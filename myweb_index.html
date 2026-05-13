@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My | Myo Thant Naing</title>
+    <link rel="stylesheet" href="myweb.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!--Quote Section  -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">MTN.Digitosphere<span class="fas fa-microchip"></span></div>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#home" data-i18n="nav_home">Home</a></li>
+            <li><a href="#about" data-i18n="nav_about">About</a></li>
+            <li><a href="#portfolio" data-i18n="nav_projects">Projects</a></li>
+            <li><a href="#interests-blog" data-i18n="nav_exploring">Exploring</a></li>
+            <li><a href="#blog" data-i18n="nav_blog">Blog</a></li>
+        </ul>
+
+        <div class="nav-right-group">
+
+            <div class="lang-switch">
+                <button onclick="changeLang('en')" title="English">🇬🇧</button>
+                <button onclick="changeLang('mm')" title="Myanmar">🇲🇲</button>
+                <button onclick="changeLang('jp')" title="Japanese">🇯🇵</button>
+                <button onclick="changeLang('vn')" title="Vietnamese">🇻🇳</button>
+                <button onclick="changeLang('ne')" title="Nepali">🇳🇵</button>
+                <button onclick="changeLang('id')" title="Indonesian">🇮🇩</button>
+            </div>
+
+            <div class="hamburger" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1><span data-i18n="hero_hello">Hello, I'm</span> <span class="accent-text">Myo Thant Naing</span></h1>
+            <p data-i18n="hero_desc">From Caring to Coding in Japan 🇯🇵</p>
+            <p class="sub-text" data-i18n="hero_sub">IT Student | Care-giver | An Aspiring AI Engineer & Passionate
+                Coder
+            </p>
+            <a href="#portfolio" class="btn" data-i18n="btn_view">View My Work</a>
+        </div>
+    </section>
+
+
+
+
+    <section id="about" class="container">
+        <h2 class="section-title" data-i18n="about_title">About Me</h2>
+
+        <div class="profile-container">
+            <div class="profile-img-wrapper">
+                <img src="Myweb_photo/My_profile2_for_myweb.heic" alt="My Profile" class="profile-pic">
+            </div>
+
+            <div class="about-text">
+                <h3 class="my-name">Myo Thant Naing</h3>
+                <p data-i18n="about_bio_short">
+                    Living in Japan. Transforming from Healthcare to Tech.
+                    I build software to solve real-world problems.
+                </p>
+
+                <div class="mini-slogan">
+                    <i class="fas fa-quote-left"></i>
+                    <span data-i18n="about_slogan">Better Late Than Never</span>
+                    <i class="fas fa-quote-right"></i>
+                </div>
+            </div>
+
+            <div class="skills-container">
+                <h4 class="skills-title">Core Competencies</h4>
+
+                <div class="skills-grid">
+                    <div class="skill-tag">
+                        <i class="fab fa-python skill-icon py"></i>
+                        <span>Python</span>
+                    </div>
+
+                    <div class="skill-tag">
+                        <i class="fas fa-brain skill-icon ai"></i>
+                        <span>AI Fundamentals</span>
+                    </div>
+
+                    <div class="skill-tag">
+                        <i class="fab fa-html5 skill-icon html"></i>
+                        <span>HTML / CSS</span>
+                    </div>
+
+                    <div class="skill-tag">
+                        <i class="fab fa-js skill-icon js"></i>
+                        <span>JavaScript</span>
+                    </div>
+
+                    <div class="skill-tag">
+                        <i class="fas fa-language skill-icon lang"></i>
+                        <span>Japanese</span>
+                    </div>
+
+                    <div class="skill-tag">
+                        <i class="fas fa-hands-helping skill-icon kaigo"></i>
+                        <span>Kaigo Care</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coder.Philosophy Start -->
+
+    <div class="tech-quote-container" data-aos="fade-up">
+        <div class="terminal-header">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="terminal-title">philosophy.py</span>
+        </div>
+
+        <div class="terminal-body">
+            <span class="code-line"><span class="keyword">print</span>(<span class="string">"Don’t Be
+                    Institutionalized..."</span>)</span>
+
+            <h2 class="tech-quote-text" data-i18n="quote_title">
+                "Don’t Be Institutionalized, Be the Architect of Your Environment."
+            </h2>
+
+            <div class="tech-quote-author">
+                <span class="const">const</span> <span class="var-name">author</span> = <span
+                    class="string">"MTN.Digitosphere"</span>;
+            </div>
+
+            <span class="cursor">_</span>
+        </div>
+    </div>
+
+    <!-- Coder.Philosophy End -->
+
+
+
+    <section id="portfolio" class="container bg-light">
+        <h2 class="section-title" data-i18n="project_title">My Projects</h2>
+
+        <!-- Python Automation, Personal Studying, Personal Portfolio Start -->
+
+        <div class="project-grid">
+            <a href="myweb_python.html" class="card-link">
+                <div class="card">
+                    <i class="fab fa-python project-icon"></i>
+                    <h3 data-i18n="proj_1_title">Python Automation</h3>
+                    <p data-i18n="proj_1_desc">Tools created to help with daily tasks.</p>
+                </div>
+            </a>
+            <a href="myweb_PStudying.html" class="card-link">
+                <div class="card">
+                    <i class="fas fa-laptop-code project-icon"></i>
+                    <h3 data-i18n="proj_2_title">Personal Studying</h3>
+                    <p data-i18n="proj_2_desc">Collection of university assignments and web designs.</p>
+                </div>
+            </a>
+
+            <a href="myweb_PPortfolio.html" class="card-link">
+                <div class="card">
+                    <i class="fas fa-globe project-icon"></i>
+                    <h3 data-i18n="proj_3_title">Personal Portfolio</h3>
+                    <p data-i18n="proj_3_desc">This website, built with HTML, CSS, and JS.</p>
+                </div>
+            </a>
+        </div>
+
+
+    </section>
+
+    <!-- Python Automation, Personal Studying, Personal Portfolio End -->
+
+
+
+    <!-- Monthly Digitsl Gallery Section -->
+    <!-- SEASONAL LENS GALLERY STYLES  -->
+
+    <section id="seasonal-lens" class="lens-section">
+        <div class="lens-header">
+            <h2 class="lens-title" data-i18n="lens_title">Year in Focus</h2>
+            <p class="lens-subtitle">12 Months. 12 Stories. Captured in Time.</p>
+        </div>
+
+        <div class="lens-carousel" id="lensCarousel">
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?w=600&q=80" alt="Jan">
+                <div class="lens-info">
+                    <h3>JANUARY</h3>
+                    <span class="zodiac">♑ Capricorn</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?w=600&q=80" alt="Feb">
+                <div class="lens-info">
+                    <h3>FEBRUARY</h3>
+                    <span class="zodiac">♒ Aquarius</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?w=600&q=80" alt="Mar">
+                <div class="lens-info">
+                    <h3>MARCH</h3>
+                    <span class="zodiac">♓ Pisces</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?w=600&q=80" alt="Apr">
+                <div class="lens-info">
+                    <h3>APRIL</h3>
+                    <span class="zodiac">♈ Aries</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1596327318357-9d7a22c54848?w=600&q=80" alt="May">
+                <div class="lens-info">
+                    <h3>MAY</h3>
+                    <span class="zodiac">♉ Taurus</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1621812891147-9759d7d10525?w=600&q=80" alt="Jun">
+                <div class="lens-info">
+                    <h3>JUNE</h3>
+                    <span class="zodiac">♊ Gemini</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1579895085443-447545464cb3?w=600&q=80" alt="Jul">
+                <div class="lens-info">
+                    <h3>JULY</h3>
+                    <span class="zodiac">♋ Cancer</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1594179047519-f347310d3322?w=600&q=80" alt="Aug">
+                <div class="lens-info">
+                    <h3>AUGUST</h3>
+                    <span class="zodiac">♌ Leo</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1506456209581-2c9430c45585?w=600&q=80" alt="Sep">
+                <div class="lens-info">
+                    <h3>SEPTEMBER</h3>
+                    <span class="zodiac">♍ Virgo</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1509557965875-b8f2c1f6006e?w=600&q=80" alt="Oct">
+                <div class="lens-info">
+                    <h3>OCTOBER</h3>
+                    <span class="zodiac">♎ Libra</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1477414956199-7da45746f742?w=600&q=80" alt="Nov">
+                <div class="lens-info">
+                    <h3>NOVEMBER</h3>
+                    <span class="zodiac">♏ Scorpio</span>
+                </div>
+            </div>
+            <div class="lens-card">
+                <img src="https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=600&q=80" alt="Dec">
+                <div class="lens-info">
+                    <h3>DECEMBER</h3>
+                    <span class="zodiac">♐ Sagittarius</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dial-container">
+            <div class="dial-marker"></div>
+            <div class="dial-track" id="dialTrack">
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+    <!-- Travel Diary Section Start  -->
+
+    <section id="blog" class="diary-section">
+        <div class="diary-header">
+            <h2 class="diary-title">Travel Chronicles ✈️</h2>
+            <p class="diary-subtitle">Journey through the lens of a developer.</p>
+        </div>
+
+        <div class="bento-grid">
+
+            <div class="bento-card large-card" onclick="openArticle('kyoto')">
+                <div class="card-bg"
+                    style="background-image: url('https://images.unsplash.com/photo-1675686036814-2794c489c748?q=80&w=800&auto=format&fit=crop');">
+                </div>
+                <div class="card-content">
+                    <span class="diary-date">Jan 15, 2026</span>
+                    <h3>Kyoto: Winter Camellias</h3>
+                    <p>Where tradition meets modern beauty. Click to read more.</p>
+                    <button class="read-btn"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div class="bento-card medium-card" onclick="openArticle('osaka')">
+                <div class="card-bg"
+                    style="background-image: url('https://images.unsplash.com/photo-1518005052357-1b3668a49e22?w=800&q=80');">
+                </div>
+                <div class="card-content">
+                    <span class="diary-date">Feb 02, 2026</span>
+                    <h3>Osaka: Plum Blossoms</h3>
+                    <p>Neon lights and street food.</p>
+                </div>
+            </div>
+
+            <div class="bento-card medium-card " onclick="openArticle('thoughts')">
+                <div class="card-bg"
+                    style="background-image: url('https://images.unsplash.com/photo-1490750967868-58cb7506aed6?w=800&q=80');">
+                </div>
+                <div class="card-content"></div>
+                <span class="diary-date">March 10, 2026</span>
+                <h3>Solitude in Nature</h3>
+                <p>"Sometimes, you just need to disconnect to reconnect."</p>
+                <div class="mini-tag">Musings</div>
+            </div>
+
+            <div class="bento-card wide-card" onclick="openArticle('kaigo-experience')">
+                <div class="card-bg"
+                    style="background-image: url('https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800&q=80');">
+                </div>
+                <div class="card-content">
+                    <span class="diary-date">April 10, 2026</span>
+                    <h3>Life of Care giver (Kaigo)</h3>
+                    <p>"Life is not ever easy, you just need to keep patient and resilience."</p>
+                    <div class="mini-tag">Care_Giving</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <!-- Travel Diary Section END -->
+
+    <!-- Hobby - Master of Jack of All Trades Section Start -->
+
+    <section id="interests-blog" class="polymath-section">
+
+        <div class="polymath-header">
+            <h5 class="polymath-subtitle">The Master of Jack of All Trades</h5>
+            <h2 class="polymath-title">Exploring the Infinite 🌌</h2>
+            <p class="polymath-desc">
+                "A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a ship, design a
+                building, write a sonnet, balance accounts, build a wall, set a bone, comfort the dying, take orders,
+                give orders, cooperate, act alone, solve equations, analyze a new problem, pitch manure, program a
+                computer, cook a tasty meal, fight efficiently, die gallantly. Specialization is for insects." <br>
+                <span class="highlight-text">– Robert A. Heinlein</span>
+            </p>
+        </div>
+
+        <div class="polymath-grid">
+
+            <a href="#" class="poly-card">
+                <div class="card-content">
+                    <i class="fas fa-globe-asia poly-icon silver"></i>
+                    <h3>Cosmology</h3>
+                    <p>Unraveling the mysteries of the universe and celestial mechanics.</p>
+                </div>
+                <div class="card-overlay"></div>
+            </a>
+
+            <a href="#" class="poly-card">
+                <div class="card-content">
+                    <i class="fas fa-atom poly-icon green"></i>
+                    <h3>Quantum Theory</h3>
+                    <p>Exploring the fundamental nature of reality and particles.</p>
+                </div>
+                <div class="card-overlay"></div>
+            </a>
+
+            <a href="#" class="poly-card">
+                <div class="card-content">
+                    <i class="fas fa-language poly-icon silver"></i>
+                    <h3>Linguistics</h3>
+                    <p>Mastering Japanese (N3+) & English communication arts.</p>
+                </div>
+                <div class="card-overlay"></div>
+            </a>
+
+            <a href="#" class="poly-card">
+                <div class="card-content">
+                    <i class="fas fa-laptop-code poly-icon green"></i>
+                    <h3>FE / IT Study</h3>
+                    <p>Fundamental Engineering, Algorithms & System Architecture.</p>
+                </div>
+                <div class="card-overlay"></div>
+            </a>
+
+            <a href="#" class="poly-card">
+                <div class="card-content">
+                    <i class="fas fa-eye poly-icon silver"></i>
+                    <h3>Occultism</h3>
+                    <p>Ancient wisdom, symbolism, and the hidden arts.</p>
+                </div>
+                <div class="card-overlay"></div>
+            </a>
+
+            <a href="#" class="poly-card">
+                <div class="card-content">
+                    <h3>Fortune Prediction</h3>
+                    <p>Astrology, Tarot, and analyzing destiny's path.</p>
+                </div>
+                <div class="card-overlay"></div>
+            </a>
+
+            <a href="#" class="poly-card">
+                <div class="card-content">
+                    <i class="fas fa-lightbulb poly-icon silver"></i>
+                    <h3>General Knowledge</h3>
+                    <p>History, Philosophy, and Random Curiosities.</p>
+                </div>
+                <div class="card-overlay"></div>
+            </a>
+
+            <a href="#" class="poly-card">
+                <div class="card-content">
+                    <i class="fas fa-theater-masks poly-icon green"></i>
+                    <h3>Unconditional Joke</h3>
+                    <p>Humor, Satire, and Light-hearted moments.</p>
+                </div>
+                <div class="card-overlay"></div>
+            </a>
+
+        </div>
+    </section>
+
+
+    <!-- Hobby - Master of Jack of All Trades Section End -->
+
+
+    <!-- Footer Section  -->
+    <footer>
+        <div class="footer-container">
+            <h3 data-i18n="footer_contact">Contact Me</h3>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+            <p>&copy; 2026 Designed by Myo Thant Naing.</p>
+        </div>
+    </footer>
+
+    <!-- Snow Effect JS -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+
+    <script src="myweb.js"></script>
+</body>
+<script src="myweb.js"></script>
+</body>
+
+</html>
