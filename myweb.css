@@ -1618,9 +1618,11 @@ a.card-link:hover .card {
     background-size: cover;
     background-position: center;
     transition: transform 0.5s ease;
-    opacity: 0.6;
-    /* Darken image */
+    opacity: 0.6; /* ဓာတ်ပုံကို မှိုင်းထားမည် */
+    z-index: 1;   /* 🔥 ဒီစာကြောင်းလေး အသစ်ထည့်ပါ (ပုံကို စာသားတွေရဲ့အောက် ပို့ရန်) 🔥 */
 }
+    /* Darken image */
+
 
 .bento-card:hover .card-bg {
     transform: scale(1.1);

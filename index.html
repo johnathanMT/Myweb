@@ -303,7 +303,7 @@
 
             <div class="bento-card large-card" onclick="openArticle('kyoto')">
                 <div class="card-bg"
-                    style="background-image: url('https://images.unsplash.com/photo-1675686036814-2794c489c748?q=80&w=800&auto=format&fit=crop');">
+                    style="background-image: url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80');">
                 </div>
                 <div class="card-content">
                     <span class="diary-date">Jan 15, 2026</span>
@@ -315,7 +315,7 @@
 
             <div class="bento-card medium-card" onclick="openArticle('osaka')">
                 <div class="card-bg"
-                    style="background-image: url('https://images.unsplash.com/photo-1518005052357-1b3668a49e22?w=800&q=80');">
+                    style="background-image: url('https://resources.matcha-jp.com/original/2019/08/06-83115.jpeg');">
                 </div>
                 <div class="card-content">
                     <span class="diary-date">Feb 02, 2026</span>
@@ -324,20 +324,21 @@
                 </div>
             </div>
 
-            <div class="bento-card medium-card " onclick="openArticle('thoughts')">
+            <div class="bento-card medium-card" onclick="openArticle('thoughts')">
                 <div class="card-bg"
-                    style="background-image: url('https://images.unsplash.com/photo-1490750967868-58cb7506aed6?w=800&q=80');">
+                    style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80');">
                 </div>
-                <div class="card-content"></div>
-                <span class="diary-date">March 10, 2026</span>
-                <h3>Solitude in Nature</h3>
-                <p>"Sometimes, you just need to disconnect to reconnect."</p>
-                <div class="mini-tag">Musings</div>
+                <div class="card-content">
+                    <span class="diary-date">March 10, 2026</span>
+                    <h3>Solitude in Nature</h3>
+                    <p>"Sometimes, you just need to disconnect to reconnect."</p>
+                    <div class="mini-tag">Musings</div>
+                </div>
             </div>
 
             <div class="bento-card wide-card" onclick="openArticle('kaigo-experience')">
                 <div class="card-bg"
-                    style="background-image: url('https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800&q=80');">
+                    style="background-image: url('https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&q=80');">
                 </div>
                 <div class="card-content">
                     <span class="diary-date">April 10, 2026</span>
@@ -348,8 +349,30 @@
             </div>
 
         </div>
+
+
+        <div id="articleModal" class="article-overlay">
+            <div class="article-container">
+
+                <button class="close-btn" onclick="closeArticle()">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <div id="modalImg" class="article-header-img"></div>
+
+                <div class="article-body">
+                    <span id="modalDate" style="color: #ff6b6b; font-weight: bold; font-size: 0.9rem;"></span>
+                    <h2 id="modalTitle" class="article-title"></h2>
+                    <div id="modalContent" class="article-content"></div>
+                </div>
+
+            </div>
+        </div>
+
     </section>
     <!-- Travel Diary Section END -->
+
+
 
     <!-- Hobby - Master of Jack of All Trades Section Start -->
 
@@ -465,7 +488,7 @@
 
     <script src="myweb.js"></script>
 </body>
-<script src="myweb.js"></script>
+
 </body>
 
 </html>
