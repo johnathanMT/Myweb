@@ -770,7 +770,7 @@ const diaryData = {
         img: "https://resources.matcha-jp.com/original/2019/08/06-83115.jpeg",
         gallery: [
             "https://th.bing.com/th/id/R.b5e1d5175c9a372df3baa430d3f8dcd1?rik=p9ue3%2bYoAyWikQ&riu=http%3a%2f%2fanekatempatwisata.com%2fwp-content%2fuploads%2f2017%2f01%2fDotonbori.jpg&ehk=JbGecfn7s2DCdwm%2fw7aWGKNX%2f7qGvQdcQvmZdPaGlvI%3d&risl=&pid=ImgRaw&r=0",
-            "https://nipponnarrative.com/wp-content/uploads/2024/09/5-1-1536x864.jpg",
+            "https://images.unsplash.com/photo-1554797589-7241bb691973?q=80&w=1000&auto=format&fit=crop",
             "https://static.vecteezy.com/system/resources/previews/008/641/906/large_2x/osaka-castle-in-autumn-foliage-season-is-a-famous-japanese-castle-landmark-and-popular-for-tourist-attractions-in-osaka-kansai-japan-photo.jpg",
             "https://i.ytimg.com/vi/g8XCnt7r3Zc/maxresdefault.jpg"
         ],
