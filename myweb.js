@@ -1078,7 +1078,7 @@ tsParticles.load("tsparticles", {
             }
         },
         color: {
-            value: "#ffffff" // အဖြူရောင်
+            value: "#87CEFA" // အဖြူရောင်
         },
         shape: {
             type: "circle" // အဝိုင်း
