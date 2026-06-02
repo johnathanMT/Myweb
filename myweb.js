@@ -37,17 +37,17 @@ const translations = {
         nav_exploring: "Exploring",
 
         hero_hello: "Hello, I'm",
-        hero_desc: "From Caring to Coding in Japan 🇯🇵",
-        hero_sub: "Care-giver | IT Student | An Aspiring AI Engineer & Passionate Coder",
+        hero_desc: "I Can Care and also Can Code 🇯🇵",
+        hero_sub: "Care-giver | Computer Science Student | An Aspiring AI Engineer & Passionate Software Developer",
         btn_view: "View My Work",
 
         // About Me / Profile
-        about_title: "About Me",
-        about_bio_short: "Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.",
+        about_title: "Who Am I?",
+        about_bio_short: "Living in Japan.Healthcare to Tech. I build software to solve real-world problems.",
         about_slogan: "Better Late Than Never",
-        about_text_1: "Living in Japan.",
+        about_text_1: "Living in Japan.Powered by caffeine and an endless curiosity to learn",
         about_text_2: "Better Late Than Never",
-        about_text_3: "My goal is to become an AI Engineer. I am exploring various fields as a 'Master of Jack of All Trades'.",
+        about_text_3: "My goal is to become an AI Engineer. I am exploring various fields as a 'A Dangerously Capable Generalist'.",
 
         // Projects General
         project_title: "My Projects",
@@ -126,9 +126,9 @@ const translations = {
         nav_blog: "မှတ်တမ်း",
         nav_exploring: "စူးစမ်းလေ့လာ",
 
-        hero_hello: "မင်္ဂလာပါ၊ ကျွန်တော်က",
+        hero_hello: "မင်္ဂလာပါ၊ ကျွန်တော်ကတော့",
         hero_desc: "ပြုစုစောင့်ရှောက်ခြင်းမှ ဆန်းသစ်တီထွင်ဆန်တီးခြင်းသို့",
-        hero_sub: "Kaigo ဝန်ထမ်း | IT ကျောင်းသား | အနာဂတ် AI Engineer နှင့် စိတ်အားထက်သန်သော Coder",
+        hero_sub: "ကျန်းမာရေးစောင့်ရှောက်သူ | ကွန်ပျူတာသိပ္ပံ ကျောင်းသား | အနာဂတ် AI အင်ဂျင်နီယာနှင့် စိတ်အားထက်သန်သော ဆော့ဖ်ဝဲလ်ရေးသားသူ",
         btn_view: "လက်ရာများကိုကြည့်ရန်",
 
         about_title: "ကျွန်တော့်အကြောင်း",
@@ -136,7 +136,7 @@ const translations = {
         about_slogan: "နောက်ကျတာက လုံးဝမလုပ်တာထက် ပိုကောင်းပါတယ်",
         about_text_1: "ဂျပန်နိုင်ငံတွင် နေထိုင်ပါသည်။",
         about_text_2: "နောက်ကျတာက လုံးဝမလုပ်တာထက် ပိုကောင်းပါတယ်",
-        about_text_3: "ကျွန်တော့်ရည်မှန်းချက်က AI Engineer ဖြစ်ဖို့ပါ။ နယ်ပယ်စုံကို စူးစမ်းလေ့လာနေသူ တစ်ယောက်ပါ။",
+        about_text_3: "ကျွန်တော့်ရဲ့ ရည်မှန်းချက်ကတော့ AI အင်ဂျင်နီယာတစ်ယောက် ဖြစ်လာဖို့ပါ။ 'စွမ်းဆောင်ရည်မြင့်မားပြီး နယ်ပယ်စုံကျွမ်းကျင်သူ (A Dangerously Capable Generalist)' တစ်ယောက်အနေနဲ့ နယ်ပယ်အသီးသီးကို လေ့လာစူးစမ်းနေပါတယ်။",
 
         project_title: "ဖန်တီးမှုများ",
         proj_1_title: "Python Automation",
@@ -206,17 +206,20 @@ const translations = {
         nav_blog: "ブログ",
         nav_exploring: "探求", // (Tankyū - Exploration)
 
-        hero_hello: "こんにちは、私は",
-        hero_desc: "日本での介護職からコーディングの世界へ 🇯🇵",
-        hero_sub: "介護スタッフ | IT学生 | AIエンジニア志望 & 情熱的なコーダー",
-        btn_view: "作品を見る",
 
-        about_title: "自己紹介",
-        about_bio_short: "日本在住。医療介護職からITエンジニアへ転身中。実社会の問題を解決するソフトウェアを開発しています。",
-        about_slogan: "遅くてもやらないよりはまし",
-        about_text_1: "日本在住です。",
-        about_text_2: "遅くてもやらないよりはましです。",
-        about_text_3: "目標はAIエンジニアになることです。様々な分野を探求している「何でも屋」です。",
+        Hero_hello: "こんにちは、私は",
+        hero_desc: "ケア も コーディングもできるエンジニアです 🇯🇵",
+        hero_sub: "介護職 | コンピュータサイエンス専攻の学生 | AIエンジニア志望 ＆ 情熱的なソフトウェア開発者",
+        btn_view: "制作物を見る",
+
+        // About Me / Profile
+        about_title: "私について",
+        about_bio_short: "日本在住。医療・介護分野からテック業界へ。現実世界の課題を解決するソフトウェアを開発しています。",
+        about_slogan: "何事も、始めるのに遅すぎることはない",
+        about_text_1: "日本在住。カフェインと尽きることのない学習意欲を原動力にしています。",
+        about_text_2: "何事も、始めるのに遅すぎることはない。",
+        about_text_3: "私の目標はAIエンジニアになることです。「恐ろしいほど有能なジェネラリスト（A Dangerously Capable Generalist）」として、様々な分野を探求しています。",
+
 
         project_title: "私のプロジェクト",
         proj_1_title: "Python 自動化",
@@ -286,17 +289,19 @@ const translations = {
         nav_blog: "Blog",
         nav_exploring: "Khám phá",
 
-        hero_hello: "Xin chào, tôi là",
-        hero_desc: "Từ Kaigo đến Lập trình viên tại Nhật Bản 🇯🇵",
-        hero_sub: "Nhân viên Kaigo | Sinh viên CNTT | Kỹ sư AI tương lai & Lập trình viên nhiệt huyết",
-        btn_view: "Xem tác phẩm",
 
-        about_title: "Về tôi",
-        about_bio_short: "Đang sống tại Nhật Bản. Chuyển đổi từ ngành Y tế sang Công nghệ. Tôi xây dựng phần mềm để giải quyết các vấn đề thực tế.",
-        about_slogan: "Muộn còn hơn không",
-        about_text_1: "Đang sống tại Nhật Bản.",
-        about_text_2: "Muộn còn hơn không.",
-        about_text_3: "Mục tiêu của tôi là trở thành Kỹ sư AI. Tôi đang khám phá nhiều lĩnh vực khác nhau.",
+        Hero_hello: "Xin chào, tôi là",
+        hero_desc: "Tôi có thể Chăm sóc (Care) và cũng có thể Lập trình (Code) 🇯🇵",
+        hero_sub: "Điều dưỡng viên | Sinh viên Khoa học Máy tính | Kỹ sư AI tương lai & Lập trình viên Phần mềm đam mê",
+        btn_view: "Xem Dự án của Tôi",
+
+        // About Me / Profile
+        about_title: "Tôi là ai?",
+        about_bio_short: "Đang sống tại Nhật Bản. Từ ngành Y tế chuyển sang Công nghệ. Tôi xây dựng phần mềm để giải quyết các vấn đề thực tế.",
+        about_slogan: "Muộn còn hơn không bao giờ",
+        about_text_1: "Đang sống tại Nhật Bản. Được tiếp sức bởi caffeine và niềm đam mê học hỏi không ngừng.",
+        about_text_2: "Muộn còn hơn không bao giờ.",
+        about_text_3: "Mục tiêu của tôi là trở thành Kỹ sư AI. Tôi đang khám phá nhiều lĩnh vực khác nhau với tư cách là một 'Generalist xuất sắc và đa năng' (A Dangerously Capable Generalist).",
 
         project_title: "Dự án của tôi",
         proj_1_title: "Tự động hóa Python",
@@ -366,17 +371,20 @@ const translations = {
         nav_blog: "ब्लग",
         nav_exploring: "अन्वेषण", // (Anveshan)
 
-        hero_hello: "नमस्ते, म हुँ",
-        hero_desc: "जापानमा हेरचाहकर्ता देखि कोडिङ सम्म 🇯🇵",
-        hero_sub: "केयरगिभर | IT विद्यार्थी | भविष्यको AI इन्जिनियर र जोसपूर्ण कोडर",
-        btn_view: "मेरो काम हेर्नुहोस्",
 
-        about_title: "मेरो बारेमा",
-        about_bio_short: "जापानमा बस्दै। स्वास्थ्य सेवाबाट प्राविधिक क्षेत्रमा रूपान्तरण हुँदै। म वास्तविक समस्या समाधान गर्न सफ्टवेयर बनाउँछु।",
-        about_slogan: "ढिलो हुनु नहुनु भन्दा राम्रो हो",
-        about_text_1: "जापानमा बस्दै।",
-        about_text_2: "ढिलो हुनु नहुनु भन्दा राम्रो हो।",
-        about_text_3: "मेरो लक्ष्य AI इन्जिनियर बन्ने हो। म विभिन्न क्षेत्रहरू अन्वेषण गर्दैछु।",
+        Hero_hello: "नमस्ते, म",
+        hero_desc: "म हेरचाह (Care) गर्न सक्छु र कोड (Code) पनि लेख्न सक्छु 🇯🇵",
+        hero_sub: "हेरचाहकर्ता | कम्प्युटर विज्ञानको विद्यार्थी | भविष्यको एआई इन्जिनियर र उत्साही सफ्टवेयर विकासकर्ता",
+        btn_view: "मेरा कामहरू हेर्नुहोस्",
+
+        // About Me / Profile
+        about_title: "म को हुँ?",
+        about_bio_short: "जापानमा बस्दैछु। स्वास्थ्य सेवाबाट प्रविधि क्षेत्रमा। म वास्तविक संसारका समस्याहरू समाधान गर्न सफ्टवेयर निर्माण गर्छु।",
+        about_slogan: "कहिल्यै नगर्नु भन्दा ढिलो गर्नु बेस",
+        about_text_1: "जापानमा बस्दैछु। क्याफिन र सिक्ने अनन्त उत्सुकताबाट प्रेरित छु।",
+        about_text_2: "कहिल्यै नगर्नु भन्दा ढिलो गर्नु बेस।",
+        about_text_3: "मेरो लक्ष्य एआई (AI) इन्जिनियर बन्नु हो। म एक 'खतरनाक रूपमा सक्षम बहुमुखी व्यक्ति' (A Dangerously Capable Generalist) को रूपमा विभिन्न क्षेत्रहरूको खोजी गर्दैछु।",
+
 
         project_title: "मेरो परियोजनाहरू",
         proj_1_title: "Python स्वचालन",
@@ -446,17 +454,20 @@ const translations = {
         nav_blog: "Blog",
         nav_exploring: "Eksplorasi",
 
-        hero_hello: "Halo, saya",
-        hero_desc: "Dari Kaigo ke Coding di Jepang 🇯🇵",
-        hero_sub: "Staf Kaigo | Mahasiswa IT | Calon Insinyur AI & Coder yang Bersemangat",
-        btn_view: "Lihat Karya",
 
-        about_title: "Tentang Saya",
-        about_bio_short: "Tinggal di Jepang. Bertransformasi dari Kesehatan ke Teknologi. Saya membangun perangkat lunak untuk memecahkan masalah dunia nyata.",
-        about_slogan: "Lebih baik terlambat daripada tidak sama sekali",
-        about_text_1: "Tinggal di Jepang.",
-        about_text_2: "Lebih baik terlambat daripada tidak sama sekali.",
-        about_text_3: "Tujuan saya adalah menjadi Insinyur AI. Saya menjelajahi berbagai bidang.",
+        Hero_hello: "Halo, saya",
+        hero_desc: "Saya Bisa Merawat (Care) dan Juga Bisa Mengoding (Code) 🇯🇵",
+        hero_sub: "Perawat | Mahasiswa Ilmu Komputer | Calon Insinyur AI & Pengembang Perangkat Lunak yang Bersemangat",
+        btn_view: "Lihat Karya Saya",
+
+        // About Me / Profile
+        about_title: "Siapa Saya?",
+        about_bio_short: "Tinggal di Jepang. Dari Kesehatan ke Teknologi. Saya membangun perangkat lunak untuk menyelesaikan masalah dunia nyata.",
+        about_slogan: "Lebih Baik Terlambat Daripada Tidak Sama Sekali",
+        about_text_1: "Tinggal di Jepang. Digerakkan oleh kafein dan rasa ingin tahu yang tak ada habisnya untuk belajar.",
+        about_text_2: "Lebih Baik Terlambat Daripada Tidak Sama Sekali.",
+        about_text_3: "Tujuan saya adalah menjadi Insinyur AI. Saya sedang menjelajahi berbagai bidang sebagai 'Generalis yang Sangat Mumpuni' (A Dangerously Capable Generalist).",
+
 
         project_title: "Proyek Saya",
         proj_1_title: "Otomasi Python",
