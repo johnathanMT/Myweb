@@ -362,6 +362,49 @@ body {
     color: #2ecc71;
 }
 
+
+/* --- New Skills Icon Colors --- */
+/* English - အပြာနုရောင် */
+.skill-icon.eng {
+    color: #4fc3f7;
+}
+
+/* UI/UX - ပန်းရောင်/ခရမ်းရောင် */
+.skill-icon.uiux {
+    color: #e1bee7;
+}
+
+/* IoT (M5Stack) - စိမ်းပြာရောင် */
+.skill-icon.iot {
+    color: #00bcd4;
+}
+
+/* C# - ခရမ်းရင့်ရောင် (Official C# color) */
+.skill-icon.csharp {
+    color: #9b59b6;
+}
+
+/* DDOOCP - လိမ္မော်ရောင် */
+.skill-icon.ddoocp {
+    color: #ff9800;
+}
+
+/* OOSAD - အနီရောင်ဖျော့ဖျော့ (Diagrams တွေနဲ့ လိုက်ဖက်ရန်) */
+.skill-icon.oosad {
+    color: #ff5252;
+}
+
+/* Software Engineering - မီးခိုးပြာရောင် */
+.skill-icon.se {
+    color: #607d8b;
+}
+
+/* AMCC - ရွှေဝါရောင် / အဝါရင့် */
+.skill-icon.amcc {
+    color: #ffc107;
+}
+
+
 /* Care Green */
 
 
