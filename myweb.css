@@ -558,11 +558,11 @@ body {
 }
 
 
-/* Python Automation, Personal Studying, Personal Portfolio Start */
+/* Python Automation, Personal Studying, Personal Portfolio , Bean Boutique Start */
 /* Link Styling (အပြာရောင် မျဉ်းကြောင်း ဖျောက်ခြင်း) */
 a.card-link {
     text-decoration: none !important;
-    /* မျဉ်းကြောင်း လုံးဝ ဖျောက်မယ် */
+    /* မျဉ်းကြောင်း လုံးဝ ဖျောက်မယِ */
     color: inherit;
     /* စာလုံးအရောင်ကို အမည်းအတိုင်း ထားမယ် */
     display: block;
@@ -596,7 +596,23 @@ a.card-link:hover .card {
 }
 
 
-/* Python Automation, Personal Studying, Personal Portfolio Start End   */
+/* --- Coffee Shop Card Special Styling --- */
+/* Mouse တင်လိုက်ရင် ဘောင်နဲ့ အရိပ်ကို ကော်ဖီရောင် ပြောင်းမယ် */
+a.coffee-card-link:hover .card {
+    border-color: #6F4E37;
+    /* ကော်ဖီရောင် ဘောင် */
+    box-shadow: 0 15px 30px rgba(111, 78, 55, 0.2);
+    /* ကော်ဖီရောင် အရိပ်ဖျော့ဖျော့ */
+}
+
+/* Coffee Icon ကို ကော်ဖီရောင် ပြောင်းမယ် */
+a.coffee-card-link .project-icon {
+    color: #6F4E37;
+}
+
+
+
+/* Python Automation, Personal Studying, Personal Portfolio , Bean Boutique End   */
 
 /* Blog Full Post */
 .blog-full-post {
@@ -1618,10 +1634,13 @@ a.card-link:hover .card {
     background-size: cover;
     background-position: center;
     transition: transform 0.5s ease;
-    opacity: 0.6; /* ဓာတ်ပုံကို မှိုင်းထားမည် */
-    z-index: 1;   /* 🔥 ဒီစာကြောင်းလေး အသစ်ထည့်ပါ (ပုံကို စာသားတွေရဲ့အောက် ပို့ရန်) 🔥 */
+    opacity: 0.6;
+    /* ဓာတ်ပုံကို မှိုင်းထားမည် */
+    z-index: 1;
+    /* 🔥 ဒီစာကြောင်းလေး အသစ်ထည့်ပါ (ပုံကို စာသားတွေရဲ့အောက် ပို့ရန်) 🔥 */
 }
-    /* Darken image */
+
+/* Darken image */
 
 
 .bento-card:hover .card-bg {
