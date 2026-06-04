@@ -1,0 +1,101 @@
+import { useEffect, useRef } from 'react'
+import { PROJECTS } from '../data/content'
+
+const T = {
+  en: { title: 'My Projects', sub: 'Things I\'ve built and continue to build.' },
+  mm: { title: 'ကျွန်တော်၏ ပရောဂျက်များ', sub: 'တည်ဆောက်ထားသောနှင့် တည်ဆောက်ဆဲ ပရောဂျက်များ' },
+  jp: { title: '私のプロジェクト',              sub: '作ったものと作り続けているもの。' },
+  vn: { title: 'Dự án của tôi',             sub: 'Những gì tôi đã và đang xây dựng.' },
+  ne: { title: 'मेरा परियोजनाहरू',          sub: 'मैले बनाएका र बनाउँदै गरेका कुराहरू।' },
+  id: { title: 'Proyek Saya',               sub: 'Hal-hal yang telah dan sedang saya bangun.' },
+}
+
+export default function Projects({ lang }) {
+  const t = T[lang] || T.en
+  const sectionRef = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
+      { threshold: 0.1 }
+    )
+    sectionRef.current?.querySelectorAll('.reveal').forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <section id="projects" ref={sectionRef} className="relative py-24 border-t border-white/5">
+      <div className="absolute inset-0 bg-gradient-to-b from-surface to-space pointer-events-none" />
+
+      <div className="section-container relative z-10">
+        <div className="reveal mb-14">
+          <p className="text-accent text-sm font-semibold uppercase tracking-widest mb-2">Work</p>
+          <h2 className="section-title">{t.title}</h2>
+          <p className="section-subtitle">{t.sub}</p>
+        </div>
+
+        {/* Featured project */}
+        {PROJECTS.filter(p => p.featured).map(project => (
+          <div key={project.id} className="reveal mb-6">
+            <a
+              href={project.url}
+              target={project.ext ? '_blank' : '_self'}
+              rel={project.ext ? 'noopener noreferrer' : undefined}
+              className="block group rounded-2xl border border-white/10 bg-card hover:border-accent/30 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1"
+            >
+              <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
+                <div className="flex items-center justify-center w-16 h-16 rounded-2xl flex-shrink-0"
+                  style={{ background: `${project.color}15`, border: `1px solid ${project.color}30` }}>
+                  <i className={`${project.icon} text-2xl`} style={{ color: project.color }} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-accent/20 text-accent-light">Featured</span>
+                    {project.ext && (
+                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-white/5 text-muted">External</span>
+                    )}
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-1 group-hover:text-accent-light transition-colors">{project.title}</h3>
+                  <p className="text-muted text-sm">{project.desc}</p>
+                </div>
+                <div className="flex-shrink-0">
+                  <span className="flex items-center gap-2 text-sm text-muted group-hover:text-accent-light transition-colors">
+                    Visit <i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </div>
+              </div>
+            </a>
+          </div>
+        ))}
+
+        {/* Grid of other projects */}
+        <div className="reveal grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
+          {PROJECTS.filter(p => !p.featured).map((project, i) => (
+            <a
+              key={project.id}
+              href={project.url}
+              target={project.ext ? '_blank' : '_self'}
+              rel={project.ext ? 'noopener noreferrer' : undefined}
+              className="group glass-card p-6 flex flex-col gap-4"
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
+              <div className="flex items-center justify-between">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ background: `${project.color}15`, border: `1px solid ${project.color}25` }}
+                >
+                  <i className={`${project.icon} text-lg`} style={{ color: project.color }} />
+                </div>
+                <i className="fas fa-arrow-up-right-from-square text-muted group-hover:text-accent-light text-xs opacity-0 group-hover:opacity-100 transition-all" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white mb-1 group-hover:text-accent-light transition-colors">{project.title}</h3>
+                <p className="text-muted text-sm leading-relaxed">{project.desc}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
