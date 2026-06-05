@@ -1,58 +1,59 @@
 import { useState, useEffect, useRef } from 'react'
 import { BLOG_POSTS } from '../data/content'
 
-const TAG_COLORS = {
-  Travel:      'bg-cyan/10 text-cyan',
-  Musings:     'bg-purple-400/10 text-purple-400',
-  'Care Giving': 'bg-pink-400/10 text-pink-400',
+const TAG_CLASS = {
+  Travel:       'tag-travel',
+  Musings:      'tag-musings',
+  'Care Giving':'tag-care-giving',
 }
 
-function BentoCard({ post, onClick }) {
-  const sizeClass = {
-    large:  'bento-large',
-    medium: 'bento-medium',
-    wide:   'bento-wide',
-  }[post.size] || 'bento-medium'
+const LANG_LABELS = {
+  en: 'English', mm: 'မြန်မာ', jp: '日本語', vn: 'Tiếng Việt', ne: 'नेपाली', id: 'Bahasa'
+}
 
-  const tagStyle = TAG_COLORS[post.tag] || 'bg-white/10 text-gray-400'
+function BentoCard({ post, lang, onClick }) {
+  const sizeClass = { large:'bento-large', medium:'bento-medium', wide:'bento-wide' }[post.size] || 'bento-medium'
+  const tr = post.translations[lang] || post.translations.en
+  const title = post.title[lang] || post.title.en
 
   return (
-    <div className={`bento-card ${sizeClass}`} onClick={() => onClick(post)}>
+    <div className={`bento-card ${sizeClass} group`} onClick={() => onClick(post)}>
       <div className="bg-layer" style={{ backgroundImage: `url(${post.img})` }} />
       <div className="overlay" />
       <div className="info">
         <div className="flex items-center gap-2 mb-2">
-          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${tagStyle}`}>{post.tag}</span>
+          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TAG_CLASS[post.tag] || 'bg-white/10 text-gray-400'}`}>
+            {post.tag}
+          </span>
           <span className="text-xs text-gray-400">{post.date}</span>
         </div>
-        <h3 className="text-white font-bold text-lg leading-tight mb-1">{post.title}</h3>
-        <p className="text-gray-300 text-sm leading-relaxed line-clamp-2">{post.excerpt}</p>
-        <button className="mt-3 flex items-center gap-1.5 text-xs text-accent-light font-medium hover:gap-2.5 transition-all">
-          Read more <i className="fas fa-arrow-right text-[10px]" />
-        </button>
+        <h3 className="text-white font-bold text-xl leading-snug mb-1.5">{title}</h3>
+        <p className="text-gray-300 text-sm leading-relaxed line-clamp-2">{tr.excerpt}</p>
+        <div className="mt-3 flex items-center gap-2 text-xs font-semibold"
+          style={{ color: '#f43f5e' }}>
+          <span>Read more</span>
+          <i className="fas fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform" />
+        </div>
       </div>
     </div>
   )
 }
 
-function Modal({ post, onClose }) {
+function Modal({ post, lang, setLang, onClose }) {
   const isOpen = Boolean(post)
 
-  // Close on Escape
   useEffect(() => {
     if (!isOpen) return
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', handler)
-    document.body.style.overflow = isOpen ? 'hidden' : ''
-    return () => {
-      window.removeEventListener('keydown', handler)
-      document.body.style.overflow = ''
-    }
+    const h = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', h)
+    document.body.style.overflow = 'hidden'
+    return () => { window.removeEventListener('keydown', h); document.body.style.overflow = '' }
   }, [isOpen, onClose])
 
   if (!post) return null
 
-  const tagStyle = TAG_COLORS[post.tag] || 'bg-white/10 text-gray-400'
+  const tr    = post.translations[lang] || post.translations.en
+  const title = post.title[lang] || post.title.en
 
   return (
     <div
@@ -61,27 +62,46 @@ function Modal({ post, onClose }) {
     >
       <div className="modal-box">
         {/* Hero image */}
-        <div className="relative h-56 overflow-hidden rounded-t-2xl">
-          <img src={post.img} alt={post.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#16161f] via-transparent to-transparent" />
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white transition-colors"
-          >
+        <div className="relative h-60 overflow-hidden rounded-t-3xl">
+          <img src={post.img} alt={title} className="w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #0f0f1a, transparent 60%)' }} />
+          <button onClick={onClose}
+            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 flex items-center justify-center text-white transition-all z-10">
             <i className="fas fa-times text-sm" />
           </button>
         </div>
 
         {/* Body */}
         <div className="p-6 md:p-8">
-          <div className="flex items-center gap-2 mb-3">
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${tagStyle}`}>{post.tag}</span>
-            <span className="text-xs text-muted">{post.date}</span>
+          {/* Language switcher */}
+          <div className="flex flex-wrap gap-1.5 mb-5">
+            {Object.entries(LANG_LABELS).map(([code, label]) => (
+              <button
+                key={code}
+                onClick={() => setLang(code)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all border ${
+                  lang === code
+                    ? 'bg-rose-500/20 border-rose-500/50 text-rose-400'
+                    : 'bg-white/5 border-white/10 text-gray-500 hover:text-white hover:border-white/20'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
-          <h2 className="text-2xl font-bold text-white mb-4">{post.title}</h2>
-          <div className="space-y-4">
-            {post.content.split('\n\n').map((para, i) => (
-              <p key={i} className="text-gray-300 text-sm leading-relaxed">{para}</p>
+
+          <div className="flex items-center gap-2 mb-3">
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${TAG_CLASS[post.tag] || ''}`}>
+              {post.tag}
+            </span>
+            <span className="text-xs text-gray-500">{post.date}</span>
+          </div>
+
+          <h2 className="text-2xl font-bold text-white mb-6 leading-tight">{title}</h2>
+
+          <div className="space-y-4 border-l-2 border-rose-500/30 pl-5">
+            {tr.body.split('\n\n').map((para, i) => (
+              <p key={i} className="text-gray-300 text-sm leading-[1.85]">{para}</p>
             ))}
           </div>
         </div>
@@ -90,38 +110,65 @@ function Modal({ post, onClose }) {
   )
 }
 
-export default function TravelChronicles() {
+export default function TravelChronicles({ lang, setLang }) {
   const [activePost, setActivePost] = useState(null)
   const sectionRef = useRef(null)
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
-      { threshold: 0.1 }
+    const obs = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
+      { threshold: 0.08 }
     )
-    sectionRef.current?.querySelectorAll('.reveal').forEach(el => observer.observe(el))
-    return () => observer.disconnect()
+    sectionRef.current?.querySelectorAll('.reveal').forEach(el => obs.observe(el))
+    return () => obs.disconnect()
   }, [])
 
   return (
-    <section id="blog" ref={sectionRef} className="relative py-24 border-t border-white/5">
-      <div className="absolute inset-0 bg-gradient-to-b from-surface to-space pointer-events-none" />
+    <section id="blog" ref={sectionRef} className="relative py-24 border-t border-white/5"
+      style={{ '--c': '#f43f5e' }}>
+      {/* Rose-tinted bg */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: 'linear-gradient(180deg, #07070f 0%, #0d0609 50%, #07070f 100%)' }} />
+      <div className="absolute top-0 right-0 w-[500px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-10"
+        style={{ background: 'radial-gradient(ellipse, #f43f5e, transparent)' }} />
 
       <div className="section-container relative z-10">
-        <div className="reveal mb-14">
-          <p className="text-accent text-sm font-semibold uppercase tracking-widest mb-2">Chronicles</p>
-          <h2 className="section-title">Travel Chronicles ✈️</h2>
-          <p className="section-subtitle">Journey through the lens of a developer.</p>
+        {/* Header */}
+        <div className="reveal mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <span className="section-badge">Chronicles</span>
+            <h2 className="section-title">
+              <span className="accent-gradient-rose">Travel Chronicles</span> ✈️
+            </h2>
+            <p className="section-subtitle">Journey through the lens of a developer.</p>
+          </div>
+
+          {/* Global language switcher for cards */}
+          <div className="flex flex-wrap gap-1.5">
+            {Object.entries(LANG_LABELS).map(([code, label]) => (
+              <button
+                key={code}
+                onClick={() => setLang(code)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  lang === code
+                    ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
+                    : 'bg-white/4 border-white/8 text-gray-500 hover:text-white hover:bg-white/8'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="reveal bento-grid">
           {BLOG_POSTS.map(post => (
-            <BentoCard key={post.id} post={post} onClick={setActivePost} />
+            <BentoCard key={post.id} post={post} lang={lang} onClick={setActivePost} />
           ))}
         </div>
       </div>
 
-      <Modal post={activePost} onClose={() => setActivePost(null)} />
+      <Modal post={activePost} lang={lang} setLang={setLang} onClose={() => setActivePost(null)} />
     </section>
   )
 }

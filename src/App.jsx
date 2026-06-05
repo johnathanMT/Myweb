@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
-import Navbar          from './components/Navbar'
-import Hero            from './components/Hero'
-import About           from './components/About'
-import Philosophy      from './components/Philosophy'
-import Projects        from './components/Projects'
-import SeasonalGallery from './components/SeasonalGallery'
+import Navbar           from './components/Navbar'
+import Hero             from './components/Hero'
+import About            from './components/About'
+import Philosophy       from './components/Philosophy'
+import Projects         from './components/Projects'
+import SeasonalGallery  from './components/SeasonalGallery'
 import TravelChronicles from './components/TravelChronicles'
-import Exploring       from './components/Exploring'
-import Footer          from './components/Footer'
+import Exploring        from './components/Exploring'
+import Footer           from './components/Footer'
 
 export default function App() {
   const [lang, setLang] = useState(() => {
@@ -19,19 +19,17 @@ export default function App() {
   }, [lang])
 
   return (
-    <div className="relative min-h-screen bg-space text-white overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#07070f] text-white overflow-x-hidden">
       <Navbar lang={lang} setLang={setLang} />
-
       <main>
         <Hero            lang={lang} />
         <About           lang={lang} />
         <Philosophy />
         <Projects        lang={lang} />
         <SeasonalGallery />
-        <TravelChronicles />
+        <TravelChronicles lang={lang} setLang={setLang} />
         <Exploring />
       </main>
-
       <Footer />
     </div>
   )
