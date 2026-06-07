@@ -19,11 +19,18 @@
 const PortfolioAPI = (() => {
   const BASE_URL = "https://myweb-zqv1.onrender.com";
   const TOKEN_KEY = "mtn_jwt";
- 
+  const USER_KEY  = "mtn_user";
+
   const getToken = () => localStorage.getItem(TOKEN_KEY);
   const setToken = (t) => localStorage.setItem(TOKEN_KEY, t);
   const clearToken = () => localStorage.removeItem(TOKEN_KEY);
   const isLoggedIn = () => !!getToken();
+
+  // Current user (id, username, email, role) stored at login for UI scoping.
+  const setUser = (u) => localStorage.setItem(USER_KEY, JSON.stringify(u));
+  const getCurrentUser = () => { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch { return null; } };
+  const isAdmin  = () => getCurrentUser()?.role === "Admin";
+  const isAuthor = () => ["Admin", "Author"].includes(getCurrentUser()?.role);
  
   // ---- Core request helper ------------------------------------------------
   async function request(path, { method = "GET", body, auth = false, isForm = false } = {}) {
@@ -55,9 +62,12 @@ const PortfolioAPI = (() => {
   // NOTE: login uses EMAIL (per LoginDto), not username.
   async function login(email, password) {
     const resp = await request("/api/Auth/login", { method: "POST", body: { email, password } });
-    const token = resp?.data?.token;
-    if (token) setToken(token);
-    return resp; // resp.data = { token, username, email, role, expiresAt }
+    const d = resp?.data;
+    if (d?.token) {
+      setToken(d.token);
+      setUser({ id: d.id, username: d.username, email: d.email, role: d.role });
+    }
+    return resp; // resp.data = { id, token, username, email, role, expiresAt }
   }
  
   // adminSecret is optional — include it only if registering an admin account.
@@ -67,14 +77,21 @@ const PortfolioAPI = (() => {
     return request("/api/Auth/register", { method: "POST", body });
   }
  
-  const logout = () => clearToken();
- 
+  const logout = () => { clearToken(); localStorage.removeItem(USER_KEY); };
+
   // ---- Articles -----------------------------------------------------------
+  // published: true (published only), false (drafts only), or "all" (admins).
+  // The token is sent when logged in so Authors also receive their own drafts.
   function getArticles({ page = 1, pageSize = 10, published = true, tag, search } = {}) {
-    const q = new URLSearchParams({ page, pageSize, published });
+    const q = new URLSearchParams({ page, pageSize });
+    if (published === "all" || published === null) {
+      q.set("published", ""); // empty -> backend treats as "all" (admin only)
+    } else {
+      q.set("published", published);
+    }
     if (tag) q.set("tag", tag);
     if (search) q.set("search", search);
-    return request(`/api/Articles?${q.toString()}`);
+    return request(`/api/Articles?${q.toString()}`, { auth: true });
   }
  
   const getArticle = (id) => request(`/api/Articles/${id}`);
@@ -106,7 +123,7 @@ const PortfolioAPI = (() => {
   const wakeBackend = () => fetch(`${BASE_URL}/`).catch(() => {});
  
   return {
-    BASE_URL, isLoggedIn,
+    BASE_URL, isLoggedIn, getCurrentUser, isAdmin, isAuthor,
     login, register, logout,
     getArticles, getArticle, createArticle, updateArticle, deleteArticle,
     wakeBackend,

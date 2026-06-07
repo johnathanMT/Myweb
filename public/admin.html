@@ -50,7 +50,7 @@
 
   <div class="wrap">
     <h1>Admin Console</h1>
-    <div class="sub">// manage articles · authenticated access only</div>
+    <div class="sub">// <span id="who">authenticated access only</span></div>
 
     <!-- LOGIN -->
     <section class="panel" id="loginBox">
@@ -90,7 +90,7 @@
 
     <!-- MANAGE LIST -->
     <section class="panel hidden" id="manageBox">
-      <h3 style="margin:0 0 12px;font-family:var(--mono)">All articles</h3>
+      <h3 id="manageTitle" style="margin:0 0 12px;font-family:var(--mono)">Articles</h3>
       <div id="manageList"></div>
     </section>
   </div>
@@ -107,9 +107,29 @@
     function renderState(){
       const on=PortfolioAPI.isLoggedIn();
       $("loginBox").classList.toggle("hidden",on);
-      $("editorBox").classList.toggle("hidden",!on);
       $("manageBox").classList.toggle("hidden",!on);
-      if(on) loadManage();
+
+      if(!on){
+        $("editorBox").classList.add("hidden");
+        $("who").textContent="authenticated access only";
+        return;
+      }
+
+      const u=PortfolioAPI.getCurrentUser();
+      $("who").textContent = u ? `signed in as ${u.username} · role: ${u.role}` : "";
+
+      // Guests can log in but have no publishing access.
+      if(!PortfolioAPI.isAuthor()){
+        $("editorBox").classList.add("hidden");
+        $("manageTitle").textContent="No access";
+        $("manageList").innerHTML=
+          `<small>Your account (role: ${u?.role}) can't publish. Ask an admin to grant you the Author role.</small>`;
+        return;
+      }
+
+      $("editorBox").classList.remove("hidden");
+      $("manageTitle").textContent = PortfolioAPI.isAdmin() ? "All articles" : "My articles";
+      loadManage();
     }
 
     async function doLogin(){
@@ -127,8 +147,18 @@
 
     async function loadManage(){
       try{
-        const resp=await PortfolioAPI.getArticles({page:1,pageSize:100,published:false});
-        const items=resp?.data?.items??[]; cache={}; items.forEach(a=>cache[a.id]=a);
+        // Admins fetch everything (incl. drafts); Authors get published + their own drafts.
+        const opts = PortfolioAPI.isAdmin()
+          ? {page:1,pageSize:100,published:"all"}
+          : {page:1,pageSize:100};
+        const resp=await PortfolioAPI.getArticles(opts);
+        let items=resp?.data?.items??[];
+        // Authors manage only their own articles.
+        if(!PortfolioAPI.isAdmin()){
+          const myId=PortfolioAPI.getCurrentUser()?.id;
+          items=items.filter(a=>a.authorInfo && a.authorInfo.id===myId);
+        }
+        cache={}; items.forEach(a=>cache[a.id]=a);
         $("manageList").innerHTML = items.length ? items.map(a=>`
           <div class="manage">
             <div><strong>${esc(a.title)}</strong><br>
