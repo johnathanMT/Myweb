@@ -63,14 +63,14 @@ export default function Navbar({ lang, setLang }) {
     >
       <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
+        {/* Logo */}
         <a
-          href="/Myweb/" // တိုက်ရိုက် link ပြောင်းပေးပါ
-          className="flex items-center gap-2 ..."
+          href="/Myweb/"
+          className="flex items-center gap-2 font-mono font-semibold text-white hover:text-accent-light transition-colors"
         >
           <span className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-xs font-bold text-white">M</span>
           <span className="hidden sm:inline text-sm">{PERSONAL.handle}</span>
         </a>
-
 
         {/* Desktop nav links */}
         <ul className="hidden md:flex items-center gap-1">

@@ -1,0 +1,56 @@
+# .github/workflows/deploy.yml
+# Builds the Vite app on every push to main and deploys it to GitHub Pages.
+# After adding this, set Settings -> Pages -> Source = "GitHub Actions".
+# This replaces the manual gh-pages branch workflow and ends the branch confusion.
+
+name: Deploy Vite site to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:          # lets you trigger a deploy manually from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one deploy at a time
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Use "npm ci" if you have a package-lock.json committed; otherwise "npm install".
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build (vite build — base is already /Myweb/)
+        run: npm run build
+
+      - name: Upload build output
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist        # Vite's default output folder
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
