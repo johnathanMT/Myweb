@@ -15,7 +15,7 @@ const NAV_LINKS = [
   { href: '#about',     label: 'About' },
   { href: '#projects',  label: 'Projects' },
   { href: '#exploring', label: 'Exploring' },
-  { href: '#blog',      label: 'Blog' },
+  { href: '/blog.html',      label: 'Blog' },
 ]
 
 export default function Navbar({ lang, setLang }) {
@@ -28,7 +28,7 @@ export default function Navbar({ lang, setLang }) {
       setScrolled(window.scrollY > 40)
 
       // Active section tracking
-      const sections = ['home', 'about', 'projects', 'seasonal', 'blog', 'exploring']
+      const sections = ['home', 'about', 'projects', 'seasonal', 'exploring']
       for (const id of [...sections].reverse()) {
         const el = document.getElementById(id)
         if (el && window.scrollY >= el.offsetTop - 120) {
