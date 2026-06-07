@@ -106,6 +106,16 @@
 
     function renderState(){
       const on=PortfolioAPI.isLoggedIn();
+      const u = on ? PortfolioAPI.getCurrentUser() : null;
+
+      // Stale/invalid session: a token exists but there's no stored user info
+      // (e.g. an old token from before the RBAC update). Clear it and start fresh.
+      if (on && !u) {
+        PortfolioAPI.logout();
+        toast("Your session was outdated — please log in again.");
+        return renderState();
+      }
+
       $("loginBox").classList.toggle("hidden",on);
       $("manageBox").classList.toggle("hidden",!on);
 
@@ -115,15 +125,16 @@
         return;
       }
 
-      const u=PortfolioAPI.getCurrentUser();
-      $("who").textContent = u ? `signed in as ${u.username} · role: ${u.role}` : "";
+      $("who").textContent = `signed in as ${u.username} · role: ${u.role ?? "unknown"}`;
 
-      // Guests can log in but have no publishing access.
+      // Logged in but lacks publishing access (Guest or unknown role).
       if(!PortfolioAPI.isAuthor()){
         $("editorBox").classList.add("hidden");
         $("manageTitle").textContent="No access";
         $("manageList").innerHTML=
-          `<small>Your account (role: ${u?.role}) can't publish. Ask an admin to grant you the Author role.</small>`;
+          `<small>Your account (role: ${u.role ?? "unknown"}) can't publish.
+           Ask an admin to grant you the Author role.</small>
+           <div class="admin-row"><button class="ghost" onclick="doLogout()">Log out</button></div>`;
         return;
       }
 

@@ -45,7 +45,11 @@ const PortfolioAPI = (() => {
       body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
     });
  
-    if (res.status === 401) { clearToken(); throw new Error("Unauthorized — please log in again."); }
+    if (res.status === 401) {
+      clearToken();
+      localStorage.removeItem(USER_KEY);   // clear stale session fully
+      throw new Error("Unauthorized — please log in again.");
+    }
     if (res.status === 403) throw new Error("You do not have permission (admin required).");
     if (res.status === 429) throw new Error("Too many requests — please slow down.");
  
