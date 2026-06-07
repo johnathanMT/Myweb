@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />   <!-- keep admin page out of search engines -->
+  <title>Admin | MTN.Digitosphere</title>
+  <style>
+    :root{--bg:#0a0e14;--bg-soft:#111722;--card:#131a26;--border:#1f2937;--text:#e6edf3;
+      --muted:#8b97a7;--accent:#4be1a0;--accent-dim:#2f9c70;--danger:#ff6b6b;--radius:14px;
+      --mono:ui-monospace,"SF Mono",Consolas,monospace;--sans:"Inter",system-ui,sans-serif;}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6}
+    a{color:var(--accent);text-decoration:none}
+    nav{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;
+      border-bottom:1px solid var(--border)}
+    .brand{font-family:var(--mono);font-weight:700}.brand span{color:var(--accent)}
+    .wrap{max-width:760px;margin:0 auto;padding:40px 20px 80px}
+    h1{font-size:1.8rem;margin:0 0 4px}.sub{color:var(--muted);font-family:var(--mono);font-size:14px;margin-bottom:24px}
+    .panel{background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:22px}
+    label{font-size:13px;color:var(--muted);font-family:var(--mono)}
+    input,textarea,select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
+      padding:11px 13px;border-radius:9px;margin:6px 0;font-family:var(--sans);font-size:14px}
+    input:focus,textarea:focus{outline:none;border-color:var(--accent-dim)}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    button.btn{background:var(--accent);color:#04130c;border:none;font-weight:700;padding:10px 18px;
+      border-radius:9px;cursor:pointer}
+    button.btn:hover{background:#62f0b1}
+    button.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);
+      padding:8px 14px;border-radius:9px;cursor:pointer}
+    button.ghost:hover{color:var(--text);border-color:var(--muted)}
+    button.del{color:var(--danger);border-color:rgba(255,107,107,.4)}
+    .admin-row{display:flex;gap:10px;margin-top:14px}
+    .manage{background:var(--card);border:1px solid var(--border);border-radius:10px;
+      padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .manage small{color:var(--muted);font-family:var(--mono)}
+    .hidden{display:none!important}
+    #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card);
+      border:1px solid var(--border);padding:12px 18px;border-radius:10px;font-size:14px;opacity:0;
+      transition:.25s;pointer-events:none;z-index:50}
+    #toast.show{opacity:1}#toast.ok{border-color:var(--accent)}#toast.err{border-color:var(--danger)}
+    @media(max-width:560px){.row2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand">MTN<span>.Admin</span></div>
+    <div><a href="blog.html">← Back to blog</a></div>
+  </nav>
+
+  <div class="wrap">
+    <h1>Admin Console</h1>
+    <div class="sub">// manage articles · authenticated access only</div>
+
+    <!-- LOGIN -->
+    <section class="panel" id="loginBox">
+      <label>Email</label>
+      <input id="email" type="email" placeholder="you@example.com" autocomplete="username" />
+      <label>Password</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      <button class="btn" onclick="doLogin()">Log in</button>
+    </section>
+
+    <!-- EDITOR (hidden until logged in) -->
+    <section class="panel hidden" id="editorBox">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 id="editorTitle" style="margin:0;font-family:var(--mono)">New article</h3>
+        <button class="ghost" onclick="doLogout()">Log out</button>
+      </div>
+      <input type="hidden" id="editId" />
+      <label>Title</label>
+      <input id="title" placeholder="Article title" />
+      <div class="row2">
+        <div><label>Author</label><input id="author" placeholder="Myo Thant Naing" /></div>
+        <div><label>Tags (comma separated)</label><input id="tags" placeholder="dev, life, japan" /></div>
+      </div>
+      <label>Content (min 10 characters)</label>
+      <textarea id="content" rows="7" placeholder="Write your article…"></textarea>
+      <div class="row2">
+        <div><label>Cover image (optional)</label><input id="image" type="file" accept="image/*" /></div>
+        <div><label>Status</label>
+          <select id="isPublished"><option value="true">Publish</option><option value="false">Draft</option></select>
+        </div>
+      </div>
+      <div class="admin-row">
+        <button class="btn" id="saveBtn" onclick="doSave()">Publish</button>
+        <button class="ghost" onclick="resetEditor()">Clear</button>
+      </div>
+    </section>
+
+    <!-- MANAGE LIST -->
+    <section class="panel hidden" id="manageBox">
+      <h3 style="margin:0 0 12px;font-family:var(--mono)">All articles</h3>
+      <div id="manageList"></div>
+    </section>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="api.js"></script>
+  <script>
+    const $=(id)=>document.getElementById(id);
+    let editing=false, cache={};
+    const toast=(m,k="")=>{const t=$("toast");t.textContent=m;t.className="show "+k;setTimeout(()=>t.className=k,2600);};
+    const esc=(s)=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+
+    function renderState(){
+      const on=PortfolioAPI.isLoggedIn();
+      $("loginBox").classList.toggle("hidden",on);
+      $("editorBox").classList.toggle("hidden",!on);
+      $("manageBox").classList.toggle("hidden",!on);
+      if(on) loadManage();
+    }
+
+    async function doLogin(){
+      try{ await PortfolioAPI.login($("email").value.trim(),$("password").value);
+        $("password").value=""; toast("Logged in.","ok"); renderState();
+      }catch(e){ toast(e.message,"err"); }
+    }
+    function doLogout(){ PortfolioAPI.logout(); resetEditor(); renderState(); toast("Logged out."); }
+
+    function resetEditor(){
+      editing=false; $("editId").value="";
+      ["title","author","tags","content","image"].forEach(id=>$(id).value="");
+      $("isPublished").value="true"; $("saveBtn").textContent="Publish"; $("editorTitle").textContent="New article";
+    }
+
+    async function loadManage(){
+      try{
+        const resp=await PortfolioAPI.getArticles({page:1,pageSize:100,published:false});
+        const items=resp?.data?.items??[]; cache={}; items.forEach(a=>cache[a.id]=a);
+        $("manageList").innerHTML = items.length ? items.map(a=>`
+          <div class="manage">
+            <div><strong>${esc(a.title)}</strong><br>
+              <small>by ${esc(a.author||"")} · ${a.isPublished?"published":"draft"}</small></div>
+            <div class="admin-row" style="margin:0">
+              <button class="ghost" onclick="startEdit(${a.id})">Edit</button>
+              <button class="ghost del" onclick="doDelete(${a.id})">Delete</button>
+            </div>
+          </div>`).join("") : `<small>No articles yet.</small>`;
+      }catch(e){ toast("Couldn't load: "+e.message,"err"); }
+    }
+
+    function startEdit(id){
+      const a=cache[id]; if(!a) return; editing=true;
+      $("editId").value=id; $("title").value=a.title||""; $("author").value=a.author||"";
+      $("tags").value=a.tags||""; $("content").value=a.content||""; $("isPublished").value=String(!!a.isPublished);
+      $("saveBtn").textContent="Save changes"; $("editorTitle").textContent="Editing #"+id;
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+
+    async function doSave(){
+      const p={title:$("title").value.trim(),author:$("author").value.trim(),
+        tags:$("tags").value.trim(),content:$("content").value,isPublished:$("isPublished").value==="true"};
+      const f=$("image").files[0]; if(f)p.image=f;
+      if(!p.title||!p.author) return toast("Title and Author are required.","err");
+      if((p.content||"").length<10) return toast("Content must be at least 10 characters.","err");
+      try{
+        if(editing){ await PortfolioAPI.updateArticle($("editId").value,p); toast("Updated.","ok"); }
+        else{ await PortfolioAPI.createArticle(p); toast("Published.","ok"); }
+        resetEditor(); loadManage();
+      }catch(e){ toast(e.message,"err"); }
+    }
+
+    async function doDelete(id){
+      if(!confirm("Delete this article?")) return;
+      try{ await PortfolioAPI.deleteArticle(id); toast("Deleted.","ok"); loadManage(); }
+      catch(e){ toast(e.message,"err"); }
+    }
+
+    PortfolioAPI.wakeBackend();
+    renderState();
+  </script>
+</body>
+</html>

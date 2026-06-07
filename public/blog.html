@@ -3,116 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blog | MTN.Digitosphere</title>
+  <title>The Blog | MTN.Digitosphere</title>
+  <meta name="description" content="Thoughts on code, care, and everything between — by Myo Thant Naing." />
+
+  <!-- Open Graph (Facebook, LinkedIn) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="MTN.Digitosphere" />
+  <meta property="og:title" content="The Blog | MTN.Digitosphere" />
+  <meta property="og:description" content="Thoughts on code, care, and everything between — by Myo Thant Naing." />
+  <meta property="og:image" content="https://johnathanmt.github.io/Myweb/Myweb_photo/My_profile2_for_myweb.jpg" />
+  <meta property="og:url" content="https://johnathanmt.github.io/Myweb/blog.html" />
+  <!-- Twitter/X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Blog | MTN.Digitosphere" />
+  <meta name="twitter:description" content="Thoughts on code, care, and everything between." />
+  <meta name="twitter:image" content="https://johnathanmt.github.io/Myweb/Myweb_photo/My_profile2_for_myweb.jpg" />
+
   <style>
-    :root {
-      --bg:        #0a0e14;
-      --bg-soft:   #111722;
-      --card:      #131a26;
-      --border:    #1f2937;
-      --text:      #e6edf3;
-      --muted:     #8b97a7;
-      --accent:    #4be1a0;
-      --accent-dim:#2f9c70;
-      --danger:    #ff6b6b;
-      --radius:    14px;
-      --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
-      --sans: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; background: var(--bg); color: var(--text);
-      font-family: var(--sans); line-height: 1.6;
-      background-image: radial-gradient(900px 500px at 80% -10%, rgba(75,225,160,.08), transparent 60%);
-    }
-    a { color: var(--accent); text-decoration: none; }
-
-    /* Nav */
-    nav {
-      position: sticky; top: 0; z-index: 20;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 24px; backdrop-filter: blur(10px);
-      background: rgba(10,14,20,.72); border-bottom: 1px solid var(--border);
-    }
-    .brand { font-family: var(--mono); font-weight: 700; letter-spacing: .5px; }
-    .brand span { color: var(--accent); }
-    .nav-links a { color: var(--muted); margin-left: 20px; font-size: 14px; }
-    .nav-links a:hover { color: var(--text); }
-
-    .wrap { max-width: 820px; margin: 0 auto; padding: 40px 20px 80px; }
-
-    /* Header */
-    header.page { margin-bottom: 28px; }
-    header.page h1 { font-size: 2.2rem; margin: 0 0 6px; }
-    header.page .sub { color: var(--muted); font-family: var(--mono); font-size: 14px; }
-    .accent { color: var(--accent); }
-
-    /* Toast / status */
-    #toast {
-      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
-      background: var(--card); border: 1px solid var(--border); color: var(--text);
-      padding: 12px 18px; border-radius: 10px; font-size: 14px; opacity: 0;
-      transition: opacity .25s, transform .25s; pointer-events: none; z-index: 50;
-      box-shadow: 0 10px 30px rgba(0,0,0,.4);
-    }
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
-    #toast.err { border-color: var(--danger); }
-    #toast.ok  { border-color: var(--accent); }
-
-    /* Article cards */
-    .article {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 22px 24px; margin-bottom: 18px;
-      transition: transform .15s ease, border-color .15s ease;
-    }
-    .article:hover { transform: translateY(-2px); border-color: var(--accent-dim); }
-    .article h2 { margin: 0 0 6px; font-size: 1.35rem; }
-    .meta { color: var(--muted); font-size: 13px; font-family: var(--mono); margin-bottom: 12px; }
-    .meta b { color: var(--accent); font-weight: 600; }
-    .tags { margin: 10px 0 0; }
-    .tag {
-      display: inline-block; font-size: 12px; font-family: var(--mono);
-      color: var(--accent); border: 1px solid var(--accent-dim);
-      border-radius: 999px; padding: 2px 10px; margin: 0 6px 6px 0;
-    }
-    .article img.cover { width: 100%; border-radius: 10px; margin: 12px 0; display: block; }
-    .body { white-space: pre-wrap; }
-    .body.clamp { max-height: 8.5em; overflow: hidden;
-      -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); }
-    .readmore { background: none; border: none; color: var(--accent);
-      cursor: pointer; padding: 8px 0 0; font-family: var(--mono); font-size: 13px; }
-    .admin-row { margin-top: 14px; display: flex; gap: 10px; }
-
-    /* Buttons / inputs */
-    button.btn {
-      background: var(--accent); color: #04130c; border: none; font-weight: 700;
-      padding: 10px 18px; border-radius: 9px; cursor: pointer; font-family: var(--sans);
-    }
-    button.btn:hover { background: #62f0b1; }
-    button.ghost { background: transparent; color: var(--muted);
-      border: 1px solid var(--border); padding: 8px 14px; border-radius: 9px; cursor: pointer; }
-    button.ghost:hover { color: var(--text); border-color: var(--muted); }
-    button.del { color: var(--danger); border-color: rgba(255,107,107,.4); }
-    input, textarea {
-      width: 100%; background: var(--bg-soft); border: 1px solid var(--border);
-      color: var(--text); padding: 11px 13px; border-radius: 9px; margin: 6px 0;
-      font-family: var(--sans); font-size: 14px;
-    }
-    input:focus, textarea:focus { outline: none; border-color: var(--accent-dim); }
-    label { font-size: 13px; color: var(--muted); font-family: var(--mono); }
-
-    /* Admin panel */
-    .panel {
-      background: var(--bg-soft); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 22px 24px; margin-top: 34px;
-    }
-    .panel h3 { margin: 0 0 4px; font-family: var(--mono); }
-    .panel .hint { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
-    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .hidden { display: none !important; }
-    .empty { color: var(--muted); text-align: center; padding: 40px 0; font-family: var(--mono); }
-    .spin { color: var(--muted); text-align: center; padding: 30px 0; font-family: var(--mono); }
-    @media (max-width: 560px) { .row2 { grid-template-columns: 1fr; } }
+    :root{--bg:#0a0e14;--bg-soft:#111722;--card:#131a26;--border:#1f2937;--text:#e6edf3;
+      --muted:#8b97a7;--accent:#4be1a0;--accent-dim:#2f9c70;--radius:14px;
+      --mono:ui-monospace,"SF Mono",Consolas,monospace;--sans:"Inter",system-ui,sans-serif;}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;
+      background-image:radial-gradient(900px 500px at 80% -10%,rgba(75,225,160,.08),transparent 60%)}
+    a{color:var(--accent);text-decoration:none}
+    nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+      padding:14px 24px;backdrop-filter:blur(10px);background:rgba(10,14,20,.72);border-bottom:1px solid var(--border)}
+    .brand{font-family:var(--mono);font-weight:700}.brand span{color:var(--accent)}
+    .nav-links a{color:var(--muted);margin-left:20px;font-size:14px}.nav-links a:hover{color:var(--text)}
+    .wrap{max-width:820px;margin:0 auto;padding:40px 20px 80px}
+    header.page h1{font-size:2.2rem;margin:0 0 6px}.accent{color:var(--accent)}
+    header.page .sub{color:var(--muted);font-family:var(--mono);font-size:14px;margin-bottom:24px}
+    .searchbar{display:flex;gap:10px;margin:18px 0 26px}
+    .searchbar input{flex:1;background:var(--bg-soft);border:1px solid var(--border);color:var(--text);
+      padding:10px 13px;border-radius:9px}
+    .searchbar input:focus{outline:none;border-color:var(--accent-dim)}
+    .article{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+      padding:22px 24px;margin-bottom:18px;transition:transform .15s,border-color .15s}
+    .article:hover{transform:translateY(-2px);border-color:var(--accent-dim)}
+    .article h2{margin:0 0 6px;font-size:1.35rem}
+    .meta{color:var(--muted);font-size:13px;font-family:var(--mono);margin-bottom:12px}
+    .meta b{color:var(--accent);font-weight:600}
+    .tags{margin:10px 0 0}
+    .tag{display:inline-block;font-size:12px;font-family:var(--mono);color:var(--accent);
+      border:1px solid var(--accent-dim);border-radius:999px;padding:2px 10px;margin:0 6px 6px 0}
+    .article img.cover{width:100%;border-radius:10px;margin:12px 0;display:block}
+    .body{white-space:pre-wrap}
+    .body.clamp{max-height:8.5em;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,#000 60%,transparent)}
+    .readmore{background:none;border:none;color:var(--accent);cursor:pointer;padding:8px 0 0;
+      font-family:var(--mono);font-size:13px}
+    .empty,.spin{color:var(--muted);text-align:center;padding:40px 0;font-family:var(--mono)}
   </style>
 </head>
 <body>
@@ -131,233 +71,49 @@
       <div class="sub">// thoughts on code, care, and everything between</div>
     </header>
 
+    <div class="searchbar">
+      <input id="search" placeholder="Search articles…" onkeydown="if(event.key==='Enter')loadArticles()" />
+      <button class="readmore" style="font-family:var(--sans)" onclick="loadArticles()">Search</button>
+    </div>
+
     <div id="list"><div class="spin">Loading articles…</div></div>
-
-    <!-- Admin panel -->
-    <section class="panel">
-      <h3 id="panelTitle">Admin</h3>
-      <p class="hint" id="panelHint">Log in to publish and manage articles.</p>
-
-      <!-- Login -->
-      <div id="loginBox">
-        <label>Email</label>
-        <input id="email" type="email" placeholder="you@example.com" autocomplete="username" />
-        <label>Password</label>
-        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
-        <button class="btn" onclick="doLogin()">Log in</button>
-      </div>
-
-      <!-- Editor (shown when logged in) -->
-      <div id="editorBox" class="hidden">
-        <input type="hidden" id="editId" />
-        <label>Title</label>
-        <input id="title" placeholder="Article title" />
-        <div class="row2">
-          <div>
-            <label>Author</label>
-            <input id="author" placeholder="Myo Thant Naing" />
-          </div>
-          <div>
-            <label>Tags (comma separated)</label>
-            <input id="tags" placeholder="dev, life, japan" />
-          </div>
-        </div>
-        <label>Content (min 10 characters)</label>
-        <textarea id="content" rows="7" placeholder="Write your article…"></textarea>
-        <div class="row2">
-          <div>
-            <label>Cover image (optional)</label>
-            <input id="image" type="file" accept="image/*" />
-          </div>
-          <div>
-            <label>Publish now?</label>
-            <select id="isPublished" style="width:100%;background:var(--bg-soft);border:1px solid var(--border);color:var(--text);padding:11px 13px;border-radius:9px;margin:6px 0;">
-              <option value="true">Yes — publish</option>
-              <option value="false">No — save as draft</option>
-            </select>
-          </div>
-        </div>
-        <div class="admin-row">
-          <button class="btn" id="saveBtn" onclick="doSave()">Publish</button>
-          <button class="ghost" onclick="resetEditor()">Clear</button>
-          <button class="ghost" onclick="doLogout()" style="margin-left:auto;">Log out</button>
-        </div>
-      </div>
-    </section>
   </div>
 
-  <div id="toast"></div>
-
-  <!-- Your shared API client -->
+  <!-- Shared API client (in /public, served at /Myweb/api.js) -->
   <script src="api.js"></script>
   <script>
-    const $ = (id) => document.getElementById(id);
-    let editing = false;
+    const $=(id)=>document.getElementById(id);
+    const esc=(s)=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    const fmt=(s)=>{try{return new Date(s).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})}catch{return""}};
 
-    function toast(msg, kind = "") {
-      const t = $("toast");
-      t.textContent = msg;
-      t.className = "show " + kind;
-      setTimeout(() => (t.className = kind), 2600);
+    function tagsHtml(t){ if(!t)return""; return `<div class="tags">`+
+      t.split(",").map(x=>x.trim()).filter(Boolean).map(x=>`<span class="tag">#${esc(x)}</span>`).join("")+`</div>`; }
+
+    function card(a){
+      const long=(a.content||"").length>320;
+      const cover=a.imageUrl?`<img class="cover" src="${esc(a.imageUrl)}" alt="">`:"";
+      return `<article class="article">
+        <h2>${esc(a.title||"Untitled")}</h2>
+        <div class="meta">by <b>${esc(a.author||"Unknown")}</b> · ${fmt(a.publishedDate||a.createdAt)}</div>
+        ${cover}
+        <div class="body ${long?"clamp":""}">${esc(a.content||"")}</div>
+        ${long?`<button class="readmore" onclick="toggle(this)">Read more ▾</button>`:""}
+        ${tagsHtml(a.tags)}
+      </article>`;
+    }
+    function toggle(b){const body=b.previousElementSibling;const open=!body.classList.contains("clamp");
+      body.classList.toggle("clamp");b.textContent=open?"Read more ▾":"Show less ▴";}
+
+    async function loadArticles(){
+      const search=$("search").value.trim()||undefined;
+      try{
+        const resp=await PortfolioAPI.getArticles({page:1,pageSize:50,published:true,search});
+        const items=resp?.data?.items??[];
+        $("list").innerHTML=items.length?items.map(card).join(""):`<div class="empty">No articles found.</div>`;
+      }catch(e){ $("list").innerHTML=`<div class="empty">Couldn't load articles.<br>${esc(e.message)}</div>`; }
     }
 
-    function fmtDate(s) {
-      if (!s) return "";
-      try { return new Date(s).toLocaleDateString(undefined,
-        { year: "numeric", month: "short", day: "numeric" }); }
-      catch { return ""; }
-    }
-
-    function renderTags(tagStr) {
-      if (!tagStr) return "";
-      return `<div class="tags">` +
-        tagStr.split(",").map(t => t.trim()).filter(Boolean)
-          .map(t => `<span class="tag">#${t}</span>`).join("") + `</div>`;
-    }
-
-    function articleCard(a) {
-      const admin = PortfolioAPI.isLoggedIn();
-      const longBody = (a.content || "").length > 320;
-      const cover = a.imageUrl ? `<img class="cover" src="${a.imageUrl}" alt="">` : "";
-      const adminBtns = admin ? `
-        <div class="admin-row">
-          <button class="ghost" onclick='startEdit(${a.id})'>Edit</button>
-          <button class="ghost del" onclick='doDelete(${a.id})'>Delete</button>
-        </div>` : "";
-      return `
-        <article class="article" data-id="${a.id}">
-          <h2>${escapeHtml(a.title || "Untitled")}</h2>
-          <div class="meta">by <b>${escapeHtml(a.author || "Unknown")}</b> · ${fmtDate(a.publishedDate || a.createdAt)}
-            ${a.isPublished ? "" : " · <span style='color:var(--muted)'>[draft]</span>"}</div>
-          ${cover}
-          <div class="body ${longBody ? "clamp" : ""}">${escapeHtml(a.content || "")}</div>
-          ${longBody ? `<button class="readmore" onclick="toggleBody(this)">Read more ▾</button>` : ""}
-          ${renderTags(a.tags)}
-          ${adminBtns}
-        </article>`;
-    }
-
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, c =>
-        ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
-    }
-
-    function toggleBody(btn) {
-      const body = btn.previousElementSibling;
-      const open = !body.classList.contains("clamp");
-      body.classList.toggle("clamp");
-      btn.textContent = open ? "Read more ▾" : "Show less ▴";
-    }
-
-    // Keep article objects so Edit can prefill without another request
-    let cache = {};
-
-    async function loadArticles() {
-      try {
-        // Admins see drafts too (published=false returns all in most setups);
-        // public visitors see only published.
-        const resp = await PortfolioAPI.getArticles({ page: 1, pageSize: 50 });
-        const items = resp?.data?.items ?? [];
-        cache = {}; items.forEach(a => (cache[a.id] = a));
-        $("list").innerHTML = items.length
-          ? items.map(articleCard).join("")
-          : `<div class="empty">No articles published yet.</div>`;
-      } catch (e) {
-        $("list").innerHTML = `<div class="empty">Couldn't load articles.<br>${escapeHtml(e.message)}</div>`;
-      }
-    }
-
-    function renderAuthState() {
-      const inAdmin = PortfolioAPI.isLoggedIn();
-      $("loginBox").classList.toggle("hidden", inAdmin);
-      $("editorBox").classList.toggle("hidden", !inAdmin);
-      $("panelHint").textContent = inAdmin
-        ? "You're logged in. Create or manage articles below."
-        : "Log in to publish and manage articles.";
-    }
-
-    async function doLogin() {
-      try {
-        await PortfolioAPI.login($("email").value.trim(), $("password").value);
-        $("password").value = "";
-        toast("Login successful.", "ok");
-        renderAuthState();
-        loadArticles();
-      } catch (e) { toast(e.message, "err"); }
-    }
-
-    function doLogout() {
-      PortfolioAPI.logout();
-      resetEditor();
-      renderAuthState();
-      loadArticles();
-      toast("Logged out.");
-    }
-
-    function resetEditor() {
-      editing = false;
-      $("editId").value = "";
-      $("title").value = ""; $("author").value = "";
-      $("tags").value = ""; $("content").value = "";
-      $("image").value = ""; $("isPublished").value = "true";
-      $("saveBtn").textContent = "Publish";
-      $("panelTitle").textContent = "Admin";
-    }
-
-    function startEdit(id) {
-      const a = cache[id];
-      if (!a) return;
-      editing = true;
-      $("editId").value = id;
-      $("title").value = a.title || "";
-      $("author").value = a.author || "";
-      $("tags").value = a.tags || "";
-      $("content").value = a.content || "";
-      $("isPublished").value = String(!!a.isPublished);
-      $("saveBtn").textContent = "Save changes";
-      $("panelTitle").textContent = "Editing #" + id;
-      $("title").scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
-    async function doSave() {
-      const payload = {
-        title: $("title").value.trim(),
-        author: $("author").value.trim(),
-        tags: $("tags").value.trim(),
-        content: $("content").value,
-        isPublished: $("isPublished").value === "true",
-      };
-      const file = $("image").files[0];
-      if (file) payload.image = file;
-
-      if (!payload.title || !payload.author) return toast("Title and Author are required.", "err");
-      if ((payload.content || "").length < 10) return toast("Content must be at least 10 characters.", "err");
-
-      try {
-        if (editing) {
-          await PortfolioAPI.updateArticle($("editId").value, payload);
-          toast("Article updated.", "ok");
-        } else {
-          await PortfolioAPI.createArticle(payload);
-          toast("Article published.", "ok");
-        }
-        resetEditor();
-        loadArticles();
-      } catch (e) { toast(e.message, "err"); }
-    }
-
-    async function doDelete(id) {
-      if (!confirm("Delete this article? This can't be undone.")) return;
-      try {
-        await PortfolioAPI.deleteArticle(id);
-        toast("Article deleted.", "ok");
-        loadArticles();
-      } catch (e) { toast(e.message, "err"); }
-    }
-
-    // Boot: warm the sleeping backend, then load.
     PortfolioAPI.wakeBackend();
-    renderAuthState();
     loadArticles();
   </script>
 </body>
