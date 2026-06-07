@@ -10,16 +10,15 @@ const LANGS = [
   { code: 'id', flag: '🇮🇩' },
 ]
 
-// ဒီနေရာမှာ ထည့်ပါ
 const isGitHub = window.location.hostname.includes('github.io');
 const blogPath = isGitHub ? '/Myweb/blog.html' : '/blog.html';
 
 const NAV_LINKS = [
-  { href: '#home',      label: 'Home',    isExternal: false },
-  { href: '#about',     label: 'About',   isExternal: false },
+  { href: '#home',      label: 'Home',     isExternal: false },
+  { href: '#about',     label: 'About',    isExternal: false },
   { href: '#projects',  label: 'Projects', isExternal: false },
   { href: '#exploring', label: 'Exploring', isExternal: false },
-  { href: blogPath,     label: 'Blog',    isExternal: true }, // ဒီမှာ blogPath ကို သုံးလိုက်ပါ
+  { href: blogPath,     label: 'Blog',     isExternal: true },
 ];
 
 export default function Navbar({ lang, setLang }) {
@@ -30,8 +29,6 @@ export default function Navbar({ lang, setLang }) {
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 40)
-
-      // Active section tracking
       const sections = ['home', 'about', 'projects', 'seasonal', 'exploring']
       for (const id of [...sections].reverse()) {
         const el = document.getElementById(id)
@@ -46,8 +43,7 @@ export default function Navbar({ lang, setLang }) {
   }, [])
 
   const handleNav = (e, href, isExternal) => {
-    if (isExternal) return; // External ဆိုရင် ပုံမှန်အတိုင်း လင့်ခ်သွားပါ
-
+    if (isExternal) return;
     e.preventDefault();
     setMenuOpen(false);
     const target = document.querySelector(href);
@@ -63,7 +59,6 @@ export default function Navbar({ lang, setLang }) {
     >
       <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
-        {/* Logo */}
         <a
           href="/Myweb/"
           className="flex items-center gap-2 font-mono font-semibold text-white hover:text-accent-light transition-colors"
@@ -72,8 +67,8 @@ export default function Navbar({ lang, setLang }) {
           <span className="hidden sm:inline text-sm">{PERSONAL.handle}</span>
         </a>
 
-        {/* Desktop nav links */}
-        <ul className="hidden md:flex items-center gap-1">
+        {/* Desktop nav links — now appear at lg (>=1024px) */}
+        <ul className="hidden lg:flex items-center gap-1">
           {NAV_LINKS.map(({ href, label, isExternal }) => {
             const id = href.slice(1);
             const isActive = activeSection === id && !isExternal;
@@ -82,7 +77,6 @@ export default function Navbar({ lang, setLang }) {
                 <a
                   href={href}
                   onClick={(e) => handleNav(e, href, isExternal)}
-                  // အောက်ပါ className နေရာမှာ ... ကိုဖျက်ပြီး အပြည့်အစုံ ပြန်ထည့်ပါ
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
                     ? 'text-white bg-accent/20'
                     : 'text-muted hover:text-white hover:bg-white/5'
@@ -95,9 +89,11 @@ export default function Navbar({ lang, setLang }) {
           })}
         </ul>
 
-        {/* Right group: lang switcher + hamburger */}
+        {/* Right group: lang switcher (desktop only) + hamburger */}
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-0.5 bg-white/5 rounded-xl p-1">
+          {/* Flags now match the nav-links breakpoint: hidden until lg.
+              On smaller screens the flags live in the mobile menu below. */}
+          <div className="hidden lg:flex items-center gap-0.5 bg-white/5 rounded-xl p-1">
             {LANGS.map(({ code, flag }) => (
               <button
                 key={code}
@@ -111,10 +107,10 @@ export default function Navbar({ lang, setLang }) {
             ))}
           </div>
 
-          {/* Hamburger */}
+          {/* Hamburger — visible below lg */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-muted hover:text-white transition-colors"
+            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-muted hover:text-white transition-colors"
             aria-label="Toggle menu"
           >
             <i className={`fas ${menuOpen ? 'fa-times' : 'fa-bars'} text-base`} />
@@ -122,31 +118,34 @@ export default function Navbar({ lang, setLang }) {
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — visible below lg; holds BOTH links and flags */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        className={`lg:hidden overflow-hidden transition-all duration-300 ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
           } bg-surface/95 backdrop-blur-md border-b border-white/5`}
       >
         <ul className="px-6 py-4 flex flex-col gap-1">
-          {/* Mobile menu - ဒီနေရာကို ပြင်ပါ */}
-          {NAV_LINKS.map(({ href, label, isExternal }) => ( // isExternal ထည့်ပေးပါ
+          {NAV_LINKS.map(({ href, label, isExternal }) => (
             <li key={href}>
               <a
                 href={href}
-                onClick={(e) => handleNav(e, href, isExternal)} // ဒီမှာလည်း ထည့်ပေးပါ
+                onClick={(e) => handleNav(e, href, isExternal)}
                 className="block px-4 py-2.5 rounded-xl text-sm font-medium text-muted hover:text-white hover:bg-white/5 transition-all"
               >
                 {label}
               </a>
             </li>
           ))}
-          <li className="pt-2 border-t border-white/5 mt-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
+
+          {/* Language flags inside the mobile menu */}
+          <li className="pt-3 border-t border-white/5 mt-2">
+            <p className="px-4 pb-2 text-xs font-mono text-muted">Language</p>
+            <div className="flex items-center gap-1.5 flex-wrap px-4">
               {LANGS.map(({ code, flag }) => (
                 <button
                   key={code}
                   onClick={() => { setLang(code); setMenuOpen(false) }}
-                  className={`w-9 h-8 rounded-lg text-sm transition-all ${lang === code ? 'bg-accent/70' : 'bg-white/5 opacity-70 hover:opacity-100'
+                  title={code.toUpperCase()}
+                  className={`w-10 h-9 rounded-lg text-base transition-all ${lang === code ? 'bg-accent/70' : 'bg-white/5 opacity-70 hover:opacity-100'
                     }`}
                 >
                   {flag}
