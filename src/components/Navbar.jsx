@@ -14,11 +14,11 @@ const isGitHub = window.location.hostname.includes('github.io');
 const blogPath = isGitHub ? '/Myweb/blog.html' : '/blog.html';
 
 const NAV_LINKS = [
-  { href: '#home',      label: 'Home',     isExternal: false },
-  { href: '#about',     label: 'About',    isExternal: false },
-  { href: '#projects',  label: 'Projects', isExternal: false },
+  { href: '#home', label: 'Home', isExternal: false },
+  { href: '#about', label: 'About', isExternal: false },
+  { href: '#projects', label: 'Projects', isExternal: false },
   { href: '#exploring', label: 'Exploring', isExternal: false },
-  { href: blogPath,     label: 'Blog',     isExternal: true },
+  { href: blogPath, label: 'Blog', isExternal: true },
 ];
 
 export default function Navbar({ lang, setLang }) {

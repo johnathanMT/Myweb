@@ -18,7 +18,7 @@ export default function Exploring() {
       style={{ '--c': '#8b5cf6' }}>
       {/* Cosmic bg */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, #07070f 0%, #09070f 50%, #07070f 100%)' }} />
+        style={{ background: 'linear-gradient(180deg, rgba(7,7,15,0.5) 0%, transparent 40%, transparent 60%, rgba(7,7,15,0.5) 100%)' }} />
       <div className="absolute left-1/2 top-1/3 -translate-x-1/2 w-[600px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-10"
         style={{ background: 'radial-gradient(ellipse, #8b5cf6, #ec4899, transparent)' }} />
 
@@ -28,10 +28,10 @@ export default function Exploring() {
           <div key={i}
             className="absolute rounded-full bg-white"
             style={{
-              width:  Math.random() * 2 + 0.5 + 'px',
+              width: Math.random() * 2 + 0.5 + 'px',
               height: Math.random() * 2 + 0.5 + 'px',
-              left:   Math.random() * 100 + '%',
-              top:    Math.random() * 100 + '%',
+              left: Math.random() * 100 + '%',
+              top: Math.random() * 100 + '%',
               opacity: Math.random() * 0.4 + 0.1,
               animation: `blink ${Math.random() * 3 + 2}s ease-in-out ${Math.random() * 2}s infinite`,
             }}

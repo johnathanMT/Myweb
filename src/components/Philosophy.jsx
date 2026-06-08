@@ -31,7 +31,7 @@ export default function Philosophy() {
 
   return (
     <section ref={sectionRef} className="relative py-20 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-surface via-space to-surface pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-space/40 via-transparent to-space/40 pointer-events-none" />
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="section-container relative z-10">

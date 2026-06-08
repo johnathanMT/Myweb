@@ -2,11 +2,11 @@ import { useEffect, useRef } from 'react'
 import { PERSONAL, SKILLS } from '../data/content'
 
 const T = {
-  en: { title: 'About Me',    bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.', slogan: 'Better Late Than Never', skills: 'Core Competencies' },
+  en: { title: 'About Me', bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.', slogan: 'Better Late Than Never', skills: 'Core Competencies' },
   mm: { title: 'ကျွန်တော်အကြောင်း', bio: 'ဂျပန်တွင် နေထိုင်သည်။ ကျန်းမာရေးမှ နည်းပညာသို့ ပြောင်းလဲနေသည်။', slogan: 'နောက်ကျသော်လည်း မနောက်ကျ', skills: 'အဓိက ကျွမ်းကျင်မှုများ' },
-  jp: { title: '私について',       bio: '日本在住。医療からテックへの転身中。現実の問題を解決するソフトウェアを作っています。', slogan: 'よくできたよりも遅くできた', skills: 'コアスキル' },
-  vn: { title: 'Về Tôi',      bio: 'Sống ở Nhật Bản. Chuyển đổi từ Y tế sang Công nghệ. Tôi xây dựng phần mềm để giải quyết vấn đề thực tế.', slogan: 'Muộn còn hơn không', skills: 'Năng lực cốt lõi' },
-  ne: { title: 'मेरो बारेमा',  bio: 'जापानमा बसोबास। स्वास्थ्यसेवाबाट प्रविधितर्फ परिवर्तन। वास्तविक समस्याहरू समाधान गर्न सफ्टवेयर बनाउँछु।', slogan: 'ढिलो भए पनि हुँदैन', skills: 'मुख्य दक्षताहरू' },
+  jp: { title: '私について', bio: '日本在住。医療からテックへの転身中。現実の問題を解決するソフトウェアを作っています。', slogan: 'よくできたよりも遅くできた', skills: 'コアスキル' },
+  vn: { title: 'Về Tôi', bio: 'Sống ở Nhật Bản. Chuyển đổi từ Y tế sang Công nghệ. Tôi xây dựng phần mềm để giải quyết vấn đề thực tế.', slogan: 'Muộn còn hơn không', skills: 'Năng lực cốt lõi' },
+  ne: { title: 'मेरो बारेमा', bio: 'जापानमा बसोबास। स्वास्थ्यसेवाबाट प्रविधितर्फ परिवर्तन। वास्तविक समस्याहरू समाधान गर्न सफ्टवेयर बनाउँछु।', slogan: 'ढिलो भए पनि हुँदैन', skills: 'मुख्य दक्षताहरू' },
   id: { title: 'Tentang Saya', bio: 'Tinggal di Jepang. Bertransisi dari Kesehatan ke Teknologi. Saya membangun perangkat lunak untuk memecahkan masalah nyata.', slogan: 'Lebih baik terlambat daripada tidak', skills: 'Kompetensi Inti' },
 }
 
@@ -76,10 +76,10 @@ export default function About({ lang }) {
             {/* Quick facts */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { icon: 'fas fa-graduation-cap', label: 'IT University',   value: 'Enrolled' },
-                { icon: 'fas fa-briefcase-medical', label: 'Background',  value: 'Healthcare' },
-                { icon: 'fas fa-code',             label: 'Focus',        value: 'AI / Web Dev' },
-                { icon: 'fas fa-language',         label: 'Languages',    value: 'EN · JP · MY' },
+                { icon: 'fas fa-graduation-cap', label: 'IT University', value: 'Enrolled' },
+                { icon: 'fas fa-briefcase-medical', label: 'Background', value: 'Healthcare' },
+                { icon: 'fas fa-code', label: 'Focus', value: 'AI / Web Dev' },
+                { icon: 'fas fa-language', label: 'Languages', value: 'EN · JP · MY' },
               ].map(({ icon, label, value }) => (
                 <div key={label} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-white/5">
                   <i className={`${icon} text-accent w-4`} />

@@ -75,7 +75,7 @@ export default function SeasonalGallery() {
     >
       {/* Section bg */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, #07070f 0%, #0d0a05 50%, #07070f 100%)' }} />
+        style={{ background: 'linear-gradient(180deg, rgba(7,7,15,0.5) 0%, transparent 40%, transparent 60%, rgba(7,7,15,0.5) 100%)' }} />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] rounded-full blur-3xl pointer-events-none opacity-20"
         style={{ background: 'radial-gradient(ellipse, #f59e0b, transparent)' }} />
 

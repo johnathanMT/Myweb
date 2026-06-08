@@ -1,36 +1,36 @@
 export const PERSONAL = {
-  name:     'Myo Thant Naing',
-  handle:   'MTN.Digitosphere',
-  tagline:  'From Caring to Coding in Japan 🇯🇵',
+  name: 'Myo Thant Naing',
+  handle: 'MTN.Digitosphere',
+  tagline: 'From Caring to Coding in Japan 🇯🇵',
   subtitle: 'IT Student · Care-giver · Aspiring AI Engineer',
-  bio:      'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.',
-  slogan:   'Better Late Than Never',
-  photo:    'https://johnathanmt.github.io/Myweb/Myweb_photo/My_profile2_for_myweb.jpg',
-  quote:    "Don't Be Institutionalized, Be the Architect of Your Environment.",
+  bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.',
+  slogan: 'Better Late Than Never',
+  photo: 'https://johnathanmt.github.io/Myweb/Myweb_photo/My_profile2_for_myweb.jpg',
+  quote: "Don't Be Institutionalized, Be the Architect of Your Environment.",
   heinlein: `"A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a ship, design a building, write a sonnet, balance accounts, build a wall, set a bone, comfort the dying, take orders, give orders, cooperate, act alone, solve equations, analyze a new problem, pitch manure, program a computer, cook a tasty meal, fight efficiently, die gallantly. Specialization is for insects." – Robert A. Heinlein`,
 }
 
 export const SOCIAL = [
-  { label: 'LINE',     icon: 'fab fa-line',        url: 'https://lin.ee/s72ayHD' },
-  { label: 'GitHub',   icon: 'fab fa-github',       url: 'https://github.com/johnathanMT' },
-  { label: 'LinkedIn', icon: 'fab fa-linkedin-in',  url: 'https://www.linkedin.com/in/johnathanmt/' },
+  { label: 'LINE', icon: 'fab fa-line', url: 'https://lin.ee/s72ayHD' },
+  { label: 'GitHub', icon: 'fab fa-github', url: 'https://github.com/johnathanMT' },
+  { label: 'LinkedIn', icon: 'fab fa-linkedin-in', url: 'https://www.linkedin.com/in/johnathanmt/' },
 ]
 
 export const SKILLS = [
-  { name: 'Python',               icon: 'fab fa-python',          color: '#3b82f6' },
-  { name: 'AI Fundamentals',      icon: 'fas fa-brain',           color: '#a855f7' },
-  { name: 'HTML / CSS',           icon: 'fab fa-html5',           color: '#f97316' },
-  { name: 'JavaScript',           icon: 'fab fa-js',              color: '#eab308' },
-  { name: 'Japanese',             icon: 'fas fa-language',        color: '#ef4444' },
-  { name: 'Kaigo Care',           icon: 'fas fa-hands-helping',   color: '#ec4899' },
-  { name: 'English',              icon: 'fas fa-globe-americas',  color: '#06b6d4' },
-  { name: 'UI / UX',              icon: 'fas fa-pen-nib',         color: '#8b5cf6' },
-  { name: 'IoT (M5Stack)',        icon: 'fas fa-microchip',       color: '#10b981' },
-  { name: 'C#',                   icon: 'fas fa-code',            color: '#6366f1' },
-  { name: 'Software Engineering', icon: 'fas fa-laptop-code',     color: '#0ea5e9' },
-  { name: 'OOSAD',                icon: 'fas fa-project-diagram', color: '#f59e0b' },
-  { name: 'DDOOCP',               icon: 'fas fa-cubes',           color: '#14b8a6' },
-  { name: 'AMCC',                 icon: 'fas fa-tasks',           color: '#f43f5e' },
+  { name: 'Python', icon: 'fab fa-python', color: '#3b82f6' },
+  { name: 'AI Fundamentals', icon: 'fas fa-brain', color: '#a855f7' },
+  { name: 'HTML / CSS', icon: 'fab fa-html5', color: '#f97316' },
+  { name: 'JavaScript', icon: 'fab fa-js', color: '#eab308' },
+  { name: 'Japanese', icon: 'fas fa-language', color: '#ef4444' },
+  { name: 'Kaigo Care', icon: 'fas fa-hands-helping', color: '#ec4899' },
+  { name: 'English', icon: 'fas fa-globe-americas', color: '#06b6d4' },
+  { name: 'UI / UX', icon: 'fas fa-pen-nib', color: '#8b5cf6' },
+  { name: 'IoT (M5Stack)', icon: 'fas fa-microchip', color: '#10b981' },
+  { name: 'C#', icon: 'fas fa-code', color: '#6366f1' },
+  { name: 'Software Engineering', icon: 'fas fa-laptop-code', color: '#0ea5e9' },
+  { name: 'OOSAD', icon: 'fas fa-project-diagram', color: '#f59e0b' },
+  { name: 'DDOOCP', icon: 'fas fa-cubes', color: '#14b8a6' },
+  { name: 'AMCC', icon: 'fas fa-tasks', color: '#f43f5e' },
 ]
 
 export const PROJECTS = [
@@ -68,18 +68,18 @@ export const PROJECTS = [
 
 // High-quality curated photos representing each month's character
 export const MONTHS = [
-  { name: 'JANUARY',   zodiac: '♑ Capricorn',   color: '#93c5fd', img: 'https://images.unsplash.com/photo-1517243426866-c8a2f62e5e16?w=1200&q=90', desc: 'New beginnings under winter skies' },
-  { name: 'FEBRUARY',  zodiac: '♒ Aquarius',    color: '#f9a8d4', img: 'https://images.unsplash.com/photo-1496861083958-175bb1bd5702?w=1200&q=90', desc: 'Plum blossoms herald early spring' },
-  { name: 'MARCH',     zodiac: '♓ Pisces',      color: '#fbcfe8', img: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=1200&q=90', desc: 'Sakura petals drift on warm winds' },
-  { name: 'APRIL',     zodiac: '♈ Aries',       color: '#bbf7d0', img: 'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?w=1200&q=90', desc: 'Fields burst with the colour of hope' },
-  { name: 'MAY',       zodiac: '♉ Taurus',      color: '#a7f3d0', img: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=1200&q=90', desc: 'Golden hour across emerald hills' },
-  { name: 'JUNE',      zodiac: '♊ Gemini',      color: '#a5f3fc', img: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&q=90', desc: 'Monsoon rains bring life anew' },
-  { name: 'JULY',      zodiac: '♋ Cancer',      color: '#fde68a', img: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1200&q=90', desc: 'Fireworks bloom over summer nights' },
-  { name: 'AUGUST',    zodiac: '♌ Leo',         color: '#fcd34d', img: 'https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=1200&q=90', desc: 'Sunflower fields stretch to the horizon' },
-  { name: 'SEPTEMBER', zodiac: '♍ Virgo',       color: '#fed7aa', img: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1200&q=90', desc: 'Leaves turn amber as summer fades' },
-  { name: 'OCTOBER',   zodiac: '♎ Libra',       color: '#fca5a5', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=90', desc: 'Autumn fire across mountain forests' },
-  { name: 'NOVEMBER',  zodiac: '♏ Scorpio',     color: '#d8b4fe', img: 'https://images.unsplash.com/photo-1477414956199-7da45746f742?w=1200&q=90', desc: 'Mist rolls through twilight valleys' },
-  { name: 'DECEMBER',  zodiac: '♐ Sagittarius', color: '#bfdbfe', img: 'https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=1200&q=90', desc: 'Snow blankets the world in silence' },
+  { name: 'JANUARY', zodiac: '♑ Capricorn', color: '#93c5fd', img: 'https://images.unsplash.com/photo-1517243426866-c8a2f62e5e16?w=1200&q=90', desc: 'New beginnings under winter skies' },
+  { name: 'FEBRUARY', zodiac: '♒ Aquarius', color: '#f9a8d4', img: 'https://images.unsplash.com/photo-1496861083958-175bb1bd5702?w=1200&q=90', desc: 'Plum blossoms herald early spring' },
+  { name: 'MARCH', zodiac: '♓ Pisces', color: '#fbcfe8', img: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=1200&q=90', desc: 'Sakura petals drift on warm winds' },
+  { name: 'APRIL', zodiac: '♈ Aries', color: '#bbf7d0', img: 'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?w=1200&q=90', desc: 'Fields burst with the colour of hope' },
+  { name: 'MAY', zodiac: '♉ Taurus', color: '#a7f3d0', img: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=1200&q=90', desc: 'Golden hour across emerald hills' },
+  { name: 'JUNE', zodiac: '♊ Gemini', color: '#a5f3fc', img: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&q=90', desc: 'Monsoon rains bring life anew' },
+  { name: 'JULY', zodiac: '♋ Cancer', color: '#fde68a', img: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1200&q=90', desc: 'Fireworks bloom over summer nights' },
+  { name: 'AUGUST', zodiac: '♌ Leo', color: '#fcd34d', img: 'https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=1200&q=90', desc: 'Sunflower fields stretch to the horizon' },
+  { name: 'SEPTEMBER', zodiac: '♍ Virgo', color: '#fed7aa', img: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1200&q=90', desc: 'Leaves turn amber as summer fades' },
+  { name: 'OCTOBER', zodiac: '♎ Libra', color: '#fca5a5', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=90', desc: 'Autumn fire across mountain forests' },
+  { name: 'NOVEMBER', zodiac: '♏ Scorpio', color: '#d8b4fe', img: 'https://images.unsplash.com/photo-1477414956199-7da45746f742?w=1200&q=90', desc: 'Mist rolls through twilight valleys' },
+  { name: 'DECEMBER', zodiac: '♐ Sagittarius', color: '#bfdbfe', img: 'https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=1200&q=90', desc: 'Snow blankets the world in silence' },
 ]
 
 // ─── Multilingual blog translations ───────────────────────────────────────────
@@ -317,12 +317,12 @@ export const BLOG_POSTS = [
 ]
 
 export const INTERESTS = [
-  { title: 'Cosmology',          desc: 'Unraveling the mysteries of the universe and celestial mechanics.',  icon: 'fas fa-globe-asia',    color: '#0ea5e9', page: 'cosmology.html' },
-  { title: 'Quantum Theory',     desc: 'Exploring the fundamental nature of reality and particles.',         icon: 'fas fa-atom',          color: '#10b981', page: 'quantum-theory.html' },
-  { title: 'Linguistics',        desc: 'Mastering Japanese (N3+) & English communication arts.',             icon: 'fas fa-language',      color: '#f97316', page: 'linguistics.html' },
-  { title: 'FE / IT Study',      desc: 'Fundamental Engineering, Algorithms & System Architecture.',         icon: 'fas fa-laptop-code',   color: '#06b6d4', page: 'fe-it-study.html' },
-  { title: 'Occultism',          desc: 'Ancient wisdom, symbolism, and the hidden arts.',                   icon: 'fas fa-eye',           color: '#8b5cf6', page: 'occultism.html' },
-  { title: 'Fortune Prediction', desc: 'Astrology, Tarot, and analyzing destiny\'s path.',                  icon: 'fas fa-star',          color: '#f59e0b', page: 'fortune-prediction.html' },
-  { title: 'General Knowledge',  desc: 'History, Philosophy, and Random Curiosities.',                      icon: 'fas fa-lightbulb',     color: '#ef4444', page: 'general-knowledge.html' },
-  { title: 'Unconditional Joke', desc: 'Humor, Satire, and Light-hearted moments.',                         icon: 'fas fa-theater-masks', color: '#eab308', page: 'unconditional-jokes.html' },
+  { title: 'Cosmology', desc: 'Unraveling the mysteries of the universe and celestial mechanics.', icon: 'fas fa-globe-asia', color: '#0ea5e9', page: 'cosmology.html' },
+  { title: 'Quantum Theory', desc: 'Exploring the fundamental nature of reality and particles.', icon: 'fas fa-atom', color: '#10b981', page: 'quantum-theory.html' },
+  { title: 'Linguistics', desc: 'Mastering Japanese (N3+) & English communication arts.', icon: 'fas fa-language', color: '#f97316', page: 'linguistics.html' },
+  { title: 'FE / IT Study', desc: 'Fundamental Engineering, Algorithms & System Architecture.', icon: 'fas fa-laptop-code', color: '#06b6d4', page: 'fe-it-study.html' },
+  { title: 'Occultism', desc: 'Ancient wisdom, symbolism, and the hidden arts.', icon: 'fas fa-eye', color: '#8b5cf6', page: 'occultism.html' },
+  { title: 'Fortune Prediction', desc: 'Astrology, Tarot, and analyzing destiny\'s path.', icon: 'fas fa-star', color: '#f59e0b', page: 'fortune-prediction.html' },
+  { title: 'General Knowledge', desc: 'History, Philosophy, and Random Curiosities.', icon: 'fas fa-lightbulb', color: '#ef4444', page: 'general-knowledge.html' },
+  { title: 'Unconditional Joke', desc: 'Humor, Satire, and Light-hearted moments.', icon: 'fas fa-theater-masks', color: '#eab308', page: 'unconditional-jokes.html' },
 ]

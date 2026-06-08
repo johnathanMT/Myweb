@@ -128,7 +128,7 @@ export default function TravelChronicles({ lang, setLang }) {
       style={{ '--c': '#f43f5e' }}>
       {/* Rose-tinted bg */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, #07070f 0%, #0d0609 50%, #07070f 100%)' }} />
+        style={{ background: 'linear-gradient(180deg, rgba(7,7,15,0.5) 0%, transparent 40%, transparent 60%, rgba(7,7,15,0.5) 100%)' }} />
       <div className="absolute top-0 right-0 w-[500px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-10"
         style={{ background: 'radial-gradient(ellipse, #f43f5e, transparent)' }} />
 
