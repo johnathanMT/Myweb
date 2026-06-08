@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import AmbientBackground from './components/AmbientBackground'
 import Navbar           from './components/Navbar'
 import Hero             from './components/Hero'
 import About            from './components/About'
 import Philosophy       from './components/Philosophy'
-import Projects         from './components/Projects'
+import ProjectsSection  from './components/ProjectsSection'   // upgraded sleek cards
+import ArticlesSection  from './components/ArticlesSection'   // API-driven blog cards
 import SeasonalGallery  from './components/SeasonalGallery'
 import TravelChronicles from './components/TravelChronicles'
 import Exploring        from './components/Exploring'
@@ -20,12 +22,16 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen bg-[#07070f] text-white overflow-x-hidden">
+      {/* dim cyberpunk ambient glows behind everything */}
+      <AmbientBackground />
+
       <Navbar lang={lang} setLang={setLang} />
-      <main>
-        <Hero            lang={lang} />
-        <About           lang={lang} />
+      <main className="relative z-10">
+        <Hero             lang={lang} />
+        <About            lang={lang} />
         <Philosophy />
-        <Projects        lang={lang} />
+        <ProjectsSection  lang={lang} />
+        <ArticlesSection />
         <SeasonalGallery />
         <TravelChronicles lang={lang} setLang={setLang} />
         <Exploring />

@@ -7,13 +7,13 @@ import MediaGallery from './MediaGallery'
 
 // Anti-spam "Quick Reaction" palette — users pick from these instead of typing.
 const QUICK_REACTIONS = [
-  { key: 'love',      emoji: '❤️', label: 'Love it' },
-  { key: 'clap',      emoji: '👏', label: 'Bravo' },
-  { key: 'fire',      emoji: '🔥', label: 'Fire' },
-  { key: 'idea',      emoji: '💡', label: 'Insightful' },
-  { key: 'great',     emoji: '🙌', label: 'Great post!' },
+  { key: 'love', emoji: '❤️', label: 'Love it' },
+  { key: 'clap', emoji: '👏', label: 'Bravo' },
+  { key: 'fire', emoji: '🔥', label: 'Fire' },
+  { key: 'idea', emoji: '💡', label: 'Insightful' },
+  { key: 'great', emoji: '🙌', label: 'Great post!' },
   { key: 'inspiring', emoji: '✨', label: 'Very inspiring!' },
-  { key: 'helpful',   emoji: '🙏', label: 'Helpful!' },
+  { key: 'helpful', emoji: '🙏', label: 'Helpful!' },
 ]
 
 /**
@@ -56,8 +56,8 @@ export default function ArticleCard({ article = {}, onLike, onReact, shareUrl })
   // Build the media list (priority: explicit media > images/video > single imageUrl)
   const mediaList = media
     ?? (images || videoUrl
-        ? [...(videoUrl ? [{ type: 'video', url: videoUrl }] : []), ...((images || []).map((u) => ({ type: 'image', url: u })))]
-        : imageUrl ? [{ type: 'image', url: imageUrl }] : [])
+      ? [...(videoUrl ? [{ type: 'video', url: videoUrl }] : []), ...((images || []).map((u) => ({ type: 'image', url: u })))]
+      : imageUrl ? [{ type: 'image', url: imageUrl }] : [])
 
   const toggleLike = async () => {
     const next = !liked
@@ -80,16 +80,16 @@ export default function ArticleCard({ article = {}, onLike, onReact, shareUrl })
     const links = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${u}`,
-      twitter:  `https://twitter.com/intent/tweet?url=${u}&text=${t}`,
+      twitter: `https://twitter.com/intent/tweet?url=${u}&text=${t}`,
     }
     if (links[network]) window.open(links[network], '_blank', 'noopener,width=600,height=540')
   }
-  const copyLink = async () => { try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch {} }
+  const copyLink = async () => { try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch { } }
 
   const metaRows = [
-    origin       && { icon: MapPin, label: 'Origin', value: origin },
-    roastLevel   && { icon: Flame,  label: 'Roast',  value: roastLevel },
-    tastingNotes && { icon: Coffee, label: 'Notes',  value: tastingNotes },
+    origin && { icon: MapPin, label: 'Origin', value: origin },
+    roastLevel && { icon: Flame, label: 'Roast', value: roastLevel },
+    tastingNotes && { icon: Coffee, label: 'Notes', value: tastingNotes },
   ].filter(Boolean)
 
   return (
