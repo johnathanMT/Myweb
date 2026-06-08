@@ -1,10 +1,21 @@
 // ESM API client for the React app (the static pages use public/api.js instead).
 const BASE_URL = 'https://myweb-zqv1.onrender.com'
 const TOKEN_KEY = 'mtn_jwt'
+const VISITOR_KEY = 'mtn_visitor'
 const token = () => localStorage.getItem(TOKEN_KEY)
 
+// Stable anonymous visitor id (for dedupe of likes/reactions; no login, no PII)
+const visitorId = () => {
+  let v = localStorage.getItem(VISITOR_KEY)
+  if (!v) {
+    v = (crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    localStorage.setItem(VISITOR_KEY, v)
+  }
+  return v
+}
+
 async function req(path, opts = {}) {
-  const headers = { ...(opts.headers || {}) }
+  const headers = { 'X-Visitor-Id': visitorId(), ...(opts.headers || {}) }
   if (token()) headers.Authorization = `Bearer ${token()}`
   const res = await fetch(`${BASE_URL}${path}`, { ...opts, headers })
   const text = await res.text()

@@ -20,6 +20,18 @@ const PortfolioAPI = (() => {
   const BASE_URL = "https://myweb-zqv1.onrender.com";
   const TOKEN_KEY = "mtn_jwt";
   const USER_KEY  = "mtn_user";
+  const VISITOR_KEY = "mtn_visitor";
+
+  // Stable anonymous visitor id for like/reaction dedupe (no login, no PII)
+  const visitorId = () => {
+    let v = localStorage.getItem(VISITOR_KEY);
+    if (!v) {
+      v = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem(VISITOR_KEY, v);
+    }
+    return v;
+  };
 
   const getToken = () => localStorage.getItem(TOKEN_KEY);
   const setToken = (t) => localStorage.setItem(TOKEN_KEY, t);
@@ -34,7 +46,7 @@ const PortfolioAPI = (() => {
  
   // ---- Core request helper ------------------------------------------------
   async function request(path, { method = "GET", body, auth = false, isForm = false } = {}) {
-    const headers = {};
+    const headers = { "X-Visitor-Id": visitorId() };
     // For FormData, DO NOT set Content-Type — the browser adds the multipart boundary.
     if (!isForm && body !== undefined) headers["Content-Type"] = "application/json";
     if (auth && getToken()) headers["Authorization"] = `Bearer ${getToken()}`;
