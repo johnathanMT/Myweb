@@ -13,12 +13,12 @@ import '../crt.css'
 // Floating quantum "data nodes" (cyan / magenta / electric-blue)
 const NODES = [
   { x: '12%', y: '24%', s: 10, c: '#00e5ff', d: 0 },
-  { x: '85%', y: '20%', s: 7,  c: '#ff3df0', d: 0.6 },
+  { x: '85%', y: '20%', s: 7, c: '#ff3df0', d: 0.6 },
   { x: '78%', y: '70%', s: 12, c: '#4b7bff', d: 1.1 },
-  { x: '18%', y: '74%', s: 8,  c: '#00e5ff', d: 0.3 },
-  { x: '50%', y: '12%', s: 6,  c: '#7c3aed', d: 0.9 },
-  { x: '92%', y: '48%', s: 5,  c: '#ff3df0', d: 1.4 },
-  { x: '6%',  y: '50%', s: 6,  c: '#4b7bff', d: 0.5 },
+  { x: '18%', y: '74%', s: 8, c: '#00e5ff', d: 0.3 },
+  { x: '50%', y: '12%', s: 6, c: '#7c3aed', d: 0.9 },
+  { x: '92%', y: '48%', s: 5, c: '#ff3df0', d: 1.4 },
+  { x: '6%', y: '50%', s: 6, c: '#4b7bff', d: 0.5 },
 ]
 
 function DataNode({ x, y, s, c, d }) {
@@ -87,7 +87,7 @@ export default function CRTHero({ children }) {
         </p>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          {['React', 'C# / .NET', 'AI', 'Kaigo Care', 'Japanese N3+'].map((b) => (
+          {['React', 'C# / .NET', 'AI', 'Computer Science', 'Web', 'English','Japanese'].map((b) => (
             <span key={b} className="rounded-md border border-white/12 bg-white/[0.04] px-3 py-1 font-mono text-xs text-gray-300">
               {b}
             </span>
@@ -96,13 +96,13 @@ export default function CRTHero({ children }) {
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a href="#projects"
-             onClick={(e)=>{e.preventDefault();document.querySelector('#projects')?.scrollIntoView({behavior:'smooth'})}}
-             className="rounded-lg bg-gradient-to-r from-cyan to-[#4b7bff] px-6 py-2.5 text-sm font-semibold text-[#04121a] shadow-lg shadow-cyan/25 transition-transform hover:-translate-y-0.5">
+            onClick={(e) => { e.preventDefault(); document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' }) }}
+            className="rounded-lg bg-gradient-to-r from-cyan to-[#4b7bff] px-6 py-2.5 text-sm font-semibold text-[#04121a] shadow-lg shadow-cyan/25 transition-transform hover:-translate-y-0.5">
             View My Work
           </a>
           <a href="#about"
-             onClick={(e)=>{e.preventDefault();document.querySelector('#about')?.scrollIntoView({behavior:'smooth'})}}
-             className="rounded-lg border border-white/20 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:border-cyan hover:text-cyan">
+            onClick={(e) => { e.preventDefault(); document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' }) }}
+            className="rounded-lg border border-white/20 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:border-cyan hover:text-cyan">
             My Story
           </a>
         </div>

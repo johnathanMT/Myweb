@@ -14,7 +14,7 @@ export default function PageShell({ children }) {
   const [lang, setLang] = useState(() => {
     try { return localStorage.getItem('mtn_lang') || 'en' } catch { return 'en' }
   })
-  useEffect(() => { try { localStorage.setItem('mtn_lang', lang) } catch {} }, [lang])
+  useEffect(() => { try { localStorage.setItem('mtn_lang', lang) } catch { } }, [lang])
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
   return (
