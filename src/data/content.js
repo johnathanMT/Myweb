@@ -38,19 +38,19 @@ export const PROJECTS = [
     id: 'python', title: 'Python Automation',
     desc: 'Tools created to help with daily tasks and workflows.',
     icon: 'fab fa-python', color: '#3b82f6',
-    url: 'https://johnathanmt.github.io/Myweb/myweb_python.html', ext: false,
+    url: '#/python', ext: false,            // routed React page
   },
   {
     id: 'studying', title: 'Personal Studying',
     desc: 'University assignments, web designs, and learning projects.',
     icon: 'fas fa-laptop-code', color: '#a855f7',
-    url: 'https://johnathanmt.github.io/Myweb/myweb_PStudying.html', ext: false,
+    url: '#/studying', ext: false,          // routed React page
   },
   {
-    id: 'portfolio', title: 'Personal Portfolio',
-    desc: 'This website — built with React, Vite, and Tailwind CSS.',
-    icon: 'fas fa-globe', color: '#06b6d4',
-    url: 'https://johnathanmt.github.io/Myweb/myweb_PPortfolio.html', ext: false,
+    id: 'bibliography', title: 'Bibliography',
+    desc: 'A chronological journey — from analog beginnings to a cyber-modern present.',
+    icon: 'fas fa-book', color: '#06b6d4',
+    url: '#/bibliography', ext: false,      // routed React page
   },
   {
     id: 'coffee', title: 'Bean Boutique Coffee Shop',
