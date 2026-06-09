@@ -138,6 +138,12 @@ const PortfolioAPI = (() => {
   const deleteArticle = (id) =>
     request(`/api/Articles/${id}`, { method: "DELETE", auth: true });
 
+  // ---- Gallery image management (Author/Admin) ---------------------------
+  const deleteArticleImage = (articleId, imageId) =>
+    request(`/api/Articles/${articleId}/images/${imageId}`, { method: "DELETE", auth: true });
+  const reorderArticleImages = (articleId, imageIds) =>
+    request(`/api/Articles/${articleId}/images/reorder`, { method: "PUT", auth: true, body: { imageIds } });
+
   // ---- Anonymous interactions (no login; X-Visitor-Id dedupes) ------------
   const likeArticle   = (id) => request(`/api/Articles/${id}/like`,   { method: "POST" });
   const unlikeArticle = (id) => request(`/api/Articles/${id}/like`,   { method: "DELETE" });
@@ -151,6 +157,7 @@ const PortfolioAPI = (() => {
     BASE_URL, isLoggedIn, getCurrentUser, isAdmin, isAuthor,
     login, register, logout,
     getArticles, getArticle, createArticle, updateArticle, deleteArticle,
+    deleteArticleImage, reorderArticleImages,
     likeArticle, unlikeArticle, reactArticle,
     wakeBackend,
   };

@@ -44,6 +44,21 @@
       padding:14px 24px;background:rgba(7,7,15,.7);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
     .brand{font-family:var(--mono);font-weight:700}.brand span{color:var(--cyan)}
     .nav-links a{color:var(--muted);margin-left:20px;font-size:14px}.nav-links a:hover{color:var(--text)}
+    .navright{display:flex;align-items:center;gap:16px}
+    /* custom frosted-glass language switcher */
+    .langsw{display:flex;gap:3px;background:var(--glass);border:1px solid var(--line);
+      border-radius:999px;padding:4px;backdrop-filter:blur(10px)}
+    .langsw button{border:none;background:transparent;color:var(--muted);font-family:var(--mono);
+      font-size:12px;padding:5px 11px;border-radius:999px;cursor:pointer;transition:.2s;white-space:nowrap}
+    .langsw button:hover{color:#fff}
+    .langsw button.active{background:linear-gradient(90deg,var(--cyan),var(--blue));color:#04121a;
+      font-weight:700;box-shadow:0 0 14px rgba(0,229,255,.45)}
+    /* hide Google Translate's default chrome — we drive it with our own UI */
+    .goog-te-banner-frame.skiptranslate, iframe.skiptranslate{display:none!important;visibility:hidden!important}
+    .goog-te-gadget{height:0!important;overflow:hidden!important;font-size:0!important}
+    #goog-gt-tt, .goog-te-balloon-frame, .goog-tooltip{display:none!important}
+    .goog-text-highlight{background:none!important;box-shadow:none!important}
+    body{top:0!important;position:static!important}
     .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 
     /* ===== LIST VIEW ===== */
@@ -180,10 +195,18 @@
 
   <nav>
     <div class="brand">MTN<span>.Digitosphere</span></div>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="index.html#projects">Projects</a>
-      <a href="blog.html">Blog</a>
+    <div class="navright">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="blog.html">Blog</a>
+      </div>
+      <!-- custom translation switcher (kept out of translation via notranslate) -->
+      <div class="langsw notranslate" translate="no">
+        <button data-lang="en" onclick="setLang('en')">EN</button>
+        <button data-lang="ja" onclick="setLang('ja')">日本語</button>
+        <button data-lang="my" onclick="setLang('my')">မြန်မာ</button>
+      </div>
     </div>
   </nav>
 
@@ -386,5 +409,47 @@
       });
     }
   </script>
+
+  <!-- ===== Seamless translation (EN / 日本語 / မြန်မာ) — Google engine, custom cyber UI ===== -->
+  <div id="google_translate_element" class="notranslate" style="position:absolute;left:-9999px;top:-9999px"></div>
+  <script>
+    function googleTranslateElementInit(){
+      new google.translate.TranslateElement(
+        { pageLanguage:'en', includedLanguages:'en,ja,my', autoDisplay:false },
+        'google_translate_element');
+    }
+    // Drive Google's hidden <select> from our own buttons (no clunky widget shown).
+    function applyLang(code, tries){
+      tries = tries || 0;
+      const combo = document.querySelector('.goog-te-combo');
+      if(!combo){ if(tries < 25) setTimeout(()=>applyLang(code, tries+1), 300); return; }
+      combo.value = (code === 'en') ? '' : code;   // '' = restore original English
+      combo.dispatchEvent(new Event('change'));
+    }
+    function setGoogCookie(code){
+      const kill = 'googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+      document.cookie = kill; document.cookie = kill + ';domain=.' + location.hostname;
+      if(code !== 'en'){
+        const v = 'googtrans=/en/' + code + ';path=/';
+        document.cookie = v; document.cookie = v + ';domain=.' + location.hostname;
+      }
+    }
+    function updateLangUI(code){
+      document.querySelectorAll('.langsw button').forEach(b => b.classList.toggle('active', b.dataset.lang === code));
+    }
+    function setLang(code){
+      localStorage.setItem('blog_tlang', code);
+      setGoogCookie(code);   // persist across reloads
+      applyLang(code);       // instant in-page switch
+      updateLangUI(code);
+    }
+    // On load: restore the reader's last language.
+    (function(){
+      const saved = localStorage.getItem('blog_tlang') || 'en';
+      updateLangUI(saved);
+      if(saved !== 'en'){ setGoogCookie(saved); setTimeout(()=>applyLang(saved), 900); }
+    })();
+  </script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>

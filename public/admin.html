@@ -262,6 +262,13 @@
       <!-- live previews of the selected media before saving -->
       <div id="previews" style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0"></div>
       <div id="videoName" style="font-family:var(--mono);font-size:12px;color:var(--accent)"></div>
+
+      <!-- existing gallery images (shown when editing): delete / reorder -->
+      <div id="existingWrap" class="hidden" style="margin:12px 0">
+        <label>Current gallery images — ↑ ↓ to reorder · × to delete</label>
+        <div id="existingImages" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px"></div>
+      </div>
+
       <div class="admin-row">
         <button class="btn" id="saveBtn" onclick="doSave()">Publish</button>
         <button class="ghost" onclick="resetEditor()">Clear</button>
@@ -331,11 +338,50 @@
     }
     function doLogout() { PortfolioAPI.logout(); resetEditor(); renderState(); toast("Logged out."); }
 
+    let editingImages = [];   // current gallery images (with ids) when editing
+
     function resetEditor() {
       editing = false; $("editId").value = "";
       ["title", "author", "tags", "content", "image", "video"].forEach(id => $(id).value = "");
       $("isPublished").value = "true"; $("saveBtn").textContent = "Publish"; $("editorTitle").textContent = "New article";
       $("previews").innerHTML = ""; $("videoName").textContent = "";
+      editingImages = []; renderExisting();
+    }
+
+    // Render existing gallery images with delete + up/down reorder controls.
+    function renderExisting() {
+      const wrap = $("existingWrap"), box = $("existingImages");
+      if (!editingImages.length) { wrap.classList.add("hidden"); box.innerHTML = ""; return; }
+      wrap.classList.remove("hidden");
+      const btn = "background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;width:24px;height:22px;cursor:pointer;font-size:12px";
+      box.innerHTML = editingImages.map((img, i) => `
+        <div style="position:relative;width:88px">
+          <img src="${esc(img.imageUrl)}" style="width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+          <button onclick="delExisting(${img.id})" title="Delete"
+            style="position:absolute;top:-8px;right:-8px;background:var(--danger);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:1">×</button>
+          <div style="display:flex;justify-content:center;gap:5px;margin-top:4px">
+            <button onclick="moveExisting(${img.id},-1)" ${i === 0 ? "disabled" : ""} style="${btn}">↑</button>
+            <button onclick="moveExisting(${img.id},1)" ${i === editingImages.length - 1 ? "disabled" : ""} style="${btn}">↓</button>
+          </div>
+        </div>`).join("");
+    }
+
+    async function delExisting(imageId) {
+      if (!confirm("Delete this image permanently?")) return;
+      try {
+        await PortfolioAPI.deleteArticleImage($("editId").value, imageId);
+        editingImages = editingImages.filter(x => x.id !== imageId);
+        renderExisting(); toast("Image deleted.", "ok");
+      } catch (e) { toast(e.message, "err"); }
+    }
+
+    async function moveExisting(imageId, dir) {
+      const i = editingImages.findIndex(x => x.id === imageId), j = i + dir;
+      if (j < 0 || j >= editingImages.length) return;
+      [editingImages[i], editingImages[j]] = [editingImages[j], editingImages[i]];
+      renderExisting();
+      try { await PortfolioAPI.reorderArticleImages($("editId").value, editingImages.map(x => x.id)); }
+      catch (e) { toast("Reorder failed: " + e.message, "err"); }
     }
 
     // Live thumbnail previews of the selected images (first one tagged COVER).
@@ -385,6 +431,8 @@
       $("editId").value = id; $("title").value = a.title || ""; $("author").value = a.author || "";
       $("tags").value = a.tags || ""; $("content").value = a.content || ""; $("isPublished").value = String(!!a.isPublished);
       $("saveBtn").textContent = "Save changes"; $("editorTitle").textContent = "Editing #" + id;
+      editingImages = Array.isArray(a.images) ? a.images.slice() : [];
+      renderExisting();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
