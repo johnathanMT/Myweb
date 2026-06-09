@@ -3,6 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Content Security Policy: locked to 'self' + the exact Google Translate domains.
+       Primary XSS defense is output escaping (esc()); CSP is defense-in-depth.
+       Note: GitHub Pages can't send HTTP headers, so CSP must be a <meta> tag. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    base-uri 'self';
+    object-src 'none';
+    script-src 'self' 'unsafe-inline' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com https://*.gstatic.com https://*.googleapis.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com;
+    font-src 'self' https://fonts.gstatic.com;
+    img-src 'self' data: https:;
+    media-src 'self' https://res.cloudinary.com blob:;
+    connect-src 'self' https://myweb-zqv1.onrender.com https://translate.googleapis.com https://translate.google.com;
+    frame-src https://translate.google.com https://www.google.com;
+  ">
+
   <title>The Blog | MTN.Digitosphere</title>
   <meta name="description" content="Thoughts on code, care, and everything between — by Myo Thant Naing." />
 
