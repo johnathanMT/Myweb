@@ -32,7 +32,6 @@
     a{color:var(--cyan);text-decoration:none}
     img{max-width:100%;display:block}
 
-    /* ---- ambient cyberpunk glows + edge vignette (match homepage) ---- */
     .ambient{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
     .ambient i{position:absolute;border-radius:50%;filter:blur(140px);opacity:.5}
     .ambient .c1{top:-12%;left:18%;width:34rem;height:34rem;background:rgba(0,229,255,.14)}
@@ -41,12 +40,10 @@
     .vignette{position:fixed;inset:0;z-index:-1;pointer-events:none;
       background:radial-gradient(120% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.6) 100%)}
 
-    /* ---- nav ---- */
     nav{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
       padding:14px 24px;background:rgba(7,7,15,.7);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
     .brand{font-family:var(--mono);font-weight:700}.brand span{color:var(--cyan)}
     .nav-links a{color:var(--muted);margin-left:20px;font-size:14px}.nav-links a:hover{color:var(--text)}
-
     .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 
     /* ===== LIST VIEW ===== */
@@ -73,72 +70,105 @@
 
     /* ===== ARTICLE (EDITORIAL) VIEW ===== */
     .article{padding-bottom:100px}
-    .hero{position:relative;height:min(74vh,640px);overflow:hidden}
-    .hero img{width:100%;height:100%;object-fit:cover}
-    .hero::after{content:"";position:absolute;inset:0;
-      background:linear-gradient(180deg,rgba(7,7,15,.25) 0%,rgba(7,7,15,.1) 40%,rgba(7,7,15,.95) 100%)}
-    .hero .kicker{position:absolute;left:0;right:0;top:26px;text-align:center;z-index:2;
+
+    /* FIX: full image visible on desktop (contain, not cropped) */
+    .hero{position:relative;display:flex;align-items:center;justify-content:center;
+      width:100%;min-height:38vh;max-height:80vh;overflow:hidden;
+      background:radial-gradient(60% 80% at 50% 28%,rgba(0,229,255,.07),transparent 70%)}
+    .hero img{width:100%;height:auto;max-height:80vh;object-fit:contain;object-position:center}
+    .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:42%;pointer-events:none;
+      background:linear-gradient(180deg,transparent,rgba(7,7,15,.92))}
+    .hero .kicker{position:absolute;left:0;right:0;top:22px;text-align:center;z-index:2;
       font-family:var(--mono);font-size:12px;letter-spacing:.35em;text-transform:uppercase;color:var(--cyan)}
 
-    /* frosted title pane overlapping the hero */
-    .headpane{position:relative;z-index:3;max-width:820px;margin:-150px auto 0;padding:38px 40px;
+    /* small overlap so the image is NOT obstructed on desktop */
+    .headpane{position:relative;z-index:3;max-width:820px;margin:-56px auto 0;padding:34px 40px;
       background:var(--panel);backdrop-filter:blur(18px) saturate(140%);
       border:1px solid rgba(0,229,255,.22);border-radius:20px;
-      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset,0 40px 80px rgba(0,0,0,.55),
-                 0 0 40px rgba(0,229,255,.10)}
+      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset,0 40px 80px rgba(0,0,0,.55),0 0 40px rgba(0,229,255,.10)}
     .headpane h1{font-family:var(--serif);font-weight:700;font-size:clamp(1.7rem,4vw,2.8rem);line-height:1.18;margin:.2rem 0 .6rem}
     .headpane .by{font-family:var(--mono);font-size:13px;color:var(--muted)}
     .headpane .by b{color:var(--cyan);font-weight:500}
     .tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
-    .tag{font-family:var(--mono);font-size:12px;color:var(--cyan);border:1px solid rgba(0,229,255,.3);
-      border-radius:999px;padding:3px 11px}
+    .tag{font-family:var(--mono);font-size:12px;color:var(--cyan);border:1px solid rgba(0,229,255,.3);border-radius:999px;padding:3px 11px}
+
+    /* ===== "REVENGE POP" multi-image gallery ===== */
+    .popwrap{max-width:1180px;margin:54px auto 0;padding:0 8px}
+    .popwrap .lbl{font-family:var(--mono);font-size:12px;letter-spacing:.25em;text-transform:uppercase;
+      color:var(--magenta);text-align:center;margin-bottom:18px}
+    .popwrap .lbl b{color:var(--cyan)}
+    .popgal{display:flex;align-items:center;gap:0;overflow-x:auto;padding:40px 24px 50px;
+      scroll-snap-type:x proximity;
+      -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
+              mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+    .popgal::-webkit-scrollbar{height:8px}
+    .popgal::-webkit-scrollbar-thumb{background:rgba(0,229,255,.4);border-radius:4px}
+    .popitem{flex:0 0 auto;width:clamp(220px,34vw,400px);height:300px;border-radius:18px;overflow:hidden;
+      cursor:zoom-in;scroll-snap-align:center;position:relative;
+      border:2px solid var(--cyan);
+      box-shadow:0 0 0 5px rgba(0,229,255,.08),0 24px 50px rgba(0,0,0,.55),0 0 30px rgba(0,229,255,.30);
+      transform:rotate(-2.5deg);transition:transform .35s ease,box-shadow .35s,filter .35s}
+    .popitem:not(:first-child){margin-left:-34px}            /* overlapping band */
+    .popitem img{width:100%;height:100%;object-fit:cover}
+    .popitem:nth-child(2n){border-color:var(--magenta);transform:rotate(2.5deg);height:360px;margin-top:-30px;
+      box-shadow:0 0 0 5px rgba(255,61,240,.08),0 24px 50px rgba(0,0,0,.55),0 0 30px rgba(255,61,240,.32)}
+    .popitem:nth-child(3n){transform:rotate(-1deg);height:250px;margin-top:34px;
+      border-color:var(--blue);box-shadow:0 0 0 5px rgba(75,123,255,.08),0 24px 50px rgba(0,0,0,.55),0 0 30px rgba(75,123,255,.3)}
+    .popitem:nth-child(4n){height:330px}
+    .popitem:hover{transform:rotate(0) scale(1.05);z-index:5;filter:saturate(1.15)}
+    .popitem::after{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;
+      background:linear-gradient(120deg,transparent 60%,rgba(255,255,255,.18))}
+    .pop-badge{position:absolute;top:-14px;left:-10px;z-index:6;font-family:var(--mono);font-weight:700;
+      font-size:13px;color:#04121a;background:var(--cyan);padding:4px 12px;border-radius:999px;
+      transform:rotate(-8deg);box-shadow:0 0 18px rgba(0,229,255,.6)}
+
+    /* lightbox */
+    .lb{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+      background:rgba(3,4,8,.93);backdrop-filter:blur(6px);padding:4vw}
+    .lb.open{display:flex}
+    .lb img{max-width:92vw;max-height:88vh;border-radius:14px;border:2px solid var(--cyan);
+      box-shadow:0 0 50px rgba(0,229,255,.4)}
+    .lb .x{position:absolute;top:16px;right:24px;font-size:2.2rem;color:#fff;cursor:pointer;line-height:1}
 
     /* staggered editorial body — frosted panes with neon edge lighting */
     .body-editorial{max-width:880px;margin:56px auto 0;display:flex;flex-direction:column;gap:30px}
     .pane{position:relative;background:var(--glass);backdrop-filter:blur(14px);
-      border:1px solid var(--line);border-radius:16px;padding:26px 30px;font-size:1.06rem;color:#dfe6f0;
-      white-space:pre-wrap}
+      border:1px solid var(--line);border-radius:16px;padding:26px 30px;font-size:1.06rem;color:#dfe6f0;white-space:pre-wrap}
     .pane::before{content:"";position:absolute;top:14px;bottom:14px;width:2px;border-radius:2px}
-    /* alternate offset + alternate neon edge colour */
     .pane:nth-child(odd){align-self:flex-start;width:min(96%,720px)}
     .pane:nth-child(odd)::before{left:-1px;background:linear-gradient(var(--cyan),transparent);box-shadow:0 0 16px var(--cyan)}
     .pane:nth-child(even){align-self:flex-end;width:min(96%,720px)}
     .pane:nth-child(even)::before{right:-1px;background:linear-gradient(var(--magenta),transparent);box-shadow:0 0 16px var(--magenta)}
     .pull{font-family:var(--serif);font-style:italic;font-size:clamp(1.3rem,3vw,1.9rem);
-      text-align:center;color:#fff;max-width:760px;margin:8px auto;padding:10px 20px;
-      border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+      text-align:center;color:#fff;max-width:760px;margin:8px auto;padding:10px 20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 
-    /* ===== interactions bar ===== */
-    .interactions{max-width:880px;margin:60px auto 0;border:1px solid var(--line);border-radius:20px;
-      background:var(--glass);backdrop-filter:blur(16px);padding:22px 26px}
+    .interactions{max-width:880px;margin:60px auto 0;border:1px solid var(--line);border-radius:20px;background:var(--glass);backdrop-filter:blur(16px);padding:22px 26px}
     .ix-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
-    .ix-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:transparent;
-      color:var(--text);border-radius:999px;padding:9px 16px;cursor:pointer;font-size:.95rem;transition:.2s}
+    .ix-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:9px 16px;cursor:pointer;font-size:.95rem;transition:.2s}
     .ix-btn:hover{border-color:var(--cyan)}
     .ix-btn.liked{color:#ff5d8f;border-color:#ff5d8f55;background:rgba(255,93,143,.08)}
     .share{display:flex;gap:8px}
-    .share button{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:transparent;
-      color:var(--muted);cursor:pointer;font-size:1rem;transition:.2s}
+    .share button{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;font-size:1rem;transition:.2s}
     .share button:hover{color:var(--cyan);border-color:var(--cyan)}
     .reactions{margin-top:18px;border-top:1px solid var(--line);padding-top:18px}
     .reactions .lbl{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
     .chips{display:flex;flex-wrap:wrap;gap:10px}
-    .chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--glass);
-      color:#e6edf7;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:.92rem;transition:.18s}
+    .chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--glass);color:#e6edf7;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:.92rem;transition:.18s}
     .chip:hover{border-color:var(--cyan);transform:translateY(-2px)}
     .chip.sent{border-color:var(--cyan);background:rgba(0,229,255,.14);color:#fff}
     .chip .n{color:var(--cyan);font-size:.8rem}
 
-    .center{text-align:center}
-    .muted{color:var(--muted)}
+    .center{text-align:center}.muted{color:var(--muted)}
     .spin{padding:80px 0;text-align:center;color:var(--muted);font-family:var(--mono)}
     .backlink{display:inline-flex;gap:8px;align-items:center;color:var(--muted);font-family:var(--mono);font-size:13px;margin:18px 0}
     .backlink:hover{color:var(--cyan)}
 
     @media(max-width:640px){
-      .headpane{margin-top:-90px;padding:26px 22px}
+      .headpane{margin-top:-40px;padding:24px 20px}
       .pane{padding:22px 20px}
       .pane:nth-child(odd),.pane:nth-child(even){width:100%}
+      .popitem{width:78vw;height:280px}
+      .popitem:nth-child(2n){height:300px}
     }
   </style>
 </head>
@@ -157,6 +187,9 @@
 
   <div id="app" class="wrap"><div class="spin">Loading…</div></div>
 
+  <!-- lightbox -->
+  <div class="lb" id="lb"><span class="x" id="lbx">×</span><img id="lbimg" src="" alt=""></div>
+
   <script src="api.js"></script>
   <script>
     const $app = document.getElementById('app');
@@ -166,72 +199,79 @@
       {key:'idea',e:'💡',l:'Insightful'},{key:'great',e:'🙌',l:'Great post!'},
       {key:'inspiring',e:'✨',l:'Very inspiring!'},{key:'helpful',e:'🙏',l:'Helpful!'},
     ];
-    const esc = (s)=>String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-    const fmt = (s)=>{try{return new Date(s).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}catch{return''}};
+    const esc=(s)=>String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    const fmt=(s)=>{try{return new Date(s).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}catch{return''}};
+
+    // Pull extra image URLs out of the article body so we can build a gallery.
+    function extractImages(content, heroUrl){
+      const imgs=[]; if(heroUrl) imgs.push(heroUrl);
+      let text=content||'';
+      text=text.replace(/!\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/g,(_,u)=>{imgs.push(u);return'';});      // markdown
+      text=text.replace(/(?:^|\s)(https?:\/\/\S+\.(?:jpe?g|png|webp|gif|avif)(?:\?\S*)?)/gi,(_,u)=>{imgs.push(u);return'';}); // bare
+      return { images:[...new Set(imgs)], text:text.replace(/\n{3,}/g,'\n\n').trim() };
+    }
 
     PortfolioAPI.wakeBackend();
     const id = new URLSearchParams(location.search).get('id');
     if (id) renderArticle(id); else renderList();
 
-    /* ---------------- LIST VIEW ---------------- */
+    /* ---------- LIST ---------- */
     async function renderList(){
-      $app.innerHTML = `
+      $app.innerHTML=`
         <header class="list-head">
           <h1>The <b>Blog</b></h1>
           <div class="sub">// thoughts on code, care, and everything between</div>
-          <div class="searchbar">
-            <input id="q" placeholder="Search articles…" />
-            <button id="qbtn">Search</button>
-          </div>
+          <div class="searchbar"><input id="q" placeholder="Search articles…"/><button id="qbtn">Search</button></div>
         </header>
         <div id="list" class="grid"><div class="spin">Loading articles…</div></div>`;
-      const load = async ()=>{
-        const search = document.getElementById('q').value.trim() || undefined;
+      const load=async()=>{
+        const search=document.getElementById('q').value.trim()||undefined;
         try{
-          const r = await PortfolioAPI.getArticles({page:1,pageSize:50,published:true,search});
-          const items = r?.data?.items ?? [];
-          document.getElementById('list').innerHTML = items.length ? items.map(cardHTML).join('')
-            : `<p class="muted center">No articles found.</p>`;
-        }catch(e){ document.getElementById('list').innerHTML = `<p class="muted center">Couldn't load: ${esc(e.message)}</p>`; }
+          const r=await PortfolioAPI.getArticles({page:1,pageSize:50,published:true,search});
+          const items=r?.data?.items??[];
+          document.getElementById('list').innerHTML=items.length?items.map(cardHTML).join(''):`<p class="muted center">No articles found.</p>`;
+        }catch(e){document.getElementById('list').innerHTML=`<p class="muted center">Couldn't load: ${esc(e.message)}</p>`;}
       };
-      document.getElementById('qbtn').onclick = load;
+      document.getElementById('qbtn').onclick=load;
       document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')load();});
       load();
     }
     function cardHTML(a){
-      const img = a.imageUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&q=80';
-      const reacts = Object.values(a.reactions||{}).reduce((x,y)=>x+(y||0),0);
+      const img=a.imageUrl||'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&q=80';
+      const reacts=Object.values(a.reactions||{}).reduce((x,y)=>x+(y||0),0);
       return `<a class="card" href="blog.html?id=${a.id}">
         <div class="ph"><img src="${esc(img)}" alt="" loading="lazy"></div>
         <div class="body">
           <div class="meta">${esc(a.author||'')} · ${fmt(a.publishedDate||a.createdAt)}</div>
           <h3>${esc(a.title)}</h3>
-          <p>${esc((a.content||'').slice(0,120))}…</p>
+          <p>${esc((a.content||'').replace(/!\[[^\]]*\]\([^)]*\)/g,'').slice(0,120))}…</p>
           <div class="foot"><span>♥ ${a.likeCount||0}</span><span>💬 ${reacts}</span></div>
         </div></a>`;
     }
 
-    /* ---------------- ARTICLE (EDITORIAL) VIEW ---------------- */
+    /* ---------- ARTICLE (EDITORIAL) ---------- */
     async function renderArticle(id){
       try{
-        const r = await PortfolioAPI.getArticle(id);
-        const a = r?.data;
-        if(!a){ $app.innerHTML = `<p class="spin">Article not found. <a href="blog.html">← All posts</a></p>`; return; }
-        const img = a.imageUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1600&q=85';
-        const paras = (a.content||'').split(/\n{2,}/).filter(Boolean);
-        // pull-quote = a short early paragraph; the rest become staggered panes
-        let pull = '';
-        const panes = [];
-        paras.forEach((p,i)=>{ if(i===1 && p.length<160 && !pull){ pull = p; } else { panes.push(p); } });
-        const tags = (a.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
+        const r=await PortfolioAPI.getArticle(id);
+        const a=r?.data;
+        if(!a){ $app.innerHTML=`<p class="spin">Article not found. <a href="blog.html">← All posts</a></p>`; return; }
 
-        $app.innerHTML = `
+        // Prefer the API's multi-image list; fall back to images embedded in content.
+        const fromContent = extractImages(a.content, a.imageUrl);
+        const apiImgs = Array.isArray(a.imageUrls) ? a.imageUrls : [];
+        const images = [...new Set([...apiImgs, ...fromContent.images])];
+        const text = fromContent.text;
+        const hero = images[0] || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1600&q=85';
+        const galleryImgs = images.slice(1);            // everything after the hero
+        const paras = text.split(/\n{2,}/).filter(Boolean);
+        let pull=''; const panes=[];
+        paras.forEach((p,i)=>{ if(i===1 && p.length<160 && !pull){pull=p;} else {panes.push(p);} });
+        const tags=(a.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
+
+        $app.innerHTML=`
         <article class="article">
           <a class="backlink" href="blog.html">← All posts</a>
-          <div class="hero">
-            <div class="kicker">// reading · MTN.Digitosphere</div>
-            <img src="${esc(img)}" alt="${esc(a.title)}">
-          </div>
+          <div class="hero"><div class="kicker">// reading · MTN.Digitosphere</div><img src="${esc(hero)}" alt="${esc(a.title)}"></div>
 
           <div class="headpane">
             <div class="by">by <b>${esc(a.author||'Unknown')}</b> · ${fmt(a.publishedDate||a.createdAt)}</div>
@@ -239,29 +279,52 @@
             ${tags.length?`<div class="tags">${tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div>`:''}
           </div>
 
+          ${galleryImgs.length?galleryHTML(galleryImgs):''}
+
           <div class="body-editorial">
             ${panes.map((p,i)=>{
-              const out = `<div class="pane">${esc(p)}</div>`;
-              return (pull && i===0) ? out + `<blockquote class="pull">“${esc(pull)}”</blockquote>` : out;
+              const out=`<div class="pane">${esc(p)}</div>`;
+              return (pull&&i===0)?out+`<blockquote class="pull">“${esc(pull)}”</blockquote>`:out;
             }).join('')}
           </div>
 
           ${interactionsHTML(a)}
         </article>`;
+        wireGallery();
         wireInteractions(a);
       }catch(e){
-        $app.innerHTML = `<p class="spin">Couldn't load this article: ${esc(e.message)}<br><a href="blog.html">← All posts</a></p>`;
+        $app.innerHTML=`<p class="spin">Couldn't load this article: ${esc(e.message)}<br><a href="blog.html">← All posts</a></p>`;
       }
     }
 
+    function galleryHTML(imgs){
+      return `<section class="popwrap">
+        <div class="lbl">✦ <b>GALLERY</b> ✦ revenge&nbsp;pop</div>
+        <div class="popgal">
+          ${imgs.map((u,i)=>`<figure class="popitem" data-full="${esc(u)}">
+            ${i===0?'<span class="pop-badge">POP!</span>':''}
+            <img src="${esc(u)}" alt="" loading="lazy">
+          </figure>`).join('')}
+        </div>
+      </section>`;
+    }
+    function wireGallery(){
+      const lb=document.getElementById('lb'), lbimg=document.getElementById('lbimg');
+      document.querySelectorAll('.popitem').forEach(it=>{
+        it.onclick=()=>{ lbimg.src=it.dataset.full; lb.classList.add('open'); };
+      });
+      const close=()=>lb.classList.remove('open');
+      document.getElementById('lbx').onclick=close;
+      lb.onclick=(e)=>{ if(e.target===lb) close(); };
+      document.addEventListener('keydown',e=>{ if(e.key==='Escape') close(); });
+    }
+
     function interactionsHTML(a){
-      const counts = a.reactions||{};
+      const counts=a.reactions||{};
       return `
       <section class="interactions">
         <div class="ix-row">
-          <button class="ix-btn" id="likeBtn">
-            <span id="heart">♡</span> <span id="likeN">${a.likeCount||0}</span> <span class="muted">likes</span>
-          </button>
+          <button class="ix-btn" id="likeBtn"><span id="heart">♡</span> <span id="likeN">${a.likeCount||0}</span> <span class="muted">likes</span></button>
           <div class="share">
             <button data-net="facebook" title="Share on Facebook"><b>f</b></button>
             <button data-net="twitter" title="Share on X">𝕏</button>
@@ -272,9 +335,7 @@
         <div class="reactions">
           <div class="lbl">Quick reaction — pick one</div>
           <div class="chips" id="chips">
-            ${REACTIONS.map(r=>`<button class="chip" data-key="${r.key}">
-              <span>${r.e}</span><span>${r.l}</span>${counts[r.key]?`<span class="n">${counts[r.key]}</span>`:''}
-            </button>`).join('')}
+            ${REACTIONS.map(r=>`<button class="chip" data-key="${r.key}"><span>${r.e}</span><span>${r.l}</span>${counts[r.key]?`<span class="n">${counts[r.key]}</span>`:''}</button>`).join('')}
           </div>
           <p id="thanks" class="muted" style="margin-top:12px;display:none;color:var(--cyan)">Thanks for your reaction! 🎉</p>
         </div>
@@ -282,37 +343,30 @@
     }
 
     function wireInteractions(a){
-      const id = a.id;
-      const shareUrl = `${API}/share/${id}`;        // OG endpoint → rich previews
-      // ---- Like (anonymous; remembered per-browser) ----
-      const likeKey = 'mtn_liked_'+id;
-      let liked = localStorage.getItem(likeKey)==='1';
-      let likeN = a.likeCount||0;
-      const heart = document.getElementById('heart'), likeNEl = document.getElementById('likeN');
-      const likeBtn = document.getElementById('likeBtn');
-      const paint = ()=>{ heart.textContent = liked?'♥':'♡'; likeNEl.textContent = likeN; likeBtn.classList.toggle('liked',liked); };
+      const id=a.id;
+      const shareUrl=`${API}/share/${id}`;
+      const likeKey='mtn_liked_'+id;
+      let liked=localStorage.getItem(likeKey)==='1';
+      let likeN=a.likeCount||0;
+      const heart=document.getElementById('heart'), likeNEl=document.getElementById('likeN'), likeBtn=document.getElementById('likeBtn');
+      const paint=()=>{heart.textContent=liked?'♥':'♡';likeNEl.textContent=likeN;likeBtn.classList.toggle('liked',liked);};
       paint();
-      likeBtn.onclick = async ()=>{
-        liked=!liked; likeN += liked?1:-1; localStorage.setItem(likeKey, liked?'1':'0'); paint();
-        try{ liked ? await PortfolioAPI.likeArticle(id) : await PortfolioAPI.unlikeArticle(id); }
-        catch{ /* optimistic; backend may be cold */ }
+      likeBtn.onclick=async()=>{
+        liked=!liked; likeN+=liked?1:-1; localStorage.setItem(likeKey,liked?'1':'0'); paint();
+        try{ liked?await PortfolioAPI.likeArticle(id):await PortfolioAPI.unlikeArticle(id); }catch{}
       };
-      // ---- Quick reactions (one pick, anti-spam) ----
       let sent=false;
       document.querySelectorAll('#chips .chip').forEach(btn=>{
-        btn.onclick = async ()=>{
-          if(sent) return; sent=true;
-          btn.classList.add('sent');
-          let n = btn.querySelector('.n');
-          if(!n){ n=document.createElement('span'); n.className='n'; btn.appendChild(n); }
-          n.textContent = String(parseInt(n.textContent||'0',10)+1);
+        btn.onclick=async()=>{
+          if(sent)return; sent=true; btn.classList.add('sent');
+          let n=btn.querySelector('.n'); if(!n){n=document.createElement('span');n.className='n';btn.appendChild(n);}
+          n.textContent=String(parseInt(n.textContent||'0',10)+1);
           document.getElementById('thanks').style.display='block';
-          try{ await PortfolioAPI.reactArticle(id, btn.dataset.key); }catch{}
+          try{ await PortfolioAPI.reactArticle(id,btn.dataset.key); }catch{}
         };
       });
-      // ---- Share (points at /share/{id}) ----
       document.querySelectorAll('.share button').forEach(b=>{
-        b.onclick = ()=>{
+        b.onclick=()=>{
           const u=encodeURIComponent(shareUrl), t=encodeURIComponent(a.title||'');
           const links={
             facebook:`https://www.facebook.com/sharer/sharer.php?u=${u}`,
