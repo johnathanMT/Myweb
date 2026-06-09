@@ -92,10 +92,14 @@ export default function ArticleCard({ article = {}, onLike, onReact, shareUrl })
     tastingNotes && { icon: Coffee, label: 'Notes', value: tastingNotes },
   ].filter(Boolean)
 
+  const blogHref = `${import.meta.env.BASE_URL}blog.html?id=${id}`
+
   return (
-    <article className="group flex w-full max-w-md flex-col overflow-hidden rounded-3xl bg-card shadow-2xl shadow-black/40 ring-1 ring-white/10 transition-transform duration-300 hover:-translate-y-1">
-      {/* Media header (carousel / collage / video) */}
-      <MediaGallery media={mediaList} alt={title} className="rounded-t-3xl" />
+    <article className="group flex w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-cyan/40 hover:shadow-[0_28px_60px_-18px_rgba(0,229,255,0.28)]">
+      {/* Click media or body to open the full article (blog.html?id=) */}
+      <a href={blogHref} className="block">
+        {/* Media header (carousel / collage / video) */}
+        <MediaGallery media={mediaList} alt={title} className="rounded-t-3xl" />
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-6">
@@ -126,7 +130,8 @@ export default function ArticleCard({ article = {}, onLike, onReact, shareUrl })
             ))}
           </div>
         )}
-      </div>
+        </div>
+      </a>
 
       {/* Interactive footer */}
       <div className="flex items-center justify-between gap-2 border-t border-white/10 bg-white/5 px-5 py-3 backdrop-blur-md">

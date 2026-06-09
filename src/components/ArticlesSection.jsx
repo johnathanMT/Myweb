@@ -56,7 +56,7 @@ export default function ArticlesSection() {
             <ArticleCard
               key={a.id}
               article={a}
-              shareUrl={`https://johnathanmt.github.io/Myweb/blog.html#${a.id}`}
+              shareUrl={`${api.BASE_URL}/share/${a.id}`}
               onLike={handleLike}
               onReact={handleReact}
             />

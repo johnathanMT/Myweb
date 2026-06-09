@@ -87,7 +87,7 @@ export default function CRTHero({ children }) {
         </p>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          {['React', 'C# / .NET', 'AI', 'Computer Science', 'Web', 'English','Japanese'].map((b) => (
+          {['React', 'C# / .NET', 'AI', 'Computer Science', 'Web',].map((b) => (
             <span key={b} className="rounded-md border border-white/12 bg-white/[0.04] px-3 py-1 font-mono text-xs text-gray-300">
               {b}
             </span>

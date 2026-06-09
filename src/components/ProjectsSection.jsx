@@ -19,7 +19,7 @@ function ProjectCard({ project, featured = false }) {
       href={project.url}
       target={project.ext ? '_blank' : '_self'}
       rel={project.ext ? 'noopener noreferrer' : undefined}
-      className={`group relative flex flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-white/10 shadow-2xl shadow-black/40 transition-all duration-300 hover:-translate-y-1.5 hover:ring-white/20 ${featured ? 'sm:col-span-2' : ''}`}
+      className={`group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-cyan/40 hover:shadow-[0_28px_60px_-18px_rgba(0,229,255,0.25)] ${featured ? 'sm:col-span-2' : ''}`}
     >
       {/* Colour-tinted header with faceted lines + glowing icon */}
       <div

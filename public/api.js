@@ -134,7 +134,13 @@ const PortfolioAPI = (() => {
  
   const deleteArticle = (id) =>
     request(`/api/Articles/${id}`, { method: "DELETE", auth: true });
- 
+
+  // ---- Anonymous interactions (no login; X-Visitor-Id dedupes) ------------
+  const likeArticle   = (id) => request(`/api/Articles/${id}/like`,   { method: "POST" });
+  const unlikeArticle = (id) => request(`/api/Articles/${id}/like`,   { method: "DELETE" });
+  const reactArticle  = (id, reaction) =>
+    request(`/api/Articles/${id}/reactions`, { method: "POST", body: { reaction } });
+
   // ---- Wake the free-tier backend (Render sleeps after ~15 min idle) ------
   const wakeBackend = () => fetch(`${BASE_URL}/`).catch(() => {});
  
@@ -142,6 +148,7 @@ const PortfolioAPI = (() => {
     BASE_URL, isLoggedIn, getCurrentUser, isAdmin, isAuthor,
     login, register, logout,
     getArticles, getArticle, createArticle, updateArticle, deleteArticle,
+    likeArticle, unlikeArticle, reactArticle,
     wakeBackend,
   };
 })();
