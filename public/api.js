@@ -114,12 +114,15 @@ const PortfolioAPI = (() => {
  
   // Build the multipart body the API expects (PascalCase field names).
   // `image` is a File object from an <input type="file">, optional.
-  function buildArticleForm({ title, content, author, image, tags, isPublished, publishedDate }) {
+  function buildArticleForm({ title, content, author, image, galleryImages, video, imageUrls, tags, isPublished, publishedDate }) {
     const form = new FormData();
     if (title != null) form.append("Title", title);
     if (content != null) form.append("Content", content);
     if (author != null) form.append("Author", author);
-    if (image) form.append("Image", image);
+    if (image) form.append("Image", image);                                   // primary / cover
+    if (Array.isArray(galleryImages)) galleryImages.forEach(f => form.append("GalleryImages", f)); // extra image files
+    if (Array.isArray(imageUrls))     imageUrls.forEach(u => form.append("ImageUrls", u));         // extra hosted URLs
+    if (video) form.append("Video", video);                                   // optional video file
     if (tags != null) form.append("Tags", tags);
     if (isPublished != null) form.append("IsPublished", isPublished);
     if (publishedDate != null) form.append("PublishedDate", publishedDate);

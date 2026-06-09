@@ -245,7 +245,8 @@
       <label>Content (min 10 characters)</label>
       <textarea id="content" rows="7" placeholder="Write your article…"></textarea>
       <div class="row2">
-        <div><label>Cover image (optional)</label><input id="image" type="file" accept="image/*" /></div>
+        <div><label>Images (first = cover · select multiple)</label>
+          <input id="image" type="file" accept="image/*" multiple onchange="previewImages()" /></div>
         <div><label>Status</label>
           <select id="isPublished">
             <option value="true">Publish</option>
@@ -253,6 +254,14 @@
           </select>
         </div>
       </div>
+      <div class="row2">
+        <div><label>Video (optional · mp4, webm, mov)</label>
+          <input id="video" type="file" accept="video/*" onchange="previewVideo()" /></div>
+        <div></div>
+      </div>
+      <!-- live previews of the selected media before saving -->
+      <div id="previews" style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0"></div>
+      <div id="videoName" style="font-family:var(--mono);font-size:12px;color:var(--accent)"></div>
       <div class="admin-row">
         <button class="btn" id="saveBtn" onclick="doSave()">Publish</button>
         <button class="ghost" onclick="resetEditor()">Clear</button>
@@ -324,8 +333,25 @@
 
     function resetEditor() {
       editing = false; $("editId").value = "";
-      ["title", "author", "tags", "content", "image"].forEach(id => $(id).value = "");
+      ["title", "author", "tags", "content", "image", "video"].forEach(id => $(id).value = "");
       $("isPublished").value = "true"; $("saveBtn").textContent = "Publish"; $("editorTitle").textContent = "New article";
+      $("previews").innerHTML = ""; $("videoName").textContent = "";
+    }
+
+    // Live thumbnail previews of the selected images (first one tagged COVER).
+    function previewImages() {
+      const files = [...$("image").files];
+      $("previews").innerHTML = files.map((f, i) => {
+        const url = URL.createObjectURL(f);
+        return `<div style="position:relative">
+          <img src="${url}" style="width:74px;height:74px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+          ${i === 0 ? '<span style="position:absolute;top:-6px;left:-6px;background:var(--accent);color:#04130c;font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px">COVER</span>' : ''}
+        </div>`;
+      }).join("");
+    }
+    function previewVideo() {
+      const f = $("video").files[0];
+      $("videoName").textContent = f ? `🎬 ${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)` : "";
     }
 
     async function loadManage() {
@@ -367,7 +393,10 @@
         title: $("title").value.trim(), author: $("author").value.trim(),
         tags: $("tags").value.trim(), content: $("content").value, isPublished: $("isPublished").value === "true"
       };
-      const f = $("image").files[0]; if (f) p.image = f;
+      // First selected image = cover (primary); the rest go to the gallery.
+      const imgs = [...$("image").files];
+      if (imgs.length) { p.image = imgs[0]; p.galleryImages = imgs.slice(1); }
+      const vid = $("video").files[0]; if (vid) p.video = vid;
       if (!p.title || !p.author) return toast("Title and Author are required.", "err");
       if ((p.content || "").length < 10) return toast("Content must be at least 10 characters.", "err");
       try {

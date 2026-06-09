@@ -110,6 +110,8 @@
       transform:rotate(-2.5deg);transition:transform .35s ease,box-shadow .35s,filter .35s}
     .popitem:not(:first-child){margin-left:-34px}            /* overlapping band */
     .popitem img{width:100%;height:100%;object-fit:cover}
+    .popitem video{width:100%;height:100%;object-fit:cover;background:#000}
+    .popitem.popvideo{cursor:default;width:clamp(280px,46vw,520px)}
     .popitem:nth-child(2n){border-color:var(--magenta);transform:rotate(2.5deg);height:360px;margin-top:-30px;
       box-shadow:0 0 0 5px rgba(255,61,240,.08),0 24px 50px rgba(0,0,0,.55),0 0 30px rgba(255,61,240,.32)}
     .popitem:nth-child(3n){transform:rotate(-1deg);height:250px;margin-top:34px;
@@ -279,7 +281,7 @@
             ${tags.length?`<div class="tags">${tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div>`:''}
           </div>
 
-          ${galleryImgs.length?galleryHTML(galleryImgs):''}
+          ${(galleryImgs.length||a.videoUrl)?galleryHTML(galleryImgs, a.videoUrl):''}
 
           <div class="body-editorial">
             ${panes.map((p,i)=>{
@@ -297,12 +299,17 @@
       }
     }
 
-    function galleryHTML(imgs){
+    function galleryHTML(imgs, videoUrl){
+      const videoItem = videoUrl ? `<figure class="popitem popvideo">
+        <span class="pop-badge" style="background:var(--magenta);color:#fff">▶ VIDEO</span>
+        <video src="${esc(videoUrl)}" controls playsinline preload="metadata"></video>
+      </figure>` : '';
       return `<section class="popwrap">
         <div class="lbl">✦ <b>GALLERY</b> ✦ revenge&nbsp;pop</div>
         <div class="popgal">
+          ${videoItem}
           ${imgs.map((u,i)=>`<figure class="popitem" data-full="${esc(u)}">
-            ${i===0?'<span class="pop-badge">POP!</span>':''}
+            ${(!videoUrl && i===0)?'<span class="pop-badge">POP!</span>':''}
             <img src="${esc(u)}" alt="" loading="lazy">
           </figure>`).join('')}
         </div>
@@ -310,7 +317,7 @@
     }
     function wireGallery(){
       const lb=document.getElementById('lb'), lbimg=document.getElementById('lbimg');
-      document.querySelectorAll('.popitem').forEach(it=>{
+      document.querySelectorAll('.popitem[data-full]').forEach(it=>{   // images only (skip video)
         it.onclick=()=>{ lbimg.src=it.dataset.full; lb.classList.add('open'); };
       });
       const close=()=>lb.classList.remove('open');
