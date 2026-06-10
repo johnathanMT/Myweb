@@ -4,6 +4,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Strict CSP — NO Google Translate, NO external script origins.
+         script-src is a clean 'self' (Vite ships external bundles).
+         style-src keeps 'unsafe-inline' ONLY because React/Vite inject inline
+         styles (style={{}} props) — this can't be nonced. Google Fonts + Font
+         Awesome CSS/fonts are allowed (typography, not the translate engine). -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        base-uri 'self';
+        object-src 'none';
+        script-src 'self';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+        img-src 'self' data: https:;
+        media-src 'self' https://res.cloudinary.com;
+        connect-src 'self' https://myweb-zqv1.onrender.com;
+    ">
+
     <meta name="description"
         content="Myo Thant Naing — IT Student, Aspiring AI Engineer, living in Japan. From caring to coding." />
     <title>MTN · Myo Thant Naing</title>

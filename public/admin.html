@@ -5,6 +5,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" /> <!-- keep admin page out of search engines -->
+
+  <!-- Hardened CSP — NO Google domains, NO external script/style origins.
+       Locked to 'self' + your own API only; objects/base-uri blocked; blob:
+       allowed for local image previews (URL.createObjectURL).
+       NOTE: 'unsafe-inline' remains because this page still uses inline onclick
+       handlers + inline styles. To reach a clean script-src 'self' here too,
+       admin.html needs the same externalisation refactor as blog.js. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    base-uri 'self';
+    object-src 'none';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    font-src 'self';
+    img-src 'self' data: https: blob:;
+    media-src 'self' https://res.cloudinary.com blob:;
+    connect-src 'self' https://myweb-zqv1.onrender.com;
+  ">
+
   <title>Admin | MTN.Digitosphere</title>
   <style>
     :root {

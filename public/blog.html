@@ -4,14 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Content Security Policy: locked to 'self' + the exact Google Translate domains.
-       Primary XSS defense is output escaping (esc()); CSP is defense-in-depth.
-       Note: GitHub Pages can't send HTTP headers, so CSP must be a <meta> tag. -->
+  <!-- Strict CSP: locked to 'self' + the exact Google Translate domains.
+       script-src has NO 'unsafe-inline' (all JS is external: api.js + blog.js).
+       style-src keeps 'unsafe-inline' only because Google Translate injects
+       inline styles for the translated text. GitHub Pages can't set HTTP headers,
+       so the policy is delivered as a <meta> tag. -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     base-uri 'self';
     object-src 'none';
-    script-src 'self' 'unsafe-inline' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com https://*.gstatic.com https://*.googleapis.com;
+    script-src 'self' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com https://*.gstatic.com https://*.googleapis.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com;
     font-src 'self' https://fonts.gstatic.com;
     img-src 'self' data: https:;
@@ -62,7 +64,6 @@
     .brand{font-family:var(--mono);font-weight:700}.brand span{color:var(--cyan)}
     .nav-links a{color:var(--muted);margin-left:20px;font-size:14px}.nav-links a:hover{color:var(--text)}
     .navright{display:flex;align-items:center;gap:16px}
-    /* custom frosted-glass language switcher */
     .langsw{display:flex;gap:3px;background:var(--glass);border:1px solid var(--line);
       border-radius:999px;padding:4px;backdrop-filter:blur(10px)}
     .langsw button{border:none;background:transparent;color:var(--muted);font-family:var(--mono);
@@ -102,8 +103,6 @@
 
     /* ===== ARTICLE (EDITORIAL) VIEW ===== */
     .article{padding-bottom:100px}
-
-    /* FIX: full image visible on desktop (contain, not cropped) */
     .hero{position:relative;display:flex;align-items:center;justify-content:center;
       width:100%;min-height:38vh;max-height:80vh;overflow:hidden;
       background:radial-gradient(60% 80% at 50% 28%,rgba(0,229,255,.07),transparent 70%)}
@@ -112,8 +111,6 @@
       background:linear-gradient(180deg,transparent,rgba(7,7,15,.92))}
     .hero .kicker{position:absolute;left:0;right:0;top:22px;text-align:center;z-index:2;
       font-family:var(--mono);font-size:12px;letter-spacing:.35em;text-transform:uppercase;color:var(--cyan)}
-
-    /* small overlap so the image is NOT obstructed on desktop */
     .headpane{position:relative;z-index:3;max-width:820px;margin:-56px auto 0;padding:34px 40px;
       background:var(--panel);backdrop-filter:blur(18px) saturate(140%);
       border:1px solid rgba(0,229,255,.22);border-radius:20px;
@@ -140,7 +137,7 @@
       border:2px solid var(--cyan);
       box-shadow:0 0 0 5px rgba(0,229,255,.08),0 24px 50px rgba(0,0,0,.55),0 0 30px rgba(0,229,255,.30);
       transform:rotate(-2.5deg);transition:transform .35s ease,box-shadow .35s,filter .35s}
-    .popitem:not(:first-child){margin-left:-34px}            /* overlapping band */
+    .popitem:not(:first-child){margin-left:-34px}
     .popitem img{width:100%;height:100%;object-fit:cover}
     .popitem video{width:100%;height:100%;object-fit:cover;background:#000}
     .popitem.popvideo{cursor:default;width:clamp(280px,46vw,520px)}
@@ -218,11 +215,11 @@
         <a href="index.html#projects">Projects</a>
         <a href="blog.html">Blog</a>
       </div>
-      <!-- custom translation switcher (kept out of translation via notranslate) -->
+      <!-- custom translation switcher (wired in blog.js; kept untranslated) -->
       <div class="langsw notranslate" translate="no">
-        <button data-lang="en" onclick="setLang('en')">EN</button>
-        <button data-lang="ja" onclick="setLang('ja')">日本語</button>
-        <button data-lang="my" onclick="setLang('my')">မြန်မာ</button>
+        <button data-lang="en">EN</button>
+        <button data-lang="ja">日本語</button>
+        <button data-lang="my">မြန်မာ</button>
       </div>
     </div>
   </nav>
@@ -232,241 +229,12 @@
   <!-- lightbox -->
   <div class="lb" id="lb"><span class="x" id="lbx">×</span><img id="lbimg" src="" alt=""></div>
 
+  <!-- All logic is external (no inline scripts) so the CSP can use script-src 'self'. -->
   <script src="api.js"></script>
-  <script>
-    const $app = document.getElementById('app');
-    const API = PortfolioAPI.BASE_URL;
-    const REACTIONS = [
-      {key:'love',e:'❤️',l:'Love it'},{key:'clap',e:'👏',l:'Bravo'},{key:'fire',e:'🔥',l:'Fire'},
-      {key:'idea',e:'💡',l:'Insightful'},{key:'great',e:'🙌',l:'Great post!'},
-      {key:'inspiring',e:'✨',l:'Very inspiring!'},{key:'helpful',e:'🙏',l:'Helpful!'},
-    ];
-    const esc=(s)=>String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-    const fmt=(s)=>{try{return new Date(s).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}catch{return''}};
+  <script src="blog.js"></script>
 
-    // Pull extra image URLs out of the article body so we can build a gallery.
-    function extractImages(content, heroUrl){
-      const imgs=[]; if(heroUrl) imgs.push(heroUrl);
-      let text=content||'';
-      text=text.replace(/!\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/g,(_,u)=>{imgs.push(u);return'';});      // markdown
-      text=text.replace(/(?:^|\s)(https?:\/\/\S+\.(?:jpe?g|png|webp|gif|avif)(?:\?\S*)?)/gi,(_,u)=>{imgs.push(u);return'';}); // bare
-      return { images:[...new Set(imgs)], text:text.replace(/\n{3,}/g,'\n\n').trim() };
-    }
-
-    PortfolioAPI.wakeBackend();
-    const id = new URLSearchParams(location.search).get('id');
-    if (id) renderArticle(id); else renderList();
-
-    /* ---------- LIST ---------- */
-    async function renderList(){
-      $app.innerHTML=`
-        <header class="list-head">
-          <h1>The <b>Blog</b></h1>
-          <div class="sub">// thoughts on code, care, and everything between</div>
-          <div class="searchbar"><input id="q" placeholder="Search articles…"/><button id="qbtn">Search</button></div>
-        </header>
-        <div id="list" class="grid"><div class="spin">Loading articles…</div></div>`;
-      const load=async()=>{
-        const search=document.getElementById('q').value.trim()||undefined;
-        try{
-          const r=await PortfolioAPI.getArticles({page:1,pageSize:50,published:true,search});
-          const items=r?.data?.items??[];
-          document.getElementById('list').innerHTML=items.length?items.map(cardHTML).join(''):`<p class="muted center">No articles found.</p>`;
-        }catch(e){document.getElementById('list').innerHTML=`<p class="muted center">Couldn't load: ${esc(e.message)}</p>`;}
-      };
-      document.getElementById('qbtn').onclick=load;
-      document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')load();});
-      load();
-    }
-    function cardHTML(a){
-      const img=a.imageUrl||'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&q=80';
-      const reacts=Object.values(a.reactions||{}).reduce((x,y)=>x+(y||0),0);
-      return `<a class="card" href="blog.html?id=${a.id}">
-        <div class="ph"><img src="${esc(img)}" alt="" loading="lazy"></div>
-        <div class="body">
-          <div class="meta">${esc(a.author||'')} · ${fmt(a.publishedDate||a.createdAt)}</div>
-          <h3>${esc(a.title)}</h3>
-          <p>${esc((a.content||'').replace(/!\[[^\]]*\]\([^)]*\)/g,'').slice(0,120))}…</p>
-          <div class="foot"><span>♥ ${a.likeCount||0}</span><span>💬 ${reacts}</span></div>
-        </div></a>`;
-    }
-
-    /* ---------- ARTICLE (EDITORIAL) ---------- */
-    async function renderArticle(id){
-      try{
-        const r=await PortfolioAPI.getArticle(id);
-        const a=r?.data;
-        if(!a){ $app.innerHTML=`<p class="spin">Article not found. <a href="blog.html">← All posts</a></p>`; return; }
-
-        // Prefer the API's multi-image list; fall back to images embedded in content.
-        const fromContent = extractImages(a.content, a.imageUrl);
-        const apiImgs = Array.isArray(a.imageUrls) ? a.imageUrls : [];
-        const images = [...new Set([...apiImgs, ...fromContent.images])];
-        const text = fromContent.text;
-        const hero = images[0] || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1600&q=85';
-        const galleryImgs = images.slice(1);            // everything after the hero
-        const paras = text.split(/\n{2,}/).filter(Boolean);
-        let pull=''; const panes=[];
-        paras.forEach((p,i)=>{ if(i===1 && p.length<160 && !pull){pull=p;} else {panes.push(p);} });
-        const tags=(a.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
-
-        $app.innerHTML=`
-        <article class="article">
-          <a class="backlink" href="blog.html">← All posts</a>
-          <div class="hero"><div class="kicker">// reading · MTN.Digitosphere</div><img src="${esc(hero)}" alt="${esc(a.title)}"></div>
-
-          <div class="headpane">
-            <div class="by">by <b>${esc(a.author||'Unknown')}</b> · ${fmt(a.publishedDate||a.createdAt)}</div>
-            <h1>${esc(a.title)}</h1>
-            ${tags.length?`<div class="tags">${tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div>`:''}
-          </div>
-
-          ${(galleryImgs.length||a.videoUrl)?galleryHTML(galleryImgs, a.videoUrl):''}
-
-          <div class="body-editorial">
-            ${panes.map((p,i)=>{
-              const out=`<div class="pane">${esc(p)}</div>`;
-              return (pull&&i===0)?out+`<blockquote class="pull">“${esc(pull)}”</blockquote>`:out;
-            }).join('')}
-          </div>
-
-          ${interactionsHTML(a)}
-        </article>`;
-        wireGallery();
-        wireInteractions(a);
-      }catch(e){
-        $app.innerHTML=`<p class="spin">Couldn't load this article: ${esc(e.message)}<br><a href="blog.html">← All posts</a></p>`;
-      }
-    }
-
-    function galleryHTML(imgs, videoUrl){
-      const videoItem = videoUrl ? `<figure class="popitem popvideo">
-        <span class="pop-badge" style="background:var(--magenta);color:#fff">▶ VIDEO</span>
-        <video src="${esc(videoUrl)}" controls playsinline preload="metadata"></video>
-      </figure>` : '';
-      return `<section class="popwrap">
-        <div class="lbl">✦ <b>GALLERY</b> ✦ revenge&nbsp;pop</div>
-        <div class="popgal">
-          ${videoItem}
-          ${imgs.map((u,i)=>`<figure class="popitem" data-full="${esc(u)}">
-            ${(!videoUrl && i===0)?'<span class="pop-badge">POP!</span>':''}
-            <img src="${esc(u)}" alt="" loading="lazy">
-          </figure>`).join('')}
-        </div>
-      </section>`;
-    }
-    function wireGallery(){
-      const lb=document.getElementById('lb'), lbimg=document.getElementById('lbimg');
-      document.querySelectorAll('.popitem[data-full]').forEach(it=>{   // images only (skip video)
-        it.onclick=()=>{ lbimg.src=it.dataset.full; lb.classList.add('open'); };
-      });
-      const close=()=>lb.classList.remove('open');
-      document.getElementById('lbx').onclick=close;
-      lb.onclick=(e)=>{ if(e.target===lb) close(); };
-      document.addEventListener('keydown',e=>{ if(e.key==='Escape') close(); });
-    }
-
-    function interactionsHTML(a){
-      const counts=a.reactions||{};
-      return `
-      <section class="interactions">
-        <div class="ix-row">
-          <button class="ix-btn" id="likeBtn"><span id="heart">♡</span> <span id="likeN">${a.likeCount||0}</span> <span class="muted">likes</span></button>
-          <div class="share">
-            <button data-net="facebook" title="Share on Facebook"><b>f</b></button>
-            <button data-net="twitter" title="Share on X">𝕏</button>
-            <button data-net="linkedin" title="Share on LinkedIn">in</button>
-            <button data-net="copy" title="Copy link">🔗</button>
-          </div>
-        </div>
-        <div class="reactions">
-          <div class="lbl">Quick reaction — pick one</div>
-          <div class="chips" id="chips">
-            ${REACTIONS.map(r=>`<button class="chip" data-key="${r.key}"><span>${r.e}</span><span>${r.l}</span>${counts[r.key]?`<span class="n">${counts[r.key]}</span>`:''}</button>`).join('')}
-          </div>
-          <p id="thanks" class="muted" style="margin-top:12px;display:none;color:var(--cyan)">Thanks for your reaction! 🎉</p>
-        </div>
-      </section>`;
-    }
-
-    function wireInteractions(a){
-      const id=a.id;
-      const shareUrl=`${API}/share/${id}`;
-      const likeKey='mtn_liked_'+id;
-      let liked=localStorage.getItem(likeKey)==='1';
-      let likeN=a.likeCount||0;
-      const heart=document.getElementById('heart'), likeNEl=document.getElementById('likeN'), likeBtn=document.getElementById('likeBtn');
-      const paint=()=>{heart.textContent=liked?'♥':'♡';likeNEl.textContent=likeN;likeBtn.classList.toggle('liked',liked);};
-      paint();
-      likeBtn.onclick=async()=>{
-        liked=!liked; likeN+=liked?1:-1; localStorage.setItem(likeKey,liked?'1':'0'); paint();
-        try{ liked?await PortfolioAPI.likeArticle(id):await PortfolioAPI.unlikeArticle(id); }catch{}
-      };
-      let sent=false;
-      document.querySelectorAll('#chips .chip').forEach(btn=>{
-        btn.onclick=async()=>{
-          if(sent)return; sent=true; btn.classList.add('sent');
-          let n=btn.querySelector('.n'); if(!n){n=document.createElement('span');n.className='n';btn.appendChild(n);}
-          n.textContent=String(parseInt(n.textContent||'0',10)+1);
-          document.getElementById('thanks').style.display='block';
-          try{ await PortfolioAPI.reactArticle(id,btn.dataset.key); }catch{}
-        };
-      });
-      document.querySelectorAll('.share button').forEach(b=>{
-        b.onclick=()=>{
-          const u=encodeURIComponent(shareUrl), t=encodeURIComponent(a.title||'');
-          const links={
-            facebook:`https://www.facebook.com/sharer/sharer.php?u=${u}`,
-            twitter:`https://twitter.com/intent/tweet?url=${u}&text=${t}`,
-            linkedin:`https://www.linkedin.com/sharing/share-offsite/?url=${u}`,
-          };
-          if(b.dataset.net==='copy'){ navigator.clipboard?.writeText(shareUrl); b.textContent='✓'; setTimeout(()=>b.textContent='🔗',1200); }
-          else window.open(links[b.dataset.net],'_blank','noopener,width=600,height=540');
-        };
-      });
-    }
-  </script>
-
-  <!-- ===== Seamless translation (EN / 日本語 / မြန်မာ) — Google engine, custom cyber UI ===== -->
+  <!-- Google Translate engine — blog.js defines window.googleTranslateElementInit -->
   <div id="google_translate_element" class="notranslate" style="position:absolute;left:-9999px;top:-9999px"></div>
-  <script>
-    function googleTranslateElementInit(){
-      new google.translate.TranslateElement(
-        { pageLanguage:'en', includedLanguages:'en,ja,my', autoDisplay:false },
-        'google_translate_element');
-    }
-    // Drive Google's hidden <select> from our own buttons (no clunky widget shown).
-    function applyLang(code, tries){
-      tries = tries || 0;
-      const combo = document.querySelector('.goog-te-combo');
-      if(!combo){ if(tries < 25) setTimeout(()=>applyLang(code, tries+1), 300); return; }
-      combo.value = (code === 'en') ? '' : code;   // '' = restore original English
-      combo.dispatchEvent(new Event('change'));
-    }
-    function setGoogCookie(code){
-      const kill = 'googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
-      document.cookie = kill; document.cookie = kill + ';domain=.' + location.hostname;
-      if(code !== 'en'){
-        const v = 'googtrans=/en/' + code + ';path=/';
-        document.cookie = v; document.cookie = v + ';domain=.' + location.hostname;
-      }
-    }
-    function updateLangUI(code){
-      document.querySelectorAll('.langsw button').forEach(b => b.classList.toggle('active', b.dataset.lang === code));
-    }
-    function setLang(code){
-      localStorage.setItem('blog_tlang', code);
-      setGoogCookie(code);   // persist across reloads
-      applyLang(code);       // instant in-page switch
-      updateLangUI(code);
-    }
-    // On load: restore the reader's last language.
-    (function(){
-      const saved = localStorage.getItem('blog_tlang') || 'en';
-      updateLangUI(saved);
-      if(saved !== 'en'){ setGoogCookie(saved); setTimeout(()=>applyLang(saved), 900); }
-    })();
-  </script>
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
