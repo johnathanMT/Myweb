@@ -237,16 +237,29 @@
   };
 
   /* ---------------- BOOT ---------------- */
-  // Wire the language switcher buttons (no inline handlers).
-  document.querySelectorAll('.langsw button').forEach((b) =>
-    b.addEventListener('click', () => setLang(b.dataset.lang)));
+  function boot() {
+    try {
+      // Wire the language switcher buttons (no inline handlers).
+      document.querySelectorAll('.langsw button').forEach((b) =>
+        b.addEventListener('click', () => setLang(b.dataset.lang)));
 
-  if (window.PortfolioAPI) PortfolioAPI.wakeBackend();
-  const id = new URLSearchParams(location.search).get('id');
-  if (id) renderArticle(id); else renderList();
+      if (window.PortfolioAPI && PortfolioAPI.wakeBackend) PortfolioAPI.wakeBackend();
+      const id = new URLSearchParams(location.search).get('id');
+      if (id) renderArticle(id); else renderList();
 
-  // Restore the reader's last language.
-  const saved = localStorage.getItem('blog_tlang') || 'en';
-  updateLangUI(saved);
-  if (saved !== 'en') { setGoogCookie(saved); setTimeout(() => applyLang(saved), 900); }
+      // Restore the reader's last language.
+      const saved = localStorage.getItem('blog_tlang') || 'en';
+      updateLangUI(saved);
+      if (saved !== 'en') { setGoogCookie(saved); setTimeout(() => applyLang(saved), 900); }
+    } catch (err) {
+      // Never leave the page silently blank — surface the failure.
+      console.error('[blog] init failed:', err);
+      const app = document.getElementById('app');
+      if (app) app.innerHTML = '<p class="spin">Couldn\'t initialise the blog: ' + esc(err && err.message) + '</p>';
+    }
+  }
+
+  // Runs immediately under defer (DOM already parsed); guard kept as a safety net.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
