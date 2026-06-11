@@ -2,13 +2,16 @@ import { useEffect, useRef } from 'react'
 import { PERSONAL, SKILLS } from '../data/content'
 
 const T = {
-  en: { title: 'About Me', bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.', slogan: 'Better Late Than Never', skills: 'Core Competencies' },
-  mm: { title: 'ကျွန်တော်အကြောင်း', bio: 'ဂျပန်တွင် နေထိုင်သည်။ ကျန်းမာရေးမှ နည်းပညာသို့ ပြောင်းလဲနေသည်။', slogan: 'နောက်ကျသော်လည်း မနောက်ကျ', skills: 'အဓိက ကျွမ်းကျင်မှုများ' },
-  jp: { title: '私について', bio: '日本在住。医療からテックへの転身中。現実の問題を解決するソフトウェアを作っています。', slogan: 'よくできたよりも遅くできた', skills: 'コアスキル' },
-  vn: { title: 'Về Tôi', bio: 'Sống ở Nhật Bản. Chuyển đổi từ Y tế sang Công nghệ. Tôi xây dựng phần mềm để giải quyết vấn đề thực tế.', slogan: 'Muộn còn hơn không', skills: 'Năng lực cốt lõi' },
-  ne: { title: 'मेरो बारेमा', bio: 'जापानमा बसोबास। स्वास्थ्यसेवाबाट प्रविधितर्फ परिवर्तन। वास्तविक समस्याहरू समाधान गर्न सफ्टवेयर बनाउँछु।', slogan: 'ढिलो भए पनि हुँदैन', skills: 'मुख्य दक्षताहरू' },
-  id: { title: 'Tentang Saya', bio: 'Tinggal di Jepang. Bertransisi dari Kesehatan ke Teknologi. Saya membangun perangkat lunak untuk memecahkan masalah nyata.', slogan: 'Lebih baik terlambat daripada tidak', skills: 'Kompetensi Inti' },
+  
+  mm: { title: 'ကျတော့် အကြောင်း', bio: 'ဂျပန်တွင် နေထိုင်သည်။ တိုးတက်ပြောင်းလဲနေသော Ai ခေတ်သစ်ဆီသို့', slogan: 'ဘယ်တော့မှ မစတင်ဖြစ်ခဲ့တာထက်စာရင် နောက်ကျတာက ပိုကောင်းပါတယ်။', skills: 'အဓိက ကျွမ်းကျင်မှုများ' },
+  en: { title: 'About Me', bio: 'Living in Japan. Advancing towards the evolving new era of AI.', slogan: 'Better late than never.', skills: 'Core Competencies' },
+  jp: { title: '私について', bio: '日本在住。進化し続ける新しいAI時代へ。', slogan: '遅れても、全くやらないよりはまし。', skills: 'コアスキル' },
+  vn: { title: 'Về Tôi', bio: 'Sống ở Nhật Bản. Hướng tới kỷ nguyên AI mới đang không ngừng phát triển.', slogan: 'Thà muộn còn hơn không.', skills: 'Năng lực cốt lõi' },
+  ne: { title: 'मेरो बारेमा', bio: 'जापानमा बसोबास। विकासशील नयाँ एआई (AI) युगको तर्फ।', slogan: 'कहिल्यै सुरु नगर्नुभन्दा ढिलो सुरु गर्नु राम्रो हो।', skills: 'मुख्य दक्षताहरू' },
+  id: { title: 'Tentang Saya', bio: 'Tinggal di Jepang. Melangkah menuju era baru AI yang terus berkembang.', slogan: 'Lebih baik terlambat daripada tidak sama sekali.', skills: 'Kompetensi Inti' }
 }
+
+
 
 export default function About({ lang }) {
   const t = T[lang] || T.en
@@ -43,12 +46,15 @@ export default function About({ lang }) {
           <div className="flex justify-center md:justify-start">
             <div className="relative">
               <div className="absolute inset-0 rounded-3xl bg-accent/20 blur-2xl scale-110 pointer-events-none" />
-              <div className="relative w-64 h-64 rounded-3xl overflow-hidden ring-2 ring-accent/30 ring-offset-4 ring-offset-space">
+              <div className="relative w-64 h-64 rounded-3xl overflow-hidden ring-2 ring-accent/30 ring-offset-4 ring-offset-space bg-card flex items-center justify-center">
+                {/* Initials fallback sits underneath; the photo covers it when it loads. */}
+                <span className="absolute text-5xl font-bold text-accent/40 select-none">MTN</span>
                 <img
                   src={PERSONAL.photo}
                   alt={PERSONAL.name}
-                  className="w-full h-full object-cover"
+                  className="relative w-full h-full object-cover"
                   loading="lazy"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
               </div>
               {/* Floating badge */}

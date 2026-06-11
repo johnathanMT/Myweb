@@ -5,7 +5,10 @@ export const PERSONAL = {
   subtitle: 'IT Student · Care-giver · Aspiring AI Engineer',
   bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.',
   slogan: 'Better Late Than Never',
-  photo: 'https://johnathanmt.github.io/Myweb/Myweb_photo/My_profile2_for_myweb.jpg',
+  // Served from the build's own /public folder. import.meta.env.BASE_URL is
+  // '/Myweb/' in production and '/' in dev, so this resolves correctly on both
+  // GitHub Pages and localhost without hardcoding the github.io origin.
+  photo: import.meta.env.BASE_URL + 'Myweb_photo/My_profile2_for_myweb.jpg',
   quote: "Don't Be Institutionalized, Be the Architect of Your Environment.",
   heinlein: `"A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a ship, design a building, write a sonnet, balance accounts, build a wall, set a bone, comfort the dying, take orders, give orders, cooperate, act alone, solve equations, analyze a new problem, pitch manure, program a computer, cook a tasty meal, fight efficiently, die gallantly. Specialization is for insects." – Robert A. Heinlein`,
 }

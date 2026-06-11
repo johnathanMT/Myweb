@@ -47,7 +47,14 @@
         const r = await PortfolioAPI.getArticles({ page: 1, pageSize: 50, published: true, search });
         const items = r?.data?.items ?? [];
         document.getElementById('list').innerHTML = items.length ? items.map(cardHTML).join('') : `<p class="muted center">No articles found.</p>`;
-      } catch (e) { document.getElementById('list').innerHTML = `<p class="muted center">Couldn't load: ${esc(e.message)}</p>`; }
+      } catch (e) {
+        // Log the full error/stack to the console BEFORE showing the friendly UI message.
+        console.error('[blog] list load failed:', e);
+        document.getElementById('list').innerHTML =
+          `<p class="muted center">Couldn't load articles: ${esc(e.message)}<br>
+           <button id="retry" class="ix-btn" style="margin-top:10px">Retry</button></p>`;
+        document.getElementById('retry')?.addEventListener('click', load);
+      }
     };
     document.getElementById('qbtn').addEventListener('click', load);
     document.getElementById('q').addEventListener('keydown', (e) => { if (e.key === 'Enter') load(); });
@@ -110,6 +117,8 @@
       wireGallery();
       wireInteractions(a);
     } catch (e) {
+      // Log the full error/stack to the console BEFORE showing the friendly UI message.
+      console.error('[blog] article load failed (id=' + id + '):', e);
       $app.innerHTML = `<p class="spin">Couldn't load this article: ${esc(e.message)}<br><a href="blog.html">← All posts</a></p>`;
     }
   }
