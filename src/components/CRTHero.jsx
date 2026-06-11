@@ -73,9 +73,9 @@ export default function CRTHero({ children }) {
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan" /> quantum workstation · online
         </p>
 
-        {/* Glitch + glow name */}
+        {/* Giant crimson glow name — size is driven by .q-name (clamp/vw) in crt.css */}
         <span className="q-name-wrap block">
-          <h1 className="q-name text-4xl sm:text-6xl lg:text-7xl" data-text="MYO THANT NAING">
+          <h1 className="q-name" data-text="MYO THANT NAING">
             MYO THANT NAING
           </h1>
         </span>

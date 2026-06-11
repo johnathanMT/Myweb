@@ -30,56 +30,72 @@ export default function About({ lang }) {
   }, [])
 
   return (
-    <section id="about" ref={sectionRef} className="relative py-24 border-t border-white/5">
+    <section id="about" ref={sectionRef} className="relative py-28 border-t border-white/5 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-space to-surface pointer-events-none" />
+      {/* ambient glows */}
+      <div className="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl pointer-events-none opacity-20"
+        style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }} />
+      <div className="absolute bottom-0 right-1/4 w-[360px] h-[360px] rounded-full blur-3xl pointer-events-none opacity-15"
+        style={{ background: 'radial-gradient(circle, #00d4ff, transparent 70%)' }} />
 
       <div className="section-container relative z-10">
         {/* Header */}
         <div className="reveal mb-16">
-          <p className="text-accent text-sm font-semibold uppercase tracking-widest mb-2">Who I Am</p>
-          <h2 className="section-title">{t.title}</h2>
+          <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light mb-4">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-light" /> Who I Am
+          </span>
+          <h2 className="section-title">
+            <span className="bg-gradient-to-r from-white via-accent-light to-cyan bg-clip-text text-transparent">{t.title}</span>
+          </h2>
         </div>
 
         {/* Profile + Bio */}
-        <div className="reveal grid md:grid-cols-2 gap-12 items-center mb-16">
-          {/* Photo */}
+        <div className="reveal grid md:grid-cols-[auto_1fr] gap-12 items-center mb-16">
+          {/* Photo — hi-tech framed */}
           <div className="flex justify-center md:justify-start">
-            <div className="relative">
-              <div className="absolute inset-0 rounded-3xl bg-accent/20 blur-2xl scale-110 pointer-events-none" />
-              <div className="relative w-64 h-64 rounded-3xl overflow-hidden ring-2 ring-accent/30 ring-offset-4 ring-offset-space bg-card flex items-center justify-center">
-                {/* Initials fallback sits underneath; the photo covers it when it loads. */}
-                <span className="absolute text-5xl font-bold text-accent/40 select-none">MTN</span>
+            <div className="group relative">
+              {/* rotating gradient halo */}
+              <div className="absolute -inset-1 rounded-[28px] opacity-70 blur-md transition-opacity duration-500 group-hover:opacity-100"
+                style={{ background: 'conic-gradient(from 0deg, #7c3aed, #00d4ff, #ff1e3c, #7c3aed)' }} />
+              <div className="relative w-64 h-64 rounded-3xl overflow-hidden bg-card flex items-center justify-center ring-1 ring-white/10">
+                <span className="absolute text-5xl font-bold text-accent/30 select-none">MTN</span>
                 <img
                   src={PERSONAL.photo}
                   alt={PERSONAL.name}
-                  className="relative w-full h-full object-cover"
+                  className="relative w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                   onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
+                {/* HUD corner brackets */}
+                <span className="absolute left-2 top-2 w-5 h-5 border-l-2 border-t-2 border-cyan/70 rounded-tl" />
+                <span className="absolute right-2 bottom-2 w-5 h-5 border-r-2 border-b-2 border-cyan/70 rounded-br" />
               </div>
-              {/* Floating badge */}
-              <div className="absolute -bottom-4 -right-4 bg-card border border-white/10 rounded-2xl px-4 py-2 shadow-xl">
-                <p className="text-xs text-muted">Based in</p>
-                <p className="text-sm font-semibold text-white">Japan 🇯🇵</p>
+              {/* Floating status badge (glass) */}
+              <div className="absolute -bottom-4 -right-4 backdrop-blur-xl bg-white/5 border border-white/15 rounded-2xl px-4 py-2 shadow-xl">
+                <p className="text-[10px] uppercase tracking-wider text-muted">Based in</p>
+                <p className="text-sm font-semibold text-white flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Japan 🇯🇵
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Bio */}
-          <div className="space-y-6">
+          {/* Bio — glass card */}
+          <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-7 md:p-9 space-y-6"
+            style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 30px 60px -30px rgba(124,58,237,0.4)' }}>
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-1">{PERSONAL.name}</h3>
-              <p className="text-accent text-sm font-mono">{PERSONAL.handle}</p>
+              <p className="text-accent-light text-sm font-mono">{PERSONAL.handle}</p>
             </div>
             <p className="text-gray-300 text-base leading-relaxed">{t.bio}</p>
 
             {/* Quote */}
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-accent/5 border border-accent/15">
-              <i className="fas fa-quote-left text-accent/50 mt-0.5 text-lg flex-shrink-0" />
-              <p className="text-gray-300 text-sm font-medium italic">{t.slogan}</p>
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-accent/10 to-transparent border border-accent/20">
+              <i className="fas fa-quote-left text-accent-light/60 mt-0.5 text-lg flex-shrink-0" />
+              <p className="text-gray-200 text-sm font-medium italic">{t.slogan}</p>
             </div>
 
-            {/* Quick facts */}
+            {/* Quick facts — glass tiles with glowing icons */}
             <div className="grid grid-cols-2 gap-3">
               {[
                 { icon: 'fas fa-graduation-cap', label: 'IT University', value: 'Enrolled' },
@@ -87,8 +103,12 @@ export default function About({ lang }) {
                 { icon: 'fas fa-code', label: 'Focus', value: 'AI / Web Dev' },
                 { icon: 'fas fa-language', label: 'Languages', value: 'EN · JP · MY' },
               ].map(({ icon, label, value }) => (
-                <div key={label} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-white/5">
-                  <i className={`${icon} text-accent w-4`} />
+                <div key={label}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/8 hover:border-accent/40 hover:bg-accent/5 transition-all duration-200">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent-light"
+                    style={{ boxShadow: '0 0 14px -2px rgba(124,58,237,0.6)' }}>
+                    <i className={`${icon} text-sm`} />
+                  </span>
                   <div>
                     <p className="text-xs text-muted">{label}</p>
                     <p className="text-sm font-medium text-white">{value}</p>
@@ -99,20 +119,23 @@ export default function About({ lang }) {
           </div>
         </div>
 
-        {/* Skills */}
+        {/* Skills — glowing glass chips */}
         <div className="reveal">
-          <p className="text-accent text-sm font-semibold uppercase tracking-widest mb-6">{t.skills}</p>
+          <p className="text-accent-light text-sm font-semibold uppercase tracking-widest mb-6">{t.skills}</p>
           <div className="flex flex-wrap gap-2.5">
             {SKILLS.map(({ name, icon, color }) => (
               <div
                 key={name}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card border border-white/5 hover:border-white/15 transition-all duration-200 group cursor-default"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/8 backdrop-blur-sm hover:-translate-y-0.5 hover:border-white/25 transition-all duration-200 group cursor-default"
+                style={{ '--g': color }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 18px -4px ${color}` }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none' }}
               >
                 <i
                   className={`${icon} text-sm transition-transform duration-200 group-hover:scale-110`}
-                  style={{ color }}
+                  style={{ color, filter: `drop-shadow(0 0 6px ${color}99)` }}
                 />
-                <span className="text-sm text-gray-300 font-medium">{name}</span>
+                <span className="text-sm text-gray-200 font-medium">{name}</span>
               </div>
             ))}
           </div>
