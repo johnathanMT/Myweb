@@ -37,6 +37,9 @@ export default function About({ lang }) {
         style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }} />
       <div className="absolute bottom-0 right-1/4 w-[360px] h-[360px] rounded-full blur-3xl pointer-events-none opacity-15"
         style={{ background: 'radial-gradient(circle, #00d4ff, transparent 70%)' }} />
+      {/* deep muted crimson accent — subtle psychological depth */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[300px] rounded-full blur-3xl pointer-events-none opacity-[0.08]"
+        style={{ background: 'radial-gradient(ellipse, #96142b, transparent 70%)' }} />
 
       <div className="section-container relative z-10">
         {/* Header */}

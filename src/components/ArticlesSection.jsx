@@ -33,7 +33,7 @@ export default function ArticlesSection() {
     <section id="articles" className="relative overflow-hidden py-28">
       {/* deep-space backdrop */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(120% 60% at 50% 0%, rgba(124,58,237,0.18), transparent 60%), radial-gradient(80% 50% at 50% 100%, rgba(0,212,255,0.10), transparent 70%)' }} />
+        style={{ background: 'radial-gradient(120% 60% at 50% 0%, rgba(124,58,237,0.18), transparent 60%), radial-gradient(80% 50% at 50% 100%, rgba(0,212,255,0.10), transparent 70%), radial-gradient(50% 45% at 50% 55%, rgba(150,20,40,0.10), transparent 72%)' }} />
 
       {/* ── The portal / doorway ── */}
       <div className="relative z-10 mx-auto mb-16 flex max-w-4xl flex-col items-center px-6 text-center">
@@ -78,10 +78,26 @@ export default function ArticlesSection() {
                 style={{ boxShadow: '0 0 30px -4px rgba(124,58,237,0.6), inset 0 0 30px -10px rgba(0,212,255,0.5)' }} />
 
               <div className="relative h-44 overflow-hidden">
-                <img src={preview(a)} alt="" loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                {/* the real image — encrypted (blurred/desaturated) until hover */}
+                <img src={preview(a)} alt="" loading="lazy" className="radio-img h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b14] via-transparent to-transparent" />
-                <span className="absolute left-3 top-3 font-mono text-[11px] tabular-nums text-cyan/90">{String(i + 1).padStart(2, '0')}</span>
+
+                {/* Default "encrypted signal" veil: scanning grid + radio wave + EQ bars */}
+                <div className="radio-veil">
+                  <div className="radio-grid" />
+                  <svg className="radio-wave" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden>
+                    <path d="M0,30 Q12.5,4 25,30 T50,30 T75,30 T100,30 T125,30 T150,30 T175,30 T200,30" />
+                  </svg>
+                  <div className="radio-bars" aria-hidden>
+                    {Array.from({ length: 20 }).map((_, b) => <span key={b} style={{ '--b': b }} />)}
+                  </div>
+                  <span className="radio-status">▮ SIGNAL&nbsp;LOCKED</span>
+                </div>
+
+                {/* decryption scan-line that sweeps down on hover */}
+                <span className="radio-scan" aria-hidden />
+
+                <span className="absolute left-3 top-3 z-20 font-mono text-[11px] tabular-nums text-cyan/90">{String(i + 1).padStart(2, '0')}</span>
               </div>
 
               <div className="p-5">

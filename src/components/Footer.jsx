@@ -85,16 +85,22 @@ export default function Footer() {
             </a>
           </div>
 
-          {/* Nav links */}
+          {/* Nav links — "Blog" routes to the real blog.html page (not an on-page anchor) */}
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
             {[
-              ['#home', 'Home'], ['#about', 'About'], ['#projects', 'Projects'],
-              ['#seasonal', 'Gallery'], ['#blog', 'Blog'], ['#exploring', 'Exploring'],
-            ].map(([href, label]) => (
+              { href: '#home', label: 'Home' },
+              { href: '#about', label: 'About' },
+              { href: '#projects', label: 'Projects' },
+              { href: '#seasonal', label: 'Gallery' },
+              { href: SITE.asset('blog.html'), label: 'Blog', page: true },
+              { href: '#exploring', label: 'Exploring' },
+            ].map(({ href, label, page }) => (
               <a
-                key={href}
+                key={label}
                 href={href}
-                onClick={(e) => { e.preventDefault(); document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' }) }}
+                {...(page
+                  ? {} // real navigation to blog.html
+                  : { onClick: (e) => { e.preventDefault(); document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' }) } })}
                 className="text-gray-400 hover:text-white text-sm font-medium uppercase tracking-wider transition-colors"
                 onMouseEnter={(e) => { e.currentTarget.style.textShadow = `0 0 12px ${GOLD}` }}
                 onMouseLeave={(e) => { e.currentTarget.style.textShadow = 'none' }}

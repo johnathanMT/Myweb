@@ -76,6 +76,9 @@ export default function Philosophy() {
     <section ref={sectionRef} className="relative py-28 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-space/40 via-transparent to-space/40 pointer-events-none" />
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[360px] bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+      {/* subtle deep-crimson undertone */}
+      <div className="absolute left-1/2 bottom-8 -translate-x-1/2 w-[460px] h-[200px] rounded-full blur-3xl pointer-events-none opacity-[0.10]"
+        style={{ background: 'radial-gradient(ellipse, #96142b, transparent 70%)' }} />
 
       <div className="section-container relative z-10">
         {/* Larger, prominent terminal */}
