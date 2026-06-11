@@ -36,17 +36,19 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Single place to point the whole site at a domain. To move to a custom
-      # apex domain later, change these (set VITE_BASE: / and VITE_SITE_URL).
-      # Nothing else in the codebase hard-codes the domain.
+      # Build-time config. Each value first looks for a GitHub repository VARIABLE
+      # (Settings → Secrets and variables → Actions → Variables tab); if unset it
+      # falls back to the default after `||`, so the build works either way.
+      # NOTE: VITE_BASE is "/" because the site is served at the apex domain
+      # root (myothant.dev). It would be "/Myweb/" only for a github.io project page.
       - name: Build (vite build + inject-site token replacement)
         run: npm run build
         env:
-          VITE_SITE_URL: https://myothant.dev
-          VITE_BASE: /Myweb/
-          VITE_API_URL: https://myweb-zqv1.onrender.com
-          VITE_CONTACT_EMAIL: ai@myothant.dev
-          VITE_LINE_URL: https://lin.ee/s72ayHD
+          VITE_SITE_URL:      ${{ vars.VITE_SITE_URL      || 'https://myothant.dev' }}
+          VITE_BASE:          ${{ vars.VITE_BASE          || '/' }}
+          VITE_API_URL:       ${{ vars.VITE_API_URL       || 'https://myweb-zqv1.onrender.com' }}
+          VITE_CONTACT_EMAIL: ${{ vars.VITE_CONTACT_EMAIL || 'ai@myothant.dev' }}
+          VITE_LINE_URL:      ${{ vars.VITE_LINE_URL      || 'https://lin.ee/s72ayHD' }}
 
       - name: Upload build output
         uses: actions/upload-pages-artifact@v3
