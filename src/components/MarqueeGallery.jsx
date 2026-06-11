@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { AnimatePresence, motion, useMotionValue, useSpring } from 'framer-motion'
 import { PROJECTS } from '../data/content'
+import { ASSETS } from '../config/assets'
 import '../marquee.css'
 
 /**
@@ -12,7 +13,7 @@ import '../marquee.css'
  * Props:
  *   items: [{ title, image }]   (defaults to your PROJECTS, mapped to images)
  */
-const FALLBACK = 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&q=80'
+const FALLBACK = ASSETS.fallback
 
 export default function MarqueeGallery({ items }) {
   // Map your existing PROJECTS to {title, image}; fall back to a placeholder.

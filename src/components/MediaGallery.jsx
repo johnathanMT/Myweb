@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react'
+import { ASSETS } from '../config/assets'
 
 /**
  * MediaGallery — renders an article's media:
@@ -22,7 +23,7 @@ export default function MediaGallery({ media, images, videoUrl, alt = '', classN
     ]
 
   const [index, setIndex] = useState(0)
-  const fallback = 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&q=80'
+  const fallback = ASSETS.fallback
 
   if (items.length === 0) {
     return (

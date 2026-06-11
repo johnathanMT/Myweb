@@ -1,4 +1,5 @@
 import { SITE } from '../config/site'
+import { ASSETS } from '../config/assets'
 
 export const PERSONAL = {
   name: 'Myo Thant Naing',
@@ -8,9 +9,8 @@ export const PERSONAL = {
   bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.',
   slogan: 'Better Late Than Never',
   email: SITE.email,
-  // Served from the build's own /public folder via the configured base path
-  // (works on GitHub Pages, a custom domain, or localhost — no hard-coded origin).
-  photo: SITE.asset('Myweb_photo/My_profile2_for_myweb.jpg'),
+  // Bundled via src/assets (Vite hashes it + fixes the URL for any domain).
+  photo: ASSETS.profile,
   quote: "Don't Be Institutionalized, Be the Architect of Your Environment.",
   heinlein: `"A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a ship, design a building, write a sonnet, balance accounts, build a wall, set a bone, comfort the dying, take orders, give orders, cooperate, act alone, solve equations, analyze a new problem, pitch manure, program a computer, cook a tasty meal, fight efficiently, die gallantly. Specialization is for insects." – Robert A. Heinlein`,
 }
@@ -22,8 +22,9 @@ export const SOCIAL = [
 ]
 
 export const SKILLS = [
+  { name: 'AI & Agentic AI', icon: 'fas fa-brain', color: '#a855f7' },
   { name: 'Python', icon: 'fab fa-python', color: '#3b82f6' },
-  { name: 'AI Fundamentals', icon: 'fas fa-brain', color: '#a855f7' },
+  { name: 'C#', icon: 'fas fa-code', color: '#6366f1' },
   { name: 'HTML / CSS', icon: 'fab fa-html5', color: '#f97316' },
   { name: 'JavaScript', icon: 'fab fa-js', color: '#eab308' },
   { name: 'Japanese', icon: 'fas fa-language', color: '#ef4444' },
@@ -31,11 +32,8 @@ export const SKILLS = [
   { name: 'English', icon: 'fas fa-globe-americas', color: '#06b6d4' },
   { name: 'UI / UX', icon: 'fas fa-pen-nib', color: '#8b5cf6' },
   { name: 'IoT (M5Stack)', icon: 'fas fa-microchip', color: '#10b981' },
-  { name: 'C#', icon: 'fas fa-code', color: '#6366f1' },
   { name: 'Software Engineering', icon: 'fas fa-laptop-code', color: '#0ea5e9' },
-  { name: 'OOSAD', icon: 'fas fa-project-diagram', color: '#f59e0b' },
-  { name: 'DDOOCP', icon: 'fas fa-cubes', color: '#14b8a6' },
-  { name: 'AMCC', icon: 'fas fa-tasks', color: '#f43f5e' },
+
 ]
 
 export const PROJECTS = [
@@ -73,18 +71,18 @@ export const PROJECTS = [
 
 // High-quality curated photos representing each month's character
 export const MONTHS = [
-  { name: 'JANUARY', zodiac: '♑ Capricorn', color: '#93c5fd', img: 'https://images.unsplash.com/photo-1517243426866-c8a2f62e5e16?w=1200&q=90', desc: 'New beginnings under winter skies' },
-  { name: 'FEBRUARY', zodiac: '♒ Aquarius', color: '#f9a8d4', img: 'https://images.unsplash.com/photo-1496861083958-175bb1bd5702?w=1200&q=90', desc: 'Plum blossoms herald early spring' },
-  { name: 'MARCH', zodiac: '♓ Pisces', color: '#fbcfe8', img: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=1200&q=90', desc: 'Sakura petals drift on warm winds' },
-  { name: 'APRIL', zodiac: '♈ Aries', color: '#bbf7d0', img: 'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?w=1200&q=90', desc: 'Fields burst with the colour of hope' },
-  { name: 'MAY', zodiac: '♉ Taurus', color: '#a7f3d0', img: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=1200&q=90', desc: 'Golden hour across emerald hills' },
-  { name: 'JUNE', zodiac: '♊ Gemini', color: '#a5f3fc', img: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&q=90', desc: 'Monsoon rains bring life anew' },
-  { name: 'JULY', zodiac: '♋ Cancer', color: '#fde68a', img: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1200&q=90', desc: 'Fireworks bloom over summer nights' },
-  { name: 'AUGUST', zodiac: '♌ Leo', color: '#fcd34d', img: 'https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=1200&q=90', desc: 'Sunflower fields stretch to the horizon' },
-  { name: 'SEPTEMBER', zodiac: '♍ Virgo', color: '#fed7aa', img: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1200&q=90', desc: 'Leaves turn amber as summer fades' },
-  { name: 'OCTOBER', zodiac: '♎ Libra', color: '#fca5a5', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=90', desc: 'Autumn fire across mountain forests' },
-  { name: 'NOVEMBER', zodiac: '♏ Scorpio', color: '#d8b4fe', img: 'https://images.unsplash.com/photo-1477414956199-7da45746f742?w=1200&q=90', desc: 'Mist rolls through twilight valleys' },
-  { name: 'DECEMBER', zodiac: '♐ Sagittarius', color: '#bfdbfe', img: 'https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=1200&q=90', desc: 'Snow blankets the world in silence' },
+  { name: 'JANUARY', zodiac: '♑ Capricorn', color: '#93c5fd', img: ASSETS.months.JANUARY, desc: 'New beginnings under winter skies' },
+  { name: 'FEBRUARY', zodiac: '♒ Aquarius', color: '#f9a8d4', img: ASSETS.months.FEBRUARY, desc: 'Plum blossoms herald early spring' },
+  { name: 'MARCH', zodiac: '♓ Pisces', color: '#fbcfe8', img: ASSETS.months.MARCH, desc: 'Sakura petals drift on warm winds' },
+  { name: 'APRIL', zodiac: '♈ Aries', color: '#bbf7d0', img: ASSETS.months.APRIL, desc: 'Fields burst with the colour of hope' },
+  { name: 'MAY', zodiac: '♉ Taurus', color: '#a7f3d0', img: ASSETS.months.MAY, desc: 'Golden hour across emerald hills' },
+  { name: 'JUNE', zodiac: '♊ Gemini', color: '#a5f3fc', img: ASSETS.months.JUNE, desc: 'Monsoon rains bring life anew' },
+  { name: 'JULY', zodiac: '♋ Cancer', color: '#fde68a', img: ASSETS.months.JULY, desc: 'Fireworks bloom over summer nights' },
+  { name: 'AUGUST', zodiac: '♌ Leo', color: '#fcd34d', img: ASSETS.months.AUGUST, desc: 'Sunflower fields stretch to the horizon' },
+  { name: 'SEPTEMBER', zodiac: '♍ Virgo', color: '#fed7aa', img: ASSETS.months.SEPTEMBER, desc: 'Leaves turn amber as summer fades' },
+  { name: 'OCTOBER', zodiac: '♎ Libra', color: '#fca5a5', img: ASSETS.months.OCTOBER, desc: 'Autumn fire across mountain forests' },
+  { name: 'NOVEMBER', zodiac: '♏ Scorpio', color: '#d8b4fe', img: ASSETS.months.NOVEMBER, desc: 'Mist rolls through twilight valleys' },
+  { name: 'DECEMBER', zodiac: '♐ Sagittarius', color: '#bfdbfe', img: ASSETS.months.DECEMBER, desc: 'Snow blankets the world in silence' },
 ]
 
 // ─── Multilingual blog translations ───────────────────────────────────────────
@@ -99,11 +97,8 @@ For a developer who spends most days staring at screens, these moments of analog
   },
   mm: {
     excerpt: 'ထုံးတမ်းစဉ်လာနှင့် ခေတ်မီလှပမှုတို့ တွေ့ဆုံရာနေရာ',
-    body: `ဆောင်းရာသီ ကျိုတိုမြို့သည် အခြားသောရာသီများနှင့် နှိုင်းယှဉ်၍မရနိုင်သော တိတ်ဆိတ်မှုကို သယ်ဆောင်သည်။ နီမြောင်သော ကမေလီးယားပန်းများသည် ရေခဲဖျားသော မြေဆီလွှာမှ ပေါ်ထွက်ကာ ရာစုနှစ်ဟောင်း ကျောက်မီးဆိုင်းများဘေးတွင် အေးမြသောမိုးကောင်းကင်ကို ဆန့်ကျင်ရပ်တည်သည်။
-
-ဂျီအိုန်၏ နောက်ကျောလမ်းများတွင် လမ်းလျှောက်ကာ သစ်သားမာချီယာအိမ်များနှင့် ဘုရားကျောင်းတံခါးဝများမှ ထွက်လာသော သမင်ပင်နံ့ကို ရှူရှိုက်ခဲ့သည်။ မြို့သည် ကျောက်ခင်းလမ်းတစ်ခုတိုင်းတွင် ထောင်နှစ်တစ်ထောင် သမိုင်းကို ပြောသည်။
-
-တစ်နေ့တာ မျက်နှာပြင်များကို ငေးကြည့်ကာ ဖြတ်သန်းသော developer တစ်ဦးအတွက် ဤသောနာမွန်ဆန်သော အလှများသည် မြေပေါ်မှာ ပြန်ချည်နှောင်ပေးသည်။ ကျိုတိုသည် ကျွန်တော် ဘာကြောင့် code ရေးသောကို သတိပေးသည်။`,
+    body: `ကျိုတို၏ ဆောင်းရာသီသည် အခြားမည်သည့်ရာသီနှင့်မျှ မနှိုင်းယှဉ်နိုင်သော တိတ်ဆိတ်ငြိမ်းချမ်းမှုကို ဆောင်ကြဉ်းလာလေ့ရှိသည်။ ရေခဲမှတ်နီးပါး အေးစက်နေသော မြေပြင်မှနေ၍ နီရဲနေသည့် ကမေလီးယား (Camellia) ပန်းတို့သည် ရာစုနှစ်ပေါင်းများစွာ သက်တမ်းရှိသော ကျောက်မီးခုံများဘေးတွင် အေးမြသော မိုးကောင်းကင်ကို ဆန့်ကျင်ကာ ဂုဏ်ယူစွာ ပွင့်လန်းနေကြသည်။ဂီအိုန် (Gion) ၏ နောက်ကျောလမ်းသွယ်များတွင် လျှောက်လှမ်းရင်း သစ်သားမာချီယာ (Machiya) အိမ်များနှင့် ဘုရားကျောင်းတံခါးဝများမှ သင်းပျံ့လာသည့် ထင်းရှူးရနံ့ကို ရှူရှိုက်မိသည်။ ဤမြို့၏ ကျောက်ခင်းလမ်းတိုင်းသည် နှစ်ထောင်ချီကြာမြင့်ခဲ့သည့် သမိုင်းကြောင်းများကို တိတ်တဆိတ် စကားပြောနေသကဲ့သို့ပင်။
+ကွန်ပျူတာမျက်နှာပြင်များရှေ့တွင် တစ်နေ့တာကို ကုန်ဆုံးလေ့ရှိသည့် ဆော့ဖ်ဝဲလ်ရေးသားသူ (Developer) တစ်ဦးအတွက်မူ ဤသို့သော သဘာဝ၏ အလှတရားများသည် ကျွန်ုပ်အား မြေပြင်ပေါ်သို့ ပြန်လည်ရောက်ရှိစေကာ စိတ်ကို ပေါ့ပါးလန်းဆန်းစေသည်။ ကျိုတိုမြို့သည် ကျွန်ုပ်ဘာကြောင့် ကုဒ် (Code) များ စတင်ရေးသားခဲ့ရသည်ဆိုသည့် မူလရည်ရွယ်ချက်ကို ပြန်လည်သတိရစေသည့် နေရာတစ်ခု ဖြစ်ပါတော့သည်။`,
   },
   jp: {
     excerpt: '伝統と現代の美しさが出会う場所',
@@ -149,10 +144,11 @@ But away from the noise, the plum blossoms in Osaka Castle Park bloom quietly in
 I sat on a park bench with takoyaki in one hand, laptop in the other, writing code while cherry trees swayed overhead. This, I think, is the beauty of building a life in Japan.`,
   },
   mm: {
-    excerpt: 'နီออင်မီးရောင်နှင့် ဆည်းဆာ အစားအသောက်များ',
-    body: `အိုဆာကာသည် မည်သည့်မြို့နှင့်မျှ မတူသောပုံစံဖြင့် အသက်ရှင်နေသည်။ ဒိုတွန်ဘိုရီ၏ လမ်းဘေးအစားအသောက်ဆိုင်များ၊ လူအုပ်၏ စွမ်းအင်၊ ညနက် နှစ်နာရီတွင် မိုးရွာသည့် ကတ္တရာလမ်းမှ ရောင်ပြန်သော နီonly မီးများ — ဤမြို့သည် အိပ်ချင်ဟုမဆိုသောမြို့ ဖြစ်သည်။
+    excerpt: 'နီယွန်မီးရောင်များနှင့် အိုဆာကာ၏ အရသာများ',
+    body: `
 
-ဆူညံသံများမှ ဝေးကွာသောနေရာတွင်၊ Osaka Castle Park ရှိ သင်္ဘောသဖန်းပန်းများသည် ဖေဖော်ဝါရီ အစောပိုင်းတွင် တိတ်တဆိတ် ပွင့်သည်။ နူးညံ့သောနှင်းဆီနှင့် ဖြူဖွေးသောအရောင်၊ ၎င်းမြို့၏ ပုံမှန် maximalism နှင့် ကွဲပြားသော ဆန့်ကျင်ဘက်တစ်ခု ဖြစ်သည်။`,
+အိုဆာကာမြို့သည် အခြားမည်သည့်မြို့နှင့်မျှ မတူသည့် ကိုယ်ပိုင်ဟန်ဖြင့် အသက်ဝင်နေတတ်သည်။ ဒိုတွန်ဘိုရီ (Dotonbori) လမ်းမကြီးတစ်လျှောက်ရှိ လမ်းဘေးအစားအသောက်ဆိုင်များမှ အနံ့အသက်များ၊ လူအုပ်ကြီး၏ တက်ကြွမှု၊ ညဉ့်နက်သန်းခေါင်အချိန် မိုးရွာချလိုက်သည့် ကတ္တရာလမ်းပေါ်၌ ရောင်ပြန်ဟပ်နေသော နီယွန်မီးရောင်များ — ဤသည်မှာ အိုဆာကာမြို့၏ ပုံရိပ်ဖြစ်ပြီး "ဘယ်သောအခါမှ အိပ်စက်ခြင်းမရှိသောမြို့" ဟုပင် ဆိုရပေမည်။
+မြို့ပြ၏ ဆူညံသံများနှင့် ဝေးကွာသော အိုဆာကာရဲတိုက်ဥယျာဉ် (Osaka Castle Park) တွင်မူ အခြားသော အငွေ့အသက်ကို ခံစားရသည်။ ဖေဖော်ဝါရီလ အစောပိုင်းတွင် တိတ်တဆိတ် ပွင့်လန်းလာသော သင်္ဘောသဖန်းပန်း (Plum blossoms) များသည် အိုဆာကာမြို့၏ အမြဲမပြတ် ရုန်းကန်လှုပ်ရှားနေသည့် "Maximalism" ပုံစံနှင့် လုံးဝဆန့်ကျင်ဘက်ဖြစ်ပြီး၊ ၎င်းတို့၏ နူးညံ့သည့် ပန်းရောင်နှင့် ဖြူဖွေးသည့်အရောင်များသည် မြို့တော်၏ တိတ်ဆိတ်လှပသော ကဏ္ဍတစ်ခုကို ထုတ်ဖော်ပြသနေသည်။`,
   },
   jp: {
     excerpt: '梅の花の下でネオンライトと屋台グルメ',
@@ -199,11 +195,9 @@ Disconnecting is not failure. It's maintenance. The same discipline that keeps s
   },
   mm: {
     excerpt: '"တစ်ခါတစ်ရံ ပြန်လည်ချိတ်ဆက်ရန် ချိတ်ဆက်မှုဖြတ်ရသည်"',
-    body: `မြို့ပြင် တောနက်ထဲတွင် လမ်းကြောင်းတစ်ခုကို တွေ့ထားသည်။ ဖုန်းလိုင်းမရှိ၊ notification မရှိ၊ ထင်းရှူးပင်ရွက်တွင် လေတိုက်သံနှင့် တစ်ခါတစ်ရံ ကျီးကန်ဟောင်သံသာ ကြားရသည်။
-
-Code base ရှုပ်ထွေးသောအခါ သို့မဟုတ် လိုက်လံနေသောပြဿနာကို မဖြေရှင်းနိုင်သောအခါ ထိုနေရာသို့ သွားသည်။ အမြဲတမ်း ပြန်လမ်းတွင် အဖြေသည် ရောက်လာသည်။
-
-ချိတ်ဆက်မှုဖြတ်ခြင်းသည် ရှုံးနိမ့်ခြင်းမဟုတ်။ ပြုပြင်ထိန်းသိမ်းခြင်းပင် ဖြစ်သည်။`,
+    body: `မြို့ပြင်ရှိ တောနက်ထဲတွင် ကျွန်ုပ်သာသိသော လမ်းကြောင်းလေးတစ်ခုရှိသည်။ ထိုနေရာတွင် ဖုန်းလိုင်းများ မရှိသလို၊ အသိပေးချက် (Notification) များ၏ အနှောင့်အယှက်လည်း ကင်းစင်သည်။ ထင်းရှူးရွက်များကြားမှ လေတိုးသံနှင့် ရံဖန်ရံခါ ကြားရတတ်သည့် ကျီးကန်းသံများကသာ တိတ်ဆိတ်မှုကို ဖြည့်ဆည်းပေးထားသည်။
+ကုဒ် (Code) များ ရှုပ်ထွေးလွန်း၍ စိတ်အာရုံများ လည်ပင်းခေတ်ဖြစ်နေချိန် သို့မဟုတ် ပြဿနာတစ်ခုကို မည်သို့မျှ အဖြေရှာမရတော့သည့်အခါ ထိုနေရာသို့ ကျွန်ုပ်သွားလေ့ရှိသည်။ ထူးခြားသည်မှာ ပြန်လမ်းတွင် အမြဲဆိုသလိုပင် လိုချင်သည့်အဖြေများက စိတ်ထဲသို့ ပေါ်ပေါက်လာတတ်သည်။
+အမှန်စင်စစ်... လောကကြီးနှင့် အဆက်ဖြတ်ခြင်းဆိုသည်မှာ ရှုံးနိမ့်ခြင်းမဟုတ်ပါ။ မိမိကိုယ်ကို ပြန်လည်ပြုပြင်ထိန်းသိမ်းခြင်း (System Maintenance) သာ ဖြစ်သည်။`,
   },
   jp: {
     excerpt: '「時には、繋がり直すために切り離す必要がある」',
@@ -249,13 +243,12 @@ It taught me patience in a way no programming book can. It taught me to read bet
 I don't regret the path. I carry it into every project, every team interaction, every line of code I write. Empathy is a feature, not a bug.`,
   },
   mm: {
-    excerpt: '"ဘဝသည် လွယ်ကူလေ့မရှိ — သည်းခံမှုနှင့် ခံနိုင်ရည်ရှိသူ ဖြစ်ပါ"',
-    body: `ကျွန်တော် ပထမဆုံး code ကို ပရော်ဖက်ရှင်နယ်အနေဖြင့် မရေးမှီ၊ ဂျပန်တွင် Kaigo ဟုခေါ်သော ပြုစုနာထမ်းသမားအဖြစ် နှစ်ပေါင်းများစွာ ဖြတ်သန်းခဲ့သည်။ နံနက်စော်တိုင်း၊ ညနက်တိုင်း၊ တစ်ဦးတစ်ယောက်၏ ဂုဏ်သိက္ကာအတွက် တာဝန်ဝတ္တရားလေးများ ပတ္တနားဘိတ်ဖြင့် ဖြတ်ကျော်ခဲ့သည်။
-
-ကျွန်တော်ကို programming စာအုပ်တစ်အုပ်မျှ မပေးနိုင်သောပုံစံဖြင့် သည်းခံမှုကို သင်ပေးသည်။ တစ်ဦးတစ်ယောက် မပြောနိုင်သောအခါပင် ၎င်းတို့ဘာလိုသည်ကို နားလည်ရန် — လိုင်းကြားဖတ်တတ်ရန် သင်ပေးသည်။
-
-ကျွန်တော် ထိုလမ်းကြောင်းကို နှမြောမနည်း။ ၎င်းကို ပရောဂျက်တစ်ခုတိုင်း၊ team interaction တစ်ခုတိုင်း၊ ရေးသောကုဒ်တုိင်းတွင် သယ်ဆောင်သွားသည်။`,
+    excerpt: '"ဘဝသည် လွယ်ကူလေ့မရှိ — သည်းခံခြင်းနှင့် ခံနိုင်ရည်ရှိခြင်းသည်ပင် အောင်မြင်မှု၏ အခြေခံပင်"',
+    body: `ကျွန်ုပ် ပရော်ဖက်ရှင်နယ် ဆော့ဖ်ဝဲလ်ရေးသားသူ (Developer) အဖြစ် မစတင်မီက ဂျပန်နိုင်ငံတွင် "ကိုင်ဂို" (Kaigo) ခေါ် လူနာပြုစုစောင့်ရှောက်ရေးလုပ်ငန်းဖြင့် နှစ်ပေါင်းများစွာ ဖြတ်သန်းခဲ့ရသည်။ နံနက်ခင်းတိုင်း၊ ညဉ့်နက်ချိန်တိုင်းတွင် တစ်ဦးတစ်ယောက်၏ ဂုဏ်သိက္ခာကို ထိန်းသိမ်းရင်း၊ တာဝန်ဝတ္တရားများကို မညည်းမညူ ဆောင်ရွက်ခဲ့ရသည့် အချိန်များသည် ကျွန်ုပ်အတွက် အဖိုးမဖြတ်နိုင်သော သင်ခန်းစာများ ဖြစ်ခဲ့သည်။
+ထိုကာလများသည် Programming စာအုပ်များ မပေးနိုင်သော သည်းခံခြင်းတရားကို ကျွန်ုပ်အား လက်တွေ့သင်ကြားပေးခဲ့သည်။ လူနာများ စကားမပြောနိုင်သည့်အချိန်တွင်ပင် ၎င်းတို့၏ လိုအပ်ချက်ကို နားလည်ပေးနိုင်ရန်အတွက် "မပြောပြသည့် စကားကြားမှ အဓိပ္ပာယ်ကို ဖတ်တတ်အောင်" (Reading between the lines) လေ့ကျင့်ပေးခဲ့သည်။
+ထိုလမ်းကြောင်းကို ဖြတ်သန်းခဲ့ရသည့်အတွက် ကျွန်ုပ်တစ်စုံတစ်ရာ နောင်တမရပါ။ ထိုအတွေ့အကြုံများသည် ကျွန်ုပ်၏ လက်ရှိလုပ်ငန်းခွင် ပရောဂျက်တစ်ခုစီ၊ အဖွဲ့အစည်းအတွင်း ပူးပေါင်းဆောင်ရွက်မှုတိုင်းနှင့် ကျွန်ုပ်ရေးသားလိုက်သည့် ကုဒ် (Code) တိုင်းတွင် အသက်ဝင်နေဆဲ ဖြစ်သည်။`,
   },
+
   jp: {
     excerpt: '"人生は決して簡単ではない — 忍耐と回復力を持とう"',
     body: `プロとして最初のコードを書く前、私は日本で介護士として何年も過ごした。早朝、深夜、他人の尊厳に対する責任の重さ。
@@ -271,6 +264,7 @@ I don't regret the path. I carry it into every project, every team interaction, 
 Nó dạy tôi sự kiên nhẫn theo cách không sách lập trình nào có thể làm. Nó dạy tôi đọc giữa các dòng — hiểu những gì ai đó cần ngay cả khi họ không thể diễn đạt.
 
 Tôi không hối tiếc về con đường đó. Tôi mang nó vào mọi dự án, mọi tương tác nhóm, mọi dòng code tôi viết.`,
+
   },
   ne: {
     excerpt: '"जीवन कहिल्यै सजिलो छैन — धैर्य र लचिलोपन राख"',
@@ -294,29 +288,31 @@ export const BLOG_POSTS = [
   {
     id: 'kyoto', size: 'large',
     date: 'Jan 15, 2026', tag: 'Travel',
-    img: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&q=90',
-    title: { en: 'Kyoto: Winter Camellias', mm: 'ကျိုတို: ဆောင်းရာသီ ကမေလီးယား', jp: '京都：冬の椿', vn: 'Kyoto: Hoa Trà Mùa Đông', ne: 'क्योटो: जाडोको क्यामेलिया', id: 'Kyoto: Kamellia Musim Dingin' },
+    img: ASSETS.blog.kyoto,
+    title: {
+      en: 'Kyoto: Winter Camellias', mm: 'ကျိုတို၏ ဆောင်းရာသီ - ကမေလီးယားပန်းများ', jp: '京都：冬の椿', vn: 'Kyoto: Hoa Trà Mùa Đông', ne: 'क्योटो: जाडोको क्यामेलिया', id: 'Kyoto: Kamellia Musim Dingin'
+    },
     translations: kyotoContent,
   },
   {
     id: 'osaka', size: 'medium',
     date: 'Feb 02, 2026', tag: 'Travel',
-    img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=90',
-    title: { en: 'Osaka: Plum Blossoms', mm: 'အိုဆာကာ: သင်္ဘောသဖန်း', jp: '大阪：梅の花', vn: 'Osaka: Hoa Mận', ne: 'ओसाका: बेरका फूल', id: 'Osaka: Bunga Plum' },
+    img: ASSETS.blog.osaka,
+    title: { en: 'Osaka: Plum Blossoms', mm: 'အိုဆာကာ၏ ဆောင်းဦး - သင်္ဘောသဖန်းပန်းများ', jp: '大阪：梅の花', vn: 'Osaka: Hoa Mận', ne: 'ओसाका: बेरका फूल', id: 'Osaka: Bunga Plum' },
     translations: osakaContent,
   },
   {
     id: 'thoughts', size: 'medium',
     date: 'Mar 10, 2026', tag: 'Musings',
-    img: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=90',
-    title: { en: 'Solitude in Nature', mm: 'သဘာဝတွင် တစ်ဦးတည်း', jp: '自然の中の孤独', vn: 'Cô Đơn Trong Thiên Nhiên', ne: 'प्रकृतिमा एकान्त', id: 'Kesendirian di Alam' },
+    img: ASSETS.blog.thoughts,
+    title: { en: 'Solitude in Nature', mm: 'သဘာဝတရား၏ တိတ်ဆိတ်ငြိမ်းချမ်းမှု (သို့မဟုတ်) သဘာဝအလယ်က တစ်ကိုယ်တော်ငြိမ်းချမ်းခြင်း', jp: '自然の中の孤独', vn: 'Cô Đơn Trong Thiên Nhiên', ne: 'प्रकृतिमा एकान्त', id: 'Kesendirian di Alam' },
     translations: thoughtsContent,
   },
   {
     id: 'kaigo-experience', size: 'wide',
     date: 'Apr 10, 2026', tag: 'Care Giving',
-    img: 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1200&q=90',
-    title: { en: 'Life of a Care Giver (Kaigo)', mm: 'ပြုစုနာထမ်းသမားဘဝ', jp: '介護士の生活', vn: 'Cuộc Sống Người Chăm Sóc', ne: 'हेरचाहकर्ताको जीवन', id: 'Kehidupan Seorang Perawat' },
+    img: ASSETS.blog['kaigo-experience'],
+    title: { en: 'Life of a Care Giver (Kaigo)', mm: 'ခဣဂေါ့(ပြုစုစောင့်ရှောက်သူ) ဘဝအတွေ့အကြုံ', jp: '介護士の生活', vn: 'Cuộc Sống Người Chăm Sóc', ne: 'हेरचाहकर्ताको जीवन', id: 'Kehidupan Seorang Perawat' },
     translations: kaigoContent,
   },
 ]
