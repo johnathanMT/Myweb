@@ -168,9 +168,14 @@
     .ix-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:9px 16px;cursor:pointer;font-size:.95rem;transition:.2s}
     .ix-btn:hover{border-color:var(--cyan)}
     .ix-btn.liked{color:#ff5d8f;border-color:#ff5d8f55;background:rgba(255,93,143,.08)}
-    .share{display:flex;gap:8px}
-    .share button{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;font-size:1rem;transition:.2s}
-    .share button:hover{color:var(--cyan);border-color:var(--cyan)}
+    .share{display:flex;gap:10px}
+    .share .sh{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:13px;border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--muted);cursor:pointer;transition:.25s ease;backdrop-filter:blur(6px)}
+    .share .sh svg{transition:transform .25s ease}
+    .share .sh:hover{color:var(--cyan);border-color:var(--cyan);background:rgba(0,212,255,.08);transform:translateY(-2px);box-shadow:0 0 18px -2px rgba(0,212,255,.6)}
+    .share .sh:hover svg{transform:scale(1.12)}
+    /* premium dark-tech Facebook accent (subtle blue glow, not bright-blue fill) */
+    .share .sh-fb:hover{color:#5b8cff;border-color:#5b8cff;background:rgba(91,140,255,.10);box-shadow:0 0 20px -2px rgba(91,140,255,.7)}
+    .share .sh.copied{color:#4be1a0;border-color:#4be1a0;box-shadow:0 0 18px -2px rgba(75,225,160,.6);font-weight:700}
     .reactions{margin-top:18px;border-top:1px solid var(--line);padding-top:18px}
     .reactions .lbl{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
     .chips{display:flex;flex-wrap:wrap;gap:10px}

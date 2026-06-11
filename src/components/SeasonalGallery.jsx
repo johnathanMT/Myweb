@@ -34,7 +34,7 @@ export default function SeasonalGallery() {
           <h2 className="section-title">
             <span className="bg-gradient-to-r from-cyan via-white to-accent-light bg-clip-text text-transparent">Year in Focus</span>
           </h2>
-          <p className="text-gray-400 text-sm">12 Months · 12 Stories · orbiting in deep space</p>
+          <p className="text-gray-400 text-sm">12 Myanmar Festivals · one for every month · orbiting in deep space</p>
         </div>
 
         {/* Orbit */}
@@ -50,8 +50,10 @@ export default function SeasonalGallery() {
             {MONTHS.map((m, i) => (
               <div key={m.name} className="orbit-planet" style={{ '--i': i }}>
                 <div className="orbit-body" style={{ '--c': m.color }}>
-                  <img src={m.img} alt={m.name} loading="lazy" />
-                  <span className="orbit-label" style={{ color: m.color }}>{m.name}</span>
+                  <img src={m.img} alt={`${m.festival} — ${m.name}`} loading="lazy" />
+                  <span className="orbit-label" style={{ color: m.color }}>
+                    <b>{m.festival}</b><br /><span style={{ opacity: 0.6, fontWeight: 400 }}>{m.name}</span>
+                  </span>
                 </div>
               </div>
             ))}

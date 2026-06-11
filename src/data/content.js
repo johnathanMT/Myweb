@@ -69,20 +69,23 @@ export const PROJECTS = [
   },
 ]
 
-// High-quality curated photos representing each month's character
+// 12 traditional Myanmar festivals — one per month (Gregorian alignment).
+// `festival` is the headline; `desc` gives the context. Images come from the
+// central registry (ASSETS.months.*) — drop a real festival photo in
+// src/assets/images/ and import it in config/assets.js to swap any one.
 export const MONTHS = [
-  { name: 'JANUARY', zodiac: '♑ Capricorn', color: '#93c5fd', img: ASSETS.months.JANUARY, desc: 'New beginnings under winter skies' },
-  { name: 'FEBRUARY', zodiac: '♒ Aquarius', color: '#f9a8d4', img: ASSETS.months.FEBRUARY, desc: 'Plum blossoms herald early spring' },
-  { name: 'MARCH', zodiac: '♓ Pisces', color: '#fbcfe8', img: ASSETS.months.MARCH, desc: 'Sakura petals drift on warm winds' },
-  { name: 'APRIL', zodiac: '♈ Aries', color: '#bbf7d0', img: ASSETS.months.APRIL, desc: 'Fields burst with the colour of hope' },
-  { name: 'MAY', zodiac: '♉ Taurus', color: '#a7f3d0', img: ASSETS.months.MAY, desc: 'Golden hour across emerald hills' },
-  { name: 'JUNE', zodiac: '♊ Gemini', color: '#a5f3fc', img: ASSETS.months.JUNE, desc: 'Monsoon rains bring life anew' },
-  { name: 'JULY', zodiac: '♋ Cancer', color: '#fde68a', img: ASSETS.months.JULY, desc: 'Fireworks bloom over summer nights' },
-  { name: 'AUGUST', zodiac: '♌ Leo', color: '#fcd34d', img: ASSETS.months.AUGUST, desc: 'Sunflower fields stretch to the horizon' },
-  { name: 'SEPTEMBER', zodiac: '♍ Virgo', color: '#fed7aa', img: ASSETS.months.SEPTEMBER, desc: 'Leaves turn amber as summer fades' },
-  { name: 'OCTOBER', zodiac: '♎ Libra', color: '#fca5a5', img: ASSETS.months.OCTOBER, desc: 'Autumn fire across mountain forests' },
-  { name: 'NOVEMBER', zodiac: '♏ Scorpio', color: '#d8b4fe', img: ASSETS.months.NOVEMBER, desc: 'Mist rolls through twilight valleys' },
-  { name: 'DECEMBER', zodiac: '♐ Sagittarius', color: '#bfdbfe', img: ASSETS.months.DECEMBER, desc: 'Snow blankets the world in silence' },
+  { name: 'JANUARY',   festival: 'Ananda Pagoda Festival',    region: 'Bagan',            color: '#93c5fd', img: ASSETS.months.JANUARY,   desc: 'Pilgrims and bullock carts gather at Bagan’s Ananda Temple under the cool-season sky.' },
+  { name: 'FEBRUARY',  festival: 'Mahamuni Pagoda Festival',  region: 'Mandalay',         color: '#f9a8d4', img: ASSETS.months.FEBRUARY,  desc: 'Devotees honour the revered Mahamuni Buddha image during the cool dry season.' },
+  { name: 'MARCH',     festival: 'Shwedagon Pagoda Festival', region: 'Yangon (Tabaung)', color: '#fbcfe8', img: ASSETS.months.MARCH,     desc: 'The golden Shwedagon glows as the largest paya pwè of the year unfolds.' },
+  { name: 'APRIL',     festival: 'Thingyan Water Festival',   region: 'Nationwide',       color: '#bbf7d0', img: ASSETS.months.APRIL,     desc: 'The joyous New Year water festival washes away the old year across Myanmar.' },
+  { name: 'MAY',       festival: 'Kasone Bodhi Watering',     region: 'Nationwide',       color: '#a7f3d0', img: ASSETS.months.MAY,       desc: 'Faithful pour scented water at the foot of the sacred Bodhi tree on the full moon.' },
+  { name: 'JUNE',      festival: 'Nayon Tipiṭaka Exams',      region: 'Monasteries',      color: '#a5f3fc', img: ASSETS.months.JUNE,      desc: 'Monks recite the Tipiṭaka scriptures in the great monastic examinations of Nayon.' },
+  { name: 'JULY',      festival: 'Waso — Buddhist Lent',      region: 'Nationwide',       color: '#fde68a', img: ASSETS.months.JULY,      desc: 'Offering of Waso robes marks the start of the three-month Buddhist Lent.' },
+  { name: 'AUGUST',    festival: 'Taungbyone Nat Festival',   region: 'near Mandalay',    color: '#fcd34d', img: ASSETS.months.AUGUST,    desc: 'The most famous spirit (nat) festival, a week of music, offerings and devotion.' },
+  { name: 'SEPTEMBER', festival: 'Phaung Daw Oo Festival',    region: 'Inle Lake',        color: '#fed7aa', img: ASSETS.months.SEPTEMBER, desc: 'A royal barge carries sacred Buddha images around Inle Lake with leg-rowers.' },
+  { name: 'OCTOBER',   festival: 'Thadingyut Lights',         region: 'Nationwide',       color: '#fca5a5', img: ASSETS.months.OCTOBER,   desc: 'The Festival of Lights celebrates the Buddha’s return — homes glow with candles.' },
+  { name: 'NOVEMBER',  festival: 'Tazaungdaing Balloons',     region: 'Taunggyi',         color: '#d8b4fe', img: ASSETS.months.NOVEMBER,  desc: 'Fire balloons rise into the night at the dazzling festival of lights.' },
+  { name: 'DECEMBER',  festival: 'Kayin (Karen) New Year',    region: 'Kayin State',      color: '#bfdbfe', img: ASSETS.months.DECEMBER,  desc: 'The Karen people welcome the new year with the don dance and traditional dress.' },
 ]
 
 // ─── Multilingual blog translations ───────────────────────────────────────────
