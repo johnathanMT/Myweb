@@ -159,16 +159,21 @@
       title: $('title').value.trim(), author: $('author').value.trim(),
       tags: $('tags').value.trim(), content: $('content').value, isPublished: $('isPublished').value === 'true',
     };
-    const imgs = [...$('image').files];
-    if (imgs.length) { p.image = imgs[0]; p.galleryImages = imgs.slice(1); }
+    const imgs = [...$('image').files];   // FileList → array; preserves ALL selected files
+    if (imgs.length) { p.image = imgs[0]; p.galleryImages = imgs.slice(1); } // [0]=cover, rest=gallery
     const vid = $('video').files[0]; if (vid) p.video = vid;
     if (!p.title || !p.author) return toast('Title and Author are required.', 'err');
     if ((p.content || '').length < 10) return toast('Content must be at least 10 characters.', 'err');
+    console.log(`[admin] saving — ${imgs.length} image(s) selected (cover + ${Math.max(0, imgs.length - 1)} gallery)${vid ? ', 1 video' : ''}`);
     try {
       if (editing) { await PortfolioAPI.updateArticle($('editId').value, p); toast('Updated.', 'ok'); }
       else { await PortfolioAPI.createArticle(p); toast('Published.', 'ok'); }
       resetEditor(); loadManage();
-    } catch (e) { toast(e.message, 'err'); }
+    } catch (e) {
+      // Full error logged here; api.js also logs the raw backend response (status + body).
+      console.error('[admin] save failed:', e);
+      toast(e.message, 'err');
+    }
   }
 
   async function doDelete(id) {

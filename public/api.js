@@ -66,9 +66,18 @@ const PortfolioAPI = (() => {
     if (res.status === 429) throw new Error("Too many requests — please slow down.");
  
     const text = await res.text();
-    const json = text ? JSON.parse(text) : null;
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch { /* non-JSON body (e.g. proxy error page) */ }
     if (!res.ok) {
-      const msg = json?.message || (json?.errors && json.errors.join(", ")) || `Request failed (${res.status})`;
+      // Surface EVERYTHING the backend sent so failures are debuggable in the console:
+      // status, the ApiResponse.message, and any errors[] detail (stack trace when
+      // the server has detailed errors enabled).
+      console.error(
+        `[api] ${method} ${path} → ${res.status} ${res.statusText}`,
+        { message: json?.message, errors: json?.errors, raw: text }
+      );
+      const detail = json?.errors && json.errors.length ? ` — ${json.errors.join("; ")}` : "";
+      const msg = (json?.message || `Request failed (${res.status})`) + detail;
       throw new Error(msg);
     }
     return json; // ApiResponse wrapper: { success, message, data, errors, statusCode }
@@ -151,7 +160,11 @@ const PortfolioAPI = (() => {
     request(`/api/Articles/${id}/reactions`, { method: "POST", body: { reaction } });
 
   // ---- Wake the free-tier backend (Render sleeps after ~15 min idle) ------
-  const wakeBackend = () => fetch(`${BASE_URL}/`).catch(() => {});
+  // Hit a real CORS-enabled API endpoint, NOT the bare root "/" — the root
+  // 301-redirects to /index.html and the redirect has no CORS headers, which
+  // spams the console with misleading "blocked by CORS / 301" errors.
+  const wakeBackend = () =>
+    fetch(`${BASE_URL}/api/Articles?page=1&pageSize=1`, { method: "GET" }).catch(() => {});
  
   return {
     BASE_URL, isLoggedIn, getCurrentUser, isAdmin, isAuthor,
