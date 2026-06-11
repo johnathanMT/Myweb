@@ -10,6 +10,7 @@ import ArticlesSection  from './components/ArticlesSection'
 import SeasonalGallery  from './components/SeasonalGallery'
 import TravelChronicles from './components/TravelChronicles'
 import Exploring        from './components/Exploring'
+import AILineBot        from './components/AILineBot'      // "Talk to my AI agent" promo
 import Footer           from './components/Footer'
 
 export default function App() {
@@ -39,6 +40,7 @@ export default function App() {
         <SeasonalGallery />
         <TravelChronicles lang={lang} setLang={setLang} />
         <Exploring />
+        <AILineBot        lang={lang} />
       </main>
       <Footer />
     </div>

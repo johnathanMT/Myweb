@@ -1,3 +1,5 @@
+import { SITE } from '../config/site'
+
 export const PERSONAL = {
   name: 'Myo Thant Naing',
   handle: 'MTN.Digitosphere',
@@ -5,10 +7,10 @@ export const PERSONAL = {
   subtitle: 'IT Student · Care-giver · Aspiring AI Engineer',
   bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.',
   slogan: 'Better Late Than Never',
-  // Served from the build's own /public folder. import.meta.env.BASE_URL is
-  // '/Myweb/' in production and '/' in dev, so this resolves correctly on both
-  // GitHub Pages and localhost without hardcoding the github.io origin.
-  photo: import.meta.env.BASE_URL + 'Myweb_photo/My_profile2_for_myweb.jpg',
+  email: SITE.email,
+  // Served from the build's own /public folder via the configured base path
+  // (works on GitHub Pages, a custom domain, or localhost — no hard-coded origin).
+  photo: SITE.asset('Myweb_photo/My_profile2_for_myweb.jpg'),
   quote: "Don't Be Institutionalized, Be the Architect of Your Environment.",
   heinlein: `"A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a ship, design a building, write a sonnet, balance accounts, build a wall, set a bone, comfort the dying, take orders, give orders, cooperate, act alone, solve equations, analyze a new problem, pitch manure, program a computer, cook a tasty meal, fight efficiently, die gallantly. Specialization is for insects." – Robert A. Heinlein`,
 }
@@ -59,13 +61,13 @@ export const PROJECTS = [
     id: 'coffee', title: 'Bean Boutique Coffee Shop',
     desc: 'A modern website showcasing premium coffee beans and brewing equipment.',
     icon: 'fas fa-coffee', color: '#f59e0b',
-    url: 'https://johnathanmt.github.io/bean-boutique-coffee-shop/', ext: true, featured: true,
+    url: SITE.coffeeUrl, ext: true, featured: true,
   },
   {
     id: 'github', title: 'GitHub Projects',
     desc: 'Explore all repositories, source codes, and categorized projects.',
     icon: 'fab fa-github', color: '#e2e2f0',
-    url: 'https://johnathanmt.github.io/Myweb/myweb_github_project.html', ext: false,
+    url: SITE.asset('myweb_github_project.html'), ext: false,
   },
 ]
 

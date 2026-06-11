@@ -1,8 +1,13 @@
 // ============================================================================
 //  api.js  —  Frontend API client for MTN Portfolio
-//  Frontend : https://johnathanmt.github.io/Myweb  (GitHub Pages, static)
-//  Backend  : https://myweb-zqv1.onrender.com      (Render, .NET 8 API)
+//  Frontend : the deployed site origin (GitHub Pages or a custom domain)
+//  Backend  : configurable — see BASE_URL below (Render, .NET 8 API)
 //  Database : Aiven MySQL (accessed only by the backend)
+//
+//  This file is served verbatim from /public (NOT processed by Vite), so it
+//  can't read import.meta.env. The API origin is therefore taken from an
+//  optional global `window.SITE_CONFIG.apiUrl` (which the postbuild injector or
+//  an inline <script> can set), falling back to the default below.
 //
 //  Verified against the live Swagger contract (/swagger/v1/swagger.json):
 //   - POST /api/Auth/login     body JSON  { email, password }
@@ -17,7 +22,10 @@
 // ============================================================================
  
 const PortfolioAPI = (() => {
-  const BASE_URL = "https://myweb-zqv1.onrender.com";
+  // Single configurable backend origin. Override at runtime by defining
+  // `window.SITE_CONFIG = { apiUrl: "https://your-api.example.com" }` before
+  // this script loads; otherwise the default is used.
+  const BASE_URL = (window.SITE_CONFIG && window.SITE_CONFIG.apiUrl) || "https://myweb-zqv1.onrender.com";
   const TOKEN_KEY = "mtn_jwt";
   const USER_KEY  = "mtn_user";
   const VISITOR_KEY = "mtn_visitor";

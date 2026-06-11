@@ -36,8 +36,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build (vite build — base is already /Myweb/)
+      # Single place to point the whole site at a domain. To move to a custom
+      # apex domain later, change these (set VITE_BASE: / and VITE_SITE_URL).
+      # Nothing else in the codebase hard-codes the domain.
+      - name: Build (vite build + inject-site token replacement)
         run: npm run build
+        env:
+          VITE_SITE_URL: https://myothant.dev
+          VITE_BASE: /Myweb/
+          VITE_API_URL: https://myweb-zqv1.onrender.com
+          VITE_CONTACT_EMAIL: ai@myothant.dev
+          VITE_LINE_URL: https://lin.ee/s72ayHD
 
       - name: Upload build output
         uses: actions/upload-pages-artifact@v3

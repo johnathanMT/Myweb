@@ -1,5 +1,6 @@
 // ESM API client for the React app (the static pages use public/api.js instead).
-const BASE_URL = 'https://myweb-zqv1.onrender.com'
+import { SITE } from '../config/site'
+const BASE_URL = SITE.apiUrl
 const TOKEN_KEY = 'mtn_jwt'
 const VISITOR_KEY = 'mtn_visitor'
 const token = () => localStorage.getItem(TOKEN_KEY)

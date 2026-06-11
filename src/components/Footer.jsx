@@ -1,4 +1,5 @@
 import { PERSONAL, SOCIAL } from '../data/content'
+import { SITE } from '../config/site'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -35,17 +36,26 @@ export default function Footer() {
             ))}
           </div>
 
-          {/* Featured project link */}
-          <a
-            href="https://johnathanmt.github.io/bean-boutique-coffee-shop/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-white/10 hover:border-accent/30 text-sm text-gray-300 hover:text-white transition-all duration-200 group"
-          >
-            <span>☕</span>
-            <span>Bean Boutique Coffee Shop</span>
-            <i className="fas fa-arrow-up-right-from-square text-xs text-muted group-hover:text-accent-light transition-colors" />
-          </a>
+          {/* Contact + featured project links */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={SITE.mailto}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent/10 border border-accent/30 text-sm text-accent-light hover:text-white hover:bg-accent/20 transition-all duration-200 group"
+            >
+              <i className="fas fa-envelope text-xs" />
+              <span>{SITE.email}</span>
+            </a>
+            <a
+              href={SITE.coffeeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-white/10 hover:border-accent/30 text-sm text-gray-300 hover:text-white transition-all duration-200 group"
+            >
+              <span>☕</span>
+              <span>Bean Boutique Coffee Shop</span>
+              <i className="fas fa-arrow-up-right-from-square text-xs text-muted group-hover:text-accent-light transition-colors" />
+            </a>
+          </div>
 
           {/* Nav links */}
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
