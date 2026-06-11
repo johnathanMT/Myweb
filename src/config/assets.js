@@ -28,6 +28,8 @@ import profile from '../assets/images/profile.jpg'
 // —— 2) BUNDLED imports ——————————————————————————————————————————————
 import tokyo from '../assets/images/tokyo_night.jpg' // For Travel Chronic Section.
 
+// —— 3) BUNDLED imports ——————————————————————————————————————————————
+import kaigo_experience from '../assets/images/diaper_night.png' // For Travel Chronic Section.
 
 // —— 2) PUBLIC helper ————————————————————————————————————————————————————————
 // import.meta.env.BASE_URL is whatever you set via VITE_BASE at build time
@@ -70,7 +72,7 @@ export const ASSETS = {
     osaka:              unsplash('photo-1566073771259-6a8506099945'),
     tokyo:              tokyo, // bundled import ) 
     thoughts:           unsplash('photo-1441974231531-c6227db76b6e'),
-    'kaigo-experience': unsplash('photo-1576765608535-5f04d1e3f289'),
+    kaigo_experience:   kaigo_experience, // bundled import )
   },
 }
 

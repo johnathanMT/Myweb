@@ -372,9 +372,9 @@ export const BLOG_POSTS = [
     translations: thoughtsContent,
   },
   {
-    id: 'kaigo-experience', size: 'wide',
+    id: 'kaigo_experience', size: 'wide',
     date: 'Apr 10, 2026', tag: 'Care Giving',
-    img: ASSETS.blog['kaigo-experience'],
+    img: ASSETS.blog.kaigo_experience,
     title: { en: 'Life of a Care Giver (Kaigo)', mm: 'ခဣဂေါ့(ပြုစုစောင့်ရှောက်သူ) ဘဝအတွေ့အကြုံ', jp: '介護士の生活', vn: 'Cuộc Sống Người Chăm Sóc', ne: 'हेरचाहकर्ताको जीवन', id: 'Kehidupan Seorang Perawat' },
     translations: kaigoContent,
   },
