@@ -8,6 +8,11 @@
 (function () {
   'use strict';
 
+  // TRACE: confirms blog.js ran AND that api.js loaded first (PortfolioAPI defined).
+  // If you see "PortfolioAPI: undefined", api.js failed to load/parse before blog.js.
+  console.log('[blog] blog.js loaded · PortfolioAPI:', typeof window.PortfolioAPI,
+              '· API base:', (window.PortfolioAPI && PortfolioAPI.BASE_URL) || '(none)');
+
   const $app = document.getElementById('app');
   const API = (window.PortfolioAPI && PortfolioAPI.BASE_URL) || '';
 

@@ -116,6 +116,7 @@ const PortfolioAPI = (() => {
   // published: true (published only), false (drafts only), or "all" (admins).
   // The token is sent when logged in so Authors also receive their own drafts.
   function getArticles({ page = 1, pageSize = 10, published = true, tag, search } = {}) {
+    console.log('[api] getArticles() → about to fetch', `${BASE_URL}/api/Articles`, { page, pageSize, published });
     const q = new URLSearchParams({ page, pageSize });
     if (published === "all" || published === null) {
       q.set("published", ""); // empty -> backend treats as "all" (admin only)
