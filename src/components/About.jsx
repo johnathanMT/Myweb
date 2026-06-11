@@ -20,8 +20,9 @@ export default function About({ lang }) {
 
   return (
     <section id="about" ref={sectionRef} className="relative py-28 border-t border-white/5 overflow-hidden">
-      {/* translucent backdrop so the neon city glows through behind the content */}
-      <div className="absolute inset-0 bg-gradient-to-b from-space/70 to-surface/70 pointer-events-none" />
+      {/* heavy frosted scrim — keeps text readable over the neon city while
+          still letting a hint of it glow through */}
+      <div className="absolute inset-0 bg-black/55 backdrop-blur-md pointer-events-none" />
       {/* ambient glows */}
       <div className="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl pointer-events-none opacity-20"
         style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }} />

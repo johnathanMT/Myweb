@@ -12,6 +12,9 @@ import TravelChronicles from './components/TravelChronicles'
 import Exploring        from './components/Exploring'
 import AILineBot        from './components/AILineBot'      // "Talk to my AI agent" promo
 import Footer           from './components/Footer'
+import CyberCursor      from './components/CyberCursor'     // custom crosshair cursor
+import BootScreen       from './components/BootScreen'      // "System Booting…" loader
+import HudFrame         from './components/HudFrame'        // HUD corner overlay
 
 // Code-split the heavy three.js bundle so it never blocks first paint.
 const CyberBackground = lazy(() => import('./three/CyberBackground'))
@@ -66,6 +69,11 @@ export default function App() {
         <AILineBot        lang={lang} />
       </main>
       <div className="relative z-10"><Footer /></div>
+
+      {/* ── Elite cyberpunk overlays (fixed, above everything) ── */}
+      <HudFrame />
+      <CyberCursor />
+      <BootScreen />
     </div>
   )
 }

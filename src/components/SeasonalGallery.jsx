@@ -37,8 +37,9 @@ export default function SeasonalGallery() {
           <p className="text-gray-400 text-sm">12 Myanmar Festivals · one for every month · orbiting in deep space</p>
         </div>
 
-        {/* Orbit */}
-        <div className="reveal orbit-viewport">
+        {/* Orbit — wrapped in its own deep-space glass universe */}
+        <div className="reveal orbit-frame">
+        <div className="orbit-viewport">
           <div className="orbit-stage">
             {/* central sun / core */}
             <div className="orbit-sun" aria-hidden />
@@ -58,6 +59,7 @@ export default function SeasonalGallery() {
               </div>
             ))}
           </div>
+        </div>
         </div>
       </div>
     </section>

@@ -45,10 +45,10 @@ export default function ArticlesSection() {
         </div>
 
         <p className="mt-2 font-mono text-sm uppercase tracking-[0.4em] text-accent-light">// transmission</p>
-        <h2 className="mt-3 text-4xl font-bold sm:text-5xl">
+        <h2 className="glow-heading mt-3 text-4xl font-bold sm:text-5xl">
           <span className="bg-gradient-to-r from-white via-accent-light to-cyan bg-clip-text text-transparent">Articles</span>
         </h2>
-        <p className="mt-3 max-w-md text-sm text-gray-400">Signals emerging from the archive — click any to open the full transmission.</p>
+        <p className="mt-3 max-w-md text-sm text-gray-300 [text-shadow:0_2px_8px_rgba(0,0,0,0.9)]">Signals emerging from the archive — click any to open the full transmission.</p>
         <a href={`${import.meta.env.BASE_URL}blog.html`} className="mt-5 inline-flex items-center gap-2 font-mono text-sm text-cyan hover:text-white transition-colors">
           All posts <ArrowUpRight size={15} />
         </a>
