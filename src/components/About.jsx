@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
 import { PERSONAL, SKILLS } from '../data/content'
+import { useCyberReveal } from '../hooks/useCyberReveal'
 
 const T = {
   
@@ -15,23 +15,13 @@ const T = {
 
 export default function About({ lang }) {
   const t = T[lang] || T.en
-  const sectionRef = useRef(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('visible')
-      }),
-      { threshold: 0.1 }
-    )
-    const revealEls = sectionRef.current?.querySelectorAll('.reveal')
-    revealEls?.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+  // GSAP ScrollTrigger reveals, synced to the same scroll as the 3D camera.
+  const sectionRef = useCyberReveal()
 
   return (
     <section id="about" ref={sectionRef} className="relative py-28 border-t border-white/5 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-space to-surface pointer-events-none" />
+      {/* translucent backdrop so the neon city glows through behind the content */}
+      <div className="absolute inset-0 bg-gradient-to-b from-space/70 to-surface/70 pointer-events-none" />
       {/* ambient glows */}
       <div className="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl pointer-events-none opacity-20"
         style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }} />
@@ -43,7 +33,7 @@ export default function About({ lang }) {
 
       <div className="section-container relative z-10">
         {/* Header */}
-        <div className="reveal mb-16">
+        <div data-reveal className="mb-16">
           <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light mb-4">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-light" /> Who I Am
           </span>
@@ -53,7 +43,7 @@ export default function About({ lang }) {
         </div>
 
         {/* Profile + Bio */}
-        <div className="reveal grid md:grid-cols-[auto_1fr] gap-12 items-center mb-16">
+        <div data-reveal className="grid md:grid-cols-[auto_1fr] gap-12 items-center mb-16">
           {/* Photo — hi-tech framed */}
           <div className="flex justify-center md:justify-start">
             <div className="group relative">
@@ -123,7 +113,7 @@ export default function About({ lang }) {
         </div>
 
         {/* Skills — glowing glass chips */}
-        <div className="reveal">
+        <div data-reveal>
           <p className="text-accent-light text-sm font-semibold uppercase tracking-widest mb-6">{t.skills}</p>
           <div className="flex flex-wrap gap-2.5">
             {SKILLS.map(({ name, icon, color }) => (

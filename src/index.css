@@ -980,3 +980,57 @@ body::before {
 }
 /* subtle crimson secondary-text highlight */
 .hl-crimson { color: var(--crimson-soft); }
+
+/* ══════════════════════════════════════════
+   AGGRESSIVE FULL-BLEED TYPOGRAPHY (brutalist/cyber)
+   Dependency-free — use immediately on any heading.
+══════════════════════════════════════════ */
+/* Break an element out of its centered container to the full viewport width. */
+.fullbleed {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+/* Giant hero display — scales with viewport, near-zero leading, tight tracking. */
+.display-hero {
+  font-size: clamp(3rem, 15vw, 18rem);
+  line-height: 0.82;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/* Section-scale mega heading. */
+.display-mega {
+  font-size: clamp(2.25rem, 10vw, 9rem);
+  line-height: 0.88;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+}
+
+/* Optional: let a left-aligned heading hang slightly off the left edge,
+   and add a faint outline-only "ghost" weight behind it for depth. */
+.edge-left { margin-left: clamp(-0.06em, -1.2vw, 0em); }
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 640px) {
+  .display-hero { line-height: 0.9; }
+}
+
+/* Fixed WebGL background layer (R3F starter). Page content must sit above it. */
+.cyber-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;   /* let clicks pass through to the page */
+}
+.cyber-bg canvas { display: block; }
