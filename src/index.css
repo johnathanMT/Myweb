@@ -425,34 +425,38 @@
 /* ══════════════════════════════════════════
    BENTO GRID — TRAVEL
 ══════════════════════════════════════════ */
+/* Responsive auto-arranging bento grid.
+   • Columns auto-fill the row: as many ~320px tracks as fit, each stretching to
+     share leftover space (1fr). 5 posts or 50, it never needs manual breakpoints.
+   • grid-auto-rows sets ONE uniform row height, so every card aligns to the same
+     baseline grid — no ragged bottoms. Tall cards just span more rows.
+   • grid-auto-flow: dense backfills the holes that span-2 cards would otherwise
+     leave, so the layout stays gap-free as it grows.
+   • minmax(min(100%, 320px), 1fr) lets the track shrink to 100% on tiny screens
+     so a card never overflows its container. */
 .bento-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  grid-auto-rows: 220px;
+  grid-auto-flow: dense;
+  gap: 1.25rem;
 }
 
-@media (max-width: 640px) {
-  .bento-grid {
-    grid-template-columns: 1fr;
-  }
-}
+/* Size = how many column/row cells a card occupies (not a fixed pixel height). */
+.bento-medium { grid-column: span 1; grid-row: span 1; }              /* standard tile   */
+.bento-wide   { grid-column: span 2; grid-row: span 1; }              /* panoramic strip */
+.bento-large  { grid-column: span 2; grid-row: span 2; }              /* featured hero   */
 
-.bento-large {
-  grid-column: span 2;
-  min-height: 360px;
-}
-
-.bento-medium {
-  min-height: 280px;
-}
-
-.bento-wide {
-  grid-column: span 2;
-  min-height: 220px;
+/* When only one column fits, drop the 2-col spans so nothing overflows. */
+@media (max-width: 700px) {
+  .bento-wide,
+  .bento-large { grid-column: span 1; }
 }
 
 .bento-card {
   position: relative;
+  height: 100%;            /* fill the grid area the size-span defines */
+  min-height: 0;
   border-radius: 20px;
   overflow: hidden;
   cursor: pointer;

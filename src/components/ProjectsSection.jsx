@@ -33,7 +33,7 @@ function ProjectCard({ project, featured = false }) {
         />
         {/* glow blob */}
         <div className="absolute -bottom-10 left-1/2 h-28 w-28 -translate-x-1/2 rounded-full blur-3xl"
-             style={{ background: `${c}55` }} />
+          style={{ background: `${c}55` }} />
         <i
           className={`${project.icon} relative text-4xl transition-transform duration-300 group-hover:scale-110`}
           style={{ color: c, filter: `drop-shadow(0 0 14px ${c}88)` }}

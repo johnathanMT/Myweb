@@ -25,6 +25,10 @@
 import profile from '../assets/images/profile.jpg'
 // Add more like:  import m5stack from '../assets/images/m5stack.jpg'
 
+// —— 2) BUNDLED imports ——————————————————————————————————————————————
+import tokyo from '../assets/images/tokyo_night.jpg' // For Travel Chronic Section.
+
+
 // —— 2) PUBLIC helper ————————————————————————————————————————————————————————
 // import.meta.env.BASE_URL is whatever you set via VITE_BASE at build time
 // ('/' for the apex domain, '/Myweb/' for a github.io project page). Always
@@ -64,6 +68,7 @@ export const ASSETS = {
   blog: {
     kyoto:              unsplash('photo-1493976040374-85c8e12f0c0e'),
     osaka:              unsplash('photo-1566073771259-6a8506099945'),
+    tokyo:              tokyo, // bundled import ) 
     thoughts:           unsplash('photo-1441974231531-c6227db76b6e'),
     'kaigo-experience': unsplash('photo-1576765608535-5f04d1e3f289'),
   },

@@ -30,26 +30,33 @@
     linear-gradient(90deg, rgba(0, 229, 255, 0.06) 1px, transparent 1px);
   background-size: 46px 46px;
   -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 78%);
-          mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 78%);
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 78%);
 }
 
 /* slow-drifting conic "scan" light to feel like live processing */
 .q-sweep {
   position: absolute;
-  left: 50%; top: 45%;
-  width: 140vmax; height: 140vmax;
+  left: 50%;
+  top: 45%;
+  width: 140vmax;
+  height: 140vmax;
   translate: -50% -50%;
   pointer-events: none;
   opacity: 0.35;
   background: conic-gradient(from 0deg,
-    transparent 0deg,
-    rgba(0, 229, 255, 0.10) 30deg,
-    transparent 70deg,
-    rgba(255, 61, 240, 0.08) 140deg,
-    transparent 180deg);
+      transparent 0deg,
+      rgba(0, 229, 255, 0.10) 30deg,
+      transparent 70deg,
+      rgba(255, 61, 240, 0.08) 140deg,
+      transparent 180deg);
   animation: q-rotate 24s linear infinite;
 }
-@keyframes q-rotate { to { transform: rotate(360deg); } }
+
+@keyframes q-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* glassmorphism workstation panel */
 .q-panel {
@@ -74,12 +81,25 @@
 .q-panel::after {
   content: "";
   position: absolute;
-  width: 26px; height: 26px;
+  width: 26px;
+  height: 26px;
   border: 2px solid rgba(0, 229, 255, 0.55);
   pointer-events: none;
 }
-.q-panel::before { left: 14px; top: 14px; border-right: 0; border-bottom: 0; }
-.q-panel::after  { right: 14px; bottom: 14px; border-left: 0; border-top: 0; }
+
+.q-panel::before {
+  left: 14px;
+  top: 14px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.q-panel::after {
+  right: 14px;
+  bottom: 14px;
+  border-left: 0;
+  border-top: 0;
+}
 
 /* ── Cyberpunk glitch + glow name ─────────────────────────── */
 .q-name {
@@ -101,20 +121,67 @@
   inset: 0;
   pointer-events: none;
 }
-.q-name::before { color: #00e5ff; mix-blend-mode: screen; animation: q-split-c 3.6s steps(1) infinite; }
-.q-name::after  { color: #ff3df0; mix-blend-mode: screen; animation: q-split-m 3.6s steps(1) infinite; }
+
+.q-name::before {
+  color: #00e5ff;
+  mix-blend-mode: screen;
+  animation: q-split-c 3.6s steps(1) infinite;
+}
+
+.q-name::after {
+  color: #ff3df0;
+  mix-blend-mode: screen;
+  animation: q-split-m 3.6s steps(1) infinite;
+}
 
 @keyframes q-split-c {
-  0%, 88%, 100% { transform: translate(0, 0); opacity: 0.55; }
-  90% { transform: translate(-2px, -1px); opacity: 0.9; }
-  93% { transform: translate(2px, 1px);  opacity: 0.7; }
-  96% { transform: translate(-1px, 1px); opacity: 0.85; }
+
+  0%,
+  88%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.55;
+  }
+
+  90% {
+    transform: translate(-2px, -1px);
+    opacity: 0.9;
+  }
+
+  93% {
+    transform: translate(2px, 1px);
+    opacity: 0.7;
+  }
+
+  96% {
+    transform: translate(-1px, 1px);
+    opacity: 0.85;
+  }
 }
+
 @keyframes q-split-m {
-  0%, 88%, 100% { transform: translate(0, 0); opacity: 0.5; }
-  90% { transform: translate(2px, 1px);  opacity: 0.85; }
-  93% { transform: translate(-2px, -1px); opacity: 0.7; }
-  96% { transform: translate(1px, -1px); opacity: 0.8; }
+
+  0%,
+  88%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.5;
+  }
+
+  90% {
+    transform: translate(2px, 1px);
+    opacity: 0.85;
+  }
+
+  93% {
+    transform: translate(-2px, -1px);
+    opacity: 0.7;
+  }
+
+  96% {
+    transform: translate(1px, -1px);
+    opacity: 0.8;
+  }
 }
 
 /* "Data stream" — a bright scan that travels through the name */
@@ -123,24 +190,40 @@
   display: inline-block;
   isolation: isolate;
 }
+
 .q-name-wrap::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: linear-gradient(100deg,
-    transparent 38%,
-    rgba(0, 229, 255, 0.0) 45%,
-    rgba(0, 229, 255, 0.55) 50%,
-    rgba(255, 61, 240, 0.35) 55%,
-    transparent 62%);
+      transparent 38%,
+      rgba(0, 229, 255, 0.0) 45%,
+      rgba(0, 229, 255, 0.55) 50%,
+      rgba(255, 61, 240, 0.35) 55%,
+      transparent 62%);
   background-size: 250% 100%;
   mix-blend-mode: screen;
   -webkit-mask-image: linear-gradient(#000, #000);
   animation: q-stream 4.2s ease-in-out infinite;
 }
-@keyframes q-stream { 0% { background-position: 180% 0; } 100% { background-position: -80% 0; } }
+
+@keyframes q-stream {
+  0% {
+    background-position: 180% 0;
+  }
+
+  100% {
+    background-position: -80% 0;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .q-sweep, .q-name::before, .q-name::after, .q-name-wrap::after { animation: none; }
+
+  .q-sweep,
+  .q-name::before,
+  .q-name::after,
+  .q-name-wrap::after {
+    animation: none;
+  }
 }

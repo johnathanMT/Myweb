@@ -184,6 +184,62 @@ Saya duduk di bangku taman dengan takoyaki di satu tangan, laptop di tangan lain
   },
 }
 
+
+const tokyoContent = {
+  en: {
+    excerpt: 'Neon dreams and the pulse of technology.',
+    body: `Tokyo is the city where the future happens. From the intricate web of trains to the towering digital displays of Shibuya, it is a place where relentless ambition meets unparalleled efficiency. It is the global epicenter of technology and innovation.
+
+Yet, amidst the glass skyscrapers and neon-lit nights, hidden shrines remain. It is a city that breathes success while never forgetting the discipline of its past. 
+
+For a developer, Tokyo is more than a city; it is a canvas of possibilities. Every line of code I write here feels like a step toward a future that is already being built on these streets.`,
+  },
+  mm: {
+    excerpt: 'နီယွန်အိပ်မက်များနှင့် နည်းပညာ၏ အသက်ရှူသံ။',
+    body: `တိုကျိုသည် အနာဂတ်ကို လက်တွေ့ဖော်ဆောင်နေသည့် မြို့တော်ဖြစ်သည်။ ရှုပ်ထွေးလှသော မီးရထားလမ်းကြောင်းများမှသည် ရှီဘူယာ၏ မျက်စိကျစရာ ဒစ်ဂျစ်တယ်မျက်နှာပြင်များအထိ၊ ဤမြို့သည် ပြင်းပြသောဆန္ဒများနှင့် ထူးခြားသောစွမ်းဆောင်ရည်များ ပေါင်းစပ်ရာနေရာဖြစ်သည်။ ၎င်းသည် ကမ္ဘာ့နည်းပညာနှင့် ဆန်းသစ်တီထွင်မှုတို့၏ ဗဟိုချက်မဖြစ်သည်။
+
+သို့သော်လည်း မှန်စီရံထားသည့် အဆောက်အအုံကြီးများနှင့် နီယွန်မီးရောင်များကြားတွင် ရှေးဟောင်းဘုရားကျောင်းလေးများမှာမူ ငြိမ်းချမ်းစွာ တည်ရှိနေဆဲဖြစ်သည်။ ဤမြို့သည် အောင်မြင်မှုကို အသက်ရှူသံတိုင်းတွင် ထည့်သွင်းထားသလို၊ သူ၏ အတိတ်က စည်းကမ်းတကျရှိမှုကိုလည်း ဘယ်သောအခါမျှ မေ့လျော့ခြင်းမရှိပေ။
+
+Developer တစ်ယောက်အတွက် တိုကျိုသည် မြို့တစ်မြို့ထက် ပိုပါသည်။ ၎င်းသည် အခွင့်အရေးများစွာရှိသည့် ပန်းချီကားတစ်ချပ်ဖြစ်သည်။ ဤလမ်းမများပေါ်တွင် ကျွန်ုပ်ရေးသားလိုက်သည့် ကုဒ်တိုင်းသည် အနာဂတ်ဆီသို့ ခြေလှမ်းတစ်လှမ်းချင်း တိုးဝင်နေသကဲ့သို့ ခံစားရသည်။`,
+  },
+
+  jp: {
+    excerpt: 'ネオンの夢とテクノロジーの鼓動',
+    body: `東京は未来が現実となる街だ。複雑な鉄道網から渋谷の巨大なデジタルサイネージまで、ここは絶え間ない野心と比類なき効率性が交差する場所だ。東京はテクノロジーとイノベーションの世界的な中心地である。
+
+しかし、ガラスの摩天楼とネオンの夜の合間には、静かな神社が息づいている。この街は成功の鼓動を感じさせながらも、過去の規律を決して忘れない。
+
+エンジニアにとって、東京は単なる街以上の存在だ。可能性というキャンバスであり、ここで書くすべてのコードが、この街で形作られる未来への一歩のように感じられる。`,
+  },
+  vn: {
+    excerpt: 'Giấc mơ neon và nhịp đập của công nghệ.',
+    body: `Tokyo là thành phố nơi tương lai trở thành hiện thực. Từ mạng lưới tàu hỏa phức tạp đến các màn hình kỹ thuật số rực rỡ ở Shibuya, đây là nơi mà tham vọng không ngừng nghỉ gặp gỡ hiệu suất vô song. Đây là trung tâm toàn cầu của công nghệ và đổi mới.
+
+Tuy nhiên, giữa những tòa nhà chọc trời bằng kính và đêm neon, những ngôi đền ẩn giấu vẫn tồn tại. Đó là một thành phố hít thở sự thành công nhưng không bao giờ quên đi kỷ luật của quá khứ.
+
+Đối với một lập trình viên, Tokyo không chỉ là một thành phố; nó là một bức tranh của những khả năng. Mỗi dòng code tôi viết ở đây giống như một bước tiến tới tương lai đang được xây dựng trên chính những con phố này.`,
+  },
+  ne: {
+    excerpt: 'नियोन सपनाहरू र प्रविधिको स्पन्दन।',
+    body: `टोक्यो त्यो सहर हो जहाँ भविष्य वास्तविकता बन्छ। जटिल रेल सञ्जालदेखि सिबुयाका चम्किलो डिजिटल डिस्प्लेहरूसम्म, यो स्थान अथक महत्वाकांक्षा र अनुपम दक्षताको संगम हो। यो प्रविधि र नवाचारको विश्वव्यापी केन्द्र हो।
+
+तर, सिसाका गगनचुम्बी भवनहरू र नियोन-प्रकाशित रातहरूका बीचमा, लुकेका मन्दिरहरू शान्त छन्। यो यस्तो सहर हो जसले सफलताको सास फेर्छ तर आफ्नो विगतको अनुशासनलाई कहिल्यै बिर्सदैन।
+
+एक डेभलपरका लागि, टोक्यो सहर मात्र होइन; यो सम्भावनाहरूको क्यानभास हो। यहाँ मैले लेखेको प्रत्येक कोड यस सहरका सडकहरूमा निर्माण भइरहेको भविष्यतर्फको पाइला जस्तो लाग्छ।`,
+  },
+  id: {
+    excerpt: 'Mimpi neon dan denyut nadi teknologi.',
+    body: `Tokyo adalah kota tempat masa depan menjadi kenyataan. Dari jaringan kereta yang rumit hingga tampilan digital yang megah di Shibuya, ini adalah tempat di mana ambisi yang tak henti-hentinya bertemu dengan efisiensi yang tak tertandingi. Ini adalah pusat global teknologi dan inovasi.
+
+Namun, di tengah gedung pencakar langit kaca dan malam yang diterangi neon, kuil-kuil tersembunyi tetap ada. Ini adalah kota yang menghirup kesuksesan tanpa pernah melupakan disiplin masa lalunya.
+
+Bagi seorang pengembang, Tokyo lebih dari sekadar kota; ini adalah kanvas kemungkinan. Setiap baris kode yang saya tulis di sini terasa seperti langkah menuju masa depan yang sedang dibangun di jalanan ini.`,
+  },
+}
+
+
+
+
 const thoughtsContent = {
   en: {
     excerpt: '"Sometimes, you just need to disconnect to reconnect."',
@@ -300,6 +356,13 @@ export const BLOG_POSTS = [
     img: ASSETS.blog.osaka,
     title: { en: 'Osaka: Plum Blossoms', mm: 'အိုဆာကာ၏ ဆောင်းဦး - သင်္ဘောသဖန်းပန်းများ', jp: '大阪：梅の花', vn: 'Osaka: Hoa Mận', ne: 'ओसाका: बेरका फूल', id: 'Osaka: Bunga Plum' },
     translations: osakaContent,
+  },
+  {
+    id: 'tokyo', size: 'medium',
+    date: 'May 18, 2026', tag: 'Travel',
+    img: ASSETS.blog.tokyo,
+    title: { en: 'Tokyo: Neon Futures', mm: 'တိုကျို - နီယွန်အနာဂတ်များ', jp: '東京：ネオンの未来', vn: 'Tokyo: Tương Lai Neon', ne: 'टोकियो: नियोन भविष्य', id: 'Tokyo: Masa Depan Neon' },
+    translations: tokyoContent,
   },
   {
     id: 'thoughts', size: 'medium',
