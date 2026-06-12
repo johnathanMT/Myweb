@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { BLOG_POSTS } from '../data/content'
+import { useCyberReveal } from '../hooks/useCyberReveal'
 
 const TAG_CLASS = {
   Travel:       'tag-travel',
@@ -112,20 +113,13 @@ function Modal({ post, lang, setLang, onClose }) {
 
 export default function TravelChronicles({ lang, setLang }) {
   const [activePost, setActivePost] = useState(null)
-  const sectionRef = useRef(null)
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
-      { threshold: 0.08 }
-    )
-    sectionRef.current?.querySelectorAll('.reveal').forEach(el => obs.observe(el))
-    return () => obs.disconnect()
-  }, [])
+  const sectionRef = useCyberReveal()   // GSAP ScrollTrigger reveals, synced to the 3D camera
 
   return (
     <section id="blog" ref={sectionRef} className="relative py-24 border-t border-white/5"
       style={{ '--c': '#f43f5e' }}>
+      {/* heavy frosted scrim for readability over the 3D city */}
+      <div className="absolute inset-0 bg-black/45 backdrop-blur-md pointer-events-none" />
       {/* Rose-tinted bg */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'linear-gradient(180deg, rgba(7,7,15,0.5) 0%, transparent 40%, transparent 60%, rgba(7,7,15,0.5) 100%)' }} />
@@ -134,7 +128,7 @@ export default function TravelChronicles({ lang, setLang }) {
 
       <div className="section-container relative z-10">
         {/* Header */}
-        <div className="reveal mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <div data-reveal className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             <span className="section-badge">Chronicles</span>
             <h2 className="section-title">
@@ -161,7 +155,7 @@ export default function TravelChronicles({ lang, setLang }) {
           </div>
         </div>
 
-        <div className="reveal bento-grid">
+        <div data-reveal className="bento-grid">
           {BLOG_POSTS.map(post => (
             <BentoCard key={post.id} post={post} lang={lang} onClick={setActivePost} />
           ))}

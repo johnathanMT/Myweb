@@ -1,21 +1,14 @@
-import { useEffect, useRef } from 'react'
 import { INTERESTS, PERSONAL } from '../data/content'
+import { useCyberReveal } from '../hooks/useCyberReveal'
 
 export default function Exploring() {
-  const sectionRef = useRef(null)
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
-      { threshold: 0.05 }
-    )
-    sectionRef.current?.querySelectorAll('.reveal').forEach(el => obs.observe(el))
-    return () => obs.disconnect()
-  }, [])
+  const sectionRef = useCyberReveal()   // GSAP ScrollTrigger reveals, synced to the 3D camera
 
   return (
     <section id="exploring" ref={sectionRef} className="relative py-24 border-t border-white/5"
       style={{ '--c': '#8b5cf6' }}>
+      {/* heavy frosted scrim for readability over the 3D city */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-md pointer-events-none" />
       {/* Cosmic bg */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'linear-gradient(180deg, rgba(7,7,15,0.5) 0%, transparent 40%, transparent 60%, rgba(7,7,15,0.5) 100%)' }} />
@@ -41,7 +34,7 @@ export default function Exploring() {
 
       <div className="section-container relative z-10">
         {/* Header */}
-        <div className="reveal mb-8">
+        <div data-reveal className="mb-8">
           <span className="section-badge">Polymath</span>
           <h2 className="section-title">
             Exploring the Infinite <span className="accent-gradient">🌌</span>
@@ -50,7 +43,7 @@ export default function Exploring() {
         </div>
 
         {/* Heinlein quote */}
-        <div className="reveal mb-14 max-w-3xl">
+        <div data-reveal className="mb-14 max-w-3xl">
           <div className="relative p-6 rounded-2xl overflow-hidden"
             style={{ background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.15)' }}>
             <div className="absolute top-0 left-0 w-1 h-full rounded-full"
@@ -61,7 +54,7 @@ export default function Exploring() {
         </div>
 
         {/* Interest grid — 4 cols desktop, 2 cols mobile */}
-        <div className="reveal grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div data-reveal className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {INTERESTS.map(({ title, desc, icon, color, page }, i) => (
             <a
               key={title}

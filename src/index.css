@@ -1145,10 +1145,15 @@ body::before {
   width: min(620px, 88vw);
   min-height: 168px;
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.9;
   color: #7ef9c5;
   text-shadow: 0 0 8px rgba(57, 255, 150, 0.5);
   white-space: pre-wrap;
+  /* Per-glyph fallback: Latin uses Fira Code; Burmese glyphs fall through to the
+     first Myanmar-capable font available — web-loaded Padauk / Noto Sans Myanmar,
+     then common system Burmese fonts (Windows · macOS/iOS · Android/Linux). */
+  font-family: "Fira Code", "Padauk", "Noto Sans Myanmar", "Myanmar Text",
+               "Pyidaungsu", "Myanmar Sangam MN", "Noto Sans Myanmar UI", monospace;
 }
 .boot-log .ok { color: #00d4ff; }
 .boot-bar {

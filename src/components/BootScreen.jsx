@@ -6,7 +6,8 @@ import { useEffect, useRef, useState } from 'react'
  * Skippable, and near-instant for prefers-reduced-motion.
  */
 const LINES = [
-  '> initializing MTN.OS kernel ...........',
+  '> initializing MyoThantNaing.Operation System kernel ...........',
+  '> နမောတဿ ဘဂဝါတော အရဟတော သမ္မာသမ္ဗုဒ္ဓဿ ...........',
   '> mounting /neon/megacity ............... [OK]',
   '> loading shaders: bloom · chromatic · glitch [OK]',
   '> uplink → myweb-zqv1.onrender.com ...... [OK]',
@@ -30,7 +31,7 @@ export default function BootScreen() {
 
     const finish = () => {
       endT = setTimeout(() => {
-        try { sessionStorage.setItem('mtn_booted', '1') } catch {}
+        try { sessionStorage.setItem('mtn_booted', '1') } catch { }
         setDone(true)
         setTimeout(() => setShow(false), 650)   // unmount after fade
       }, reduce ? 150 : 550)
@@ -60,7 +61,7 @@ export default function BootScreen() {
   if (!show) return null
 
   const skip = () => {
-    try { sessionStorage.setItem('mtn_booted', '1') } catch {}
+    try { sessionStorage.setItem('mtn_booted', '1') } catch { }
     setDone(true); setTimeout(() => setShow(false), 650)
   }
 

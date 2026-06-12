@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
 import { ArrowUpRight, Star } from 'lucide-react'
 import { PROJECTS } from '../data/content'
+import { useCyberReveal } from '../hooks/useCyberReveal'
 
 const T = {
   en: { title: 'My Projects', sub: "Things I've built and continue to build." },
@@ -71,35 +71,27 @@ function ProjectCard({ project, featured = false }) {
 
 export default function ProjectsSection({ lang }) {
   const t = T[lang] || T.en
-  const ref = useRef(null)
-
-  // keep the existing scroll-reveal behaviour
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add('visible')),
-      { threshold: 0.1 },
-    )
-    ref.current?.querySelectorAll('.reveal').forEach((el) => obs.observe(el))
-    return () => obs.disconnect()
-  }, [])
+  const ref = useCyberReveal()   // GSAP ScrollTrigger reveals, synced to the 3D camera
 
   const featured = PROJECTS.filter((p) => p.featured)
   const rest = PROJECTS.filter((p) => !p.featured)
 
   return (
-    <section id="projects" ref={ref} className="relative overflow-hidden bg-transparent py-24">
+    <section id="projects" ref={ref} className="relative overflow-hidden py-24">
+      {/* heavy frosted scrim for readability over the 3D city */}
+      <div className="absolute inset-0 bg-black/45 backdrop-blur-md pointer-events-none" />
       {/* section-local cyberpunk glow */}
       <div className="pointer-events-none absolute -top-10 right-10 h-72 w-72 rounded-full bg-purple-700/15 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-[120px]" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <div className="reveal mb-12 text-center">
+        <div data-reveal className="mb-12 text-center">
           <p className="font-mono text-sm uppercase tracking-[0.25em] text-accent-light">// work</p>
-          <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl">{t.title}</h2>
-          <p className="mt-2 text-muted">{t.sub}</p>
+          <h2 className="glow-heading mt-2 text-3xl font-bold text-white sm:text-4xl">{t.title}</h2>
+          <p className="mt-2 text-gray-300">{t.sub}</p>
         </div>
 
-        <div className="reveal grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div data-reveal className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((p) => <ProjectCard key={p.id} project={p} featured />)}
           {rest.map((p) => <ProjectCard key={p.id} project={p} />)}
         </div>
