@@ -28,13 +28,15 @@ export default function App() {
     try { localStorage.setItem('mtn_lang', lang) } catch {}
   }, [lang])
 
-  // Only run the WebGL flythrough on capable devices; otherwise fall back to the
-  // static galaxy gradient. Decided once on mount.
+  // Run the WebGL flythrough on phones AND laptops (the mobile performance tier
+  // in NeonCity + the lower DPR in CyberBackground keep it smooth). Only fall
+  // back to the static galaxy when the user asked for reduced motion or is in
+  // data-saver mode. Decided once on mount.
   const [heavyOK, setHeavyOK] = useState(false)
   useEffect(() => {
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     const saveData = navigator.connection?.saveData
-    setHeavyOK(!reduce && !saveData && window.innerWidth > 820)
+    setHeavyOK(!reduce && !saveData)
   }, [])
 
   return (

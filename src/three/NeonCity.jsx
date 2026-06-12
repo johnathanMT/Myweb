@@ -22,11 +22,13 @@ const SIGN_WORDS = ['サイバー', '東京', 'ラーメン', '未来', '電脳'
 // Holographic signs near the start of the corridor act as navigation. Each
 // scrolls to a section (or opens the blog). Populated at runtime for the raycaster.
 const BASE = import.meta.env.BASE_URL || '/'
+// Pushed well back (z) and spread wide (x) + vertically (y) so they frame the
+// HTML hero name instead of overlapping it. Bigger planes keep them readable.
 const MENU = [
-  { label: 'ABOUT',    target: '#about',     color: '#00e5ff', pos: [-5.2, 3.8, -14], rotY: 0.35 },
-  { label: 'PROJECTS', target: '#projects',  color: '#ff1e6b', pos: [ 5.4, 1.8, -17], rotY: -0.35 },
-  { label: 'EXPLORE',  target: '#exploring', color: '#19ffe0', pos: [-5.6, 0.4, -23], rotY: 0.35 },
-  { label: 'BLOG',     external: true, href: `${BASE}blog.html`, color: '#ff8a00', pos: [5.2, 4.6, -26], rotY: -0.35 },
+  { label: 'ABOUT',    target: '#about',     color: '#00e5ff', pos: [-8.5,  6.5, -30], rotY: 0.5 },
+  { label: 'PROJECTS', target: '#projects',  color: '#ff1e6b', pos: [ 8.8,  2.0, -34], rotY: -0.5 },
+  { label: 'EXPLORE',  target: '#exploring', color: '#19ffe0', pos: [-9.0, -1.5, -38], rotY: 0.5 },
+  { label: 'BLOG',     external: true, href: `${BASE}blog.html`, color: '#ff8a00', pos: [ 8.5,  7.5, -42], rotY: -0.5 },
 ]
 let MENU_MESHES = []   // [{ mesh, item }] — filled by <MenuPortals>, read by the camera raycaster
 
@@ -280,7 +282,7 @@ function MenuPortals() {
           position={it.pos}
           rotation={[0, it.rotY, 0]}
         >
-          <planeGeometry args={[2.6 * it.aspect, 2.6]} />
+          <planeGeometry args={[3.4 * it.aspect, 3.4]} />
           <meshBasicMaterial map={it.tex} transparent toneMapped={false} side={THREE.DoubleSide} depthWrite={false} />
         </mesh>
       ))}
