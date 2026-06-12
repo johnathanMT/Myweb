@@ -22,10 +22,14 @@ import { initCyberScroll } from '../lib/cyberScroll'
 export default function CyberBackground() {
   useEffect(() => initCyberScroll(), [])
 
+  // Phone vs laptop, decided once. Phones get a lower pixel-ratio cap (a fragment-
+  // heavy Bloom pass at full retina DPR melts mobile GPUs) and lighter effects.
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 820
+
   return (
     <div className="cyber-bg" aria-hidden="true">
       <Canvas
-        dpr={[1, 1.75]}
+        dpr={[1, isMobile ? 1.2 : 1.75]}
         gl={{ antialias: false, powerPreference: 'high-performance' }}
         camera={{ position: [0, 1.2, 6], fov: 72, near: 0.1, far: 600 }}
       >
@@ -33,7 +37,8 @@ export default function CyberBackground() {
         <fog attach="fog" args={['#05030c', 14, 95]} />
         <Suspense fallback={null}>
           <NeonCity />
-          <Effects glitch />
+          {/* lighter post-processing on phones (no glitch, gentler bloom) */}
+          <Effects glitch={!isMobile} low={isMobile} />
         </Suspense>
       </Canvas>
     </div>

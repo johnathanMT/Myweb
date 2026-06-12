@@ -19,10 +19,10 @@ export default function About({ lang }) {
   const sectionRef = useCyberReveal()
 
   return (
-    <section id="about" ref={sectionRef} className="relative py-28 border-t border-white/5 overflow-hidden">
-      {/* heavy frosted scrim — keeps text readable over the neon city while
-          still letting a hint of it glow through */}
-      <div className="absolute inset-0 bg-black/55 backdrop-blur-md pointer-events-none" />
+    <section id="about" ref={sectionRef} className="relative py-28 border-t border-white/5 overflow-hidden text-legible">
+      {/* crystal-clear: faint tint only, NO blur — the 3D city shows through.
+          Readability comes from .text-legible (inherited dark text-shadow). */}
+      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* ambient glows */}
       <div className="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl pointer-events-none opacity-20"
         style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }} />
@@ -75,7 +75,7 @@ export default function About({ lang }) {
           </div>
 
           {/* Bio — glass card */}
-          <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-7 md:p-9 space-y-6"
+          <div className="relative rounded-3xl border border-white/10 bg-black/15 backdrop-blur-sm p-7 md:p-9 space-y-6"
             style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 30px 60px -30px rgba(124,58,237,0.4)' }}>
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-1">{PERSONAL.name}</h3>

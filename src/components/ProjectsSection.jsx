@@ -77,9 +77,9 @@ export default function ProjectsSection({ lang }) {
   const rest = PROJECTS.filter((p) => !p.featured)
 
   return (
-    <section id="projects" ref={ref} className="relative overflow-hidden py-24">
-      {/* heavy frosted scrim for readability over the 3D city */}
-      <div className="absolute inset-0 bg-black/45 backdrop-blur-md pointer-events-none" />
+    <section id="projects" ref={ref} className="relative overflow-hidden py-24 text-legible">
+      {/* crystal-clear: faint tint only, no blur (readability via .text-legible) */}
+      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* section-local cyberpunk glow */}
       <div className="pointer-events-none absolute -top-10 right-10 h-72 w-72 rounded-full bg-purple-700/15 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-[120px]" />

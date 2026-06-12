@@ -713,8 +713,10 @@ body::before {
 ══════════════════════════════════════════ */
 .orbit-galaxy {
   background:
-    radial-gradient(circle at 50% 40%, rgba(40, 20, 70, 0.45), transparent 60%),
-    #05030c;
+    radial-gradient(circle at 50% 40%, rgba(40, 20, 70, 0.35), transparent 60%),
+    /* translucent (was opaque #05030c) so the 3D city shows through; the
+       twinkling starfield ::before still overlays for the cosmic feel */
+    rgba(5, 3, 12, 0.3);
 }
 
 /* twinkling starfield */
@@ -1040,21 +1042,44 @@ body::before {
 ══════════════════════════════════════════ */
 /* Heavy dark frosted panel — wrap content sections so text stays legible. */
 .glass-panel {
-  background: rgba(7, 6, 14, 0.6);
-  backdrop-filter: blur(14px) saturate(120%);
-  -webkit-backdrop-filter: blur(14px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 5, 12, 0.18);                       /* near-transparent — 3D shows through */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border: 1px solid rgba(124, 58, 237, 0.18);
   border-radius: 24px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 30px 70px -40px rgba(0, 0, 0, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 30px 70px -40px rgba(0, 0, 0, 0.8);
 }
 
 /* Glow + dark halo so headings pop against neon. Apply to any heading. */
+/* Brighter, more vibrant neon glow for headings (cyan core + violet halo). */
 .glow-heading {
-  text-shadow: 0 0 18px rgba(124, 58, 237, 0.55), 0 0 40px rgba(0, 212, 255, 0.25), 0 2px 10px rgba(0, 0, 0, 0.85);
+  text-shadow:
+    0 0 8px  rgba(255, 255, 255, 0.55),
+    0 0 22px rgba(0, 229, 255, 0.85),
+    0 0 46px rgba(124, 58, 237, 0.7),
+    0 2px 12px rgba(0, 0, 0, 0.95);
 }
 
 /* Global lift for existing section titles (covers About, Gallery, Travel, …). */
-.section-title { text-shadow: 0 0 20px rgba(124, 58, 237, 0.45), 0 2px 10px rgba(0, 0, 0, 0.85); }
+.section-title {
+  text-shadow:
+    0 0 8px  rgba(255, 255, 255, 0.4),
+    0 0 24px rgba(0, 229, 255, 0.7),
+    0 0 44px rgba(124, 58, 237, 0.55),
+    0 2px 12px rgba(0, 0, 0, 0.95);
+}
+
+/* Readable body/paragraph text over the bright 3D scene: a soft dark halo so
+   light neon behind it never washes out the words. Add to subheads/paragraphs. */
+/* Dense dark halo for legibility over a crystal-clear 3D background. text-shadow
+   INHERITS, so adding this to a <section> makes every paragraph/label inside it
+   readable — while headings keep their own neon glow (they set their own shadow). */
+.text-legible {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.98),
+    0 0 6px rgba(0, 0, 0, 0.92),
+    0 0 16px rgba(0, 0, 0, 0.8);
+}
 
 /* ══════════════════════════════════════════
    YEAR IN FOCUS — its own deep-space universe
@@ -1065,11 +1090,11 @@ body::before {
   padding: 1.5rem 1rem 2.5rem;
   overflow: hidden;
   background:
-    radial-gradient(120% 90% at 50% 0%, rgba(124, 58, 237, 0.16), transparent 60%),
-    radial-gradient(100% 80% at 50% 100%, rgba(0, 212, 255, 0.12), transparent 65%),
-    rgba(4, 3, 12, 0.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    radial-gradient(120% 90% at 50% 0%, rgba(124, 58, 237, 0.14), transparent 60%),
+    radial-gradient(100% 80% at 50% 100%, rgba(0, 212, 255, 0.10), transparent 65%),
+    rgba(4, 3, 12, 0.18);                 /* near-transparent — orbit + city show through */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   border: 1px solid transparent;
   /* glowing gradient border via mask trick */
   box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.35), 0 0 60px -10px rgba(124, 58, 237, 0.45), inset 0 0 80px -40px rgba(0, 212, 255, 0.5);

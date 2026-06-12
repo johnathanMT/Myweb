@@ -22,7 +22,7 @@ export default function SeasonalGallery() {
   }, [])
 
   return (
-    <section id="seasonal" ref={sectionRef} className="orbit-galaxy relative py-28 border-t border-white/5 overflow-hidden">
+    <section id="seasonal" ref={sectionRef} className="orbit-galaxy relative py-28 border-t border-white/5 overflow-hidden text-legible">
       {/* nebula glows */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(60% 50% at 20% 20%, rgba(124,58,237,0.18), transparent 60%), radial-gradient(55% 45% at 85% 75%, rgba(0,212,255,0.14), transparent 60%), radial-gradient(50% 40% at 60% 110%, rgba(236,72,153,0.12), transparent 60%)' }} />

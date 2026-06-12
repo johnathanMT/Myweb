@@ -116,10 +116,10 @@ export default function TravelChronicles({ lang, setLang }) {
   const sectionRef = useCyberReveal()   // GSAP ScrollTrigger reveals, synced to the 3D camera
 
   return (
-    <section id="blog" ref={sectionRef} className="relative py-24 border-t border-white/5"
+    <section id="blog" ref={sectionRef} className="relative py-24 border-t border-white/5 text-legible"
       style={{ '--c': '#f43f5e' }}>
-      {/* heavy frosted scrim for readability over the 3D city */}
-      <div className="absolute inset-0 bg-black/45 backdrop-blur-md pointer-events-none" />
+      {/* crystal-clear: faint tint only, no blur (readability via .text-legible) */}
+      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* Rose-tinted bg */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'linear-gradient(180deg, rgba(7,7,15,0.5) 0%, transparent 40%, transparent 60%, rgba(7,7,15,0.5) 100%)' }} />

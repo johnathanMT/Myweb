@@ -50,6 +50,16 @@ export default function Navbar({ lang, setLang }) {
     if (target) target.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Logo → back to the Main Page (home route) + smooth-scroll to the very top.
+  // Uses the hash home route so it works on ANY domain (no hard-coded /Myweb/).
+  const goHome = (e) => {
+    e.preventDefault();
+    setMenuOpen(false);
+    const onSubRoute = window.location.hash && !['', '#', '#/', '#home'].includes(window.location.hash);
+    if (onSubRoute) window.location.hash = '#/';   // leave /python, /studying, … back to home
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
@@ -58,10 +68,12 @@ export default function Navbar({ lang, setLang }) {
         }`}
     >
       <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
-        {/* Logo */}
+        {/* Logo → Home (smooth scroll to top) */}
         <a
-          href="/Myweb/"
-          className="flex items-center gap-2 font-mono font-semibold text-white hover:text-accent-light transition-colors"
+          href="#/"
+          onClick={goHome}
+          aria-label="Back to top / Home"
+          className="flex items-center gap-2 font-mono font-semibold text-white hover:text-accent-light transition-colors cursor-pointer"
         >
           <span className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-xs font-bold text-white">M</span>
           <span className="hidden sm:inline text-sm">{PERSONAL.handle}</span>
