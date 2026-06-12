@@ -14,7 +14,7 @@ export default function Effects({ glitch = false, low = false }) {
   return (
     <EffectComposer disableNormalPass multisampling={0}>
       {/* Neon glow — slightly gentler on phones to save fill-rate */}
-      <Bloom intensity={low ? 0.9 : 1.25} luminanceThreshold={0.18} luminanceSmoothing={0.9} mipmapBlur radius={low ? 0.7 : 0.85} />
+      <Bloom intensity={low ? 1.05 : 1.5} luminanceThreshold={0.15} luminanceSmoothing={0.9} mipmapBlur radius={low ? 0.75 : 0.9} />
       {/* tiny RGB split for that "signal" feel */}
       <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={new Vector2(0.0009, 0.0009)} radialModulation={false} />
       {/* film grain + vignette: skip the grain on phones */}

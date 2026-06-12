@@ -10,7 +10,7 @@ const LINES = [
   '> နမောတဿ ဘဂဝါတော အရဟတော သမ္မာသမ္ဗုဒ္ဓဿ ...........',
   '> mounting /neon/megacity ............... [OK]',
   '> loading shaders: bloom · chromatic · glitch [OK]',
-  '> uplink → myweb-zqv1.onrender.com ...... [OK]',
+  '> contacting → ai@myothant.dev ...... [OK]',
   '> calibrating quantum workstation ....... [OK]',
   '> WELCOME, OPERATOR.',
 ]

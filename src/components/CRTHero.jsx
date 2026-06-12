@@ -73,7 +73,8 @@ export default function CRTHero({ children }) {
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan" /> quantum workstation · online
         </p>
 
-        {/* Giant crimson glow name — size is driven by .q-name (clamp/vw) in crt.css */}
+        {/* Single-line advanced cyber title — effects (dataflow gradient, CRT
+            scanlines, RGB slice-glitch, glow) all live on .q-name in crt.css. */}
         <span className="q-name-wrap block">
           <h1 className="q-name" data-text="MYO THANT NAING">
             MYO THANT NAING

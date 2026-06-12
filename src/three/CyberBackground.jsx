@@ -33,8 +33,9 @@ export default function CyberBackground() {
         gl={{ antialias: false, powerPreference: 'high-performance' }}
         camera={{ position: [0, 1.2, 6], fov: 72, near: 0.1, far: 600 }}
       >
-        <color attach="background" args={['#05030c']} />
-        <fog attach="fog" args={['#05030c', 14, 95]} />
+        {/* deep indigo base (not pure black) so the colour reads richer */}
+        <color attach="background" args={['#0a0618']} />
+        <fog attach="fog" args={['#0a0618', 16, 100]} />
         <Suspense fallback={null}>
           <NeonCity />
           {/* lighter post-processing on phones (no glitch, gentler bloom) */}

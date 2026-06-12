@@ -13,7 +13,9 @@ import { Instances, Instance } from '@react-three/drei'
 import * as THREE from 'three'
 import { scrollState } from '../lib/cyberScroll'
 
-const PALETTE = ['#00e5ff', '#ff1e6b', '#7c3aed', '#19ffe0', '#ff8a00']
+// Richer neon spectrum — cyan, hot-pink, violet, mint, orange, electric-green,
+// magenta, sky-blue, gold, coral — for a much more colourful city (all bloom).
+const PALETTE = ['#00e5ff', '#ff1e6b', '#7c3aed', '#19ffe0', '#ff8a00', '#39ff14', '#ff3df0', '#00b3ff', '#ffd400', '#ff5d5d']
 const DEPTH = 8
 
 const SIGN_WORDS = ['サイバー', '東京', 'ラーメン', '未来', '電脳', '寿司', '夜の街', '龍', 'バー', '居酒屋', 'CYBER', 'TOKYO']
@@ -132,7 +134,7 @@ function Clouds({ tier, track }) {
     z: -THREE.MathUtils.randFloat(10, track),
     s: THREE.MathUtils.randFloat(8, 16),
     drift: THREE.MathUtils.randFloat(0.2, 0.6) * (Math.random() < 0.5 ? -1 : 1),
-    tint: ['#7c3aed', '#00e5ff', '#ff1e6b'][(Math.random() * 3) | 0],
+    tint: PALETTE[(Math.random() * PALETTE.length) | 0],
   })), [tier, track])
   const refs = useRef([])
   useFrame((_, dt) => {
