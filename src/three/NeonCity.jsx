@@ -51,7 +51,9 @@ const DESKTOP = {
 // MOBILE / portrait — narrower horizontal FOV, so models are pulled toward the
 // centre + scaled down, and every y is AUTO-SEATED (seatY) so nothing floats.
 const MOBILE = {
-  london: { scale: 2.2, pos: [0, seatY(NATIVE_H.london, 2.2), -150], rot: [0, 0, 0] },
+  // London's bbox extends below the visible city, so seatY floats it. Manual y
+  // instead, calibrated to the desktop view: y = -10 + 3.6 * scale  (≈ -2 @ 2.2).
+  london: { scale: 2.2, pos: [0, -2, -150], rot: [0, 0, 0] },
   pagoda: { scale: 4, pos: [-13, seatY(NATIVE_H.pagoda, 4), -90], rot: [0, 0, 0] },
   osaka: { scale: 0.02, pos: [15, seatY(NATIVE_H.osaka, 0.02), -85], rot: [0, 0, 0] },
 }
