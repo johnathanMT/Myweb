@@ -26,31 +26,35 @@ import { scrollState } from '../lib/cyberScroll'
 
 const BASE = import.meta.env.BASE_URL || '/'
 const TRACK = 200
-const isLow = typeof window !== 'undefined' && window.innerWidth < 820
+
+// Measured native HEIGHT (Y extent) of each model. Used to auto-seat the base on
+// the GROUND line: base = posY - (nativeH * scale) / 2  →  posY = GROUND + that.
+const NATIVE_H = { london: 31.6, pagoda: 7.6, osaka: 2158 }
+
+const LONDON_URL = BASE + 'london-opt.glb'
+const PAGODA_URL = BASE + 'pagoda-opt.glb'
+const OSAKA_URL = BASE + 'osaka_castle.glb'
 
 // ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  CENTRALIZED TUNING BLOCK — edit everything here, no code-hunting needed.  ║
+// ║  CENTRALIZED + RESPONSIVE TUNING — two layouts, picked live by viewport.   ║
 // ║  POS = [x (left/right), y (up/down), z (depth, more negative = further)].  ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
-const GROUND = -10   // shared ground line; each POS.y below seats the base here
+const GROUND = -10                                    // shared ground line
+const seatY = (h, scale) => GROUND + (h * scale) / 2  // y that rests the base on GROUND
 
-// ── LONDON CITY — native maxDim ≈ 36, already centred → small multiplier ──────
-const LONDON_URL = BASE + 'london-opt.glb'
-const LONDON_SCALE = isLow ? 0.9 : 5.8
-const LONDON_POS = [0, 11, -290]        // FOREGROUND, centred
-const LONDON_ROT = [0, 0, 0]          // sideways? → [-Math.PI/2, 0, 0]
-
-// ── PAGODA — native maxDim ≈ 7.6 (tiny) → needs a BIG multiplier ──────────────
-const PAGODA_URL = BASE + 'pagoda-opt.glb'
-const PAGODA_SCALE = isLow ? 2.5 : 4
-const PAGODA_POS = [-40, 7, -90]     // LEFT background, towering
-const PAGODA_ROT = [0, 0, 0]
-
-// ── OSAKA CASTLE — native maxDim ≈ 2856 (HUGE) → needs a TINY multiplier ──────
-const OSAKA_URL = BASE + 'osaka_castle.glb'
-const OSAKA_SCALE = isLow ? 0.017 : 0.012
-const OSAKA_POS = [50, 3, -70]      // RIGHT background, towering
-const OSAKA_ROT = [0, 0, 0]
+// DESKTOP / landscape — your hand-tuned values, left exactly as-is.
+const DESKTOP = {
+  london: { scale: 5.8, pos: [0, 11, -290], rot: [0, 0, 0] },
+  pagoda: { scale: 4, pos: [-40, 7, -90], rot: [0, 0, 0] },
+  osaka: { scale: 0.012, pos: [50, 3, -70], rot: [0, 0, 0] },
+}
+// MOBILE / portrait — narrower horizontal FOV, so models are pulled toward the
+// centre + scaled down, and every y is AUTO-SEATED (seatY) so nothing floats.
+const MOBILE = {
+  london: { scale: 2.2, pos: [0, seatY(NATIVE_H.london, 2.2), -150], rot: [0, 0, 0] },
+  pagoda: { scale: 4, pos: [-13, seatY(NATIVE_H.pagoda, 4), -90], rot: [0, 0, 0] },
+  osaka: { scale: 0.02, pos: [15, seatY(NATIVE_H.osaka, 0.02), -85], rot: [0, 0, 0] },
+}
 
 /* Error boundary so one model/decoder failure can't blank the rest of the scene. */
 class Safe extends Component {
@@ -299,6 +303,12 @@ function InteractiveCamera({ track }) {
 //  SCENE — minimal, high-performance lighting (1 ambient + 1 directional).
 // ════════════════════════════════════════════════════════════════════════════
 export default function NeonCity() {
+  // Reactive: this selector re-runs NeonCity whenever the canvas size changes
+  // (resize / device rotation), so the layout always matches the viewport.
+  const portrait = useThree((s) => s.size.height > s.size.width)
+  const L = portrait ? MOBILE : DESKTOP
+  const k = portrait ? 'm' : 'd'   // key suffix → clean remount + re-seat on flip
+
   return (
     <group>
       {/* Simple, cheap lighting: fill + key. No shadows, no env map. */}
@@ -311,30 +321,26 @@ export default function NeonCity() {
       {/* ════════ LONDON CITY — sprawling foreground ════════ */}
       <Safe>
         <Suspense fallback={null}>
-          <Model url={LONDON_URL} scale={LONDON_SCALE} position={LONDON_POS} rotation={LONDON_ROT} />
+          <Model key={'L' + k} url={LONDON_URL} scale={L.london.scale} position={L.london.pos} rotation={L.london.rot} />
         </Suspense>
       </Safe>
 
-      {/* ════════ PAGODA — left-background tower (gold) + gateway archway ════════ */}
-      {!isLow && (
-        <Safe>
-          <Suspense fallback={null}>
-            <group>
-              <Model url={PAGODA_URL} scale={PAGODA_SCALE} position={PAGODA_POS} rotation={PAGODA_ROT} tint={goldTint} />
-              <Archway x={PAGODA_POS[0]} z={PAGODA_POS[2] + 40} scale={1.3} />
-            </group>
-          </Suspense>
-        </Safe>
-      )}
+      {/* ════════ PAGODA — left tower (gold) + gateway archway — now on mobile too ════════ */}
+      <Safe>
+        <Suspense fallback={null}>
+          <group>
+            <Model key={'P' + k} url={PAGODA_URL} scale={L.pagoda.scale} position={L.pagoda.pos} rotation={L.pagoda.rot} tint={goldTint} />
+            <Archway x={L.pagoda.pos[0]} z={L.pagoda.pos[2] + 40} scale={portrait ? 1 : 1.3} />
+          </group>
+        </Suspense>
+      </Safe>
 
-      {/* ════════ OSAKA CASTLE — right-background tower (cyber-neon tint) ════════ */}
-      {!isLow && (
-        <Safe>
-          <Suspense fallback={null}>
-            <Model url={OSAKA_URL} scale={OSAKA_SCALE} position={OSAKA_POS} rotation={OSAKA_ROT} tint={neonTint} />
-          </Suspense>
-        </Safe>
-      )}
+      {/* ════════ OSAKA CASTLE — right tower (cyber-neon tint) — now on mobile too ════════ */}
+      <Safe>
+        <Suspense fallback={null}>
+          <Model key={'O' + k} url={OSAKA_URL} scale={L.osaka.scale} position={L.osaka.pos} rotation={L.osaka.rot} tint={neonTint} />
+        </Suspense>
+      </Safe>
 
       <MenuPortals />
       <Drone />
@@ -343,9 +349,8 @@ export default function NeonCity() {
   )
 }
 
-// Warm the cache so the GLBs start downloading/decoding before first paint.
+// Warm the cache so all three GLBs start downloading/decoding before first paint
+// (small Draco files — fine on mobile too).
 useGLTF.preload(LONDON_URL, true)
-if (!isLow) {
-  useGLTF.preload(PAGODA_URL, true)
-  useGLTF.preload(OSAKA_URL, true)
-}
+useGLTF.preload(PAGODA_URL, true)
+useGLTF.preload(OSAKA_URL, true)
