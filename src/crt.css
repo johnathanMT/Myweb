@@ -87,22 +87,31 @@
   margin: 0;
   font-weight: 900;
   line-height: 0.9;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
   text-transform: uppercase;
-  font-size: clamp(2.75rem, 13vw, 11rem);   /* full-bleed single line */
+  font-size: clamp(3rem, 14vw, 12rem);   /* full-bleed single line, larger */
 
   /* Two clipped background layers: scanlines (fixed) + flowing cyber gradient.
-     background-clip:text keeps BOTH inside the glyphs — scanlines on the
-     letters themselves, not a rectangle behind them. */
+     Colours boosted to fully-saturated neon for maximum vibrancy. */
   background-image:
-    repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.45) 2px 3px),
-    linear-gradient(90deg, #00e5ff 0%, #19ffe0 26%, #4b7bff 52%, #a855f7 76%, #00e5ff 100%);
+    repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.4) 2px 3px),
+    linear-gradient(90deg, #00f0ff 0%, #19ffe0 22%, #4b7bff 48%, #ff3df0 72%, #00f0ff 100%);
   background-size: 100% 3px, 300% 100%;
   background-position: 0 0, 0% 50%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
+
+  /* Thin dark contour UNDER the gradient fill → crisp legible edges on any
+     background (paint-order draws the stroke first, then the colourful fill). */
+  -webkit-text-stroke: 1px rgba(2, 6, 16, 0.55);
+  paint-order: stroke fill;
+
+  /* Base glow + dark separation shadow (also the fallback when motion is off). */
+  filter:
+    drop-shadow(0 2px 8px rgba(0, 0, 0, 0.85))
+    drop-shadow(0 0 18px rgba(0, 229, 255, 0.7));
 
   animation:
     q-dataflow 7s linear infinite,        /* the gradient streams sideways */
@@ -118,10 +127,16 @@
 /* Glow alternates electric blue-green ⇄ violet (filter so it haloes the glyphs). */
 @keyframes q-cyberglow {
   0%, 100% {
-    filter: drop-shadow(0 0 14px rgba(0,229,255,0.65)) drop-shadow(0 0 42px rgba(25,255,224,0.4));
+    filter:
+      drop-shadow(0 2px 8px rgba(0,0,0,0.85))          /* constant dark contour for contrast */
+      drop-shadow(0 0 18px rgba(0,229,255,0.8))
+      drop-shadow(0 0 54px rgba(25,255,224,0.5));
   }
   50% {
-    filter: drop-shadow(0 0 16px rgba(168,85,247,0.75)) drop-shadow(0 0 52px rgba(124,58,237,0.5));
+    filter:
+      drop-shadow(0 2px 8px rgba(0,0,0,0.85))
+      drop-shadow(0 0 22px rgba(255,61,240,0.85))
+      drop-shadow(0 0 64px rgba(124,58,237,0.6));
   }
 }
 
@@ -159,6 +174,18 @@
   position: relative;
   display: inline-block;
   isolation: isolate;
+}
+
+/* Soft dark halo behind the name only — lifts the glyphs off a busy 3D scene
+   for readability, with no hard panel edge. */
+.q-name-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -18% -8%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(58% 68% at 50% 50%, rgba(3, 5, 12, 0.6), transparent 75%);
+  filter: blur(16px);
 }
 
 .q-name-wrap::after {

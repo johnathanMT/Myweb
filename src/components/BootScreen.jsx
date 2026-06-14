@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react'
  */
 const LINES = [
   '> initializing MyoThantNaing.Operation System kernel ...........',
-  '> နမောတဿ ဘဂဝါတော အရဟတော သမ္မာသမ္ဗုဒ္ဓဿ ...........',
+  '> ငုပ်မိသဲတိုင် တတ်နိုင်ဖျားရောက် ...........',
   '> mounting /neon/megacity ............... [OK]',
   '> loading shaders: bloom · chromatic · glitch [OK]',
   '> contacting → ai@myothant.dev ...... [OK]',

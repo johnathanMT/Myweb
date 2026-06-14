@@ -5,21 +5,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Strict CSP — NO Google Translate, NO external script origins.
-         script-src is a clean 'self' (Vite ships external bundles).
-         style-src keeps 'unsafe-inline' ONLY because React/Vite inject inline
-         styles (style={{}} props) — this can't be nonced. Google Fonts + Font
-         Awesome CSS/fonts are allowed (typography, not the translate engine). -->
+    <!-- Strict CSP, with the additions WebGL/Three.js need:
+         • script-src 'wasm-unsafe-eval' → the Draco decoder is WebAssembly.
+         • worker-src 'self' blob:        → the Draco/GLTF loader runs a blob worker.
+         • img-src blob:                  → GLTFLoader decodes textures to blob URLs.
+         • connect-src gstatic            → the Draco decoder is fetched from gstatic. -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         base-uri 'self';
         object-src 'none';
-        script-src 'self';
+        script-src 'self' 'wasm-unsafe-eval';
+        worker-src 'self' blob:;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
         font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-        img-src 'self' data: https:;
-        media-src 'self' https://res.cloudinary.com;
-        connect-src 'self' https://myweb-zqv1.onrender.com;
+        img-src 'self' data: blob: https:;
+        media-src 'self' https://res.cloudinary.com blob:;
+        connect-src 'self' https://myweb-zqv1.onrender.com https://www.gstatic.com;
     ">
 
     <meta name="description"

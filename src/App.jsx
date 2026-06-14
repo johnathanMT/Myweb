@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense, Component } from 'react'
 import AmbientBackground from './components/AmbientBackground'
 import Navbar           from './components/Navbar'
 import CRTHero          from './components/CRTHero'        // immersive curved-screen hero
@@ -18,6 +18,18 @@ import HudFrame         from './components/HudFrame'        // HUD corner overla
 
 // Code-split the heavy three.js bundle so it never blocks first paint.
 const CyberBackground = lazy(() => import('./three/CyberBackground'))
+
+// If WebGL ever fails (context lost, driver crash, etc.), fall back to the
+// static galaxy instead of blanking the whole page.
+class CanvasBoundary extends Component {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch() {}
+  render() {
+    if (this.state.failed) return <div className="orbit-galaxy fixed inset-0 z-0" aria-hidden />
+    return this.props.children
+  }
+}
 
 export default function App() {
   const [lang, setLang] = useState(() => {
@@ -44,9 +56,11 @@ export default function App() {
     // wherever a section is transparent. Content sits at z-10, canvas at z-0.
     <div className="relative min-h-screen bg-[#05030c] text-white overflow-x-hidden">
       {heavyOK ? (
-        <Suspense fallback={<div className="orbit-galaxy fixed inset-0 z-0" aria-hidden />}>
-          <CyberBackground />
-        </Suspense>
+        <CanvasBoundary>
+          <Suspense fallback={<div className="orbit-galaxy fixed inset-0 z-0" aria-hidden />}>
+            <CyberBackground />
+          </Suspense>
+        </CanvasBoundary>
       ) : (
         // Lightweight static fallback (no WebGL): the Milky-Way gradient + stars.
         <>

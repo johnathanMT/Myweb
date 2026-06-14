@@ -1,6 +1,9 @@
-import { ArrowUpRight, Star } from 'lucide-react'
+import { lazy, Suspense } from 'react'
 import { PROJECTS } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
+
+// Code-split the WebGL gallery so the three.js chunk doesn't block this section.
+const WebGLGallery = lazy(() => import('../three/WebGLGallery'))
 
 const T = {
   en: { title: 'My Projects', sub: "Things I've built and continue to build." },
@@ -11,59 +14,47 @@ const T = {
   id: { title: 'Proyek Saya', sub: 'Hal-hal yang telah dan sedang saya bangun.' },
 }
 
-/** A single sleek project card with a colour-tinted, faceted gradient header. */
-function ProjectCard({ project, featured = false }) {
+/**
+ * A borderless project "logo tile": a large glowing icon over a soft colour halo,
+ * with the title + short description beneath. No cards, no rigid borders — just
+ * the logo floating on the shared glass surface. Hover lifts + intensifies glow.
+ */
+function ProjectLogo({ project }) {
   const c = project.color
   return (
     <a
       href={project.url}
       target={project.ext ? '_blank' : '_self'}
       rel={project.ext ? 'noopener noreferrer' : undefined}
-      className={`group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-cyan/40 hover:shadow-[0_28px_60px_-18px_rgba(0,229,255,0.25)] ${featured ? 'sm:col-span-2' : ''}`}
+      className="group relative flex flex-col items-center gap-4 rounded-3xl p-6 text-center transition-transform duration-300 hover:-translate-y-1.5"
     >
-      {/* Colour-tinted header with faceted lines + glowing icon */}
-      <div
-        className={`relative flex items-center justify-center overflow-hidden ${featured ? 'h-44' : 'h-36'}`}
-        style={{ background: `radial-gradient(120% 120% at 30% 0%, ${c}33 0%, transparent 60%), linear-gradient(135deg, ${c}22, #0a0a0f)` }}
-      >
-        {/* faceted geometric line overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-50"
-          style={{ backgroundImage: `repeating-linear-gradient(118deg, transparent 0 7px, ${c}14 7px 8px)` }}
+      {/* Large glowing logo — colour halo grows on hover, no border. */}
+      <span className="relative flex h-28 w-28 items-center justify-center">
+        {/* soft colour glow behind the icon */}
+        <span
+          className="absolute inset-0 rounded-full opacity-60 blur-2xl transition-all duration-300 group-hover:opacity-100 group-hover:scale-110"
+          style={{ background: `radial-gradient(circle, ${c}66 0%, transparent 70%)` }}
         />
-        {/* glow blob */}
-        <div className="absolute -bottom-10 left-1/2 h-28 w-28 -translate-x-1/2 rounded-full blur-3xl"
-          style={{ background: `${c}55` }} />
         <i
-          className={`${project.icon} relative text-4xl transition-transform duration-300 group-hover:scale-110`}
-          style={{ color: c, filter: `drop-shadow(0 0 14px ${c}88)` }}
+          className={`${project.icon} relative text-6xl transition-transform duration-300 group-hover:scale-110`}
+          style={{ color: c, filter: `drop-shadow(0 0 16px ${c}aa)` }}
         />
+        {project.featured && (
+          <span
+            className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full"
+            style={{ background: c, boxShadow: `0 0 12px ${c}` }}
+            title="Featured"
+          />
+        )}
+      </span>
 
-        {/* badges */}
-        <div className="absolute left-4 top-4 flex gap-2">
-          {featured && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-accent/80 px-2.5 py-0.5 text-xs font-semibold text-white backdrop-blur">
-              <Star size={11} /> Featured
-            </span>
-          )}
-          {project.ext && (
-            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium text-gray-200 backdrop-blur">
-              External
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className="flex flex-1 flex-col p-6">
-        <h3 className="mb-1 text-lg font-bold text-white transition-colors group-hover:text-accent-light">
+      <div>
+        <h3 className="text-lg font-bold text-white transition-colors group-hover:text-accent-light">
           {project.title}
         </h3>
-        <p className="mb-4 flex-1 text-sm leading-relaxed text-muted">{project.desc}</p>
-        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-300 transition-colors group-hover:text-accent-light">
-          Visit
-          <ArrowUpRight size={16} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </span>
+        <p className="mx-auto mt-1.5 max-w-[22ch] text-sm leading-relaxed text-gray-400">
+          {project.desc}
+        </p>
       </div>
     </a>
   )
@@ -73,13 +64,8 @@ export default function ProjectsSection({ lang }) {
   const t = T[lang] || T.en
   const ref = useCyberReveal()   // GSAP ScrollTrigger reveals, synced to the 3D camera
 
-  const featured = PROJECTS.filter((p) => p.featured)
-  const rest = PROJECTS.filter((p) => !p.featured)
-
   return (
     <section id="projects" ref={ref} className="relative overflow-hidden py-24 text-legible">
-      {/* crystal-clear: faint tint only, no blur (readability via .text-legible) */}
-      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* section-local cyberpunk glow */}
       <div className="pointer-events-none absolute -top-10 right-10 h-72 w-72 rounded-full bg-purple-700/15 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-[120px]" />
@@ -91,9 +77,28 @@ export default function ProjectsSection({ lang }) {
           <p className="mt-2 text-gray-300">{t.sub}</p>
         </div>
 
-        <div data-reveal className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((p) => <ProjectCard key={p.id} project={p} featured />)}
-          {rest.map((p) => <ProjectCard key={p.id} project={p} />)}
+        {/* ── ONE sleek borderless glass container holds everything ──────────── */}
+        <div
+          data-reveal
+          className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.045] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] backdrop-blur-2xl sm:p-8"
+        >
+          {/* faint top-edge sheen — gives the glass form without a hard border */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
+          {/* Floating WebGL showcase — drag/scroll to glide, click to expand. */}
+          <div className="relative mb-4 h-[58vh] w-full overflow-hidden rounded-[1.75rem] bg-black/20">
+            <Suspense fallback={<div className="flex h-full items-center justify-center font-mono text-sm text-muted">Loading gallery…</div>}>
+              <WebGLGallery />
+            </Suspense>
+            <span className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.25em] text-white/50">
+              drag · scroll · click to expand
+            </span>
+          </div>
+
+          {/* Large borderless project logos */}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            {PROJECTS.map((p) => <ProjectLogo key={p.id} project={p} />)}
+          </div>
         </div>
       </div>
     </section>

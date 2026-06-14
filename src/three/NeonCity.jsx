@@ -1,55 +1,121 @@
 // ============================================================================
-//  NeonCity — neon Tokyo corridor you fly through on scroll.
+//  NeonCity — cinematic skyline from THREE Draco+WebP models:
+//    • london-opt.glb   → sprawling FOREGROUND city
+//    • pagoda-opt.glb   → gold pagoda, LEFT background tower
+//    • osaka_castle.glb → castle, RIGHT background tower
 //
-//  Signs use a CANVAS TEXTURE (not a font file) so they ALWAYS render — no
-//  troika font fetch, no CSP issue, no tofu. Plus living city: trees, moving
-//  cars, a train, and drifting clouds. Performance auto-scales for mobile.
+//  WHY THE SCALES DIFFER SO MUCH (measured world-space maxDim of each file):
+//    london ≈ 36  ·  pagoda ≈ 7.6 (tiny)  ·  osaka ≈ 2856 (huge, ~80× london)
+//  A single "1–5" scale can't fit all three — osaka at scale 1 would be 2,856
+//  units wide and bury the camera. So each model gets its OWN measured scale.
+//
+//  Y-SEATING: every model uses <Center> (bbox-centre → group origin), and each
+//  POS.y below is pre-computed so the model's BASE rests on the shared GROUND
+//  line (≈ -16). That's why nothing floats or sinks. Tune from there.
+//
+//  PERF: ambient + 1 directional only, no shadows, matrixAutoUpdate off on the
+//  static meshes, models under <Suspense>, all geometry Draco-compressed.
 //
 //  Requires:  npm i three @react-three/fiber @react-three/drei
 // ============================================================================
-import { useMemo, useRef, useEffect } from 'react'
+import { useMemo, useRef, useEffect, Suspense, Component } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Instances, Instance } from '@react-three/drei'
+import { useGLTF, Center } from '@react-three/drei'
 import * as THREE from 'three'
 import { scrollState } from '../lib/cyberScroll'
 
-// Richer neon spectrum — cyan, hot-pink, violet, mint, orange, electric-green,
-// magenta, sky-blue, gold, coral — for a much more colourful city (all bloom).
-const PALETTE = ['#00e5ff', '#ff1e6b', '#7c3aed', '#19ffe0', '#ff8a00', '#39ff14', '#ff3df0', '#00b3ff', '#ffd400', '#ff5d5d']
-const DEPTH = 8
-
-const SIGN_WORDS = ['サイバー', '東京', 'ラーメン', '未来', '電脳', '寿司', '夜の街', '龍', 'バー', '居酒屋', 'CYBER', 'TOKYO']
-
-// ── Clickable 3D holo-menu ──────────────────────────────────────────────────
-// Holographic signs near the start of the corridor act as navigation. Each
-// scrolls to a section (or opens the blog). Populated at runtime for the raycaster.
 const BASE = import.meta.env.BASE_URL || '/'
-// Pushed well back (z) and spread wide (x) + vertically (y) so they frame the
-// HTML hero name instead of overlapping it. Bigger planes keep them readable.
-const MENU = [
-  { label: 'ABOUT',    target: '#about',     color: '#00e5ff', pos: [-8.5,  6.5, -30], rotY: 0.5 },
-  { label: 'PROJECTS', target: '#projects',  color: '#ff1e6b', pos: [ 8.8,  2.0, -34], rotY: -0.5 },
-  { label: 'EXPLORE',  target: '#exploring', color: '#19ffe0', pos: [-9.0, -1.5, -38], rotY: 0.5 },
-  { label: 'BLOG',     external: true, href: `${BASE}blog.html`, color: '#ff8a00', pos: [ 8.5,  7.5, -42], rotY: -0.5 },
-]
-let MENU_MESHES = []   // [{ mesh, item }] — filled by <MenuPortals>, read by the camera raycaster
+const TRACK = 200
+const isLow = typeof window !== 'undefined' && window.innerWidth < 820
 
-// ── Performance tiers ──────────────────────────────────────────────────────
-// Decided once from viewport width; lighter geometry + fewer objects on phones.
-function makeTier() {
-  const w = typeof window !== 'undefined' ? window.innerWidth : 1280
-  const low = w < 820
-  return low
-    ? { low: true,  rows: 40, signs: 12, cars: 5, trees: 10, clouds: 5, trains: 1 }
-    : { low: false, rows: 64, signs: 26, cars: 10, trees: 20, clouds: 9, trains: 2 }
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  CENTRALIZED TUNING BLOCK — edit everything here, no code-hunting needed.  ║
+// ║  POS = [x (left/right), y (up/down), z (depth, more negative = further)].  ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+const GROUND = -10   // shared ground line; each POS.y below seats the base here
+
+// ── LONDON CITY — native maxDim ≈ 36, already centred → small multiplier ──────
+const LONDON_URL = BASE + 'london-opt.glb'
+const LONDON_SCALE = isLow ? 0.9 : 5.8
+const LONDON_POS = [0, 11, -290]        // FOREGROUND, centred
+const LONDON_ROT = [0, 0, 0]          // sideways? → [-Math.PI/2, 0, 0]
+
+// ── PAGODA — native maxDim ≈ 7.6 (tiny) → needs a BIG multiplier ──────────────
+const PAGODA_URL = BASE + 'pagoda-opt.glb'
+const PAGODA_SCALE = isLow ? 2.5 : 4
+const PAGODA_POS = [-40, 7, -90]     // LEFT background, towering
+const PAGODA_ROT = [0, 0, 0]
+
+// ── OSAKA CASTLE — native maxDim ≈ 2856 (HUGE) → needs a TINY multiplier ──────
+const OSAKA_URL = BASE + 'osaka_castle.glb'
+const OSAKA_SCALE = isLow ? 0.017 : 0.012
+const OSAKA_POS = [50, 3, -70]      // RIGHT background, towering
+const OSAKA_ROT = [0, 0, 0]
+
+/* Error boundary so one model/decoder failure can't blank the rest of the scene. */
+class Safe extends Component {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch() { }
+  render() { return this.state.failed ? null : this.props.children }
 }
 
-// ── Canvas-texture neon sign (renders ANY system glyph; needs no font file) ──
+// ── Per-model material "tints" (defined at module scope = stable identity) ────
+// Deep OLD-GOLD for the pagoda. metalness 0.5 so it reads as gold without an env
+// map; emissive + toneMapped:false makes it bloom.
+function goldTint(m) {
+  m.color = new THREE.Color('#DAA520')
+  m.emissive = new THREE.Color('#B8860B')
+  m.emissiveIntensity = 0.5
+  m.metalness = 0.5
+  m.roughness = 0.4
+  m.toneMapped = false
+}
+// Subtle CYBERPUNK neon rim for the castle — keeps its own base colour/texture,
+// just adds a cool electric-blue glow so it matches the theme.
+function neonTint(m) {
+  m.emissive = new THREE.Color('#1e90ff')
+  m.emissiveIntensity = 0.28
+  m.metalness = 0.55
+  m.roughness = 0.45
+  m.toneMapped = false
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ONE reusable model loader for all three. <Center> guarantees the bbox-centre
+//  lands exactly on `position`, so placement is predictable. Shadows off,
+//  matrices frozen (static), optional material `tint`.
+// ════════════════════════════════════════════════════════════════════════════
+function Model({ url, scale, position, rotation = [0, 0, 0], tint }) {
+  const { scene } = useGLTF(url, true)   // true = decode Draco-compressed geometry
+  const model = useMemo(() => scene.clone(true), [scene])
+
+  useEffect(() => {
+    model.traverse((o) => {
+      if (!o.isMesh) return
+      o.castShadow = false
+      o.receiveShadow = false
+      o.frustumCulled = true
+      if (o.material && tint) { o.material = o.material.clone(); tint(o.material) }
+      o.matrixAutoUpdate = false        // static geometry → skip per-frame matrix math
+    })
+  }, [model, tint])
+
+  return (
+    <group position={position} rotation={rotation}>
+      <Center>
+        <primitive object={model} scale={scale} />
+      </Center>
+    </group>
+  )
+}
+
+// ── Canvas-texture neon sign (built once, no font file needed) ──────────────
 function makeSignTexture(text, color) {
   const fontSize = 120, pad = 36
   const c = document.createElement('canvas')
   let ctx = c.getContext('2d')
-  const fam = 'bold ' + fontSize + 'px "Noto Sans JP","Hiragino Sans","Yu Gothic","Noto Sans Myanmar",system-ui,sans-serif'
+  const fam = 'bold ' + fontSize + 'px "Noto Sans JP","Hiragino Sans","Noto Sans Myanmar",system-ui,sans-serif'
   ctx.font = fam
   const w = Math.ceil(ctx.measureText(text).width) + pad * 2
   const h = fontSize + pad * 2
@@ -57,186 +123,57 @@ function makeSignTexture(text, color) {
   ctx = c.getContext('2d')
   ctx.font = fam
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-  // glow pass
   ctx.shadowColor = color; ctx.shadowBlur = 28
   ctx.fillStyle = color
-  ctx.fillText(text, w / 2, h / 2)
-  ctx.fillText(text, w / 2, h / 2)
-  // bright white core
-  ctx.shadowBlur = 6
-  ctx.fillStyle = '#ffffff'
+  ctx.fillText(text, w / 2, h / 2); ctx.fillText(text, w / 2, h / 2)
+  ctx.shadowBlur = 6; ctx.fillStyle = '#ffffff'
   ctx.fillText(text, w / 2, h / 2)
   const tex = new THREE.CanvasTexture(c)
-  tex.colorSpace = THREE.SRGBColorSpace
-  tex.anisotropy = 4
+  tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4
   return { tex, aspect: w / h }
 }
 
-function NeonSigns({ tier, track }) {
-  // Build one texture per unique word (cached), reuse across many signs.
-  const textures = useMemo(() => {
-    const map = {}
-    SIGN_WORDS.forEach((word, i) => { map[word] = makeSignTexture(word, PALETTE[i % PALETTE.length]) })
-    return map
-  }, [])
-
-  const signs = useMemo(() => {
-    const out = []
-    for (let i = 0; i < tier.signs; i++) {
-      const side = Math.random() < 0.5 ? -1 : 1
-      const word = SIGN_WORDS[(Math.random() * SIGN_WORDS.length) | 0]
-      out.push({
-        word,
-        position: [side * 4.55, THREE.MathUtils.randFloat(1.5, 11), -THREE.MathUtils.randFloat(6, track - 10)],
-        rotY: side === -1 ? Math.PI / 2 : -Math.PI / 2,
-        height: THREE.MathUtils.randFloat(1.1, 2.0),
-      })
-    }
-    return out
-  }, [tier, track])
-
-  useEffect(() => () => { Object.values(textures).forEach((t) => t.tex.dispose()) }, [textures])
-
+// ── Grand archway + "SHWEDAGON PAGODA" signboard (lightweight basic materials) ──
+function Archway({ x = 0, z, scale = 1 }) {
+  const sign = useMemo(() => makeSignTexture('SHWEDAGON PAGODA', '#00e5ff'), [])
+  useEffect(() => () => sign.tex.dispose(), [sign])
   return (
-    <group>
-      {signs.map((s, i) => {
-        const { tex, aspect } = textures[s.word]
-        return (
-          <mesh key={i} position={s.position} rotation={[0, s.rotY, 0]}>
-            <planeGeometry args={[s.height * aspect, s.height]} />
-            <meshBasicMaterial map={tex} transparent toneMapped={false} side={THREE.DoubleSide} depthWrite={false} />
-          </mesh>
-        )
-      })}
+    <group position={[x, GROUND, z]} scale={scale}>
+      <mesh position={[-11, 8, 0]}><boxGeometry args={[1.6, 20, 1.6]} /><meshBasicMaterial color="#ff1e6b" toneMapped={false} /></mesh>
+      <mesh position={[11, 8, 0]}><boxGeometry args={[1.6, 20, 1.6]} /><meshBasicMaterial color="#ff1e6b" toneMapped={false} /></mesh>
+      <mesh position={[0, 18.4, 0]}><boxGeometry args={[24, 1.8, 1.8]} /><meshBasicMaterial color="#7c3aed" toneMapped={false} /></mesh>
+      <mesh position={[0, 22, 0]}>
+        <planeGeometry args={[4 * sign.aspect, 4]} />
+        <meshBasicMaterial map={sign.tex} transparent toneMapped={false} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
     </group>
   )
 }
 
-// ── Soft cloud texture (one, reused) ───────────────────────────────────────
-function makeCloudTexture() {
-  const s = 256
-  const c = document.createElement('canvas'); c.width = c.height = s
-  const ctx = c.getContext('2d')
-  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2)
-  g.addColorStop(0, 'rgba(255,255,255,0.9)')
-  g.addColorStop(0.5, 'rgba(180,200,255,0.35)')
-  g.addColorStop(1, 'rgba(180,200,255,0)')
-  ctx.fillStyle = g; ctx.fillRect(0, 0, s, s)
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace
-  return t
-}
+// ════════════════════════════════════════════════════════════════════════════
+//  Holographic clickable menu (unchanged)
+// ════════════════════════════════════════════════════════════════════════════
+const MENU = [
+  { label: 'ABOUT', target: '#about', color: '#00e5ff', pos: [-8.5, 6.5, -30], rotY: 0.5 },
+  { label: 'PROJECTS', target: '#projects', color: '#ff1e6b', pos: [8.8, 2.0, -34], rotY: -0.5 },
+  { label: 'EXPLORE', target: '#exploring', color: '#19ffe0', pos: [-9.0, -1.5, -38], rotY: 0.5 },
+  { label: 'BLOG', external: true, href: `${BASE}blog.html`, color: '#ff8a00', pos: [8.5, 7.5, -42], rotY: -0.5 },
+]
+let MENU_MESHES = []
 
-function Clouds({ tier, track }) {
-  const tex = useMemo(makeCloudTexture, [])
-  const data = useMemo(() => Array.from({ length: tier.clouds }).map(() => ({
-    x: THREE.MathUtils.randFloatSpread(28),
-    y: THREE.MathUtils.randFloat(14, 24),
-    z: -THREE.MathUtils.randFloat(10, track),
-    s: THREE.MathUtils.randFloat(8, 16),
-    drift: THREE.MathUtils.randFloat(0.2, 0.6) * (Math.random() < 0.5 ? -1 : 1),
-    tint: PALETTE[(Math.random() * PALETTE.length) | 0],
-  })), [tier, track])
+function MenuPortals() {
+  const items = useMemo(() => MENU.map((m) => ({ ...m, ...makeSignTexture(m.label, m.color) })), [])
   const refs = useRef([])
-  useFrame((_, dt) => {
-    refs.current.forEach((m, i) => { if (m) { m.position.x += data[i].drift * dt; if (m.position.x > 30) m.position.x = -30; if (m.position.x < -30) m.position.x = 30 } })
-  })
+  useEffect(() => {
+    MENU_MESHES = refs.current.filter(Boolean).map((mesh, i) => ({ mesh, item: items[i] }))
+    return () => { MENU_MESHES = [] }
+  }, [items])
   return (
     <group>
-      {data.map((c, i) => (
-        <mesh key={i} ref={(el) => (refs.current[i] = el)} position={[c.x, c.y, c.z]}>
-          <planeGeometry args={[c.s, c.s * 0.6]} />
-          <meshBasicMaterial map={tex} color={c.tint} transparent opacity={0.16} depthWrite={false} toneMapped={false} />
-        </mesh>
-      ))}
-    </group>
-  )
-}
-
-// ── Low-poly neon trees along the kerb ─────────────────────────────────────
-function Trees({ tier, track }) {
-  const trees = useMemo(() => Array.from({ length: tier.trees }).map(() => ({
-    x: (Math.random() < 0.5 ? -1 : 1) * THREE.MathUtils.randFloat(3.4, 4.2),
-    z: -THREE.MathUtils.randFloat(4, track),
-    h: THREE.MathUtils.randFloat(1.6, 2.8),
-    c: Math.random() < 0.5 ? '#19ff6a' : '#19ffe0',
-  })), [tier, track])
-  const seg = tier.low ? 5 : 7
-  return (
-    <group>
-      {trees.map((t, i) => (
-        <group key={i} position={[t.x, -2, t.z]}>
-          <mesh position={[0, t.h * 0.35, 0]}>
-            <cylinderGeometry args={[0.08, 0.12, t.h * 0.7, 5]} />
-            <meshBasicMaterial color="#3a2a4a" toneMapped={false} />
-          </mesh>
-          <mesh position={[0, t.h * 0.85, 0]}>
-            <coneGeometry args={[t.h * 0.4, t.h * 0.9, seg]} />
-            <meshBasicMaterial color={t.c} toneMapped={false} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  )
-}
-
-// ── Moving cars (glowing streaks) ──────────────────────────────────────────
-function Cars({ tier, track }) {
-  const cars = useMemo(() => Array.from({ length: tier.cars }).map(() => {
-    const dir = Math.random() < 0.5 ? -1 : 1
-    return {
-      lane: dir * THREE.MathUtils.randFloat(1.6, 2.6),
-      speed: THREE.MathUtils.randFloat(18, 34),
-      offset: Math.random() * track,
-      color: PALETTE[(Math.random() * PALETTE.length) | 0],
-      dir,
-    }
-  }), [tier, track])
-  const refs = useRef([])
-  useFrame((state) => {
-    const t = state.clock.elapsedTime
-    cars.forEach((c, i) => {
-      const m = refs.current[i]; if (!m) return
-      const p = ((t * c.speed + c.offset) % track)
-      m.position.z = c.dir < 0 ? -p : -(track - p)
-    })
-  })
-  return (
-    <group>
-      {cars.map((c, i) => (
-        <mesh key={i} ref={(el) => (refs.current[i] = el)} position={[c.lane, -1.55, 0]} scale={[0.4, 0.3, 2.4]}>
-          <boxGeometry />
-          <meshBasicMaterial color={c.color} toneMapped={false} />
-        </mesh>
-      ))}
-    </group>
-  )
-}
-
-// ── Elevated trains ────────────────────────────────────────────────────────
-function Trains({ tier, track }) {
-  const trains = useMemo(() => Array.from({ length: tier.trains }).map((_, i) => ({
-    x: i % 2 === 0 ? -7.5 : 7.5,
-    y: THREE.MathUtils.randFloat(5.5, 8),
-    speed: THREE.MathUtils.randFloat(40, 55),
-    offset: Math.random() * track,
-    dir: i % 2 === 0 ? -1 : 1,
-    color: i % 2 === 0 ? '#00e5ff' : '#ff1e6b',
-  })), [tier, track])
-  const refs = useRef([])
-  useFrame((state) => {
-    const t = state.clock.elapsedTime
-    trains.forEach((tr, i) => {
-      const m = refs.current[i]; if (!m) return
-      const p = ((t * tr.speed + tr.offset) % track)
-      m.position.z = tr.dir < 0 ? -p : -(track - p)
-    })
-  })
-  return (
-    <group>
-      {trains.map((tr, i) => (
-        <mesh key={i} ref={(el) => (refs.current[i] = el)} position={[tr.x, tr.y, 0]} scale={[0.6, 0.7, 9]}>
-          <boxGeometry />
-          <meshBasicMaterial color={tr.color} toneMapped={false} />
+      {items.map((it, i) => (
+        <mesh key={i} ref={(el) => { if (el) { el.userData.base = 1; refs.current[i] = el } }} position={it.pos} rotation={[0, it.rotY, 0]}>
+          <planeGeometry args={[3.4 * it.aspect, 3.4]} />
+          <meshBasicMaterial map={it.tex} transparent toneMapped={false} side={THREE.DoubleSide} depthWrite={false} />
         </mesh>
       ))}
     </group>
@@ -267,46 +204,23 @@ function Drone() {
   )
 }
 
-/* Clickable holographic menu signs (canvas textures, no font file). */
-function MenuPortals() {
-  const items = useMemo(() => MENU.map((m) => ({ ...m, ...makeSignTexture(m.label, m.color) })), [])
-  const refs = useRef([])
-  useEffect(() => {
-    MENU_MESHES = refs.current.filter(Boolean).map((mesh, i) => ({ mesh, item: items[i] }))
-    return () => { MENU_MESHES = [] }
-  }, [items])
-  return (
-    <group>
-      {items.map((it, i) => (
-        <mesh
-          key={i}
-          ref={(el) => { if (el) { el.userData.base = 1; refs.current[i] = el } }}
-          position={it.pos}
-          rotation={[0, it.rotY, 0]}
-        >
-          <planeGeometry args={[3.4 * it.aspect, 3.4]} />
-          <meshBasicMaterial map={it.tex} transparent toneMapped={false} side={THREE.DoubleSide} depthWrite={false} />
-        </mesh>
-      ))}
-    </group>
-  )
-}
-
-/* Interactive camera: forward scroll + mouse/gyro "look around" + a manual
-   raycaster that hovers/clicks the holo-menu WITHOUT stealing real DOM clicks. */
+// ════════════════════════════════════════════════════════════════════════════
+//  Interactive camera — scroll approach + mouse/gyro look + responsive framing.
+//  No allocations inside useFrame (temporaries created once via useMemo).
+// ════════════════════════════════════════════════════════════════════════════
 function InteractiveCamera({ track }) {
   const { camera, size } = useThree()
   const ray = useMemo(() => new THREE.Raycaster(), [])
   const ndc = useMemo(() => new THREE.Vector2(), [])
-  const aim = useRef({ x: 0, y: 0 })     // raw target from mouse / gyro (-1..1)
-  const look = useRef({ x: 0, y: 0 })    // smoothed
+  const aim = useRef({ x: 0, y: 0 })
+  const look = useRef({ x: 0, y: 0 })
   const hovered = useRef(null)
 
-  // Portrait fit: widen FOV when taller than wide (phones).
+  const portrait = size.height > size.width
   useEffect(() => {
-    camera.fov = size.height > size.width ? 95 : 72
+    camera.fov = portrait ? 100 : 72
     camera.updateProjectionMatrix()
-  }, [size.width, size.height, camera])
+  }, [portrait, camera])
 
   useEffect(() => {
     const setHover = (mesh) => {
@@ -321,20 +235,16 @@ function InteractiveCamera({ track }) {
       ray.setFromCamera(ndc, camera)
       return ray.intersectObjects(MENU_MESHES.map((m) => m.mesh), false)[0] || null
     }
-
-    // DESKTOP: mouse drives look + hover
     const onMouse = (e) => {
       aim.current.x = (e.clientX / window.innerWidth) * 2 - 1
       aim.current.y = -((e.clientY / window.innerHeight) * 2 - 1)
       setHover(raycast(e.clientX, e.clientY)?.object || null)
     }
-    // MOBILE: gyroscope drives look (gamma=left/right, beta=front/back)
     const onOrient = (e) => {
       if (e.gamma == null) return
       aim.current.x = THREE.MathUtils.clamp(e.gamma / 35, -1, 1)
       aim.current.y = THREE.MathUtils.clamp((e.beta - 45) / 35, -1, 1)
     }
-    // CLICK / TAP: navigate if a sign is hit — but never hijack real controls
     const onClick = (e) => {
       const el = document.elementFromPoint(e.clientX, e.clientY)
       if (el && el.closest('a,button,input,textarea,select,[role="button"]')) return
@@ -345,21 +255,15 @@ function InteractiveCamera({ track }) {
       if (item.external) { window.location.href = item.href; return }
       document.querySelector(item.target)?.scrollIntoView({ behavior: 'smooth' })
     }
-
     window.addEventListener('pointermove', onMouse)
     window.addEventListener('click', onClick)
-
-    // iOS needs a user gesture to grant gyro; Android can listen directly.
     const iOS = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'
     if (iOS) {
-      const req = () => DeviceOrientationEvent.requestPermission()
-        .then((s) => { if (s === 'granted') window.addEventListener('deviceorientation', onOrient) })
-        .catch(() => {})
+      const req = () => DeviceOrientationEvent.requestPermission().then((s) => { if (s === 'granted') window.addEventListener('deviceorientation', onOrient) }).catch(() => { })
       window.addEventListener('touchend', req, { once: true })
     } else {
       window.addEventListener('deviceorientation', onOrient)
     }
-
     return () => {
       window.removeEventListener('pointermove', onMouse)
       window.removeEventListener('click', onClick)
@@ -370,15 +274,13 @@ function InteractiveCamera({ track }) {
   useFrame((_, dt) => {
     look.current.x = THREE.MathUtils.damp(look.current.x, aim.current.x, 3, dt)
     look.current.y = THREE.MathUtils.damp(look.current.y, aim.current.y, 3, dt)
-
-    const targetZ = 6 - scrollState.progress * (track - 24)
+    const startZ = portrait ? 12 : 6
+    const targetZ = startZ - scrollState.progress * (track - 24)
     camera.position.z = THREE.MathUtils.damp(camera.position.z, targetZ, 3, dt)
     camera.position.x = THREE.MathUtils.damp(camera.position.x, look.current.x * 2.2, 2.5, dt)
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, 1.2 + look.current.y * 1.2, 2.5, dt)
-    // pan/tilt the view toward the pointer/tilt for the "look-around" feel
-    camera.lookAt(look.current.x * 6, 1 + look.current.y * 4, camera.position.z - 10)
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, 2 + look.current.y * 0.3, 2.5, dt)
+    camera.lookAt(look.current.x * 6, 2 + scrollState.progress * 0 + look.current.y * 0.8, camera.position.z - 10)
 
-    // hover feedback: scale up + over-brighten the hovered sign
     for (const { mesh } of MENU_MESHES) {
       if (!mesh) continue
       const on = hovered.current === mesh
@@ -393,50 +295,57 @@ function InteractiveCamera({ track }) {
   return null
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+//  SCENE — minimal, high-performance lighting (1 ambient + 1 directional).
+// ════════════════════════════════════════════════════════════════════════════
 export default function NeonCity() {
-  const tier = useMemo(makeTier, [])
-  const track = tier.rows * DEPTH
-
-  const buildings = useMemo(() => {
-    const out = []
-    for (let i = 0; i < tier.rows; i++) {
-      for (const side of [-1, 1]) {
-        const h = THREE.MathUtils.randFloat(3, 18)
-        out.push({
-          position: [side * THREE.MathUtils.randFloat(5, 9.5), h / 2 - 2, -i * DEPTH - THREE.MathUtils.randFloat(0, DEPTH)],
-          scale: [THREE.MathUtils.randFloat(1.3, 3), h, THREE.MathUtils.randFloat(1.3, 3)],
-          color: PALETTE[(Math.random() * PALETTE.length) | 0],
-        })
-      }
-    }
-    return out
-  }, [tier])
-
   return (
     <group>
-      <ambientLight intensity={0.2} />
-      <pointLight position={[0, 12, 0]} intensity={50} distance={70} color="#7c3aed" />
+      {/* Simple, cheap lighting: fill + key. No shadows, no env map. */}
+      <ambientLight intensity={0.85} />
+      <directionalLight position={[40, 80, 30]} intensity={1.5} color="#fff1e6" castShadow={false} />
 
-      <Instances limit={buildings.length} range={buildings.length}>
-        <boxGeometry />
-        <meshBasicMaterial toneMapped={false} />
-        {buildings.map((b, i) => (
-          <Instance key={i} position={b.position} scale={b.scale} color={b.color} />
-        ))}
-      </Instances>
+      {/* Glowing neon grid (NO solid floor) on the shared ground line. */}
+      <gridHelper args={[1800, 180, '#00e5ff', '#0e2444']} position={[0, GROUND, -90]} />
 
-      <NeonSigns tier={tier} track={track} />
+      {/* ════════ LONDON CITY — sprawling foreground ════════ */}
+      <Safe>
+        <Suspense fallback={null}>
+          <Model url={LONDON_URL} scale={LONDON_SCALE} position={LONDON_POS} rotation={LONDON_ROT} />
+        </Suspense>
+      </Safe>
+
+      {/* ════════ PAGODA — left-background tower (gold) + gateway archway ════════ */}
+      {!isLow && (
+        <Safe>
+          <Suspense fallback={null}>
+            <group>
+              <Model url={PAGODA_URL} scale={PAGODA_SCALE} position={PAGODA_POS} rotation={PAGODA_ROT} tint={goldTint} />
+              <Archway x={PAGODA_POS[0]} z={PAGODA_POS[2] + 40} scale={1.3} />
+            </group>
+          </Suspense>
+        </Safe>
+      )}
+
+      {/* ════════ OSAKA CASTLE — right-background tower (cyber-neon tint) ════════ */}
+      {!isLow && (
+        <Safe>
+          <Suspense fallback={null}>
+            <Model url={OSAKA_URL} scale={OSAKA_SCALE} position={OSAKA_POS} rotation={OSAKA_ROT} tint={neonTint} />
+          </Suspense>
+        </Safe>
+      )}
+
       <MenuPortals />
-      <Trees tier={tier} track={track} />
-      <Cars tier={tier} track={track} />
-      <Trains tier={tier} track={track} />
-      <Clouds tier={tier} track={track} />
       <Drone />
-
-      <gridHelper args={[60, 60, '#ff1e6b', '#10203a']} position={[0, -2, -track / 2]} scale={[1, 1, track / 60]} />
-      <gridHelper args={[60, 60, '#00e5ff', '#10203a']} position={[0, 16, -track / 2]} scale={[1, 1, track / 60]} />
-
-      <InteractiveCamera track={track} />
+      <InteractiveCamera track={TRACK} />
     </group>
   )
+}
+
+// Warm the cache so the GLBs start downloading/decoding before first paint.
+useGLTF.preload(LONDON_URL, true)
+if (!isLow) {
+  useGLTF.preload(PAGODA_URL, true)
+  useGLTF.preload(OSAKA_URL, true)
 }
