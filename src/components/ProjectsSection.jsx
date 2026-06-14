@@ -1,9 +1,5 @@
-import { lazy, Suspense } from 'react'
 import { PROJECTS } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
-
-// Code-split the WebGL gallery so the three.js chunk doesn't block this section.
-const WebGLGallery = lazy(() => import('../three/WebGLGallery'))
 
 const T = {
   en: { title: 'My Projects', sub: "Things I've built and continue to build." },
@@ -15,9 +11,9 @@ const T = {
 }
 
 /**
- * A borderless project "logo tile": a large glowing icon over a soft colour halo,
- * with the title + short description beneath. No cards, no rigid borders — just
- * the logo floating on the shared glass surface. Hover lifts + intensifies glow.
+ * A premium, borderless project "logo tile": a large glowing icon over a soft
+ * colour halo, title + short caption beneath. No cards, no rigid borders — the
+ * logo floats on the shared glass surface. Hover lifts + intensifies the glow.
  */
 function ProjectLogo({ project }) {
   const c = project.color
@@ -26,15 +22,16 @@ function ProjectLogo({ project }) {
       href={project.url}
       target={project.ext ? '_blank' : '_self'}
       rel={project.ext ? 'noopener noreferrer' : undefined}
-      className="group relative flex flex-col items-center gap-4 rounded-3xl p-6 text-center transition-transform duration-300 hover:-translate-y-1.5"
+      className="group relative flex flex-col items-center gap-4 rounded-3xl p-6 text-center outline-none transition-transform duration-300 hover:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-white/30"
     >
-      {/* Large glowing logo — colour halo grows on hover, no border. */}
       <span className="relative flex h-28 w-28 items-center justify-center">
-        {/* soft colour glow behind the icon */}
+        {/* soft colour glow behind the icon — grows on hover */}
         <span
-          className="absolute inset-0 rounded-full opacity-60 blur-2xl transition-all duration-300 group-hover:opacity-100 group-hover:scale-110"
+          className="absolute inset-0 rounded-full opacity-60 blur-2xl transition-all duration-300 group-hover:scale-110 group-hover:opacity-100"
           style={{ background: `radial-gradient(circle, ${c}66 0%, transparent 70%)` }}
         />
+        {/* faint glass disc holds the logo without a hard border */}
+        <span className="absolute inset-2 rounded-full bg-white/[0.05] backdrop-blur-md" />
         <i
           className={`${project.icon} relative text-6xl transition-transform duration-300 group-hover:scale-110`}
           style={{ color: c, filter: `drop-shadow(0 0 16px ${c}aa)` }}
@@ -62,7 +59,7 @@ function ProjectLogo({ project }) {
 
 export default function ProjectsSection({ lang }) {
   const t = T[lang] || T.en
-  const ref = useCyberReveal()   // GSAP ScrollTrigger reveals, synced to the 3D camera
+  const ref = useCyberReveal()   // GSAP ScrollTrigger reveals
 
   return (
     <section id="projects" ref={ref} className="relative overflow-hidden py-24 text-legible">
@@ -77,26 +74,15 @@ export default function ProjectsSection({ lang }) {
           <p className="mt-2 text-gray-300">{t.sub}</p>
         </div>
 
-        {/* ── ONE sleek borderless glass container holds everything ──────────── */}
+        {/* ONE sleek borderless glass container holds the premium logo grid. */}
         <div
           data-reveal
-          className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.045] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] backdrop-blur-2xl sm:p-8"
+          className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.045] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] backdrop-blur-2xl sm:p-10"
         >
-          {/* faint top-edge sheen — gives the glass form without a hard border */}
+          {/* faint top-edge sheen → glass form without a hard border */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
-          {/* Floating WebGL showcase — drag/scroll to glide, click to expand. */}
-          <div className="relative mb-4 h-[58vh] w-full overflow-hidden rounded-[1.75rem] bg-black/20">
-            <Suspense fallback={<div className="flex h-full items-center justify-center font-mono text-sm text-muted">Loading gallery…</div>}>
-              <WebGLGallery />
-            </Suspense>
-            <span className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 font-mono text-[11px] uppercase tracking-[0.25em] text-white/50">
-              drag · scroll · click to expand
-            </span>
-          </div>
-
-          {/* Large borderless project logos */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {PROJECTS.map((p) => <ProjectLogo key={p.id} project={p} />)}
           </div>
         </div>
