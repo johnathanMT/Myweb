@@ -22,14 +22,25 @@ import HudFrame         from './components/HudFrame'
 // three.js bundle is code-split so it still never blocks first paint.
 const CyberBackground = lazy(() => import('./three/CyberBackground'))
 
-// Where the lightweight Hub lives (so users can return from the 3D build).
-const HUB_URL = import.meta.env.VITE_SITE_URL || 'https://myothant.dev'
+// Where the lightweight Hub lives. Prefer a dedicated VITE_HUB_URL; fall back to
+// VITE_SITE_URL, then the known apex. NOTE: VITE_SITE_URL is the canonical/SEO
+// origin and on THIS (immersive) deployment may be the immersive domain itself —
+// so we also guard against ever pointing "Back to Hub" at the current origin.
+function resolveHubUrl() {
+  const raw = (import.meta.env.VITE_HUB_URL || import.meta.env.VITE_SITE_URL || 'https://myothant.dev').replace(/\/+$/, '')
+  if (typeof window !== 'undefined' && raw === window.location.origin) {
+    return 'https://myothant.dev'   // never loop back to the immersive site
+  }
+  return raw
+}
 
 /** Sleek glassmorphism "Back to Hub" pill — floats top-left, never blocks the view. */
 function BackToHub() {
+  const hubUrl = resolveHubUrl()
   return (
     <a
-      href={HUB_URL}
+      href={hubUrl}
+      rel="noopener"
       aria-label="Back to the lightweight Hub"
       className="group fixed left-4 top-4 z-50 inline-flex items-center gap-2 rounded-full bg-white/[0.07] px-4 py-2 text-sm font-medium text-white/90 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-x-0.5 hover:bg-white/[0.12] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan/60"
       style={{ boxShadow: '0 0 18px -4px rgba(0,229,255,0.45)' }}

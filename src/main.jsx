@@ -16,7 +16,15 @@ import './index.css'
 // Vite inlines import.meta.env at build, so the unused app is tree-shaken out of
 // each bundle — the Hub never ships three.js, the immersive build never ships a
 // dead Hub.
-const Home = import.meta.env.VITE_APP_MODE === 'immersive' ? ImmersiveApp : App
+// Tolerate stray whitespace / casing in the Vercel env value (e.g. "Immersive ").
+const APP_MODE = (import.meta.env.VITE_APP_MODE || '').trim().toLowerCase()
+const isImmersive = APP_MODE === 'immersive'
+const Home = isImmersive ? ImmersiveApp : App
+
+// DEBUG: prints in the browser console of the DEPLOYED site so you can confirm
+// which build/branch actually ran. Remove once verified.
+console.info('[boot] VITE_APP_MODE =', JSON.stringify(import.meta.env.VITE_APP_MODE),
+  '→ rendering', isImmersive ? 'ImmersiveApp (3D)' : 'Hub')
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

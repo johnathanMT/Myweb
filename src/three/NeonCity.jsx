@@ -172,7 +172,10 @@ function MenuPortals() {
   const refs = useRef([])
   useEffect(() => {
     MENU_MESHES = refs.current.filter(Boolean).map((mesh, i) => ({ mesh, item: items[i] }))
-    return () => { MENU_MESHES = [] }
+    return () => {
+      MENU_MESHES = []
+      items.forEach((it) => it.tex?.dispose())   // free GPU canvas textures on unmount
+    }
   }, [items])
   return (
     <group>

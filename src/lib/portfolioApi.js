@@ -18,9 +18,27 @@ const visitorId = () => {
 async function req(path, opts = {}) {
   const headers = { 'X-Visitor-Id': visitorId(), ...(opts.headers || {}) }
   if (token()) headers.Authorization = `Bearer ${token()}`
-  const res = await fetch(`${BASE_URL}${path}`, { ...opts, headers })
+
+  // Abort a hung request (e.g. backend never responds) but allow enough time for
+  // Render's free-tier cold start (~30s). Override per-call with opts.timeout.
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), opts.timeout ?? 30000)
+
+  let res
+  try {
+    res = await fetch(`${BASE_URL}${path}`, { ...opts, headers, signal: ctrl.signal })
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('The server took too long to respond. Please try again.')
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
+
   const text = await res.text()
-  const json = text ? JSON.parse(text) : null
+  let json = null
+  if (text) {
+    try { json = JSON.parse(text) } catch { /* non-JSON (e.g. 502 HTML) — leave json null */ }
+  }
   if (!res.ok) throw new Error(json?.message || `Request failed (${res.status})`)
   return json
 }

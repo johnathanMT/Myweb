@@ -26,9 +26,14 @@ const PortfolioAPI = (() => {
   // `window.SITE_CONFIG = { apiUrl: "https://your-api.example.com" }` before
   // this script loads; otherwise the default is used.
   const BASE_URL = (window.SITE_CONFIG && window.SITE_CONFIG.apiUrl) || "https://myweb-zqv1.onrender.com";
-  const TOKEN_KEY = "mtn_jwt";
-  const USER_KEY  = "mtn_user";
-  const VISITOR_KEY = "mtn_visitor";
+
+  // SECURITY: the admin JWT + user object live ONLY in memory — never in
+  // localStorage. An XSS payload therefore cannot read the token, and it is
+  // wiped on tab close OR any full page reload (re-login required — intended
+  // for a single admin who prefers a zero-persistence session).
+  let _token = null;
+  let _user  = null;
+  const VISITOR_KEY = "mtn_visitor";   // anonymous, non-sensitive → may persist
 
   // Stable anonymous visitor id for like/reaction dedupe (no login, no PII)
   const visitorId = () => {
@@ -41,14 +46,14 @@ const PortfolioAPI = (() => {
     return v;
   };
 
-  const getToken = () => localStorage.getItem(TOKEN_KEY);
-  const setToken = (t) => localStorage.setItem(TOKEN_KEY, t);
-  const clearToken = () => localStorage.removeItem(TOKEN_KEY);
-  const isLoggedIn = () => !!getToken();
+  const getToken = () => _token;
+  const setToken = (t) => { _token = t; };
+  const clearToken = () => { _token = null; };
+  const isLoggedIn = () => !!_token;
 
-  // Current user (id, username, email, role) stored at login for UI scoping.
-  const setUser = (u) => localStorage.setItem(USER_KEY, JSON.stringify(u));
-  const getCurrentUser = () => { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch { return null; } };
+  // Current user (id, username, email, role) — in memory only, for UI scoping.
+  const setUser = (u) => { _user = u; };
+  const getCurrentUser = () => _user;
   const isAdmin  = () => getCurrentUser()?.role === "Admin";
   const isAuthor = () => ["Admin", "Author"].includes(getCurrentUser()?.role);
  
@@ -67,7 +72,7 @@ const PortfolioAPI = (() => {
  
     if (res.status === 401) {
       clearToken();
-      localStorage.removeItem(USER_KEY);   // clear stale session fully
+      setUser(null);                       // clear stale session fully
       throw new Error("Unauthorized — please log in again.");
     }
     if (res.status === 403) throw new Error("You do not have permission (admin required).");
@@ -110,7 +115,7 @@ const PortfolioAPI = (() => {
     return request("/api/Auth/register", { method: "POST", body });
   }
  
-  const logout = () => { clearToken(); localStorage.removeItem(USER_KEY); };
+  const logout = () => { clearToken(); setUser(null); };
 
   // ---- Articles -----------------------------------------------------------
   // published: true (published only), false (drafts only), or "all" (admins).
