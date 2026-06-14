@@ -2,8 +2,7 @@
  * blog.js — all logic for blog.html, externalised so the page needs NO inline
  * <script> blocks and NO inline event-handler attributes. This lets the CSP use
  * a strict `script-src 'self'` (no 'unsafe-inline'). All DOM wiring uses
- * addEventListener. Loaded as a classic script AFTER api.js and BEFORE the
- * Google Translate element.js (which calls window.googleTranslateElementInit).
+ * addEventListener. Loaded as a classic script AFTER api.js.
  * ========================================================================== */
 (function () {
   'use strict';
@@ -233,53 +232,12 @@
     });
   }
 
-  /* ---------------- TRANSLATION (EN / 日本語 / မြန်မာ) ---------------- */
-  function applyLang(code, tries) {
-    tries = tries || 0;
-    const combo = document.querySelector('.goog-te-combo');
-    if (!combo) { if (tries < 25) setTimeout(() => applyLang(code, tries + 1), 300); return; }
-    combo.value = (code === 'en') ? '' : code;   // '' restores original English
-    combo.dispatchEvent(new Event('change'));
-  }
-  function setGoogCookie(code) {
-    const kill = 'googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
-    document.cookie = kill; document.cookie = kill + ';domain=.' + location.hostname;
-    if (code !== 'en') {
-      const v = 'googtrans=/en/' + code + ';path=/';
-      document.cookie = v; document.cookie = v + ';domain=.' + location.hostname;
-    }
-  }
-  function updateLangUI(code) {
-    document.querySelectorAll('.langsw button').forEach((b) => b.classList.toggle('active', b.dataset.lang === code));
-  }
-  function setLang(code) {
-    localStorage.setItem('blog_tlang', code);
-    setGoogCookie(code);
-    applyLang(code);
-    updateLangUI(code);
-  }
-  // Google Translate's external script calls this global on load.
-  window.googleTranslateElementInit = function () {
-    new google.translate.TranslateElement(
-      { pageLanguage: 'en', includedLanguages: 'en,ja,my', autoDisplay: false },
-      'google_translate_element');
-  };
-
   /* ---------------- BOOT ---------------- */
   function boot() {
     try {
-      // Wire the language switcher buttons (no inline handlers).
-      document.querySelectorAll('.langsw button').forEach((b) =>
-        b.addEventListener('click', () => setLang(b.dataset.lang)));
-
       if (window.PortfolioAPI && PortfolioAPI.wakeBackend) PortfolioAPI.wakeBackend();
       const id = new URLSearchParams(location.search).get('id');
       if (id) renderArticle(id); else renderList();
-
-      // Restore the reader's last language.
-      const saved = localStorage.getItem('blog_tlang') || 'en';
-      updateLangUI(saved);
-      if (saved !== 'en') { setGoogCookie(saved); setTimeout(() => applyLang(saved), 900); }
     } catch (err) {
       // Never leave the page silently blank — surface the failure.
       console.error('[blog] init failed:', err);

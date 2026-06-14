@@ -1,9 +1,13 @@
 // ESM API client for the React app (the static pages use public/api.js instead).
 import { SITE } from '../config/site'
 const BASE_URL = SITE.apiUrl
-const TOKEN_KEY = 'mtn_jwt'
 const VISITOR_KEY = 'mtn_visitor'
-const token = () => localStorage.getItem(TOKEN_KEY)
+
+// SECURITY: JWT kept in MEMORY only — never localStorage. Not readable by XSS,
+// and cleared on refresh / tab close. Set it via api.setToken(...) right after a
+// successful login call; it lives only for the current page session.
+let _token = null
+const token = () => _token
 
 // Stable anonymous visitor id (for dedupe of likes/reactions; no login, no PII)
 const visitorId = () => {
@@ -39,12 +43,20 @@ async function req(path, opts = {}) {
   if (text) {
     try { json = JSON.parse(text) } catch { /* non-JSON (e.g. 502 HTML) — leave json null */ }
   }
-  if (!res.ok) throw new Error(json?.message || `Request failed (${res.status})`)
+  if (!res.ok) {
+    if (res.status === 401) _token = null   // drop the dead session token
+    throw new Error(json?.message || `Request failed (${res.status})`)
+  }
   return json
 }
 
 export const api = {
   BASE_URL,
+
+  // In-memory session controls (call setToken after a successful login).
+  setToken: (t) => { _token = t },
+  clearToken: () => { _token = null },
+  isLoggedIn: () => !!_token,
 
   getArticles: ({ page = 1, pageSize = 6, search } = {}) => {
     const q = new URLSearchParams({ page, pageSize, published: true })

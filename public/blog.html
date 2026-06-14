@@ -4,12 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Strict CSP: locked to 'self' + the exact Google Translate domains.
-       script-src has NO 'unsafe-inline' (all JS is external: api.js + blog.js).
-       style-src keeps 'unsafe-inline' only because Google Translate injects
-       inline styles for the translated text. GitHub Pages can't set HTTP headers,
-       so the policy is delivered as a <meta> tag. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://translate.google.com https://translate.googleapis.com https://www.google.com https://www.gstatic.com https://*.gstatic.com https://*.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self' https://res.cloudinary.com blob:; connect-src 'self' https://myweb-zqv1.onrender.com https://translate.googleapis.com https://translate.google.com https://www.google.com; frame-src https://translate.google.com https://www.google.com">
+  <!-- Strict CSP locked to 'self'. script-src has NO 'unsafe-inline' (all JS is
+       external: api.js + blog.js). style-src keeps 'unsafe-inline' for the page's
+       own inline styles. Delivered as a <meta> tag for static hosting. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self' https://res.cloudinary.com blob:; connect-src 'self' https://myweb-zqv1.onrender.com; frame-src 'none'">
 
   <title>The Blog | MTN.Digitosphere</title>
   <meta name="description" content="Thoughts on code, care, and everything between — by Myo Thant Naing." />
@@ -54,19 +52,6 @@
     .brand{font-family:var(--mono);font-weight:700}.brand span{color:var(--cyan)}
     .nav-links a{color:var(--muted);margin-left:20px;font-size:14px}.nav-links a:hover{color:var(--text)}
     .navright{display:flex;align-items:center;gap:16px}
-    .langsw{display:flex;gap:3px;background:var(--glass);border:1px solid var(--line);
-      border-radius:999px;padding:4px;backdrop-filter:blur(10px)}
-    .langsw button{border:none;background:transparent;color:var(--muted);font-family:var(--mono);
-      font-size:12px;padding:5px 11px;border-radius:999px;cursor:pointer;transition:.2s;white-space:nowrap}
-    .langsw button:hover{color:#fff}
-    .langsw button.active{background:linear-gradient(90deg,var(--cyan),var(--blue));color:#04121a;
-      font-weight:700;box-shadow:0 0 14px rgba(0,229,255,.45)}
-    /* hide Google Translate's default chrome — we drive it with our own UI */
-    .goog-te-banner-frame.skiptranslate, iframe.skiptranslate{display:none!important;visibility:hidden!important}
-    .goog-te-gadget{height:0!important;overflow:hidden!important;font-size:0!important}
-    #goog-gt-tt, .goog-te-balloon-frame, .goog-tooltip{display:none!important}
-    .goog-text-highlight{background:none!important;box-shadow:none!important}
-    body{top:0!important;position:static!important}
     .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 
     /* ===== LIST VIEW ===== */
@@ -210,12 +195,6 @@
         <a href="index.html#projects">Projects</a>
         <a href="blog.html">Blog</a>
       </div>
-      <!-- custom translation switcher (wired in blog.js; kept untranslated) -->
-      <div class="langsw notranslate" translate="no">
-        <button data-lang="en">EN</button>
-        <button data-lang="ja">日本語</button>
-        <button data-lang="my">မြန်မာ</button>
-      </div>
     </div>
   </nav>
 
@@ -228,9 +207,5 @@
   <!-- defer = run in order after the DOM is parsed -->
   <script defer src="api.js"></script>
   <script defer src="blog.js"></script>
-
-  <!-- Google Translate engine — blog.js defines window.googleTranslateElementInit -->
-  <div id="google_translate_element" class="notranslate" style="position:absolute;left:-9999px;top:-9999px"></div>
-  <script defer src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
