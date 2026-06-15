@@ -8,6 +8,7 @@ import MarqueeGallery   from './components/MarqueeGallery' // hover-reveal proje
 import ProjectsSection  from './components/ProjectsSection'
 import TechStack        from './components/TechStack'         // Architecture & journey
 import GallerySection    from './components/GallerySection'   // Memory Gallery (photos)
+import VideoShowcase     from './components/VideoShowcase'     // auto-play highlight reel
 import ArticlesSection  from './components/ArticlesSection'
 import SeasonalGallery  from './components/SeasonalGallery'
 import TravelChronicles from './components/TravelChronicles'
@@ -51,6 +52,7 @@ export default function App() {
         <ProjectsSection  lang={lang} />
         <TechStack        lang={lang} />
         <GallerySection   lang={lang} />
+        <VideoShowcase    lang={lang} />
         <ArticlesSection />
         <SeasonalGallery lang={lang} />
         <TravelChronicles lang={lang} setLang={setLang} />

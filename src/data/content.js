@@ -69,23 +69,169 @@ export const PROJECTS = [
   },
 ]
 
-// 12 traditional Myanmar festivals — one per month (Gregorian alignment).
-// `festival` is the headline; `desc` gives the context. Images come from the
-// central registry (ASSETS.months.*) — drop a real festival photo in
-// src/assets/images/ and import it in config/assets.js to swap any one.
+// The 12 BURMESE LUNAR MONTHS and their signature festivals (calendar order,
+// Tagu → Tabaung). `file` is the image slug in src/assets/images/months/
+// (e.g. tangoo.webp); SeasonalGallery binds it automatically via import.meta.glob.
+// `greg` = approximate Gregorian span. Missing images fall back to a placeholder.
+//  `festival` and `desc` are i18n objects ({ en, mm, jp, zh, vn, ne, id }).
+//  SeasonalGallery picks the active language and falls back to `en` per key.
 export const MONTHS = [
-  { name: 'JANUARY',   festival: 'Ananda Pagoda Festival',    region: 'Bagan',            color: '#93c5fd', img: ASSETS.months.JANUARY,   desc: 'Pilgrims and bullock carts gather at Bagan’s Ananda Temple under the cool-season sky.' },
-  { name: 'FEBRUARY',  festival: 'Mahamuni Pagoda Festival',  region: 'Mandalay',         color: '#f9a8d4', img: ASSETS.months.FEBRUARY,  desc: 'Devotees honour the revered Mahamuni Buddha image during the cool dry season.' },
-  { name: 'MARCH',     festival: 'Shwedagon Pagoda Festival', region: 'Yangon (Tabaung)', color: '#fbcfe8', img: ASSETS.months.MARCH,     desc: 'The golden Shwedagon glows as the largest paya pwè of the year unfolds.' },
-  { name: 'APRIL',     festival: 'Thingyan Water Festival',   region: 'Nationwide',       color: '#bbf7d0', img: ASSETS.months.APRIL,     desc: 'The joyous New Year water festival washes away the old year across Myanmar.' },
-  { name: 'MAY',       festival: 'Kasone Bodhi Watering',     region: 'Nationwide',       color: '#a7f3d0', img: ASSETS.months.MAY,       desc: 'Faithful pour scented water at the foot of the sacred Bodhi tree on the full moon.' },
-  { name: 'JUNE',      festival: 'Nayon Tipiṭaka Exams',      region: 'Monasteries',      color: '#a5f3fc', img: ASSETS.months.JUNE,      desc: 'Monks recite the Tipiṭaka scriptures in the great monastic examinations of Nayon.' },
-  { name: 'JULY',      festival: 'Waso — Buddhist Lent',      region: 'Nationwide',       color: '#fde68a', img: ASSETS.months.JULY,      desc: 'Offering of Waso robes marks the start of the three-month Buddhist Lent.' },
-  { name: 'AUGUST',    festival: 'Taungbyone Nat Festival',   region: 'near Mandalay',    color: '#fcd34d', img: ASSETS.months.AUGUST,    desc: 'The most famous spirit (nat) festival, a week of music, offerings and devotion.' },
-  { name: 'SEPTEMBER', festival: 'Phaung Daw Oo Festival',    region: 'Inle Lake',        color: '#fed7aa', img: ASSETS.months.SEPTEMBER, desc: 'A royal barge carries sacred Buddha images around Inle Lake with leg-rowers.' },
-  { name: 'OCTOBER',   festival: 'Thadingyut Lights',         region: 'Nationwide',       color: '#fca5a5', img: ASSETS.months.OCTOBER,   desc: 'The Festival of Lights celebrates the Buddha’s return — homes glow with candles.' },
-  { name: 'NOVEMBER',  festival: 'Tazaungdaing Balloons',     region: 'Taunggyi',         color: '#d8b4fe', img: ASSETS.months.NOVEMBER,  desc: 'Fire balloons rise into the night at the dazzling festival of lights.' },
-  { name: 'DECEMBER',  festival: 'Kayin (Karen) New Year',    region: 'Kayin State',      color: '#bfdbfe', img: ASSETS.months.DECEMBER,  desc: 'The Karen people welcome the new year with the don dance and traditional dress.' },
+  {
+    name: 'Tagu', mm: 'တန်ခူး', greg: 'Mar–Apr', region: 'Nationwide', color: '#bbf7d0', file: 'tangoo',
+    festival: { en: 'Thingyan Water Festival', mm: 'သင်္ကြန် ရေသဘင်ပွဲတော်', jp: 'ティンジャン（水祭り）', zh: '泼水节（缅甸新年）', vn: 'Lễ hội té nước Thingyan', ne: 'थिङ्ग्यान जल महोत्सव', id: 'Festival Air Thingyan' },
+    desc: {
+      en: 'The joyous New-Year water festival washes away the old year across Myanmar.',
+      mm: 'နှစ်သစ်ကို ကြိုဆိုသည့် ပျော်ရွှင်ဖွယ် ရေပက်ပွဲတော်ဖြင့် တစ်နိုင်ငံလုံး စိုစွတ်သွားသည်။',
+      jp: '新年を迎える楽しい水祭りで、ミャンマー全土が水に包まれます。',
+      zh: '欢乐的新年泼水节，洗去旧岁，遍及全缅甸。',
+      vn: 'Lễ hội té nước mừng năm mới rộn ràng khắp Myanmar, gột rửa năm cũ.',
+      ne: 'नयाँ वर्ष स्वागत गर्ने रमाइलो जल महोत्सवले पूरै म्यानमारलाई भिजाउँछ।',
+      id: 'Festival air Tahun Baru yang meriah membasuh tahun lama di seluruh Myanmar.',
+    },
+  },
+  {
+    name: 'Kason', mm: 'ကဆုန်', greg: 'Apr–May', region: 'Nationwide', color: '#a7f3d0', file: 'kasone',
+    festival: { en: 'Kason Bodhi-Tree Watering', mm: 'ကဆုန် ညောင်ရေသွန်းပွဲ', jp: 'カソン 菩提樹潅水祭（ウェーサーカ）', zh: '卡颂 菩提树浇水节（卫塞节）', vn: 'Lễ tưới cây Bồ Đề Kason', ne: 'कासोन बोधिवृक्ष सिँचाइ (वेसाक)', id: 'Penyiraman Pohon Bodhi Kason (Waisak)' },
+    desc: {
+      en: 'On the full moon, devotees pour scented water at the foot of the sacred Bodhi tree (Vesak).',
+      mm: 'လပြည့်နေ့၌ ဘုရားပွင့်တော်မူရာ ဗောဓိညောင်ပင်ကို ရေမွှေးဖြင့် သွန်းလောင်းပူဇော်ကြသည်။',
+      jp: '満月の日、信者たちが聖なる菩提樹に香水を注ぎます（ウェーサーカ祭）。',
+      zh: '满月之日，信众向神圣的菩提树根浇灌香水（卫塞节）。',
+      vn: 'Vào ngày rằm, tín đồ tưới nước thơm dưới gốc cây Bồ Đề thiêng (Lễ Vesak).',
+      ne: 'पूर्णिमाको दिन भक्तजनहरूले पवित्र बोधिवृक्षको फेदमा सुगन्धित पानी चढाउँछन्।',
+      id: 'Saat purnama, umat menyiramkan air wangi di kaki pohon Bodhi suci (Waisak).',
+    },
+  },
+  {
+    name: 'Nayon', mm: 'နယုန်', greg: 'May–Jun', region: 'Monasteries', color: '#a5f3fc', file: 'nayone',
+    festival: { en: 'Tipiṭaka Recitation Exams', mm: 'နယုန် ပိဋကတ် စာမေးပွဲ', jp: 'ナヨン 三蔵経試験', zh: '纳永 三藏经诵考', vn: 'Kỳ thi tụng Tam Tạng Nayon', ne: 'नायोन त्रिपिटक परीक्षा', id: 'Ujian Pembacaan Tipiṭaka Nayon' },
+    desc: {
+      en: 'Monks sit the great scriptural examinations, reciting the Tipiṭaka from memory.',
+      mm: 'ဘုန်းတော်ကြီးများ ပိဋကတ်တော်ကို အာဂုံဆောင် ရွတ်ဖတ်၍ ကြီးကျယ်သော စာမေးပွဲများ ဖြေဆိုကြသည်။',
+      jp: '僧侶たちが三蔵経を暗誦し、盛大な経典試験に臨みます。',
+      zh: '僧侣们凭记忆背诵三藏经，参加盛大的经典考试。',
+      vn: 'Chư tăng dự kỳ thi kinh điển lớn, tụng thuộc lòng Tam Tạng.',
+      ne: 'भिक्षुहरूले त्रिपिटक कण्ठ गरी महान् धर्मग्रन्थ परीक्षा दिन्छन्।',
+      id: 'Para biksu mengikuti ujian kitab besar, melafalkan Tipiṭaka dari ingatan.',
+    },
+  },
+  {
+    name: 'Waso', mm: 'ဝါဆို', greg: 'Jun–Jul', region: 'Nationwide', color: '#fde68a', file: 'waso',
+    festival: { en: 'Waso — Start of Buddhist Lent', mm: 'ဝါဆို (ဝါတွင်းအစ)', jp: 'ワソー（雨安居の始まり）', zh: '瓦梭（结夏安居开始）', vn: 'Waso — Bắt đầu Mùa An Cư', ne: 'वासो — वर्षावासको सुरुवात', id: 'Waso — Awal Masa Vassa' },
+    desc: {
+      en: 'Offering Waso robes and Waso flowers marks the start of the three-month Vassa retreat.',
+      mm: 'ဝါဆိုသင်္ကန်းနှင့် ဝါဆိုပန်းများ ကပ်လှူခြင်းဖြင့် သုံးလတာ ဝါတွင်းကာလ စတင်သည်။',
+      jp: 'ワソー法衣とワソーの花を捧げ、3か月の雨安居が始まります。',
+      zh: '供奉瓦梭袈裟与瓦梭花，标志三个月雨安居的开始。',
+      vn: 'Dâng y Waso và hoa Waso đánh dấu khởi đầu mùa an cư ba tháng.',
+      ne: 'वासो चीवर र वासो फूल चढाएर तीन महिने वर्षावास सुरु हुन्छ।',
+      id: 'Persembahan jubah Waso dan bunga Waso menandai awal retret Vassa tiga bulan.',
+    },
+  },
+  {
+    name: 'Wagaung', mm: 'ဝါခေါင်', greg: 'Jul–Aug', region: 'near Mandalay', color: '#fcd34d', file: 'wakhaung',
+    festival: { en: 'Taungbyone Nat Festival', mm: 'ဝါခေါင် တောင်ပြုန်း နတ်ပွဲ', jp: 'ワガウン タウンビョン精霊祭', zh: '瓦冈 当卑温神灵节', vn: 'Lễ hội Thần linh Taungbyone', ne: 'तौङब्योन नत् पर्व', id: 'Festival Roh Taungbyone' },
+    desc: {
+      en: 'The most famous spirit (nat) festival — a week of music, offerings and devotion.',
+      mm: 'အကျော်ကြားဆုံး နတ်ပွဲတော် — ဂီတ၊ ပူဇော်ပွဲနှင့် ကြည်ညိုမှုဖြင့် တစ်ပတ်တာ ကျင်းပသည်။',
+      jp: '最も有名な精霊（ナッ）祭り。音楽と供物、信仰の一週間。',
+      zh: '最著名的神灵（Nat）节庆 —— 一周的音乐、供奉与虔诚。',
+      vn: 'Lễ hội thần linh (nat) nổi tiếng nhất — một tuần âm nhạc, lễ vật và sùng kính.',
+      ne: 'सबैभन्दा प्रसिद्ध आत्मा (नत्) पर्व — सङ्गीत, चढावा र भक्तिको एक हप्ता।',
+      id: 'Festival roh (nat) paling terkenal — sepekan musik, persembahan, dan pengabdian.',
+    },
+  },
+  {
+    name: 'Tawthalin', mm: 'တော်သလင်း', greg: 'Aug–Sep', region: 'Rivers', color: '#7dd3fc', file: 'thawthalin',
+    festival: { en: 'Royal Regatta · Boat Races', mm: 'တော်သလင်း လှေပြိုင်ပွဲ', jp: 'タウタリン 舟レース', zh: '多塔林 赛船节', vn: 'Tawthalin — Đua thuyền', ne: 'तौथलिन डुङ्गा दौड', id: 'Tawthalin — Lomba Perahu' },
+    desc: {
+      en: 'Calm post-monsoon waters host the season of elegant royal boat races and regattas.',
+      mm: 'မိုးလွန်ကာလ၏ ငြိမ်သက်သော ရေပြင်ပေါ်တွင် မင်းမြတ်လှေပြိုင်ပွဲများ ကျင်းပသည်။',
+      jp: '雨季明けの穏やかな水面で、優雅な王室舟レースが行われます。',
+      zh: '雨季过后水面平静，正是优雅皇家赛船的季节。',
+      vn: 'Mặt nước êm ả sau mùa mưa mở ra mùa đua thuyền hoàng gia thanh lịch.',
+      ne: 'मनसुनपछिको शान्त पानीमा भव्य राजकीय डुङ्गा दौडको मौसम सुरु हुन्छ।',
+      id: 'Perairan tenang seusai musim hujan menjadi musim lomba perahu kerajaan yang anggun.',
+    },
+  },
+  {
+    name: 'Thadingyut', mm: 'သီတင်းကျွတ်', greg: 'Sep–Oct', region: 'Nationwide', color: '#fca5a5', file: 'thidinkyaut',
+    festival: { en: 'Thadingyut Festival of Lights', mm: 'သီတင်းကျွတ် မီးထွန်းပွဲ', jp: 'タディンジュ 灯明祭', zh: '达丁聚 万灯节', vn: 'Thadingyut — Lễ hội Ánh sáng', ne: 'थादिङ्ग्युत दीप पर्व', id: 'Thadingyut — Festival Cahaya' },
+    desc: {
+      en: 'Homes, streets and pagodas glow with candles to welcome the Buddha’s return; Lent ends.',
+      mm: 'ဘုရားရှင် ဆင်းသက်ကြွလာတော်မူခြင်းကို ကြိုဆိုရန် အိမ်၊ လမ်းနှင့် စေတီများ မီးအလင်းဖြင့် ဝါကျွတ်ပွဲ ဆင်နွှဲကြသည်။',
+      jp: '仏陀の帰還を祝い、家・街・仏塔がろうそくの灯で輝きます。雨安居の終了。',
+      zh: '家家户户、街道与佛塔点亮烛火，迎接佛陀归来；安居结束。',
+      vn: 'Nhà cửa, phố phường và chùa rực sáng nến đón Phật trở về; mùa an cư kết thúc.',
+      ne: 'बुद्धको आगमन स्वागत गर्न घर, सडक र स्तूपहरू मैनबत्तीले झलमल हुन्छन्; वर्षावास सकिन्छ।',
+      id: 'Rumah, jalan, dan pagoda bercahaya lilin menyambut kembalinya Buddha; Vassa berakhir.',
+    },
+  },
+  {
+    name: 'Tazaungmon', mm: 'တန်ဆောင်မုန်း', greg: 'Oct–Nov', region: 'Taunggyi', color: '#d8b4fe', file: 'tansaungmone',
+    festival: { en: 'Tazaungdaing Fire-Balloons', mm: 'တန်ဆောင်မုန်း မီးပုံးပျံပွဲ', jp: 'タザウンモン 熱気球祭', zh: '达桑蒙 热气球灯节', vn: 'Tazaungdaing — Khinh khí cầu lửa', ne: 'तजौङदाइङ अग्नि-गुब्बारा', id: 'Tazaungdaing — Balon Api' },
+    desc: {
+      en: 'Fire balloons rise into the night sky in a dazzling second festival of lights.',
+      mm: 'ဒုတိယ မီးထွန်းပွဲတော်တွင် မီးပုံးပျံများ ည၏ကောင်းကင်သို့ တလူလူ တက်သွားကြသည်။',
+      jp: '夜空に火の気球が舞い上がる、きらびやかな第二の灯明祭。',
+      zh: '璀璨的第二个灯节，火热气球升上夜空。',
+      vn: 'Khinh khí cầu lửa bay lên bầu trời đêm trong lễ hội ánh sáng thứ hai rực rỡ.',
+      ne: 'दोस्रो दीप पर्वमा आगोका गुब्बाराहरू रातको आकाशमा उड्छन्।',
+      id: 'Balon api membumbung ke langit malam dalam festival cahaya kedua yang memukau.',
+    },
+  },
+  {
+    name: 'Nadaw', mm: 'နတ်တော်', greg: 'Nov–Dec', region: 'Nationwide', color: '#c4b5fd', file: 'nattaw',
+    festival: { en: 'Nadaw Nat & Literature', mm: 'နတ်တော် (နတ်ပွဲနှင့် စာပေ)', jp: 'ナドー ナッと文学の月', zh: '纳道 神灵与文学月', vn: 'Nadaw — Thần linh & Văn học', ne: 'नादौ — नत् र साहित्य', id: 'Nadaw — Roh & Sastra' },
+    desc: {
+      en: 'A month for honouring the nats (spirits) and celebrating Myanmar poetry and literature.',
+      mm: 'နတ်များကို ပူဇော်ပသခြင်းနှင့် မြန်မာကဗျာ၊ စာပေတို့ကို ဂုဏ်ပြုသည့်လ။',
+      jp: 'ナッ（精霊）を称え、ミャンマーの詩と文学を祝う月。',
+      zh: '敬奉神灵（Nat）、礼赞缅甸诗歌与文学的月份。',
+      vn: 'Tháng tôn vinh các nat (thần linh) và tôn vinh thơ ca, văn học Myanmar.',
+      ne: 'नत् (आत्मा) हरूको सम्मान र म्यानमारको कविता तथा साहित्य मनाउने महिना।',
+      id: 'Bulan menghormati nat (roh) serta merayakan puisi dan sastra Myanmar.',
+    },
+  },
+  {
+    name: 'Pyatho', mm: 'ပြာသို', greg: 'Dec–Jan', region: 'Bagan', color: '#93c5fd', file: 'pyatho',
+    festival: { en: 'Ananda Pagoda Festival', mm: 'ပြာသို အာနန္ဒာ ဘုရားပွဲ', jp: 'ピャトー アーナンダ寺院祭', zh: '比亚多 阿南达佛塔节', vn: 'Lễ hội Chùa Ananda Pyatho', ne: 'प्यथो आनन्द मन्दिर पर्व', id: 'Festival Kuil Ananda Pyatho' },
+    desc: {
+      en: 'Pilgrims and bullock carts gather at Bagan’s Ananda Temple under the cool-season sky.',
+      mm: 'ဆောင်းရာသီကောင်းကင်အောက်တွင် ဘုရားဖူးများနှင့် နွားလှည်းများ ပုဂံ အာနန္ဒာဘုရားသို့ စုဝေးလာကြသည်။',
+      jp: '涼季の空の下、巡礼者と牛車がバガンのアーナンダ寺院に集います。',
+      zh: '凉季天空下，朝圣者与牛车齐聚蒲甘阿南达寺。',
+      vn: 'Khách hành hương và xe bò tụ hội tại chùa Ananda (Bagan) dưới bầu trời mùa mát.',
+      ne: 'चिसो मौसमको आकाशमुनि तीर्थयात्री र गोरुगाडाहरू बागानको आनन्द मन्दिरमा भेला हुन्छन्।',
+      id: 'Peziarah dan pedati sapi berkumpul di Kuil Ananda, Bagan, di bawah langit musim sejuk.',
+    },
+  },
+  {
+    name: 'Tabodwe', mm: 'တပို့တွဲ', greg: 'Jan–Feb', region: 'Nationwide', color: '#fbcfe8', file: 'tapohtwe',
+    festival: { en: 'Htamane Glutinous-Rice Feast', mm: 'တပို့တွဲ ထမနဲပွဲ', jp: 'タボドゥエ タマネ祭', zh: '达波推 糯米饭节', vn: 'Tabodwe — Lễ hội Htamane', ne: 'तबोद्वे — हतामाने पर्व', id: 'Tabodwe — Festival Htamane' },
+    desc: {
+      en: 'Communities cook giant pans of htamane (sticky-rice) together in a harvest thanksgiving.',
+      mm: 'ကောက်သစ်စားပွဲအဖြစ် ရပ်ရွာများ စုပေါင်း၍ ထမနဲ (ကောက်ညှင်းထမင်း) အကြီးစား ကျက်ပြုတ်ကြသည်။',
+      jp: '収穫感謝として、地域が集い大鍋でタマネ（もち米）を炊きます。',
+      zh: '丰收感恩之际，社区齐聚共煮大锅糯米饭（htamane）。',
+      vn: 'Cộng đồng cùng nấu những chảo lớn htamane (xôi) trong lễ tạ ơn mùa màng.',
+      ne: 'बाली भित्र्याएको आभार स्वरूप समुदायहरू मिलेर ठूला ताउलामा हतामाने (टाँसिने भात) पकाउँछन्।',
+      id: 'Warga bersama memasak htamane (ketan) dalam wajan raksasa sebagai syukuran panen.',
+    },
+  },
+  {
+    name: 'Tabaung', mm: 'တပေါင်း', greg: 'Feb–Mar', region: 'Yangon', color: '#fcd34d', file: 'tabaung',
+    festival: { en: 'Shwedagon Pagoda Festival', mm: 'တပေါင်း ရွှေတိဂုံ ဘုရားပွဲ', jp: 'タバウン シュエダゴン・パゴダ祭', zh: '达邦 大金塔节', vn: 'Lễ hội Chùa Shwedagon Tabaung', ne: 'तबाउङ श्वेडागोन पर्व', id: 'Festival Pagoda Shwedagon Tabaung' },
+    desc: {
+      en: 'The golden Shwedagon glows as the largest paya-pwè of the year unfolds; sand-pagoda festivals abound.',
+      mm: 'တစ်နှစ်တာ၏ အကြီးဆုံး ဘုရားပွဲဖြစ်ပြီး ရွှေတိဂုံစေတီတော် ရွှေရောင်တောက်ပကာ သဲပုံစေတီပွဲများ ပေါများသည်။',
+      jp: '年間最大のパヤー・プエとして黄金のシュエダゴンが輝き、各地で砂の仏塔祭りが行われます。',
+      zh: '一年中最盛大的佛塔节，金色大金塔熠熠生辉，沙塔节庆遍布各地。',
+      vn: 'Chùa Vàng Shwedagon rực sáng trong lễ hội chùa lớn nhất năm; khắp nơi có lễ hội tháp cát.',
+      ne: 'वर्षकै ठूलो पया-प्वेका रूपमा सुनौलो श्वेडागोन झलमल हुन्छ; बालुवाका स्तूप पर्वहरू व्यापक हुन्छन्।',
+      id: 'Shwedagon emas bersinar dalam paya-pwè terbesar tahun ini; festival pagoda pasir di mana-mana.',
+    },
+  },
 ]
 
 // ─── Multilingual blog translations ───────────────────────────────────────────

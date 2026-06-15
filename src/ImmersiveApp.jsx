@@ -8,6 +8,7 @@ import Philosophy       from './components/Philosophy'
 import MarqueeGallery   from './components/MarqueeGallery'
 import ProjectsSection  from './components/ProjectsSection'
 import GallerySection    from './components/GallerySection'   // Memory Gallery (photos)
+import VideoShowcase     from './components/VideoShowcase'     // auto-play highlight reel
 import ArticlesSection  from './components/ArticlesSection'
 import SeasonalGallery  from './components/SeasonalGallery'
 import TravelChronicles from './components/TravelChronicles'
@@ -105,6 +106,7 @@ export default function ImmersiveApp() {
         <MarqueeGallery />
         <ProjectsSection  lang={lang} />
         <GallerySection   lang={lang} />
+        <VideoShowcase    lang={lang} />
         <ArticlesSection />
         <SeasonalGallery lang={lang} />
         <TravelChronicles lang={lang} setLang={setLang} />
