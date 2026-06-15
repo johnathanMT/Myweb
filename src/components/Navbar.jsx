@@ -42,18 +42,30 @@ export default function Navbar({ lang, setLang }) {
   const t = NAV_T[lang] || NAV_T.en   // translated nav labels
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 40)
-      const sections = ['home', 'about', 'projects', 'stack', 'gallery', 'seasonal', 'exploring']
+    const sections = ['home', 'about', 'projects', 'stack', 'gallery', 'seasonal', 'exploring']
+    let ticking = false
+    let lastScrolled = false
+    let lastActive = 'home'
+
+    // rAF-throttled: do at most one layout read+update per animation frame, and
+    // only call setState when a value actually changes → no scroll-time jank.
+    const update = () => {
+      ticking = false
+      const y = window.scrollY
+      const isScrolled = y > 40
+      if (isScrolled !== lastScrolled) { lastScrolled = isScrolled; setScrolled(isScrolled) }
       for (const id of [...sections].reverse()) {
         const el = document.getElementById(id)
-        if (el && window.scrollY >= el.offsetTop - 120) {
-          setActiveSection(id)
+        if (el && y >= el.offsetTop - 120) {
+          if (id !== lastActive) { lastActive = id; setActiveSection(id) }
           break
         }
       }
     }
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update) } }
+
     window.addEventListener('scroll', onScroll, { passive: true })
+    update()   // set initial state
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 

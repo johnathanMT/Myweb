@@ -37,6 +37,13 @@
 
   html {
     scroll-behavior: smooth;
+    /* anchor jumps (#about, #stack, …) land BELOW the fixed 64px navbar */
+    scroll-padding-top: 5rem;
+  }
+
+  /* honour users who prefer no motion — instant jumps, no smooth-scroll lag */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
   }
 
   body {
@@ -44,7 +51,10 @@
     color: #e2e2f0;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
     overflow-x: hidden;
+    /* stop scroll-chaining bounce from leaking to the page → calmer feel */
+    overscroll-behavior-y: none;
   }
 
   ::selection {
