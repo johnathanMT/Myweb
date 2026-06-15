@@ -157,12 +157,20 @@ export default function Navbar({ lang, setLang }) {
         </div>
       </nav>
 
-      {/* Mobile menu — visible below lg; holds BOTH links and flags */}
+      {/* Mobile menu — visible below lg; holds BOTH links and flags.
+          Open: expands up to 85vh and scrolls if the content (links + 7 flags)
+          is taller, so the language switcher is always fully reachable.
+          Closed: collapses to 0 with overflow hidden for the slide animation. */}
       <div
-        className={`lg:hidden overflow-hidden transition-all duration-300 ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-          } bg-surface/95 backdrop-blur-md border-b border-white/5`}
+        className={`lg:hidden transition-all duration-300 bg-surface/95 backdrop-blur-md border-b border-white/5 ${menuOpen
+          ? 'max-h-[85vh] overflow-y-auto overscroll-contain opacity-100'
+          : 'max-h-0 overflow-hidden opacity-0'
+          }`}
       >
-        <ul className="px-6 py-4 flex flex-col gap-1">
+        <ul
+          className="px-6 pt-4 flex flex-col gap-1"
+          style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
+        >
           {NAV_LINKS.map(({ href, key, isExternal = false }) => (
             <li key={href}>
               <a
