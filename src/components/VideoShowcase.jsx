@@ -196,8 +196,8 @@ export default function VideoShowcase({ lang = 'en' }) {
 
             {/* fallback hint behind the video (shows if file missing) */}
             <div className="pointer-events-none absolute inset-0 -z-0 flex items-center justify-center"
-              style={{ background: `linear-gradient(150deg, ${current.accent}22, #0c0c0c 80%)` }}>
-              <span className="font-mono text-xs uppercase tracking-[0.3em] text-white/30">myothant{current.id}@dev</span>
+              style={{ background: `linear-gradient(150deg, ${current.accent}22, #0c0c0c 87%)` }}>
+              <span className="font-mono text-xs uppercase tracking-[0.3em] text-white/30"></span>
             </div>
 
             {/* custom Mute / Unmute toggle (glassmorphism + gold) */}
