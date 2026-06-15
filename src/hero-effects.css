@@ -20,7 +20,7 @@
   position: relative;
   display: inline-block;
   /* purple -> pink gradient flow */
-  background: linear-gradient(115deg, #9d6fef 0%, #7c3aed 35%, #ff6b6b 70%, #9d6fef 100%);
+  background: linear-gradient(115deg, rgb(var(--accent-light)) 0%, rgb(var(--accent)) 35%, #ff6b6b 70%, rgb(var(--accent-light)) 100%);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -54,7 +54,7 @@
 
 /* a thin geometric stroke to read as "illustrated/faceted" */
 .hero-name .ltr {
-  -webkit-text-stroke: 0.6px rgba(157, 111, 239, 0.35);
+  -webkit-text-stroke: 0.6px rgb(var(--accent-light) / 0.35);
 }
 
 /* The left-to-right energy pulse that sweeps across the whole name */
@@ -69,9 +69,9 @@
   background: linear-gradient(
     100deg,
     transparent 0%,
-    rgba(0, 212, 255, 0.0) 30%,
-    rgba(0, 212, 255, 0.55) 50%,
-    rgba(157, 111, 239, 0.35) 60%,
+    rgb(var(--accent) / 0.0) 30%,
+    rgb(var(--accent) / 0.55) 50%,
+    rgb(var(--accent-light) / 0.35) 60%,
     transparent 100%
   );
   filter: blur(10px);
@@ -103,17 +103,17 @@
 }
 @keyframes title-glitch {
   0%, 86%, 100% { text-shadow: none; transform: translate(0, 0); }
-  88% { text-shadow: 2px 0 #00d4ff, -2px 0 #ff6b6b; transform: translate(0.5px, 0); }
-  90% { text-shadow: -2px 0 #00d4ff, 2px 0 #ff6b6b; transform: translate(-0.5px, 0); }
-  92% { text-shadow: 1px 0 #00d4ff, -1px 0 #ff6b6b; }
+  88% { text-shadow: 2px 0 rgb(var(--accent)), -2px 0 #ff6b6b; transform: translate(0.5px, 0); }
+  90% { text-shadow: -2px 0 rgb(var(--accent)), 2px 0 #ff6b6b; transform: translate(-0.5px, 0); }
+  92% { text-shadow: 1px 0 rgb(var(--accent)), -1px 0 #ff6b6b; }
   94% { text-shadow: none; }
 }
 
 /* faint scanline texture behind the hero for "futuristic" energy */
 .hero-grid {
   background-image:
-    linear-gradient(rgba(124, 58, 237, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 58, 237, 0.08) 1px, transparent 1px);
+    linear-gradient(rgb(var(--accent) / 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--accent) / 0.08) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 30%, transparent 75%);
 }

@@ -44,10 +44,10 @@ const ERA = {
     filter: 'none', glow: '0 0 18px rgba(157,139,216,0.25)',
   },
   cyber: {
-    accent: '#00e5ff', ring: 'rgba(0,229,255,0.6)',
+    accent: '#d4af37', ring: 'rgba(212, 175, 55,0.6)',
     card: 'linear-gradient(160deg, rgba(10,22,30,0.6), rgba(6,12,18,0.72))',
-    border: 'rgba(0,229,255,0.32)', font: '"Fira Code", ui-monospace, monospace',
-    filter: 'none', glow: '0 0 22px rgba(0,229,255,0.35)',
+    border: 'rgba(212, 175, 55,0.32)', font: '"Fira Code", ui-monospace, monospace',
+    filter: 'none', glow: '0 0 22px rgba(212, 175, 55,0.35)',
   },
 }
 
@@ -115,8 +115,8 @@ export default function Bibliography() {
           style={{
             scaleY: lineScale,
             height: '100%',
-            background: 'linear-gradient(180deg, #c8a04a 0%, #9d8bd8 45%, #00e5ff 100%)',
-            boxShadow: '0 0 14px rgba(0,229,255,0.4)',
+            background: 'linear-gradient(180deg, #c8a04a 0%, #9d8bd8 45%, #d4af37 100%)',
+            boxShadow: '0 0 14px rgba(212, 175, 55,0.4)',
           }}
         />
 

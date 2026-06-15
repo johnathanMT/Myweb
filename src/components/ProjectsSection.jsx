@@ -8,6 +8,7 @@ const T = {
   vn: { title: 'Dự án của tôi', sub: 'Những gì tôi đã và đang xây dựng.' },
   ne: { title: 'मेरा परियोजनाहरू', sub: 'मैले बनाएका र बनाउँदै गरेका कुराहरू।' },
   id: { title: 'Proyek Saya', sub: 'Hal-hal yang telah dan sedang saya bangun.' },
+  zh: { title: '我的项目', sub: '我已构建并持续打造的作品。' },
 }
 
 /**

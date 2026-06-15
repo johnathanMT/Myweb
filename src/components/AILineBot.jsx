@@ -69,7 +69,7 @@ export default function AILineBot({ lang = 'en' }) {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, ease: [0.2, 0.7, 0.2, 1] }}
           className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-cyan/25 bg-card/70 p-8 sm:p-12 backdrop-blur-xl"
-          style={{ boxShadow: '0 0 40px -12px rgba(0,212,255,0.35), inset 0 0 60px -40px rgba(124,58,237,0.6)' }}
+          style={{ boxShadow: '0 0 40px -12px rgba(212, 175, 55,0.35), inset 0 0 60px -40px rgba(212, 175, 55,0.6)' }}
         >
           {/* hex / grid backdrop */}
           <div
@@ -77,15 +77,15 @@ export default function AILineBot({ lang = 'en' }) {
             className="pointer-events-none absolute inset-0 opacity-[0.12]"
             style={{
               backgroundImage:
-                'linear-gradient(rgba(0,212,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.6) 1px, transparent 1px)',
+                'linear-gradient(rgba(212, 175, 55,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(212, 175, 55,0.6) 1px, transparent 1px)',
               backgroundSize: '32px 32px',
               maskImage: 'radial-gradient(ellipse at center, #000 30%, transparent 75%)',
             }}
           />
           {/* magenta corner glow */}
-          <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,61,240,0.35), transparent 70%)' }} />
+          <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(142, 42, 42,0.35), transparent 70%)' }} />
           {/* cyan corner glow */}
-          <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.30), transparent 70%)' }} />
+          <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(212, 175, 55,0.30), transparent 70%)' }} />
 
           <div className="relative flex flex-col items-center text-center">
             {/* kicker chip */}
@@ -99,7 +99,7 @@ export default function AILineBot({ lang = 'en' }) {
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
               className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-accent/30 to-cyan/20 text-2xl text-white"
-              style={{ boxShadow: '0 0 24px -4px rgba(124,58,237,0.6)' }}
+              style={{ boxShadow: '0 0 24px -4px rgba(212, 175, 55,0.6)' }}
             >
               <i className="fas fa-robot" />
             </motion.div>

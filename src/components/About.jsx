@@ -25,12 +25,12 @@ export default function About({ lang }) {
       <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* ambient glows */}
       <div className="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl pointer-events-none opacity-20"
-        style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, rgb(var(--accent)), transparent 70%)' }} />
       <div className="absolute bottom-0 right-1/4 w-[360px] h-[360px] rounded-full blur-3xl pointer-events-none opacity-15"
-        style={{ background: 'radial-gradient(circle, #00d4ff, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, rgb(var(--accent)), transparent 70%)' }} />
       {/* deep muted crimson accent — subtle psychological depth */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[300px] rounded-full blur-3xl pointer-events-none opacity-[0.08]"
-        style={{ background: 'radial-gradient(ellipse, #96142b, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(ellipse, rgb(var(--maroon)), transparent 70%)' }} />
 
       <div className="section-container relative z-10">
         {/* Header */}
@@ -50,7 +50,7 @@ export default function About({ lang }) {
             <div className="group relative">
               {/* rotating gradient halo */}
               <div className="absolute -inset-1 rounded-[28px] opacity-70 blur-md transition-opacity duration-500 group-hover:opacity-100"
-                style={{ background: 'conic-gradient(from 0deg, #7c3aed, #00d4ff, #ff1e3c, #7c3aed)' }} />
+                style={{ background: 'conic-gradient(from 0deg, rgb(var(--accent)), rgb(var(--accent)), #ff1e3c, rgb(var(--accent)))' }} />
               <div className="relative w-64 h-64 rounded-3xl overflow-hidden bg-card flex items-center justify-center ring-1 ring-white/10">
                 <span className="absolute text-5xl font-bold text-accent/30 select-none">MTN</span>
                 <img
@@ -76,7 +76,7 @@ export default function About({ lang }) {
 
           {/* Bio — glass card */}
           <div className="relative rounded-3xl border border-white/10 bg-black/15 backdrop-blur-sm p-7 md:p-9 space-y-6"
-            style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 30px 60px -30px rgba(124,58,237,0.4)' }}>
+            style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 30px 60px -30px rgb(var(--accent)/0.4)' }}>
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-1">{PERSONAL.name}</h3>
               <p className="text-accent-light text-sm font-mono">{PERSONAL.handle}</p>
@@ -92,15 +92,15 @@ export default function About({ lang }) {
             {/* Quick facts — glass tiles with glowing icons */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { icon: 'fas fa-graduation-cap', label: 'IT University', value: 'Enrolled' },
-                { icon: 'fas fa-briefcase-medical', label: 'Background', value: 'Healthcare' },
+                { icon: 'fas fa-graduation-cap', label: 'Computer Science University', value: 'Enrolled' },
+                { icon: 'fas fa-briefcase-medical', label: 'Background', value: 'International Relations & Healthcare' },
                 { icon: 'fas fa-code', label: 'Focus', value: 'AI / Web Dev' },
                 { icon: 'fas fa-language', label: 'Languages', value: 'EN · JP · MY' },
               ].map(({ icon, label, value }) => (
                 <div key={label}
                   className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/8 hover:border-accent/40 hover:bg-accent/5 transition-all duration-200">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent-light"
-                    style={{ boxShadow: '0 0 14px -2px rgba(124,58,237,0.6)' }}>
+                    style={{ boxShadow: '0 0 14px -2px rgb(var(--accent)/0.6)' }}>
                     <i className={`${icon} text-sm`} />
                   </span>
                   <div>

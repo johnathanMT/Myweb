@@ -147,7 +147,7 @@ function Archway({ x = 0, z, scale = 1 }) {
     <group position={[x, GROUND, z]} scale={scale}>
       <mesh position={[-11, 8, 0]}><boxGeometry args={[1.6, 20, 1.6]} /><meshBasicMaterial color="#ff1e6b" toneMapped={false} /></mesh>
       <mesh position={[11, 8, 0]}><boxGeometry args={[1.6, 20, 1.6]} /><meshBasicMaterial color="#ff1e6b" toneMapped={false} /></mesh>
-      <mesh position={[0, 18.4, 0]}><boxGeometry args={[24, 1.8, 1.8]} /><meshBasicMaterial color="#7c3aed" toneMapped={false} /></mesh>
+      <mesh position={[0, 18.4, 0]}><boxGeometry args={[24, 1.8, 1.8]} /><meshBasicMaterial color="#00e5ff" toneMapped={false} /></mesh>
       <mesh position={[0, 22, 0]}>
         <planeGeometry args={[4 * sign.aspect, 4]} />
         <meshBasicMaterial map={sign.tex} transparent toneMapped={false} side={THREE.DoubleSide} depthWrite={false} />
@@ -162,7 +162,7 @@ function Archway({ x = 0, z, scale = 1 }) {
 const MENU = [
   { label: 'ABOUT', target: '#about', color: '#00e5ff', pos: [-8.5, 6.5, -30], rotY: 0.5 },
   { label: 'PROJECTS', target: '#projects', color: '#ff1e6b', pos: [8.8, 2.0, -34], rotY: -0.5 },
-  { label: 'EXPLORE', target: '#exploring', color: '#19ffe0', pos: [-9.0, -1.5, -38], rotY: 0.5 },
+  { label: 'EXPLORE', target: '#exploring', color: '#00e5ff', pos: [-9.0, -1.5, -38], rotY: 0.5 },
   { label: 'BLOG', external: true, href: `${BASE}blog.html`, color: '#ff8a00', pos: [8.5, 7.5, -42], rotY: -0.5 },
 ]
 let MENU_MESHES = []
@@ -207,7 +207,7 @@ function Drone() {
     <group ref={root}>
       <mesh ref={core}><icosahedronGeometry args={[0.45, 1]} /><meshBasicMaterial color="#00e5ff" toneMapped={false} /></mesh>
       <mesh ref={ringA}><torusGeometry args={[0.95, 0.03, 10, 48]} /><meshBasicMaterial color="#ff1e6b" toneMapped={false} /></mesh>
-      <mesh ref={ringB}><torusGeometry args={[1.25, 0.025, 10, 48]} /><meshBasicMaterial color="#7c3aed" toneMapped={false} /></mesh>
+      <mesh ref={ringB}><torusGeometry args={[1.25, 0.025, 10, 48]} /><meshBasicMaterial color="#00e5ff" toneMapped={false} /></mesh>
       <pointLight color="#00e5ff" intensity={6} distance={18} />
     </group>
   )

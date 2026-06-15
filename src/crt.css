@@ -2,7 +2,7 @@
    crt.css — "Quantum / Future-tech" hero.
    A clean glassmorphism workstation panel with a hex grid, floating data nodes,
    and a cyberpunk glitch+glow name. Pure CSS/SVG (+ Framer Motion in the JSX).
-   Palette: neon cyan #00e5ff, magenta #ff3df0, electric blue #4b7bff, violet #7c3aed.
+   Palette: neon cyan rgb(var(--accent)), magenta rgb(var(--coral)), electric blue rgb(var(--accent)), violet rgb(var(--accent)).
    ========================================================================== */
 
 .q-stage {
@@ -15,10 +15,10 @@
   overflow: hidden;
   background:
     /* multi-colour ambient wash — cyan, magenta, electric-green, violet */
-    radial-gradient(60% 55% at 22% 8%,  rgba(0, 229, 255, 0.13), transparent 70%),
-    radial-gradient(58% 55% at 82% 16%, rgba(255, 61, 240, 0.12), transparent 70%),
+    radial-gradient(60% 55% at 22% 8%,  rgb(var(--accent) / 0.13), transparent 70%),
+    radial-gradient(58% 55% at 82% 16%, rgb(var(--coral) / 0.12), transparent 70%),
     radial-gradient(55% 55% at 65% 100%, rgba(57, 255, 120, 0.09), transparent 70%),
-    radial-gradient(50% 50% at 12% 92%, rgba(124, 58, 237, 0.12), transparent 70%),
+    radial-gradient(50% 50% at 12% 92%, rgb(var(--accent) / 0.12), transparent 70%),
     /* near-transparent base so the 3D neon city stays crystal clear behind it */
     rgba(6, 7, 14, 0.12);
 }
@@ -30,8 +30,8 @@
   pointer-events: none;
   opacity: 0.5;
   background-image:
-    linear-gradient(rgba(0, 229, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 229, 255, 0.06) 1px, transparent 1px);
+    linear-gradient(rgb(var(--accent) / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--accent) / 0.06) 1px, transparent 1px);
   background-size: 46px 46px;
   -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 78%);
   mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 35%, transparent 78%);
@@ -49,9 +49,9 @@
   opacity: 0.35;
   background: conic-gradient(from 0deg,
       transparent 0deg,
-      rgba(0, 229, 255, 0.10) 30deg,
+      rgb(var(--accent) / 0.10) 30deg,
       transparent 70deg,
-      rgba(255, 61, 240, 0.08) 140deg,
+      rgb(var(--coral) / 0.08) 140deg,
       transparent 180deg);
   animation: q-rotate 24s linear infinite;
 }
@@ -95,7 +95,7 @@
      Colours boosted to fully-saturated neon for maximum vibrancy. */
   background-image:
     repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.4) 2px 3px),
-    linear-gradient(90deg, #00f0ff 0%, #19ffe0 22%, #4b7bff 48%, #ff3df0 72%, #00f0ff 100%);
+    linear-gradient(90deg, rgb(var(--accent-light)) 0%, rgb(var(--accent)) 22%, rgb(var(--accent)) 48%, rgb(var(--coral)) 72%, rgb(var(--accent-light)) 100%);
   background-size: 100% 3px, 300% 100%;
   background-position: 0 0, 0% 50%;
   -webkit-background-clip: text;
@@ -111,7 +111,7 @@
   /* Base glow + dark separation shadow (also the fallback when motion is off). */
   filter:
     drop-shadow(0 2px 8px rgba(0, 0, 0, 0.85))
-    drop-shadow(0 0 18px rgba(0, 229, 255, 0.7));
+    drop-shadow(0 0 18px rgb(var(--accent) / 0.7));
 
   animation:
     q-dataflow 7s linear infinite,        /* the gradient streams sideways */
@@ -129,14 +129,14 @@
   0%, 100% {
     filter:
       drop-shadow(0 2px 8px rgba(0,0,0,0.85))          /* constant dark contour for contrast */
-      drop-shadow(0 0 18px rgba(0,229,255,0.8))
-      drop-shadow(0 0 54px rgba(25,255,224,0.5));
+      drop-shadow(0 0 18px rgb(var(--accent) / 0.8))
+      drop-shadow(0 0 54px rgb(var(--accent) / 0.5));
   }
   50% {
     filter:
       drop-shadow(0 2px 8px rgba(0,0,0,0.85))
-      drop-shadow(0 0 22px rgba(255,61,240,0.85))
-      drop-shadow(0 0 64px rgba(124,58,237,0.6));
+      drop-shadow(0 0 22px rgb(var(--coral) / 0.85))
+      drop-shadow(0 0 64px rgb(var(--accent) / 0.6));
   }
 }
 
@@ -150,8 +150,8 @@
   -webkit-text-fill-color: currentColor;
   mix-blend-mode: screen;
 }
-.q-name::before { color: #00e5ff; animation: q-glitch-c 3.2s steps(1) infinite; }
-.q-name::after  { color: #ff3df0; animation: q-glitch-m 3.2s steps(1) infinite; }
+.q-name::before { color: rgb(var(--accent)); animation: q-glitch-c 3.2s steps(1) infinite; }
+.q-name::after  { color: rgb(var(--coral)); animation: q-glitch-m 3.2s steps(1) infinite; }
 
 /* Mostly invisible; bursts into offset + clipped slices a few times per loop. */
 @keyframes q-glitch-c {
@@ -227,3 +227,28 @@
   .q-name::before,
   .q-name::after { opacity: 0; }   /* hide the glitch ghosts when motion is off */
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BATMAN-SCOPED NAME — Premium Dark Golden-Brown + Deep Maroon ambient glow.
+   Only applies under .theme-batman (the Hub); the Cyber hero keeps its neon.
+   ════════════════════════════════════════════════════════════════════════════ */
+.theme-batman .q-name {
+  /* deep golden-brown → matte gold → maroon (no bright highlights) */
+  background-image:
+    repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.45) 2px 3px),
+    linear-gradient(90deg, #6b4a1f 0%, #b8860b 34%, #8a6a18 58%, #5c1616 84%, #6b4a1f 100%);
+  /* drop the bright pulsing q-cyberglow — keep only the calm streaming gradient */
+  animation: q-dataflow 9s linear infinite;
+  /* static premium glow: dark contour + deep maroon halo (not bright) */
+  filter:
+    drop-shadow(0 2px 8px rgba(0, 0, 0, 0.9))
+    drop-shadow(0 0 18px rgba(92, 22, 22, 0.6));
+}
+/* deep maroon ambient pool behind the name for sophisticated contrast */
+.theme-batman .q-name-wrap::before {
+  background: radial-gradient(60% 72% at 50% 50%,
+      rgba(92, 22, 22, 0.5), rgba(20, 20, 20, 0.55) 58%, transparent 80%);
+  filter: blur(22px);
+}
+/* dim the bright white "data stream" sweep so it reads premium, not flashy */
+.theme-batman .q-name-wrap::after { opacity: 0.3; }

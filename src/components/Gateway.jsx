@@ -25,7 +25,7 @@ function RecommendedBadge() {
       initial={{ opacity: 0, y: -6, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 18 }}
-      className="absolute -top-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-[#00e5ff] to-[#ff3df0] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#04121a] shadow-[0_0_18px_rgba(0,229,255,0.7)]"
+      className="absolute -top-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-[#b8860b] to-[#8e2a2a] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#04121a] shadow-[0_0_18px_rgba(212, 175, 55,0.7)]"
     >
       <Sparkles size={12} /> Recommended
     </motion.span>
@@ -95,7 +95,7 @@ export default function Gateway() {
             icon={Rocket}
             title="🚀 Lite Mode"
             subtitle="Fast & Clean (Optimized)"
-            glow="#00e5ff"
+            glow="#b8860b"
             recommended={isMobile}
             onClick={enterLite}
           />
@@ -103,7 +103,7 @@ export default function Gateway() {
             icon={Orbit}
             title="🌌 Immersive 3D Mode"
             subtitle="High Performance (Good GPU Required)"
-            glow="#ff3df0"
+            glow="#8e2a2a"
             recommended={!isMobile}
             href={IMMERSIVE_URL}
           />

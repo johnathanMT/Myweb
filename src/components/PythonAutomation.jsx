@@ -94,7 +94,7 @@ export default function PythonAutomation() {
     <section
       id="python-automation"
       className="relative overflow-hidden py-24"
-      style={{ background: 'radial-gradient(80% 60% at 50% 0%, rgba(16,185,129,0.08), transparent 70%), #04070a' }}
+      style={{ background: 'radial-gradient(80% 60% at 50% 0%, rgba(212, 175, 55,0.08), transparent 70%), #04070a' }}
     >
       {/* faint matrix grid */}
       <div

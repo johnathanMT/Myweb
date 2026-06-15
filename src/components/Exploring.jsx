@@ -6,14 +6,14 @@ export default function Exploring() {
 
   return (
     <section id="exploring" ref={sectionRef} className="relative py-24 border-t border-white/5 text-legible"
-      style={{ '--c': '#8b5cf6' }}>
+      style={{ '--c': 'rgb(var(--accent))' }}>
       {/* crystal-clear: faint tint only, no blur (readability via .text-legible) */}
       <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* Cosmic bg */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, rgba(7,7,15,0.5) 0%, transparent 40%, transparent 60%, rgba(7,7,15,0.5) 100%)' }} />
+        style={{ background: 'linear-gradient(180deg, rgba(20, 20, 20,0.5) 0%, transparent 40%, transparent 60%, rgba(20, 20, 20,0.5) 100%)' }} />
       <div className="absolute left-1/2 top-1/3 -translate-x-1/2 w-[600px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-10"
-        style={{ background: 'radial-gradient(ellipse, #8b5cf6, #ec4899, transparent)' }} />
+        style={{ background: 'radial-gradient(ellipse, rgb(var(--accent)), rgb(var(--coral)), transparent)' }} />
 
       {/* Starfield dots */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -45,9 +45,9 @@ export default function Exploring() {
         {/* Heinlein quote */}
         <div data-reveal className="mb-14 max-w-3xl">
           <div className="relative p-6 rounded-2xl overflow-hidden"
-            style={{ background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.15)' }}>
+            style={{ background: 'rgb(var(--accent)/0.05)', border: '1px solid rgb(var(--accent)/0.15)' }}>
             <div className="absolute top-0 left-0 w-1 h-full rounded-full"
-              style={{ background: 'linear-gradient(180deg, #8b5cf6, #ec4899)' }} />
+              style={{ background: 'linear-gradient(180deg, rgb(var(--accent)), rgb(var(--coral)))' }} />
             <i className="fas fa-quote-left text-purple-500/30 text-3xl absolute top-4 right-5" />
             <p className="text-gray-400 text-sm leading-[1.9] italic pl-4">{PERSONAL.heinlein}</p>
           </div>

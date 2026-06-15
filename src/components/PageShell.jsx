@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import AmbientBackground from './AmbientBackground'
 import Navbar from './Navbar'
-import Footer from './Footer'
+import Footer from './MegaFooter'
 
 /**
  * PageShell — shared layout for routed sub-pages (/python, /studying, …).
@@ -18,7 +18,7 @@ export default function PageShell({ children }) {
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#07070f] text-white">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#141414] text-white">
       <AmbientBackground />
       <Navbar lang={lang} setLang={setLang} />
       <main className="relative z-10 pt-24">

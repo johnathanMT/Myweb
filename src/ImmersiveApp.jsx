@@ -7,12 +7,13 @@ import About            from './components/About'
 import Philosophy       from './components/Philosophy'
 import MarqueeGallery   from './components/MarqueeGallery'
 import ProjectsSection  from './components/ProjectsSection'
+import GallerySection    from './components/GallerySection'   // Memory Gallery (photos)
 import ArticlesSection  from './components/ArticlesSection'
 import SeasonalGallery  from './components/SeasonalGallery'
 import TravelChronicles from './components/TravelChronicles'
 import Exploring        from './components/Exploring'
 import AILineBot        from './components/AILineBot'
-import Footer           from './components/Footer'
+import Footer           from './components/MegaFooter'   // SaaS-style mega footer
 import CyberCursor      from './components/CyberCursor'
 import BootScreen       from './components/BootScreen'
 import HudFrame         from './components/HudFrame'
@@ -79,7 +80,7 @@ export default function ImmersiveApp() {
   }, [])
 
   return (
-    <div className="relative min-h-screen bg-[#05030c] text-white overflow-x-hidden">
+    <div className="theme-cyber relative min-h-screen bg-space text-white overflow-x-hidden">
       {heavyOK ? (
         <CanvasBoundary>
           <Suspense fallback={<div className="orbit-galaxy fixed inset-0 z-0" aria-hidden />}>
@@ -103,13 +104,14 @@ export default function ImmersiveApp() {
         <Philosophy />
         <MarqueeGallery />
         <ProjectsSection  lang={lang} />
+        <GallerySection   lang={lang} />
         <ArticlesSection />
-        <SeasonalGallery />
+        <SeasonalGallery lang={lang} />
         <TravelChronicles lang={lang} setLang={setLang} />
         <Exploring />
         <AILineBot        lang={lang} />
       </main>
-      <div className="relative z-10"><Footer /></div>
+      <div className="relative z-10"><Footer lang={lang} /></div>
 
       <HudFrame />
       <CyberCursor />

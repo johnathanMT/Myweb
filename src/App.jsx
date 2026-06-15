@@ -6,12 +6,14 @@ import About            from './components/About'
 import Philosophy       from './components/Philosophy'
 import MarqueeGallery   from './components/MarqueeGallery' // hover-reveal project marquee
 import ProjectsSection  from './components/ProjectsSection'
+import TechStack        from './components/TechStack'         // Architecture & journey
+import GallerySection    from './components/GallerySection'   // Memory Gallery (photos)
 import ArticlesSection  from './components/ArticlesSection'
 import SeasonalGallery  from './components/SeasonalGallery'
 import TravelChronicles from './components/TravelChronicles'
 import Exploring        from './components/Exploring'
 import AILineBot        from './components/AILineBot'      // "Talk to my AI agent" promo
-import Footer           from './components/Footer'
+import Footer           from './components/MegaFooter'   // SaaS-style mega footer
 import CyberCursor      from './components/CyberCursor'     // custom crosshair cursor
 import BootScreen       from './components/BootScreen'      // "System Booting…" loader
 import HudFrame         from './components/HudFrame'        // HUD corner overlay
@@ -33,7 +35,7 @@ export default function App() {
 
   return (
     // Content sits at z-10; the lightweight background layers at z-0.
-    <div className="relative min-h-screen bg-[#05030c] text-white overflow-x-hidden">
+    <div className="theme-batman relative min-h-screen bg-space text-white overflow-x-hidden">
       {/* Lightweight, GPU-friendly backdrop (no WebGL): Milky-Way gradient + stars. */}
       <div className="orbit-galaxy fixed inset-0 z-0" aria-hidden />
       <AmbientBackground />
@@ -47,13 +49,15 @@ export default function App() {
         <Philosophy />
         <MarqueeGallery />
         <ProjectsSection  lang={lang} />
+        <TechStack        lang={lang} />
+        <GallerySection   lang={lang} />
         <ArticlesSection />
-        <SeasonalGallery />
+        <SeasonalGallery lang={lang} />
         <TravelChronicles lang={lang} setLang={setLang} />
         <Exploring />
         <AILineBot        lang={lang} />
       </main>
-      <div className="relative z-10"><Footer /></div>
+      <div className="relative z-10"><Footer lang={lang} /></div>
 
       {/* ── Elite cyberpunk overlays (fixed, above everything) ── */}
       <HudFrame />

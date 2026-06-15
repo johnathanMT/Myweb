@@ -33,7 +33,7 @@ export default function ArticlesSection() {
     <section id="articles" className="relative overflow-hidden py-28">
       {/* deep-space backdrop */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(120% 60% at 50% 0%, rgba(124,58,237,0.18), transparent 60%), radial-gradient(80% 50% at 50% 100%, rgba(0,212,255,0.10), transparent 70%), radial-gradient(50% 45% at 50% 55%, rgba(150,20,40,0.10), transparent 72%)' }} />
+        style={{ background: 'radial-gradient(120% 60% at 50% 0%, rgba(212, 175, 55,0.18), transparent 60%), radial-gradient(80% 50% at 50% 100%, rgba(212, 175, 55,0.10), transparent 70%), radial-gradient(50% 45% at 50% 55%, rgba(150,20,40,0.10), transparent 72%)' }} />
 
       {/* ── The portal / doorway ── */}
       <div className="relative z-10 mx-auto mb-16 flex max-w-4xl flex-col items-center px-6 text-center">
@@ -75,12 +75,12 @@ export default function ArticlesSection() {
             >
               {/* portal-glow edge on hover */}
               <span className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                style={{ boxShadow: '0 0 30px -4px rgba(124,58,237,0.6), inset 0 0 30px -10px rgba(0,212,255,0.5)' }} />
+                style={{ boxShadow: '0 0 30px -4px rgba(212, 175, 55,0.6), inset 0 0 30px -10px rgba(212, 175, 55,0.5)' }} />
 
               <div className="relative h-44 overflow-hidden">
                 {/* the real image — encrypted (blurred/desaturated) until hover */}
                 <img src={preview(a)} alt="" loading="lazy" className="radio-img h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b14] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
 
                 {/* Default "encrypted signal" veil: scanning grid + radio wave + EQ bars */}
                 <div className="radio-veil">

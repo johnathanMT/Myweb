@@ -4,15 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        space: '#0a0a0f',
-        surface: '#111118',
-        card: '#16161f',
-        'card-hover': '#1e1e2e',
-        accent: '#7c3aed',
-        'accent-light': '#9d6fef',
-        coral: '#ff6b6b',
-        cyan: '#00d4ff',
-        muted: '#6b7280',
+        // ── THEME-AWARE TOKENS (driven by CSS vars; see .theme-batman /
+        //    .theme-cyber in index.css). Same class names, different palette
+        //    depending on which wrapper the app root uses. ────────────────────
+        space: 'rgb(var(--space) / <alpha-value>)',
+        surface: 'rgb(var(--surface) / <alpha-value>)',
+        card: 'rgb(var(--card) / <alpha-value>)',
+        'card-hover': 'rgb(var(--card-hover) / <alpha-value>)',
+        accent: 'rgb(var(--accent) / <alpha-value>)',
+        'accent-light': 'rgb(var(--accent-light) / <alpha-value>)',
+        coral: 'rgb(var(--coral) / <alpha-value>)',
+        cyan: 'rgb(var(--cyan) / <alpha-value>)',
+        muted: 'rgb(var(--muted) / <alpha-value>)',
+        maroon: 'rgb(var(--maroon) / <alpha-value>)',
+        'maroon-deep': 'rgb(var(--maroon-deep) / <alpha-value>)',
+        gold: 'rgb(var(--accent) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

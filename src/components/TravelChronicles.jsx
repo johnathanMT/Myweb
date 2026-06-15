@@ -31,7 +31,7 @@ function BentoCard({ post, lang, onClick }) {
         <h3 className="text-white font-bold text-xl leading-snug mb-1.5">{title}</h3>
         <p className="text-gray-300 text-sm leading-relaxed line-clamp-2">{tr.excerpt}</p>
         <div className="mt-3 flex items-center gap-2 text-xs font-semibold"
-          style={{ color: '#f43f5e' }}>
+          style={{ color: 'rgb(var(--coral))' }}>
           <span>Read more</span>
           <i className="fas fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform" />
         </div>
@@ -65,7 +65,7 @@ function Modal({ post, lang, setLang, onClose }) {
         {/* Hero image */}
         <div className="relative h-60 overflow-hidden rounded-t-3xl">
           <img src={post.img} alt={title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #0f0f1a, transparent 60%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #1a1414, transparent 60%)' }} />
           <button onClick={onClose}
             className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 flex items-center justify-center text-white transition-all z-10">
             <i className="fas fa-times text-sm" />
@@ -117,14 +117,14 @@ export default function TravelChronicles({ lang, setLang }) {
 
   return (
     <section id="blog" ref={sectionRef} className="relative py-24 border-t border-white/5 text-legible"
-      style={{ '--c': '#f43f5e' }}>
+      style={{ '--c': 'rgb(var(--coral))' }}>
       {/* crystal-clear: faint tint only, no blur (readability via .text-legible) */}
       <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* Rose-tinted bg */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, rgba(7,7,15,0.5) 0%, transparent 40%, transparent 60%, rgba(7,7,15,0.5) 100%)' }} />
+        style={{ background: 'linear-gradient(180deg, rgba(20, 20, 20,0.5) 0%, transparent 40%, transparent 60%, rgba(20, 20, 20,0.5) 100%)' }} />
       <div className="absolute top-0 right-0 w-[500px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-10"
-        style={{ background: 'radial-gradient(ellipse, #f43f5e, transparent)' }} />
+        style={{ background: 'radial-gradient(ellipse, rgb(var(--coral)), transparent)' }} />
 
       <div className="section-container relative z-10">
         {/* Header */}

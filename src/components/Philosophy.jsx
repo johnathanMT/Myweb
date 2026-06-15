@@ -27,14 +27,14 @@ function MatrixRain() {
       raf = requestAnimationFrame(draw)
       if (t - last < 60) return
       last = t
-      ctx.fillStyle = 'rgba(11,11,20,0.22)'   // fade trail
+      ctx.fillStyle = 'rgba(20, 20, 20,0.22)'   // fade trail
       ctx.fillRect(0, 0, w, h)
       ctx.font = `${fontSize}px monospace`
       for (let i = 0; i < drops.length; i++) {
         const ch = chars[(Math.random() * chars.length) | 0]
         const x = i * fontSize
         const y = drops[i] * fontSize
-        ctx.fillStyle = Math.random() > 0.93 ? '#00d4ff' : 'rgba(124,58,237,0.6)'
+        ctx.fillStyle = Math.random() > 0.93 ? 'rgb(var(--accent))' : 'rgb(var(--accent)/0.6)'
         ctx.fillText(ch, x, y)
         if (y > h && Math.random() > 0.975) drops[i] = 0
         drops[i] += 1
@@ -78,12 +78,12 @@ export default function Philosophy() {
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[360px] bg-accent/10 rounded-full blur-3xl pointer-events-none" />
       {/* subtle deep-crimson undertone */}
       <div className="absolute left-1/2 bottom-8 -translate-x-1/2 w-[460px] h-[200px] rounded-full blur-3xl pointer-events-none opacity-[0.10]"
-        style={{ background: 'radial-gradient(ellipse, #96142b, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(ellipse, rgb(var(--maroon)), transparent 70%)' }} />
 
       <div className="section-container relative z-10">
         {/* Larger, prominent terminal */}
         <div className="relative mx-auto max-w-4xl rounded-2xl overflow-hidden border border-accent/25"
-          style={{ boxShadow: '0 0 50px -10px rgba(124,58,237,0.5), 0 30px 80px -20px rgba(0,0,0,0.8)' }}>
+          style={{ boxShadow: '0 0 50px -10px rgb(var(--accent)/0.5), 0 30px 80px -20px rgba(0,0,0,0.8)' }}>
           {/* Title bar */}
           <div className="flex items-center gap-2 px-5 py-3.5 bg-white/5 border-b border-white/10 backdrop-blur-md">
             <span className="w-3.5 h-3.5 rounded-full bg-[#ff5f57]" />
@@ -94,7 +94,7 @@ export default function Philosophy() {
           </div>
 
           {/* Body */}
-          <div className="relative bg-[#0b0b14] p-7 md:p-12 font-mono text-base md:text-lg leading-relaxed min-h-[340px]">
+          <div className="relative bg-[#141414] p-7 md:p-12 font-mono text-base md:text-lg leading-relaxed min-h-[340px]">
             <MatrixRain />
             {/* scanline sheen */}
             <div className="term-scanlines absolute inset-0 pointer-events-none" aria-hidden />
@@ -121,7 +121,7 @@ export default function Philosophy() {
                 <>
                   {/* Output quote */}
                   <div className="border-l-2 border-accent pl-5 my-7"
-                    style={{ boxShadow: '-2px 0 16px -4px rgba(124,58,237,0.7)' }}>
+                    style={{ boxShadow: '-2px 0 16px -4px rgb(var(--accent)/0.7)' }}>
                     <p className="text-xl md:text-2xl font-sans font-bold text-white leading-snug">
                       "{PERSONAL.quote}"
                     </p>

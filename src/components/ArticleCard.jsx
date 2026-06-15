@@ -95,7 +95,7 @@ export default function ArticleCard({ article = {}, onLike, onReact, shareUrl })
   const blogHref = `${import.meta.env.BASE_URL}blog.html?id=${id}`
 
   return (
-    <article className="group flex w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-cyan/40 hover:shadow-[0_28px_60px_-18px_rgba(0,229,255,0.28)]">
+    <article className="group flex w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/50 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-cyan/40 hover:shadow-[0_28px_60px_-18px_rgba(212, 175, 55,0.28)]">
       {/* Click media or body to open the full article (blog.html?id=) */}
       <a href={blogHref} className="block">
         {/* Media header (carousel / collage / video) */}

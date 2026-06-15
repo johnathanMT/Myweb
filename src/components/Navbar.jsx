@@ -8,28 +8,43 @@ const LANGS = [
   { code: 'vn', flag: '🇻🇳' },
   { code: 'ne', flag: '🇳🇵' },
   { code: 'id', flag: '🇮🇩' },
+  { code: 'zh', flag: '🇨🇳' },
 ]
 
 const isGitHub = window.location.hostname.includes('github.io');
 const blogPath = isGitHub ? '/Myweb/blog.html' : '/blog.html';
 
 const NAV_LINKS = [
-  { href: '#home', label: 'Home', isExternal: false },
-  { href: '#about', label: 'About', isExternal: false },
-  { href: '#projects', label: 'Projects', isExternal: false },
-  { href: '#exploring', label: 'Exploring', isExternal: false },
-  { href: blogPath, label: 'Blog', isExternal: true },
+  { href: '#home', key: 'home' },
+  { href: '#about', key: 'about' },
+  { href: '#projects', key: 'projects' },
+  { href: '#stack', key: 'stack' },
+  { href: '#gallery', key: 'gallery' },
+  { href: '#exploring', key: 'exploring' },
+  { href: blogPath, key: 'blog', isExternal: true },
 ];
+
+// i18n labels for the nav (falls back to `en` for any missing language).
+const NAV_T = {
+  en: { home: 'Home',      about: 'About',      projects: 'Projects',      stack: 'Stack',     gallery: 'Gallery',  exploring: 'Exploring', blog: 'Blog' },
+  mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာ',   gallery: 'ပြခန်း',    exploring: 'လေ့လာရန်',  blog: 'ဘလော့' },
+  jp: { home: 'ホーム',     about: '概要',        projects: 'プロジェクト',    stack: 'スタック',  gallery: 'ギャラリー', exploring: '探索',      blog: 'ブログ' },
+  vn: { home: 'Trang chủ', about: 'Giới thiệu', projects: 'Dự án',         stack: 'Công nghệ', gallery: 'Thư viện', exploring: 'Khám phá',  blog: 'Blog' },
+  ne: { home: 'गृह',        about: 'परिचय',       projects: 'परियोजना',       stack: 'स्ट्याक',    gallery: 'ग्यालरी',   exploring: 'अन्वेषण',    blog: 'ब्लग' },
+  id: { home: 'Beranda',   about: 'Tentang',    projects: 'Proyek',        stack: 'Teknologi', gallery: 'Galeri',   exploring: 'Jelajahi',  blog: 'Blog' },
+  zh: { home: '首页',       about: '关于',        projects: '项目',          stack: '技术栈',     gallery: '画廊',      exploring: '探索',      blog: '博客' },
+};
 
 export default function Navbar({ lang, setLang }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
+  const t = NAV_T[lang] || NAV_T.en   // translated nav labels
 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 40)
-      const sections = ['home', 'about', 'projects', 'seasonal', 'exploring']
+      const sections = ['home', 'about', 'projects', 'stack', 'gallery', 'seasonal', 'exploring']
       for (const id of [...sections].reverse()) {
         const el = document.getElementById(id)
         if (el && window.scrollY >= el.offsetTop - 120) {
@@ -81,7 +96,7 @@ export default function Navbar({ lang, setLang }) {
 
         {/* Desktop nav links — now appear at lg (>=1024px) */}
         <ul className="hidden lg:flex items-center gap-1">
-          {NAV_LINKS.map(({ href, label, isExternal }) => {
+          {NAV_LINKS.map(({ href, key, isExternal = false }) => {
             const id = href.slice(1);
             const isActive = activeSection === id && !isExternal;
             return (
@@ -94,7 +109,7 @@ export default function Navbar({ lang, setLang }) {
                     : 'text-muted hover:text-white hover:bg-white/5'
                     }`}
                 >
-                  {label}
+                  {t[key]}
                 </a>
               </li>
             );
@@ -136,14 +151,14 @@ export default function Navbar({ lang, setLang }) {
           } bg-surface/95 backdrop-blur-md border-b border-white/5`}
       >
         <ul className="px-6 py-4 flex flex-col gap-1">
-          {NAV_LINKS.map(({ href, label, isExternal }) => (
+          {NAV_LINKS.map(({ href, key, isExternal = false }) => (
             <li key={href}>
               <a
                 href={href}
                 onClick={(e) => handleNav(e, href, isExternal)}
                 className="block px-4 py-2.5 rounded-xl text-sm font-medium text-muted hover:text-white hover:bg-white/5 transition-all"
               >
-                {label}
+                {t[key]}
               </a>
             </li>
           ))}
