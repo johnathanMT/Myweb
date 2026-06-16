@@ -7,13 +7,19 @@ import { useEffect, useRef, useState } from 'react'
  */
 const LINES = [
   '> initializing MyoThantNaing.Operation System kernel ...........',
-  '> ငုပ်မိသဲတိုင် တတ်နိုင်ဖျားရောက် ...........',
-  '> mounting /neon/megacity ............... [OK]',
-  '> loading shaders: bloom · chromatic · glitch [OK]',
+  '> ငုပ်မိသဲတိုင် တက်နိုင်ဖျားရောက်: max_depth & peak_target locked ... [OK]',
+  '> 改善 (Kaizen): initiating continuous_improvement_protocol ....... [OK]',
+ '> DETECTING UNKNOWN PAYLOAD. . . . . .  .',
+  '> .......................................................',
   '> contacting → ai@myothant.dev ...... [OK]',
-  '> calibrating quantum workstation ....... [OK]',
+  '>      ▲ ▲ ▲  ',
+  '>     / O O \\   "七転び八起き..."',
+  '>     \\ \\_/ /   ',
+  '>      -----    [ ALL_IT_TAKES_IS_A_LITTLE_PUSH.sys ]',
   '> WELCOME, OPERATOR.',
+
 ]
+
 
 export default function BootScreen() {
   const [show, setShow] = useState(() => {

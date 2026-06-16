@@ -47,7 +47,7 @@ export default function AboutMe({
               Those same instincts now drive how I build software.
             </p>
             <p className="mt-4 leading-relaxed text-gray-400">
-              Today I'm an <span className="text-accent-light">IT student</span> and aspiring
+              Today I'm an <span className="text-accent-light">Computer Science student</span> and aspiring
               <span className="text-accent-light"> AI Engineer</span>, teaching myself to ship real,
               full-stack products — from a React front end to a .NET API and a cloud database.
               <span className="italic text-coral"> Better late than never.</span>
