@@ -7,7 +7,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import Particles, { ParticlesProvider, useParticlesProvider } from '@tsparticles/react'
 import { loadSlim } from '@tsparticles/slim'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Sun as SunIcon, Moon as MoonIcon, Mail, X, Send, Pencil } from 'lucide-react'
+import { ArrowLeft, Sun as SunIcon, Moon as MoonIcon, Mail, X, Send, Pencil, Sparkles, ArrowRight } from 'lucide-react'
 import { getParticlesOptions } from '../lib/sanctuaryParticles'
 
 /**
@@ -44,6 +44,17 @@ const SCENE_LAYOUT = {
 const BASE = import.meta.env.BASE_URL || '/'
 const u = (f) => `${BASE}${f}`
 Object.values(SCENE_LAYOUT).forEach((m) => useGLTF.preload(u(m.url)))
+const ALL_URLS = Object.values(SCENE_LAYOUT).map((m) => u(m.url))
+
+// Phones get a lower pixel ratio, no MSAA, and no Bloom — big perf wins.
+const IS_MOBILE = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
+
+// Welcome copy (exact, trilingual).
+const WELCOME = {
+  en: 'Welcome to the Memory World. You can choose your favorite spot to leave a message for Ko Myo Thant Naing.',
+  jp: 'メモリーワールドへようこそ。ナインへのメッセージを、お好きな場所を選んで残すことができます。',
+  mm: 'Memory World မှ နွေးထွေးစွာ ကြိုဆိုပါတယ်။ Ko Myo Thant Ning အတွက် အမှတ်တရစကားလေးကို သင်နှစ်သက်ရာ နေရာလေးမှာ ရွေးချယ်ချိတ်ဆွဲခဲ့နိုင်ပါတယ်။',
+}
 
 // Landmarks tags hang from — anchors derived from SCENE_LAYOUT positions.
 const LANDMARKS = {
@@ -241,8 +252,8 @@ function Scene({ night, tags, paused, operatorId, onOpen }) {
   return (
     <Canvas
       camera={{ position: [0, 8, 40], fov: 50 }}
-      dpr={[1, 1.5]}                                  // cap pixel ratio → big mobile win
-      gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+      dpr={IS_MOBILE ? [1, 1] : [1, 1.5]}             // phones render at 1x → big win
+      gl={{ alpha: true, antialias: !IS_MOBILE, powerPreference: 'high-performance' }}
       performance={{ min: 0.5 }}                      // allow auto-throttle under load
       style={{ background: 'transparent' }}
     >
@@ -256,7 +267,7 @@ function Scene({ night, tags, paused, operatorId, onOpen }) {
       />
       <World night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={onOpen} />
 
-      {night && (
+      {night && !IS_MOBILE && (
         <EffectComposer>
           <Bloom intensity={1.2} luminanceThreshold={0.6} luminanceSmoothing={0.3} mipmapBlur />
         </EffectComposer>
@@ -366,6 +377,33 @@ function Weather({ night }) {
   return <Particles id="sanctuary-weather" key={night ? 'night' : 'day'} options={options} className="pointer-events-none absolute inset-0 z-40" />
 }
 
+function WelcomeModal({ open, onClose }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 p-4 backdrop-blur-md" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true">
+          <motion.div initial={{ scale: 0.9, opacity: 0, y: 24 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.92, opacity: 0, y: 12 }} transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+            className="relative w-full max-w-lg rounded-[28px] border border-white/25 bg-white/15 p-7 text-center text-white shadow-2xl backdrop-blur-2xl sm:p-9">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-rose-300 text-amber-950 shadow-[0_0_24px_rgba(253,224,140,0.6)]">
+              <Sparkles size={22} />
+            </div>
+            <h2 className="font-serif text-2xl font-bold tracking-wide">Welcome to the Memory World</h2>
+            <div className="mx-auto mt-5 max-w-md space-y-4 text-left">
+              <p className="font-serif text-[14px] leading-relaxed text-white/90">{WELCOME.en}</p>
+              <p className="border-t border-white/15 pt-4 font-serif text-[14px] leading-relaxed text-white/80">{WELCOME.jp}</p>
+              <p className="border-t border-white/15 pt-4 font-serif text-[14px] leading-relaxed text-white/80">{WELCOME.mm}</p>
+            </div>
+            <button type="button" onClick={onClose}
+              className="mx-auto mt-7 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-300 to-rose-300 px-7 py-3 font-serif text-sm font-semibold text-amber-950 shadow-[0_8px_28px_rgba(0,0,0,0.4)] transition hover:brightness-105 active:scale-[0.98]">
+              Enter Sanctuary <ArrowRight size={16} />
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 /* ───────── main page ───────── */
 export default function Sanctuary() {
   const operatorId = useRef(getOperatorId()).current
@@ -378,7 +416,12 @@ export default function Sanctuary() {
   const [activeTag, setActiveTag] = useState(null)
   const [writeOpen, setWriteOpen] = useState(false)
   const [editing, setEditing] = useState(null)
-  const paused = !!activeTag || writeOpen
+  const [welcome, setWelcome] = useState(true) // magical intro popup on entry
+  const paused = !!activeTag || writeOpen || welcome
+
+  // Free GPU memory (geometries/materials/textures) when leaving the page, so
+  // navigating away from this heavy 3D route is smooth (no lingering WebGL).
+  useEffect(() => () => { try { useGLTF.clear(ALL_URLS) } catch { /* ignore */ } }, [])
 
   const myTag = tags.find((x) => x.ownerId === operatorId) || null
   const openWrite = () => { setEditing(myTag); setWriteOpen(true) }
@@ -411,26 +454,32 @@ export default function Sanctuary() {
 
         <Weather night={night} />
 
-        <Link to="/" className="absolute left-5 top-5 z-[45] inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-4 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/50"><ArrowLeft size={15} /> {t.home}</Link>
-        <button type="button" onClick={() => setNight((n) => !n)} aria-label={night ? t.day : t.night} className="absolute right-5 top-5 z-[45] inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-4 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/50">{night ? <SunIcon size={15} /> : <MoonIcon size={15} />} {night ? t.day : t.night}</button>
+        {/* TOP control bar — moved up so mobile browser chrome (bottom bars) never covers it */}
+        <div className="absolute inset-x-0 top-0 z-[45] flex items-start justify-between gap-2 px-3 sm:px-4" style={{ paddingTop: 'max(0.85rem, env(safe-area-inset-top))' }}>
+          <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/40 px-3.5 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60"><ArrowLeft size={15} /><span className="hidden sm:inline">{t.home}</span></Link>
 
-        <div className="pointer-events-none absolute left-1/2 top-6 z-[45] -translate-x-1/2 text-center">
-          <h1 className="font-serif text-2xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-3xl">{t.title}</h1>
-          <p className="mt-1 font-serif text-xs text-white/80 drop-shadow">{t.sub}</p>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="flex items-center gap-1 rounded-full border border-white/20 bg-black/40 p-1 backdrop-blur-md">
+              {LANGS.map((l) => (
+                <button key={l.code} type="button" onClick={() => setLang(l.code)} className={`rounded-full px-2.5 py-1 font-mono text-[11px] transition ${lang === l.code ? 'bg-accent/70 text-white' : 'text-white/70 hover:text-white'}`}>{l.label}</button>
+              ))}
+            </div>
+            <button type="button" onClick={() => setNight((n) => !n)} aria-label={night ? t.day : t.night} className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/40 px-3 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60">{night ? <SunIcon size={15} /> : <MoonIcon size={15} />}<span className="hidden sm:inline">{night ? t.day : t.night}</span></button>
+            <button type="button" onClick={openWrite} className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 to-rose-300 px-4 py-2 font-serif text-sm font-semibold text-amber-950 shadow-lg transition hover:brightness-105 active:scale-[0.98]">
+              {myTag ? <Pencil size={15} /> : <Mail size={16} />}<span className="hidden sm:inline">{myTag ? t.editMine : t.leave}</span>
+            </button>
+          </div>
         </div>
 
-        <div className="absolute bottom-6 left-6 z-[45] flex items-center gap-1 rounded-full border border-white/20 bg-black/30 p-1 backdrop-blur-md">
-          {LANGS.map((l) => (
-            <button key={l.code} type="button" onClick={() => setLang(l.code)} className={`rounded-full px-3 py-1.5 font-mono text-xs transition ${lang === l.code ? 'bg-accent/70 text-white' : 'text-white/70 hover:text-white'}`}>{l.label}</button>
-          ))}
+        {/* title sits just below the control bar */}
+        <div className="pointer-events-none absolute left-1/2 z-[44] -translate-x-1/2 text-center" style={{ top: 'calc(max(0.85rem, env(safe-area-inset-top)) + 3.3rem)' }}>
+          <h1 className="font-serif text-xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-3xl">{t.title}</h1>
+          <p className="mt-1 hidden font-serif text-xs text-white/80 drop-shadow sm:block">{t.sub}</p>
         </div>
-
-        <button type="button" onClick={openWrite} className="group absolute bottom-6 right-6 z-[45] inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-300 to-rose-300 px-5 py-3 font-serif text-sm font-semibold text-amber-950 shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition hover:brightness-105 active:scale-[0.98]">
-          {myTag ? <Pencil size={16} /> : <Mail size={17} className="transition-transform group-hover:-translate-y-0.5" />} {myTag ? t.editMine : t.leave}
-        </button>
 
         <ReadModal tag={activeTag} t={t} canEdit={!!activeTag && activeTag.ownerId === operatorId} onEdit={editFromRead} onClose={() => setActiveTag(null)} />
         <WriteModal open={writeOpen} editing={editing} t={t} onClose={() => { setWriteOpen(false); setEditing(null) }} onSubmit={submitMemory} />
+        <WelcomeModal open={welcome} onClose={() => setWelcome(false)} />
       </div>
     </ParticlesProvider>
   )
