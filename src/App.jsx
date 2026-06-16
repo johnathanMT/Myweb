@@ -39,13 +39,14 @@ export default function App() {
     try { localStorage.setItem('mtn_lang', lang) } catch {}
   }, [lang])
 
-  // Warm-up ping: wake the Render free-tier backend the moment the page loads,
-  // so it's already up by the time the visitor scrolls to the VisitorGlobe —
-  // hiding cold-start latency. Fire-and-forget; 'no-cors' avoids console noise
-  // (we don't read the response — the request alone triggers the wake).
+  // Warm-up ping: wake the Render free-tier backend on page load so it's up by
+  // the time the visitor reaches the globe. A normal CORS fetch is used (our
+  // origin is whitelisted in the backend's CORS policy). NOTE: 'no-cors' is
+  // wrong here — the API sends `Cross-Origin-Resource-Policy: same-site`, which
+  // the browser enforces against no-cors cross-origin loads and cancels them.
   useEffect(() => {
     const t = setTimeout(() => {
-      fetch(`${SITE.apiUrl}/health`, { mode: 'no-cors', cache: 'no-store' }).catch(() => {})
+      fetch(`${SITE.apiUrl}/health`, { cache: 'no-store' }).catch(() => {})
     }, 0)
     return () => clearTimeout(t)
   }, [])

@@ -22,18 +22,19 @@ const NAV_LINKS = [
   { href: '#stack', key: 'stack' },
   { href: '#gallery', key: 'gallery' },
   { href: '#exploring', key: 'exploring' },
+  { route: '/sanctuary', key: 'sanctuary' },     // dedicated route (#/sanctuary)
   { href: blogPath, key: 'blog', isExternal: true },
 ];
 
 // i18n labels for the nav (falls back to `en` for any missing language).
 const NAV_T = {
-  en: { home: 'Home',      about: 'About',      projects: 'Projects',      stack: 'Stack',     gallery: 'Gallery',  exploring: 'Exploring', blog: 'Blog' },
-  mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာ',   gallery: 'ပြခန်း',    exploring: 'လေ့လာရန်',  blog: 'ဘလော့' },
-  jp: { home: 'ホーム',     about: '概要',        projects: 'プロジェクト',    stack: 'スタック',  gallery: 'ギャラリー', exploring: '探索',      blog: 'ブログ' },
-  vn: { home: 'Trang chủ', about: 'Giới thiệu', projects: 'Dự án',         stack: 'Công nghệ', gallery: 'Thư viện', exploring: 'Khám phá',  blog: 'Blog' },
-  ne: { home: 'गृह',        about: 'परिचय',       projects: 'परियोजना',       stack: 'स्ट्याक',    gallery: 'ग्यालरी',   exploring: 'अन्वेषण',    blog: 'ब्लग' },
-  id: { home: 'Beranda',   about: 'Tentang',    projects: 'Proyek',        stack: 'Teknologi', gallery: 'Galeri',   exploring: 'Jelajahi',  blog: 'Blog' },
-  zh: { home: '首页',       about: '关于',        projects: '项目',          stack: '技术栈',     gallery: '画廊',      exploring: '探索',      blog: '博客' },
+  en: { home: 'Home',      about: 'About',      projects: 'Projects',      stack: 'Stack',     gallery: 'Gallery',  exploring: 'Exploring', sanctuary: 'Sanctuary', blog: 'Blog' },
+  mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာ',   gallery: 'ပြခန်း',    exploring: 'လေ့လာရန်',  sanctuary: 'အောက်မေ့ပင်', blog: 'ဘလော့' },
+  jp: { home: 'ホーム',     about: '概要',        projects: 'プロジェクト',    stack: 'スタック',  gallery: 'ギャラリー', exploring: '探索',      sanctuary: '記憶の木',   blog: 'ブログ' },
+  vn: { home: 'Trang chủ', about: 'Giới thiệu', projects: 'Dự án',         stack: 'Công nghệ', gallery: 'Thư viện', exploring: 'Khám phá',  sanctuary: 'Cây Kỷ Niệm', blog: 'Blog' },
+  ne: { home: 'गृह',        about: 'परिचय',       projects: 'परियोजना',       stack: 'स्ट्याक',    gallery: 'ग्यालरी',   exploring: 'अन्वेषण',    sanctuary: 'सम्झना रूख', blog: 'ब्लग' },
+  id: { home: 'Beranda',   about: 'Tentang',    projects: 'Proyek',        stack: 'Teknologi', gallery: 'Galeri',   exploring: 'Jelajahi',  sanctuary: 'Pohon Kenangan', blog: 'Blog' },
+  zh: { home: '首页',       about: '关于',        projects: '项目',          stack: '技术栈',     gallery: '画廊',      exploring: '探索',      sanctuary: '记忆之树',   blog: '博客' },
 };
 
 export default function Navbar({ lang, setLang }) {
@@ -98,11 +99,16 @@ export default function Navbar({ lang, setLang }) {
     else { navigate('/'); setTimeout(() => scrollToId(id), 120) }
   }
 
-  const handleNav = (e, href, isExternal) => {
-    if (isExternal) return;        // blog → let the browser follow the real link
+  // Unified click handler for nav items:
+  //  • isExternal (blog)  → let the browser follow the real link.
+  //  • route (/sanctuary) → client-side navigate to that route.
+  //  • href (#section)    → cross-page smooth-scroll to the section.
+  const handleNav = (e, item) => {
+    if (item.isExternal) return;
     e.preventDefault();
     setMenuOpen(false);
-    goToSection(href.replace(/^#/, ''));
+    if (item.route) { navigate(item.route); return; }
+    goToSection(item.href.replace(/^#/, ''));
   };
 
   // Logo → Home + smooth-scroll to the very top (works from any route).
@@ -134,14 +140,16 @@ export default function Navbar({ lang, setLang }) {
 
         {/* Desktop nav links — now appear at lg (>=1024px) */}
         <ul className="hidden lg:flex items-center gap-1">
-          {NAV_LINKS.map(({ href, key, isExternal = false }) => {
-            const id = href.slice(1);
-            const isActive = activeSection === id && !isExternal && location.pathname === '/';
+          {NAV_LINKS.map((item) => {
+            const { key, href, route, isExternal = false } = item;
+            const isActive = route
+              ? location.pathname === route
+              : (activeSection === href?.slice(1) && !isExternal && location.pathname === '/');
             return (
-              <li key={href}>
+              <li key={key}>
                 <a
-                  href={href}
-                  onClick={(e) => handleNav(e, href, isExternal)}
+                  href={route ? `#${route}` : href}
+                  onClick={(e) => handleNav(e, item)}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
                     ? 'text-white bg-accent/20'
                     : 'text-muted hover:text-white hover:bg-white/5'
@@ -197,14 +205,14 @@ export default function Navbar({ lang, setLang }) {
           className="px-6 pt-4 flex flex-col gap-1"
           style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
         >
-          {NAV_LINKS.map(({ href, key, isExternal = false }) => (
-            <li key={href}>
+          {NAV_LINKS.map((item) => (
+            <li key={item.key}>
               <a
-                href={href}
-                onClick={(e) => handleNav(e, href, isExternal)}
+                href={item.route ? `#${item.route}` : item.href}
+                onClick={(e) => handleNav(e, item)}
                 className="block px-4 py-2.5 rounded-xl text-sm font-medium text-muted hover:text-white hover:bg-white/5 transition-all"
               >
-                {t[key]}
+                {t[item.key]}
               </a>
             </li>
           ))}

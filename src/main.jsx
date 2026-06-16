@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import App from './App.jsx'
@@ -9,6 +9,9 @@ import StudyingLibrary from './components/StudyingLibrary.jsx'
 import Bibliography from './components/Bibliography.jsx'
 import GalleryPage from './components/GalleryPage.jsx'
 import './index.css'
+
+// Lazy: pulls in tsparticles — code-split out of the main bundle.
+const Sanctuary = lazy(() => import('./components/Sanctuary.jsx'))
 
 // ── TIERED EXPERIENCE SWITCH (single-repo, two Vercel deployments) ────────────
 // One codebase, two builds chosen at BUILD time by an env var:
@@ -38,6 +41,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/studying"     element={<PageShell><StudyingLibrary /></PageShell>} />
         <Route path="/bibliography" element={<PageShell><Bibliography /></PageShell>} />
         <Route path="/gallery"      element={<PageShell><GalleryPage /></PageShell>} />
+        {/* Sanctuary is full-screen immersive → no PageShell. */}
+        <Route path="/sanctuary"    element={<Suspense fallback={<div style={{minHeight:'100vh',background:'#070b1c'}} />}><Sanctuary /></Suspense>} />
         {/* unknown paths fall back to the homepage (mode-aware) */}
         <Route path="*" element={<Home />} />
       </Routes>

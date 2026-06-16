@@ -1270,3 +1270,27 @@ body::before {
 
 @media (max-width: 640px) { .hud .tr, .hud .bl { display: none; } }
 @media (prefers-reduced-motion: reduce) { .boot-bar > i { transition: none; } }
+/* ──────────────────────────────────────────────────────────────────────────
+   Sanctuary (Memory Tree) — pendulum swing, pause, lantern flicker.
+   ────────────────────────────────────────────────────────────────────────── */
+@keyframes sanctuary-sway {
+  0%, 100% { transform: rotate(-3.5deg); }
+  50%      { transform: rotate(3.5deg); }
+}
+.sanctuary-tag {
+  transform-origin: top center;        /* swings from the string attachment */
+  animation: sanctuary-sway 4.5s ease-in-out infinite;
+  will-change: transform;
+}
+/* Parent gets .is-paused while a modal is open → all tags freeze. */
+.is-paused .sanctuary-tag { animation-play-state: paused; }
+
+@keyframes sanctuary-flicker {
+  0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(0.92); }
+  50%      { opacity: 1;    transform: translateX(-50%) scale(1.08); }
+}
+.sanctuary-lantern { animation: sanctuary-flicker 3s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sanctuary-tag, .sanctuary-lantern { animation: none; }
+}
