@@ -69,6 +69,46 @@ const T = {
   zh: { badge: '实时网络', title: '来自全球的访客', sub: '每一次连接，实时呈现。', ops: '访客总数', conn: '当前连接', locating: '正在定位…', unknown: '未知位置', byCountry: '各国访客' },
 }
 
+// Status strings for the breakdown panel (kept separate so the panel can always
+// render a meaningful state — loading / empty / offline — never just vanish).
+const STATUS_T = {
+  en: { connecting: 'Connecting to network…', offline: 'Network unavailable — retrying shortly.', empty: 'No operators logged yet.' },
+  mm: { connecting: 'ကွန်ရက်နှင့် ချိတ်ဆက်နေသည်…', offline: 'ကွန်ရက် မရနိုင်ပါ — ပြန်ကြိုးစားနေသည်။', empty: 'ဧည့်သည် မှတ်တမ်းမရှိသေးပါ။' },
+  jp: { connecting: 'ネットワークに接続中…', offline: 'ネットワークに接続できません — まもなく再試行します。', empty: 'まだ訪問者の記録はありません。' },
+  vn: { connecting: 'Đang kết nối mạng…', offline: 'Mạng không khả dụng — đang thử lại.', empty: 'Chưa có người dùng nào được ghi nhận.' },
+  ne: { connecting: 'नेटवर्कमा जडान हुँदै…', offline: 'नेटवर्क उपलब्ध छैन — पुनः प्रयास गर्दै।', empty: 'अहिलेसम्म कुनै आगन्तुक छैन।' },
+  id: { connecting: 'Menghubungkan ke jaringan…', offline: 'Jaringan tidak tersedia — mencoba lagi.', empty: 'Belum ada operator tercatat.' },
+  zh: { connecting: '正在连接网络…', offline: '网络不可用 — 即将重试。', empty: '暂无访客记录。' },
+}
+
+/**
+ * Resilient JSON fetch: AbortController timeout + retry on transient failures
+ * (network error or 5xx), which is exactly what a Render free-tier COLD START
+ * looks like for the first request after the service has spun down.
+ */
+async function fetchJson(url, { method = 'GET', timeoutMs = 8000, retries = 2 } = {}) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs)
+    try {
+      const res = await fetch(url, { method, signal: ctrl.signal })
+      clearTimeout(timer)
+      if (res.status >= 500 && attempt < retries) {
+        await new Promise((r) => setTimeout(r, 1200 * (attempt + 1))) // backoff for cold start
+        continue
+      }
+      const text = await res.text()
+      let data = null
+      try { data = text ? JSON.parse(text) : null } catch { /* non-JSON */ }
+      return { ok: res.ok, status: res.status, data }
+    } catch (err) {
+      clearTimeout(timer)
+      if (attempt < retries) { await new Promise((r) => setTimeout(r, 1200 * (attempt + 1))); continue }
+      return { ok: false, status: 0, data: null, error: err }
+    }
+  }
+}
+
 export default function VisitorGlobe({ lang = 'en' }) {
   const t = T[lang] || T.en
   const globeEl = useRef()
@@ -79,55 +119,47 @@ export default function VisitorGlobe({ lang = 'en' }) {
   const [visits, setVisits] = useState(null)
   const [display, setDisplay] = useState(0)
   const [countries, setCountries] = useState([])
+  const [statsStatus, setStatsStatus] = useState('loading') // 'loading' | 'ready' | 'empty' | 'error'
+  const st = STATUS_T[lang] || STATUS_T.en
 
   const ac = useMemo(readAccent, [])
   const userCountry = useMemo(() => matchCountry(geo.country), [geo.country])
   const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: '#0b0b14' }), [])
 
   // 1) VISIT COUNT + COUNTRY BREAKDOWN — runs once geolocation has settled, so
-  //    the hit can be attributed to the visitor's country. Verbose console
-  //    logging surfaces fetch / CORS / "backend not deployed" issues.
+  //    the hit can be attributed to the visitor's country. Resilient to Render
+  //    cold starts (fetchJson retries) and verbosely logged for diagnosis.
   useEffect(() => {
     if (geo.status !== 'done') return
     const base = SITE.apiUrl
     console.log('[VisitorGlobe] API base =', base, '| country =', geo.country || '(none)')
     let cancelled = false
+    setStatsStatus('loading')
     ;(async () => {
       // a) count this visit once per browser session (with country), else read.
-      try {
-        let counted = false
-        try { counted = sessionStorage.getItem('mtn_visit_counted') === '1' } catch { /* ignore */ }
-        const url = counted
-          ? `${base}/api/visitors`
-          : `${base}/api/visitors/hit?country=${encodeURIComponent(geo.country || '')}`
-        console.log('[VisitorGlobe]', counted ? 'GET' : 'POST', url)
-        const res = await fetch(url, { method: counted ? 'GET' : 'POST' })
-        console.log('[VisitorGlobe] /visitors →', res.status, res.statusText)
-        if (!res.ok) {
-          const body = await res.text().catch(() => '')
-          console.error('[VisitorGlobe] /visitors NON-OK:', res.status, body)
-        } else {
-          const data = await res.json()
-          console.log('[VisitorGlobe] /visitors data:', data)
-          if (!cancelled && typeof data?.totalVisits === 'number') {
-            setVisits(data.totalVisits)
-            try { sessionStorage.setItem('mtn_visit_counted', '1') } catch { /* ignore */ }
-          }
-        }
-      } catch (err) {
-        console.error('[VisitorGlobe] /visitors FETCH FAILED (CORS / network / backend not deployed?):', err)
+      let counted = false
+      try { counted = sessionStorage.getItem('mtn_visit_counted') === '1' } catch { /* ignore */ }
+      const countUrl = counted
+        ? `${base}/api/visitors`
+        : `${base}/api/visitors/hit?country=${encodeURIComponent(geo.country || '')}`
+      console.log('[VisitorGlobe]', counted ? 'GET' : 'POST', countUrl)
+      const countRes = await fetchJson(countUrl, { method: counted ? 'GET' : 'POST' })
+      console.log('[VisitorGlobe] /visitors →', countRes.status, countRes.data ?? countRes.error)
+      if (!cancelled && countRes.ok && typeof countRes.data?.totalVisits === 'number') {
+        setVisits(countRes.data.totalVisits)
+        try { sessionStorage.setItem('mtn_visit_counted', '1') } catch { /* ignore */ }
       }
 
-      // b) country breakdown
-      try {
-        const res = await fetch(`${base}/api/visitors/countries`)
-        console.log('[VisitorGlobe] /countries →', res.status)
-        if (res.ok) {
-          const data = await res.json()
-          if (!cancelled && Array.isArray(data?.countries)) setCountries(data.countries)
-        }
-      } catch (err) {
-        console.error('[VisitorGlobe] /countries FETCH FAILED:', err)
+      // b) country breakdown — drives the always-visible panel's state.
+      const cRes = await fetchJson(`${base}/api/visitors/countries`)
+      console.log('[VisitorGlobe] /countries →', cRes.status, cRes.data ?? cRes.error)
+      if (cancelled) return
+      if (cRes.ok && Array.isArray(cRes.data?.countries)) {
+        setCountries(cRes.data.countries)
+        setStatsStatus(cRes.data.countries.length ? 'ready' : 'empty')
+      } else {
+        console.error('[VisitorGlobe] breakdown unavailable — is /api/visitors deployed on the backend?')
+        setStatsStatus('error')
       }
     })()
     return () => { cancelled = true }
@@ -265,10 +297,28 @@ export default function VisitorGlobe({ lang = 'en' }) {
           </div>
         </div>
 
-        {/* ── VISITOR BREAKDOWN BY COUNTRY (neon, scrollable) ── */}
-        {countries.length > 0 && (
-          <div className="mx-auto mt-12 w-full max-w-md rounded-2xl border border-accent/25 bg-black/40 p-5 text-left shadow-[0_0_30px_-10px_rgb(var(--accent)/0.5)] backdrop-blur-md">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-accent/80">{t.byCountry}</p>
+        {/* ── VISITOR BREAKDOWN BY COUNTRY (neon, scrollable) — ALWAYS rendered,
+              with explicit loading / empty / error states so it never silently
+              disappears. ── */}
+        <div className="mx-auto mt-12 w-full max-w-md rounded-2xl border border-accent/25 bg-black/40 p-5 text-left shadow-[0_0_30px_-10px_rgb(var(--accent)/0.5)] backdrop-blur-md">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-accent/80">{t.byCountry}</p>
+
+          {statsStatus === 'loading' && (
+            <p className="mt-3 flex items-center gap-2 font-mono text-xs text-muted">
+              <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-accent" />
+              {st.connecting}
+            </p>
+          )}
+
+          {statsStatus === 'error' && (
+            <p className="mt-3 font-mono text-xs text-amber-300/80">{st.offline}</p>
+          )}
+
+          {statsStatus === 'empty' && (
+            <p className="mt-3 font-mono text-xs text-muted">{st.empty}</p>
+          )}
+
+          {statsStatus === 'ready' && (
             <ul className="mt-3 max-h-56 space-y-2.5 overflow-y-auto overscroll-contain pr-1">
               {countries.map((c) => {
                 const max = countries[0]?.visits || 1
@@ -289,8 +339,8 @@ export default function VisitorGlobe({ lang = 'en' }) {
                 )
               })}
             </ul>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </section>
   )

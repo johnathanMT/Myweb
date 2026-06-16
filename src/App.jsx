@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
+import { SITE } from './config/site'
 import AmbientBackground from './components/AmbientBackground'
 import Navbar           from './components/Navbar'
 import Gateway          from './components/Gateway'         // tiered-experience landing
@@ -37,6 +38,17 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem('mtn_lang', lang) } catch {}
   }, [lang])
+
+  // Warm-up ping: wake the Render free-tier backend the moment the page loads,
+  // so it's already up by the time the visitor scrolls to the VisitorGlobe —
+  // hiding cold-start latency. Fire-and-forget; 'no-cors' avoids console noise
+  // (we don't read the response — the request alone triggers the wake).
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetch(`${SITE.apiUrl}/health`, { mode: 'no-cors', cache: 'no-store' }).catch(() => {})
+    }, 0)
+    return () => clearTimeout(t)
+  }, [])
 
   return (
     // Content sits at z-10; the lightweight background layers at z-0.
