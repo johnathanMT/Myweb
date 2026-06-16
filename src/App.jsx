@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import AmbientBackground from './components/AmbientBackground'
 import Navbar           from './components/Navbar'
 import Gateway          from './components/Gateway'         // tiered-experience landing
@@ -9,7 +9,6 @@ import ProjectsSection  from './components/ProjectsSection'
 import TechStack        from './components/TechStack'         // Architecture & journey
 import GallerySection    from './components/GallerySection'   // Memory Gallery (photos)
 import VideoShowcase     from './components/VideoShowcase'     // auto-play highlight reel
-import VisitorGlobe      from './components/VisitorGlobe'      // live 3D visitor globe
 import ArticlesSection  from './components/ArticlesSection'
 import SeasonalGallery  from './components/SeasonalGallery'
 import TravelChronicles from './components/TravelChronicles'
@@ -19,6 +18,10 @@ import Footer           from './components/MegaFooter'   // SaaS-style mega foot
 import CyberCursor      from './components/CyberCursor'     // custom crosshair cursor
 import BootScreen       from './components/BootScreen'      // "System Booting…" loader
 import HudFrame         from './components/HudFrame'        // HUD corner overlay
+
+// Lazy-loaded: pulls in three.js (~heavy), so it's code-split out of the main
+// Hub bundle and only fetched when this section is rendered.
+const VisitorGlobe = lazy(() => import('./components/VisitorGlobe'))
 
 // ── TIERED EXPERIENCE GATEWAY ────────────────────────────────────────────────
 // This is the lightweight HUB domain: NO heavy three.js here, so it stays fast on
@@ -54,7 +57,9 @@ export default function App() {
         <TechStack        lang={lang} />
         <GallerySection   lang={lang} />
         <VideoShowcase    lang={lang} />
-        <VisitorGlobe     lang={lang} />
+        <Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading globe…</div>}>
+          <VisitorGlobe   lang={lang} />
+        </Suspense>
         <ArticlesSection />
         <SeasonalGallery lang={lang} />
         <TravelChronicles lang={lang} setLang={setLang} />

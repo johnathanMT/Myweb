@@ -1,85 +1,139 @@
-import { useEffect, useRef, useState } from 'react'
-import createGlobe from 'cobe'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import Globe from 'react-globe.gl'
+import * as THREE from 'three'
+import { feature } from 'topojson-client'
+import countriesTopo from 'world-atlas/countries-110m.json'
 import { SITE } from '../config/site'
 
 /**
- * VisitorGlobe — premium, auto-spinning 3D globe (cobe) shown below the
- * "Highlights in Motion" reel. Glowing markers (theme accent colour) pin live
- * locations; the visitor's own coordinates get the biggest, brightest dot.
- * A neon overlay shows:
- *   • Total Operators (Visitors) — live count from the .NET backend.
- *   • Current Connection — the visitor's city / country (from ipapi.co).
+ * VisitorGlobe — premium 3D world map (react-globe.gl / three.js) shown below
+ * the "Highlights in Motion" reel. Country borders + continents are drawn from a
+ * bundled, lightweight world GeoJSON (world-atlas 110m). The visitor's whole
+ * country is filled/raised with the theme accent glow. Dark theme, auto-spins,
+ * and keeps the neon overlay (Total Operators + Current Connection).
  *
- * IMPORTANT (bug fix): the globe is created EXACTLY ONCE, after geolocation has
- * resolved (or timed out). cobe can render blank if you re-init it on the same
- * <canvas>, so we wait for the final marker set before creating it.
+ * No network beyond ipapi.co (geo) + the visitor-count API: the GeoJSON is
+ * bundled, so there's nothing extra to whitelist in the CSP.
  */
 
-// A few ambient "live" markers so the globe always looks populated.
-const AMBIENT_MARKERS = [
-  { location: [35.6762, 139.6503], size: 0.05 }, // Tokyo
-  { location: [51.5074, -0.1278], size: 0.05 },  // London
-  { location: [40.7128, -74.006], size: 0.05 },  // New York
-  { location: [1.3521, 103.8198], size: 0.05 },  // Singapore
-  { location: [-33.8688, 151.2093], size: 0.05 },// Sydney
-  { location: [-23.5505, -46.6333], size: 0.05 },// São Paulo
-  { location: [28.6139, 77.209], size: 0.05 },   // New Delhi
-]
+// Bundled world polygons (177 countries). Converted from TopoJSON once.
+const COUNTRIES = feature(countriesTopo, countriesTopo.objects.countries).features
 
-// Read the active theme accent ("--accent" = "R G B") → [r,g,b] 0..1 for cobe.
-function accentRGB() {
+// —— Country matching (ipapi country_name ↔ GeoJSON properties.name) ——————————
+const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '')
+// Aliases for names that differ between ipapi and Natural Earth (world-atlas).
+const ALIASES = {
+  unitedstates: 'unitedstatesofamerica',
+  usa: 'unitedstatesofamerica',
+  democraticrepublicofthecongo: 'demrepcongo',
+  republicofthecongo: 'congo',
+  bosniaandherzegovina: 'bosniaandherz',
+  dominicanrepublic: 'dominicanrep',
+  equatorialguinea: 'eqguinea',
+  centralafricanrepublic: 'centralafricanrep',
+  southsudan: 'ssudan',
+  westernsahara: 'wsahara',
+  solomonislands: 'solomonis',
+}
+function matchCountry(name) {
+  if (!name) return null
+  const target = ALIASES[norm(name)] || norm(name)
+  // 1) exact normalized match
+  let f = COUNTRIES.find((c) => norm(c.properties.name) === target)
+  if (f) return f
+  // 2) fuzzy: one name contains the other (handles abbreviations)
+  f = COUNTRIES.find((c) => {
+    const cn = norm(c.properties.name)
+    return cn && (cn.includes(target) || target.includes(cn))
+  })
+  return f || null
+}
+
+// Active theme accent ("--accent" = "R G B") → { r, g, b } 0..255.
+function readAccent() {
   try {
     const v = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
-    const parts = v.split(/\s+/).map(Number)
-    if (parts.length === 3 && parts.every((n) => Number.isFinite(n))) {
-      // Brighten a touch so markers glow clearly on the dark globe.
-      return parts.map((n) => Math.min(1, (n / 255) * 1.25))
-    }
+    const [r, g, b] = v.split(/\s+/).map(Number)
+    if ([r, g, b].every(Number.isFinite)) return { r, g, b }
   } catch { /* ignore */ }
-  return [0.85, 0.62, 0.05] // fallback: bright gold
+  return { r: 184, g: 134, b: 11 } // Batman gold
 }
 
 const T = {
-  en: { badge: 'LIVE NETWORK', title: 'Visitors around the globe', sub: 'Every connection, mapped in real time.', ops: 'Total Operators', conn: 'Current Connection', locating: 'Locating…', unknown: 'Unknown location' },
-  mm: { badge: 'တိုက်ရိုက်ကွန်ရက်', title: 'ကမ္ဘာတစ်ဝှမ်းမှ ဧည့်သည်များ', sub: 'ချိတ်ဆက်မှုတိုင်းကို အချိန်နှင့်တပြေးညီ ပြသထားသည်။', ops: 'စုစုပေါင်း ဧည့်သည်', conn: 'လက်ရှိ ချိတ်ဆက်မှု', locating: 'တည်နေရာရှာနေသည်…', unknown: 'တည်နေရာ မသိ' },
-  jp: { badge: 'ライブネットワーク', title: '世界中からの訪問者', sub: 'すべての接続をリアルタイムで可視化。', ops: '総オペレーター数', conn: '現在の接続', locating: '位置情報を取得中…', unknown: '不明な場所' },
-  vn: { badge: 'MẠNG TRỰC TIẾP', title: 'Khách truy cập toàn cầu', sub: 'Mọi kết nối, hiển thị theo thời gian thực.', ops: 'Tổng người dùng', conn: 'Kết nối hiện tại', locating: 'Đang định vị…', unknown: 'Vị trí không xác định' },
-  ne: { badge: 'प्रत्यक्ष नेटवर्क', title: 'विश्वभरका आगन्तुकहरू', sub: 'प्रत्येक जडान, वास्तविक समयमा।', ops: 'कुल आगन्तुक', conn: 'हालको जडान', locating: 'स्थान खोज्दै…', unknown: 'अज्ञात स्थान' },
-  id: { badge: 'JARINGAN LANGSUNG', title: 'Pengunjung di seluruh dunia', sub: 'Setiap koneksi, dipetakan secara real-time.', ops: 'Total Operator', conn: 'Koneksi Saat Ini', locating: 'Mencari lokasi…', unknown: 'Lokasi tidak diketahui' },
-  zh: { badge: '实时网络', title: '来自全球的访客', sub: '每一次连接，实时呈现。', ops: '访客总数', conn: '当前连接', locating: '正在定位…', unknown: '未知位置' },
+  en: { badge: 'LIVE NETWORK', title: 'Visitors around the globe', sub: 'Every connection, mapped in real time.', ops: 'Total Operators', conn: 'Current Connection', locating: 'Locating…', unknown: 'Unknown location', byCountry: 'Operators by country' },
+  mm: { badge: 'တိုက်ရိုက်ကွန်ရက်', title: 'ကမ္ဘာတစ်ဝှမ်းမှ ဧည့်သည်များ', sub: 'ချိတ်ဆက်မှုတိုင်းကို အချိန်နှင့်တပြေးညီ ပြသထားသည်။', ops: 'စုစုပေါင်း ဧည့်သည်', conn: 'လက်ရှိ ချိတ်ဆက်မှု', locating: 'တည်နေရာရှာနေသည်…', unknown: 'တည်နေရာ မသိ', byCountry: 'နိုင်ငံအလိုက် ဧည့်သည်' },
+  jp: { badge: 'ライブネットワーク', title: '世界中からの訪問者', sub: 'すべての接続をリアルタイムで可視化。', ops: '総オペレーター数', conn: '現在の接続', locating: '位置情報を取得中…', unknown: '不明な場所', byCountry: '国別オペレーター' },
+  vn: { badge: 'MẠNG TRỰC TIẾP', title: 'Khách truy cập toàn cầu', sub: 'Mọi kết nối, hiển thị theo thời gian thực.', ops: 'Tổng người dùng', conn: 'Kết nối hiện tại', locating: 'Đang định vị…', unknown: 'Vị trí không xác định', byCountry: 'Người dùng theo quốc gia' },
+  ne: { badge: 'प्रत्यक्ष नेटवर्क', title: 'विश्वभरका आगन्तुकहरू', sub: 'प्रत्येक जडान, वास्तविक समयमा।', ops: 'कुल आगन्तुक', conn: 'हालको जडान', locating: 'स्थान खोज्दै…', unknown: 'अज्ञात स्थान', byCountry: 'देश अनुसार आगन्तुक' },
+  id: { badge: 'JARINGAN LANGSUNG', title: 'Pengunjung di seluruh dunia', sub: 'Setiap koneksi, dipetakan secara real-time.', ops: 'Total Operator', conn: 'Koneksi Saat Ini', locating: 'Mencari lokasi…', unknown: 'Lokasi tidak diketahui', byCountry: 'Pengunjung per negara' },
+  zh: { badge: '实时网络', title: '来自全球的访客', sub: '每一次连接，实时呈现。', ops: '访客总数', conn: '当前连接', locating: '正在定位…', unknown: '未知位置', byCountry: '各国访客' },
 }
 
 export default function VisitorGlobe({ lang = 'en' }) {
   const t = T[lang] || T.en
-  const canvasRef = useRef(null)
-  const phiRef = useRef(0)
+  const globeEl = useRef()
+  const wrapRef = useRef()
+  const [size, setSize] = useState(0) // square px
 
-  // geo.status: 'loading' until the ipapi fetch settles (or times out).
   const [geo, setGeo] = useState({ status: 'loading', lat: null, long: null, city: '', country: '' })
   const [visits, setVisits] = useState(null)
   const [display, setDisplay] = useState(0)
+  const [countries, setCountries] = useState([])
 
-  // 1) VISITOR COUNT — increment once per session, else just read.
+  const ac = useMemo(readAccent, [])
+  const userCountry = useMemo(() => matchCountry(geo.country), [geo.country])
+  const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: '#0b0b14' }), [])
+
+  // 1) VISIT COUNT + COUNTRY BREAKDOWN — runs once geolocation has settled, so
+  //    the hit can be attributed to the visitor's country. Verbose console
+  //    logging surfaces fetch / CORS / "backend not deployed" issues.
   useEffect(() => {
-    let cancelled = false
+    if (geo.status !== 'done') return
     const base = SITE.apiUrl
+    console.log('[VisitorGlobe] API base =', base, '| country =', geo.country || '(none)')
+    let cancelled = false
     ;(async () => {
+      // a) count this visit once per browser session (with country), else read.
       try {
         let counted = false
         try { counted = sessionStorage.getItem('mtn_visit_counted') === '1' } catch { /* ignore */ }
-        const res = await fetch(`${base}/api/visitors${counted ? '' : '/hit'}`, { method: counted ? 'GET' : 'POST' })
-        const data = await res.json()
-        if (!cancelled && data && typeof data.totalVisits === 'number') {
-          setVisits(data.totalVisits)
-          try { sessionStorage.setItem('mtn_visit_counted', '1') } catch { /* ignore */ }
+        const url = counted
+          ? `${base}/api/visitors`
+          : `${base}/api/visitors/hit?country=${encodeURIComponent(geo.country || '')}`
+        console.log('[VisitorGlobe]', counted ? 'GET' : 'POST', url)
+        const res = await fetch(url, { method: counted ? 'GET' : 'POST' })
+        console.log('[VisitorGlobe] /visitors →', res.status, res.statusText)
+        if (!res.ok) {
+          const body = await res.text().catch(() => '')
+          console.error('[VisitorGlobe] /visitors NON-OK:', res.status, body)
+        } else {
+          const data = await res.json()
+          console.log('[VisitorGlobe] /visitors data:', data)
+          if (!cancelled && typeof data?.totalVisits === 'number') {
+            setVisits(data.totalVisits)
+            try { sessionStorage.setItem('mtn_visit_counted', '1') } catch { /* ignore */ }
+          }
         }
-      } catch { /* backend offline → counter hidden */ }
+      } catch (err) {
+        console.error('[VisitorGlobe] /visitors FETCH FAILED (CORS / network / backend not deployed?):', err)
+      }
+
+      // b) country breakdown
+      try {
+        const res = await fetch(`${base}/api/visitors/countries`)
+        console.log('[VisitorGlobe] /countries →', res.status)
+        if (res.ok) {
+          const data = await res.json()
+          if (!cancelled && Array.isArray(data?.countries)) setCountries(data.countries)
+        }
+      } catch (err) {
+        console.error('[VisitorGlobe] /countries FETCH FAILED:', err)
+      }
     })()
     return () => { cancelled = true }
-  }, [])
+  }, [geo.status, geo.country])
 
-  // 2) GEOLOCATION — coarse, IP-based, free. Settle exactly once (success,
-  //    failure, or 2.5s timeout) so the globe can create with final markers.
+  // 2) GEOLOCATION — coarse, IP-based, free.
   useEffect(() => {
     let done = false
     const finish = (partial) => {
@@ -93,8 +147,7 @@ export default function VisitorGlobe({ lang = 'en' }) {
       .then((d) => {
         const lat = Number(d?.latitude)
         const long = Number(d?.longitude)
-        const valid = Number.isFinite(lat) && Number.isFinite(long) &&
-          Math.abs(lat) <= 90 && Math.abs(long) <= 180
+        const valid = Number.isFinite(lat) && Number.isFinite(long) && Math.abs(lat) <= 90 && Math.abs(long) <= 180
         finish({
           lat: valid ? lat : null,
           long: valid ? long : null,
@@ -106,7 +159,7 @@ export default function VisitorGlobe({ lang = 'en' }) {
     return () => clearTimeout(timer)
   }, [])
 
-  // 3) COUNTER ANIMATION — ease toward the real total when it arrives.
+  // 3) COUNTER ANIMATION.
   useEffect(() => {
     if (visits == null) return
     let raf
@@ -114,62 +167,45 @@ export default function VisitorGlobe({ lang = 'en' }) {
     const dur = 1400
     const tick = (now) => {
       const p = Math.min(1, (now - start) / dur)
-      const eased = 1 - Math.pow(1 - p, 3)
-      setDisplay(Math.round(visits * eased))
+      setDisplay(Math.round(visits * (1 - Math.pow(1 - p, 3))))
       if (p < 1) raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [visits])
 
-  // 4) THE GLOBE — created ONCE, after geolocation settles (status === 'done').
-  const ready = geo.status === 'done'
+  // 4) RESPONSIVE SQUARE SIZE.
   useEffect(() => {
-    if (!ready || !canvasRef.current) return
+    const el = wrapRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setSize(el.clientWidth))
+    ro.observe(el)
+    setSize(el.clientWidth)
+    return () => ro.disconnect()
+  }, [])
 
-    let width = 0
-    const onResize = () => { if (canvasRef.current) width = canvasRef.current.offsetWidth }
-    window.addEventListener('resize', onResize)
-    onResize()
+  // 5) AUTO-SPIN once the globe is mounted.
+  useEffect(() => {
+    const g = globeEl.current
+    if (!g || !size) return
+    const controls = g.controls()
+    controls.autoRotate = true
+    controls.autoRotateSpeed = 0.6
+    controls.enableZoom = false
+  }, [size])
 
-    const accent = accentRGB()
-    const hasUser = geo.lat != null && geo.long != null
-    const markers = [
-      ...AMBIENT_MARKERS,
-      ...(hasUser ? [{ location: [geo.lat, geo.long], size: 0.11 }] : []),
-    ]
-
-    const globe = createGlobe(canvasRef.current, {
-      devicePixelRatio: 2,
-      width: width * 2,
-      height: width * 2,
-      phi: 0,
-      theta: 0.28,
-      dark: 1,
-      diffuse: 1.2,
-      mapSamples: 16000,
-      mapBrightness: 6,
-      baseColor: [0.24, 0.24, 0.27],
-      markerColor: accent,
-      glowColor: accent,
-      markers,
-      onRender: (state) => {
-        state.phi = phiRef.current
-        phiRef.current += 0.004 // gentle auto-spin
-        state.width = width * 2
-        state.height = width * 2
-      },
-    })
-
-    // Fade the canvas in once the first frame paints.
-    requestAnimationFrame(() => { if (canvasRef.current) canvasRef.current.style.opacity = '1' })
-
-    return () => {
-      globe.destroy()
-      window.removeEventListener('resize', onResize)
+  // 6) FLY the camera to the visitor's coordinates when known.
+  useEffect(() => {
+    if (globeEl.current && geo.lat != null && geo.long != null) {
+      globeEl.current.pointOfView({ lat: geo.lat, lng: geo.long, altitude: 2.2 }, 1200)
     }
-    // Recreate only if the resolved coordinates change (effectively once).
-  }, [ready, geo.lat, geo.long])
+  }, [geo.lat, geo.long])
+
+  const accentRgb = `rgb(${ac.r}, ${ac.g}, ${ac.b})`
+  const capColor = (d) =>
+    d === userCountry ? `rgba(${ac.r}, ${ac.g}, ${ac.b}, 0.92)` : 'rgba(255, 255, 255, 0.07)'
+  const sideColor = (d) =>
+    d === userCountry ? `rgba(${ac.r}, ${ac.g}, ${ac.b}, 0.35)` : 'rgba(0, 0, 0, 0.12)'
 
   const connectionText =
     geo.status === 'loading'
@@ -187,16 +223,31 @@ export default function VisitorGlobe({ lang = 'en' }) {
         </h2>
         <p className="mx-auto mt-4 max-w-md leading-relaxed text-gray-400">{t.sub}</p>
 
-        <div className="relative mx-auto mt-12 flex w-full max-w-[480px] flex-col items-center">
-          <div className="relative aspect-square w-full">
-            <canvas
-              ref={canvasRef}
-              style={{ width: '100%', height: '100%', opacity: 0, transition: 'opacity 1s ease', contain: 'layout paint size' }}
-              aria-label="Interactive 3D globe of visitor locations"
-            />
+        <div className="relative mx-auto mt-12 w-full max-w-[520px]">
+          {/* the globe (square, responsive) */}
+          <div ref={wrapRef} className="relative aspect-square w-full">
+            {size > 0 && (
+              <Globe
+                ref={globeEl}
+                width={size}
+                height={size}
+                backgroundColor="rgba(0,0,0,0)"
+                globeMaterial={globeMaterial}
+                showAtmosphere
+                atmosphereColor={accentRgb}
+                atmosphereAltitude={0.18}
+                polygonsData={COUNTRIES}
+                polygonCapColor={capColor}
+                polygonSideColor={sideColor}
+                polygonStrokeColor={() => 'rgba(255, 255, 255, 0.22)'}
+                polygonAltitude={(d) => (d === userCountry ? 0.07 : 0.012)}
+                polygonsTransitionDuration={800}
+              />
+            )}
           </div>
 
-          <div className="pointer-events-none mt-6 grid w-full grid-cols-1 gap-3 sm:absolute sm:bottom-2 sm:left-0 sm:mt-0 sm:w-auto sm:grid-cols-2 sm:gap-4">
+          {/* neon overlay — Total Operators + Current Connection */}
+          <div className="neon-overlay pointer-events-none mt-6 grid w-full grid-cols-1 gap-3 sm:absolute sm:bottom-2 sm:left-0 sm:mt-0 sm:w-auto sm:grid-cols-2 sm:gap-4">
             <div className="rounded-2xl border border-accent/30 bg-black/50 px-5 py-3 text-left shadow-[0_0_24px_-6px_rgb(var(--accent)/0.6)] backdrop-blur-md">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-accent/80">{t.ops}</p>
               <p className="mt-1 font-mono text-2xl font-bold text-white [text-shadow:0_0_12px_rgb(var(--accent)/0.7)]">
@@ -213,6 +264,33 @@ export default function VisitorGlobe({ lang = 'en' }) {
             </div>
           </div>
         </div>
+
+        {/* ── VISITOR BREAKDOWN BY COUNTRY (neon, scrollable) ── */}
+        {countries.length > 0 && (
+          <div className="mx-auto mt-12 w-full max-w-md rounded-2xl border border-accent/25 bg-black/40 p-5 text-left shadow-[0_0_30px_-10px_rgb(var(--accent)/0.5)] backdrop-blur-md">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-accent/80">{t.byCountry}</p>
+            <ul className="mt-3 max-h-56 space-y-2.5 overflow-y-auto overscroll-contain pr-1">
+              {countries.map((c) => {
+                const max = countries[0]?.visits || 1
+                const pct = Math.max(6, Math.round((c.visits / max) * 100))
+                return (
+                  <li key={c.country}>
+                    <div className="flex items-center justify-between font-mono text-xs text-gray-200">
+                      <span className="truncate">{c.country}</span>
+                      <span className="ml-3 tabular-nums text-accent-light">{Number(c.visits).toLocaleString()}</span>
+                    </div>
+                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                      <div
+                        className="h-full rounded-full bg-accent/80 shadow-[0_0_8px_rgb(var(--accent)/0.7)] transition-[width] duration-700"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   )
