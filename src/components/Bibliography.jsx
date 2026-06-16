@@ -31,7 +31,7 @@ const TIMELINE = [
   },
   {
     year: '2023, July', era: 'cyber', icon: Utensils, title: 'Part-Time Role at Tendon Tenya Restaurant Namba',
-    text: 'Worked as a line cook and food prep assistant in a busy tourist district.'
+    text: 'Worked as a  cook and food prep in a busy tourist district.'
   },
   {
     year: '2023, July', era: 'cyber', icon: AwardIcon, title: 'Passed JLPT N3, JFT-Basic A2 & Care Worker Evaluation Tests',
@@ -47,7 +47,7 @@ const TIMELINE = [
   },
   {
     year: '2025, May', era: 'cyber', icon: University, title: 'BSc Computer Science Student ',
-    text: 'Pursuing a Computer Science degree to enhance technical skills through self-paced online learning, (Aiming for 2028 Convo from Univercity of Wolverhampton via NCC Education).'
+    text: 'Pursuing a Computer Science degree to enhance technical skills through self-paced online learning (Aiming to graduate from University of Wolverhampton-UK via NCC Education).'
   },
 ]
 

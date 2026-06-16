@@ -1,14 +1,12 @@
-import { useState } from 'react'
 import { useGallery } from '../hooks/useGallery'
-import MemoryDetailModal from './MemoryDetailModal'
 
 /**
  * GalleryPage — the dedicated /gallery route (rendered inside <PageShell>, which
  * supplies the navbar, footer, ambient background and "back to home" link).
  *
- * Shows the FULL collection grouped by "Year — Event" (newest first), in a
- * responsive CSS-columns masonry (no hexagon cropping). Reuses the shared
- * <Lightbox> and the useGallery() hook.
+ * Shows the FULL collection (from src/assets/images/gallery/) grouped by
+ * "Month Year — Moment" (newest first) in a responsive CSS-columns masonry.
+ * No modal/lightbox — hovering a photo gives a subtle scale-up + caption.
  *
  * Language: PageShell keeps lang in localStorage under 'mtn_lang'; we read the
  * same key so captions match the rest of the site.
@@ -30,15 +28,6 @@ export default function GalleryPage() {
   const t = T[lang] || T.en
 
   const { sections, captionOf, altOf } = useGallery(lang)
-  const [active, setActive] = useState(null)
-
-  const open = (it) => setActive({
-    url: it.url,
-    caption: captionOf(it),
-    alt: altOf(it),
-    date: it.meta?.date,
-    moment: it.meta?.moment,
-  })
 
   return (
     <section className="relative mx-auto max-w-6xl px-6 py-10">
@@ -70,21 +59,17 @@ export default function GalleryPage() {
               {items.map((it) => (
                 <figure
                   key={it.id}
-                  onClick={() => open(it)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(it) } }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`View ${captionOf(it)}`}
-                  className="group relative cursor-pointer overflow-hidden rounded-lg outline-none ring-1 ring-white/10 transition-all duration-300 hover:ring-accent/50 focus-visible:ring-accent/70"
+                  title={captionOf(it)}
+                  className="group relative overflow-hidden rounded-lg ring-1 ring-white/10 transition-all duration-300 ease-out hover:scale-105 hover:ring-accent/50 active:scale-110"
                 >
                   <img
                     src={it.url}
                     alt={altOf(it)}
                     loading="lazy"
-                    className="w-full transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                    className="w-full"
                   />
-                  {/* caption gradient on hover/focus */}
-                  <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end bg-gradient-to-t from-black/75 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+                  {/* caption gradient on hover */}
+                  <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end bg-gradient-to-t from-black/75 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                     <span className="font-mono text-[11px] leading-tight text-accent-light">
                       {captionOf(it)}
                     </span>
@@ -95,9 +80,6 @@ export default function GalleryPage() {
           </div>
         ))
       )}
-
-      {/* shared memory detail modal (photo + metadata panel) */}
-      <MemoryDetailModal item={active} onClose={() => setActive(null)} />
     </section>
   )
 }

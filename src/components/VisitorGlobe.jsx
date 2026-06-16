@@ -4,15 +4,27 @@ import { SITE } from '../config/site'
 
 /**
  * VisitorGlobe — premium, auto-spinning 3D globe (cobe) shown below the
- * "Highlights in Motion" reel. A glowing marker (theme accent colour) pins the
- * visitor's approximate location, with a neon overlay showing:
+ * "Highlights in Motion" reel. Glowing markers (theme accent colour) pin live
+ * locations; the visitor's own coordinates get the biggest, brightest dot.
+ * A neon overlay shows:
  *   • Total Operators (Visitors) — live count from the .NET backend.
  *   • Current Connection — the visitor's city / country (from ipapi.co).
  *
- * Privacy: ipapi.co returns only coarse, IP-based geolocation (city level) and
- * is shown to the visitor about themselves; nothing is stored client-side
- * beyond a per-session "already counted" flag.
+ * IMPORTANT (bug fix): the globe is created EXACTLY ONCE, after geolocation has
+ * resolved (or timed out). cobe can render blank if you re-init it on the same
+ * <canvas>, so we wait for the final marker set before creating it.
  */
+
+// A few ambient "live" markers so the globe always looks populated.
+const AMBIENT_MARKERS = [
+  { location: [35.6762, 139.6503], size: 0.05 }, // Tokyo
+  { location: [51.5074, -0.1278], size: 0.05 },  // London
+  { location: [40.7128, -74.006], size: 0.05 },  // New York
+  { location: [1.3521, 103.8198], size: 0.05 },  // Singapore
+  { location: [-33.8688, 151.2093], size: 0.05 },// Sydney
+  { location: [-23.5505, -46.6333], size: 0.05 },// São Paulo
+  { location: [28.6139, 77.209], size: 0.05 },   // New Delhi
+]
 
 // Read the active theme accent ("--accent" = "R G B") → [r,g,b] 0..1 for cobe.
 function accentRGB() {
@@ -20,10 +32,11 @@ function accentRGB() {
     const v = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
     const parts = v.split(/\s+/).map(Number)
     if (parts.length === 3 && parts.every((n) => Number.isFinite(n))) {
-      return [parts[0] / 255, parts[1] / 255, parts[2] / 255]
+      // Brighten a touch so markers glow clearly on the dark globe.
+      return parts.map((n) => Math.min(1, (n / 255) * 1.25))
     }
   } catch { /* ignore */ }
-  return [0.72, 0.53, 0.04] // fallback: Batman gold
+  return [0.85, 0.62, 0.05] // fallback: bright gold
 }
 
 const T = {
@@ -40,50 +53,57 @@ export default function VisitorGlobe({ lang = 'en' }) {
   const t = T[lang] || T.en
   const canvasRef = useRef(null)
   const phiRef = useRef(0)
-  const [location, setLocation] = useState(null) // { lat, long, city, country }
-  const [visits, setVisits] = useState(null)      // number | null
-  const [display, setDisplay] = useState(0)        // animated counter value
 
-  // 1) VISITOR COUNT — increment once per browser session, else just read.
+  // geo.status: 'loading' until the ipapi fetch settles (or times out).
+  const [geo, setGeo] = useState({ status: 'loading', lat: null, long: null, city: '', country: '' })
+  const [visits, setVisits] = useState(null)
+  const [display, setDisplay] = useState(0)
+
+  // 1) VISITOR COUNT — increment once per session, else just read.
   useEffect(() => {
     let cancelled = false
     const base = SITE.apiUrl
-    const run = async () => {
+    ;(async () => {
       try {
         let counted = false
         try { counted = sessionStorage.getItem('mtn_visit_counted') === '1' } catch { /* ignore */ }
-        const res = await fetch(`${base}/api/visitors${counted ? '' : '/hit'}`, {
-          method: counted ? 'GET' : 'POST',
-        })
+        const res = await fetch(`${base}/api/visitors${counted ? '' : '/hit'}`, { method: counted ? 'GET' : 'POST' })
         const data = await res.json()
         if (!cancelled && data && typeof data.totalVisits === 'number') {
           setVisits(data.totalVisits)
           try { sessionStorage.setItem('mtn_visit_counted', '1') } catch { /* ignore */ }
         }
-      } catch { /* backend offline → counter stays hidden */ }
-    }
-    run()
+      } catch { /* backend offline → counter hidden */ }
+    })()
     return () => { cancelled = true }
   }, [])
 
-  // 2) GEOLOCATION — coarse, IP-based, free (no key).
+  // 2) GEOLOCATION — coarse, IP-based, free. Settle exactly once (success,
+  //    failure, or 2.5s timeout) so the globe can create with final markers.
   useEffect(() => {
-    let cancelled = false
+    let done = false
+    const finish = (partial) => {
+      if (done) return
+      done = true
+      setGeo({ status: 'done', lat: null, long: null, city: '', country: '', ...partial })
+    }
+    const timer = setTimeout(() => finish({}), 2500)
     fetch('https://ipapi.co/json/')
       .then((r) => r.json())
       .then((d) => {
-        if (cancelled || !d) return
-        const lat = Number(d.latitude)
-        const long = Number(d.longitude)
-        setLocation({
-          lat: Number.isFinite(lat) ? lat : null,
-          long: Number.isFinite(long) ? long : null,
-          city: d.city || '',
-          country: d.country_name || '',
+        const lat = Number(d?.latitude)
+        const long = Number(d?.longitude)
+        const valid = Number.isFinite(lat) && Number.isFinite(long) &&
+          Math.abs(lat) <= 90 && Math.abs(long) <= 180
+        finish({
+          lat: valid ? lat : null,
+          long: valid ? long : null,
+          city: d?.city || '',
+          country: d?.country_name || '',
         })
       })
-      .catch(() => { /* leave location null → no marker */ })
-    return () => { cancelled = true }
+      .catch(() => finish({}))
+    return () => clearTimeout(timer)
   }, [])
 
   // 3) COUNTER ANIMATION — ease toward the real total when it arrives.
@@ -91,29 +111,33 @@ export default function VisitorGlobe({ lang = 'en' }) {
     if (visits == null) return
     let raf
     const start = performance.now()
-    const from = 0
     const dur = 1400
     const tick = (now) => {
       const p = Math.min(1, (now - start) / dur)
-      const eased = 1 - Math.pow(1 - p, 3) // easeOutCubic
-      setDisplay(Math.round(from + (visits - from) * eased))
+      const eased = 1 - Math.pow(1 - p, 3)
+      setDisplay(Math.round(visits * eased))
       if (p < 1) raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [visits])
 
-  // 4) THE GLOBE — recreate when location (→ marker) changes.
+  // 4) THE GLOBE — created ONCE, after geolocation settles (status === 'done').
+  const ready = geo.status === 'done'
   useEffect(() => {
-    if (!canvasRef.current) return
+    if (!ready || !canvasRef.current) return
+
     let width = 0
     const onResize = () => { if (canvasRef.current) width = canvasRef.current.offsetWidth }
     window.addEventListener('resize', onResize)
     onResize()
 
     const accent = accentRGB()
-    const hasMarker = location && location.lat != null && location.long != null
-    const markers = hasMarker ? [{ location: [location.lat, location.long], size: 0.12 }] : []
+    const hasUser = geo.lat != null && geo.long != null
+    const markers = [
+      ...AMBIENT_MARKERS,
+      ...(hasUser ? [{ location: [geo.lat, geo.long], size: 0.11 }] : []),
+    ]
 
     const globe = createGlobe(canvasRef.current, {
       devicePixelRatio: 2,
@@ -137,20 +161,23 @@ export default function VisitorGlobe({ lang = 'en' }) {
       },
     })
 
-    // Fade the canvas in once the first frame is painted.
-    if (canvasRef.current) {
-      requestAnimationFrame(() => { if (canvasRef.current) canvasRef.current.style.opacity = '1' })
-    }
+    // Fade the canvas in once the first frame paints.
+    requestAnimationFrame(() => { if (canvasRef.current) canvasRef.current.style.opacity = '1' })
 
     return () => {
       globe.destroy()
       window.removeEventListener('resize', onResize)
     }
-  }, [location])
+    // Recreate only if the resolved coordinates change (effectively once).
+  }, [ready, geo.lat, geo.long])
+
+  const connectionText =
+    geo.status === 'loading'
+      ? t.locating
+      : ([geo.city, geo.country].filter(Boolean).join(', ') || t.unknown)
 
   return (
     <section id="network" className="relative overflow-hidden py-24">
-      {/* ambient accent glow */}
       <div className="pointer-events-none absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-accent/10 blur-[160px]" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 text-center">
@@ -161,7 +188,6 @@ export default function VisitorGlobe({ lang = 'en' }) {
         <p className="mx-auto mt-4 max-w-md leading-relaxed text-gray-400">{t.sub}</p>
 
         <div className="relative mx-auto mt-12 flex w-full max-w-[480px] flex-col items-center">
-          {/* the globe */}
           <div className="relative aspect-square w-full">
             <canvas
               ref={canvasRef}
@@ -170,9 +196,7 @@ export default function VisitorGlobe({ lang = 'en' }) {
             />
           </div>
 
-          {/* neon overlay cards */}
           <div className="pointer-events-none mt-6 grid w-full grid-cols-1 gap-3 sm:absolute sm:bottom-2 sm:left-0 sm:mt-0 sm:w-auto sm:grid-cols-2 sm:gap-4">
-            {/* Total Operators */}
             <div className="rounded-2xl border border-accent/30 bg-black/50 px-5 py-3 text-left shadow-[0_0_24px_-6px_rgb(var(--accent)/0.6)] backdrop-blur-md">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-accent/80">{t.ops}</p>
               <p className="mt-1 font-mono text-2xl font-bold text-white [text-shadow:0_0_12px_rgb(var(--accent)/0.7)]">
@@ -180,14 +204,11 @@ export default function VisitorGlobe({ lang = 'en' }) {
               </p>
             </div>
 
-            {/* Current Connection */}
             <div className="rounded-2xl border border-accent/30 bg-black/50 px-5 py-3 text-left shadow-[0_0_24px_-6px_rgb(var(--accent)/0.6)] backdrop-blur-md">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-accent/80">{t.conn}</p>
               <p className="mt-1 flex items-center gap-2 font-mono text-sm font-medium text-white">
                 <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-accent shadow-[0_0_8px_2px_rgb(var(--accent)/0.8)]" />
-                {location == null
-                  ? t.locating
-                  : ([location.city, location.country].filter(Boolean).join(', ') || t.unknown)}
+                {connectionText}
               </p>
             </div>
           </div>

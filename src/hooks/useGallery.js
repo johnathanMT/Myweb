@@ -2,40 +2,40 @@ import { useMemo } from 'react'
 import { GALLERY } from '../data/galleryData'
 
 /**
- * useGallery — single source of truth for gallery data, shared by the homepage
- * GallerySection (highlights) and the dedicated GalleryPage (grouped masonry).
+ * useGallery — single source of truth for gallery data.
  *
- *  THE FOLDER IS THE SOURCE OF TRUTH: every image in src/assets/images/gallery/
- *  is discovered automatically via import.meta.glob (Vite bundles + hashes them).
+ *  TWO DISTINCT FOLDERS (foolproof photo management — no overlap, no flags):
+ *    • src/assets/images/highlights/  → the HOMEPAGE HEXAGON grid.
+ *    • src/assets/images/gallery/     → the dedicated /gallery PAGE.
+ *  Drop a file in the relevant folder and it appears there automatically (Vite
+ *  bundles + content-hashes it). A photo can live in BOTH folders if you want it
+ *  featured on the homepage AND listed in the full gallery — just place a copy
+ *  in each.
+ *
  *  galleryData.js is an OPTIONAL metadata layer matched by filename, adding
- *  i18n caption/alt and the date / moment / highlight fields.
+ *  i18n caption/alt plus the date / moment fields (used for sorting + grouping).
+ *  It applies to a file in EITHER folder.
  *
  * Returns:
- *   all         — every item, sorted CHRONOLOGICALLY newest-first by `date`
- *                 (undated items fall to the end): { id, file, url, meta }
- *   highlights  — up to MAX_HIGHLIGHTS items for the homepage hexagon grid
+ *   highlights  — items from highlights/, newest-first by `date` (for hexagons)
  *   sections    — [ ['August 2024 — Work Life', [items]], … ] newest-first,
- *                 grouped by month+year+moment, for the grouped gallery page
+ *                 grouped by month+year+moment, from gallery/ (for the page)
  *   captionOf / altOf — i18n resolvers (fall back to a filename-derived label)
- *   MAX_HIGHLIGHTS
  */
 
-// How many photos the homepage hexagon grid shows (keep it 10–15).
-export const MAX_HIGHLIGHTS = 12
+// Two separate, explicit globs — the ONLY place the folders are referenced.
+// NOTE: Vite statically analyzes import.meta.glob, so the options MUST be an
+// inline object literal here (a shared variable is not allowed).
+const HIGHLIGHT_IMAGES = import.meta.glob('../assets/images/highlights/*.{jpg,jpeg,png,webp,avif}', { eager: true, import: 'default', query: '?url' })
+const GALLERY_IMAGES   = import.meta.glob('../assets/images/gallery/*.{jpg,jpeg,png,webp,avif}', { eager: true, import: 'default', query: '?url' })
 
-// FOLDER = source of truth. eager glob → { '../assets/.../x.jpg': '/hashed-url' }
-const IMAGES = import.meta.glob(
-  '../assets/images/gallery/*.{jpg,jpeg,png,webp,avif}',
-  { eager: true, import: 'default', query: '?url' }
-)
-
-// Optional metadata, keyed by filename for quick lookup.
+// Optional metadata, keyed by filename for quick lookup (shared by both folders).
 const META = Object.fromEntries(GALLERY.map((g) => [g.file, g]))
 
 // Turn a filename into a clean label: 'new-photo_02.jpg' → 'New Photo 02'.
 const labelFromFile = (file) =>
-  file.replace(/\.[^.]+$/, '')      // drop extension
-      .replace(/[_-]+/g, ' ')       // _ and - → space
+  file.replace(/\.[^.]+$/, '')
+      .replace(/[_-]+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim()
       .replace(/\b\w/g, (c) => c.toUpperCase())
@@ -49,37 +49,35 @@ const parseDate = (s) => {
 }
 const timeOf = (it) => {
   const d = parseDate(it.meta?.date)
-  return d ? d.getTime() : -Infinity   // undated → sorts to the end
+  return d ? d.getTime() : -Infinity // undated → sorts to the end
 }
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December']
 
-// Group label: "August 2024 — Work Life" (or "Undated — Moments" with no date).
 const sectionLabel = (it) => {
   const d = parseDate(it.meta?.date)
   const moment = it.meta?.moment || 'Moments'
   return d ? `${MONTHS[d.getMonth()]} ${d.getFullYear()} — ${moment}` : `Undated — ${moment}`
 }
 
-// Build the full render list FROM THE FOLDER, attaching metadata when present,
-// then sort CHRONOLOGICALLY newest-first (filename as a stable tiebreaker).
-const ALL_ITEMS = Object.entries(IMAGES)
-  .map(([path, url]) => {
-    const file = path.split('/').pop()
-    return { id: file, file, url, meta: META[file] || null }
-  })
-  .sort((a, b) => (timeOf(b) - timeOf(a)) || a.file.localeCompare(b.file))
+// Build a sorted item list (newest-first by date, filename as tiebreaker).
+const buildItems = (images) =>
+  Object.entries(images)
+    .map(([path, url]) => {
+      const file = path.split('/').pop()
+      return { id: file, file, url, meta: META[file] || null }
+    })
+    .sort((a, b) => (timeOf(b) - timeOf(a)) || a.file.localeCompare(b.file))
 
-// HIGHLIGHTS: prefer explicitly-flagged photos, else the newest MAX_HIGHLIGHTS.
-const FEATURED = ALL_ITEMS.filter((it) => it.meta?.highlight)
-const HIGHLIGHTS = (FEATURED.length ? FEATURED : ALL_ITEMS).slice(0, MAX_HIGHLIGHTS)
+// HIGHLIGHTS: everything in the highlights/ folder (the folder is the curation).
+const HIGHLIGHTS = buildItems(HIGHLIGHT_IMAGES)
 
-// SECTIONS: group by month+year+moment. ALL_ITEMS is already newest-first, so a
-// Map preserves that order → sections (and items within them) stay newest-first.
+// FULL GALLERY ITEMS + SECTIONS (grouped, newest-first via insertion order).
+const GALLERY_ITEMS = buildItems(GALLERY_IMAGES)
 const SECTIONS = (() => {
   const map = new Map()
-  for (const it of ALL_ITEMS) {
+  for (const it of GALLERY_ITEMS) {
     const key = sectionLabel(it)
     if (!map.has(key)) map.set(key, [])
     map.get(key).push(it)
@@ -92,10 +90,8 @@ export function useGallery(lang = 'en') {
   const captionOf = (it) => (it.meta && pick(it.meta.caption)) || labelFromFile(it.file)
   const altOf = (it) => (it.meta && pick(it.meta.alt)) || captionOf(it)
 
-  // Data is module-level + immutable, so memoize references for stable identity.
-  const all = useMemo(() => ALL_ITEMS, [])
   const highlights = useMemo(() => HIGHLIGHTS, [])
   const sections = useMemo(() => SECTIONS, [])
 
-  return { all, highlights, sections, captionOf, altOf, MAX_HIGHLIGHTS }
+  return { highlights, sections, captionOf, altOf }
 }

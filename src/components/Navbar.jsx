@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { PERSONAL } from '../data/content'
 
 const LANGS = [
@@ -41,6 +42,9 @@ export default function Navbar({ lang, setLang }) {
   const [activeSection, setActiveSection] = useState('home')
   const t = NAV_T[lang] || NAV_T.en   // translated nav labels
 
+  const location = useLocation()
+  const navigate = useNavigate()
+
   useEffect(() => {
     const sections = ['home', 'about', 'projects', 'stack', 'gallery', 'seasonal', 'exploring']
     let ticking = false
@@ -69,22 +73,44 @@ export default function Navbar({ lang, setLang }) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Smooth-scroll to an element id, retrying briefly while the Home page mounts
+  // (sections aren't in the DOM the instant we navigate from another route).
+  const scrollToId = (id, tries = 25) => {
+    const el = document.getElementById(id)
+    if (el) { el.scrollIntoView({ behavior: 'smooth' }); return }
+    if (tries > 0) setTimeout(() => scrollToId(id, tries - 1), 80)
+  }
+
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+
+  // Core cross-page navigation:
+  //  • on Home ('/')    → scroll right now.
+  //  • on another route → navigate('/'), then scroll once Home has mounted.
+  //  • 'home' link      → always scroll to the very top.
+  const goToSection = (id) => {
+    const onHome = location.pathname === '/'
+    if (id === 'home') {
+      if (onHome) scrollTop()
+      else { navigate('/'); setTimeout(scrollTop, 120) }
+      return
+    }
+    if (onHome) scrollToId(id)
+    else { navigate('/'); setTimeout(() => scrollToId(id), 120) }
+  }
+
   const handleNav = (e, href, isExternal) => {
-    if (isExternal) return;
+    if (isExternal) return;        // blog → let the browser follow the real link
     e.preventDefault();
     setMenuOpen(false);
-    const target = document.querySelector(href);
-    if (target) target.scrollIntoView({ behavior: 'smooth' });
+    goToSection(href.replace(/^#/, ''));
   };
 
-  // Logo → back to the Main Page (home route) + smooth-scroll to the very top.
-  // Uses the hash home route so it works on ANY domain (no hard-coded /Myweb/).
+  // Logo → Home + smooth-scroll to the very top (works from any route).
   const goHome = (e) => {
     e.preventDefault();
     setMenuOpen(false);
-    const onSubRoute = window.location.hash && !['', '#', '#/', '#home'].includes(window.location.hash);
-    if (onSubRoute) window.location.hash = '#/';   // leave /python, /studying, … back to home
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (location.pathname === '/') scrollTop()
+    else { navigate('/'); setTimeout(scrollTop, 120) }
   };
 
   return (
@@ -110,7 +136,7 @@ export default function Navbar({ lang, setLang }) {
         <ul className="hidden lg:flex items-center gap-1">
           {NAV_LINKS.map(({ href, key, isExternal = false }) => {
             const id = href.slice(1);
-            const isActive = activeSection === id && !isExternal;
+            const isActive = activeSection === id && !isExternal && location.pathname === '/';
             return (
               <li key={href}>
                 <a

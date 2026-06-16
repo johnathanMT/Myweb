@@ -1,15 +1,13 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 import { useGallery } from '../hooks/useGallery'
-import MemoryDetailModal from './MemoryDetailModal'
 
 /**
  * GallerySection — homepage "Memory Gallery" (HIGHLIGHTS ONLY).
  *
- *  Data + i18n + highlight selection all live in useGallery(); the full
- *  collection lives on the dedicated /gallery page. Clicking a hexagon opens the
- *  shared <Lightbox> with the UNCROPPED, full-resolution image.
+ *  Hexagons are sourced from src/assets/images/highlights/ via useGallery();
+ *  the full collection lives on the dedicated /gallery page. No modal/lightbox —
+ *  hovering a hexagon gives a subtle, elegant scale-up (and the caption).
  *
  *  Layout: left copy + right staggered HEXAGON grid (dark glass + amber accents).
  */
@@ -32,16 +30,6 @@ export default function GallerySection({ lang = 'en' }) {
   const t = T[lang] || T.en
   const ref = useCyberReveal()
   const { highlights, captionOf, altOf } = useGallery(lang)
-
-  // Detail modal: holds the resolved item ({ url, caption, alt, date, moment }) or null.
-  const [active, setActive] = useState(null)
-  const open = (it) => setActive({
-    url: it.url,
-    caption: captionOf(it),
-    alt: altOf(it),
-    date: it.meta?.date,
-    moment: it.meta?.moment,
-  })
 
   return (
     <section id="gallery" ref={ref} className="relative overflow-hidden py-24">
@@ -78,7 +66,7 @@ export default function GallerySection({ lang = 'en' }) {
         {/* ── RIGHT: staggered HEXAGON photo grid (highlights only) ── */}
         {highlights.length === 0 ? (
           <p data-reveal className="font-mono text-sm text-muted">
-            Drop images into <code>src/assets/images/gallery/</code> — they appear here automatically.
+            Drop images into <code>src/assets/images/highlights/</code> — they appear here automatically.
           </p>
         ) : (
           <div
@@ -88,16 +76,12 @@ export default function GallerySection({ lang = 'en' }) {
             {highlights.map((it) => (
               <figure
                 key={it.id}
-                onClick={() => open(it)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(it) } }}
-                role="button"
-                tabIndex={0}
-                aria-label={`View ${captionOf(it)}`}
-                className="group cursor-pointer outline-none transition-[transform,filter] duration-300 hover:-translate-y-1 focus-visible:-translate-y-1 hover:[filter:drop-shadow(0_0_14px_rgb(var(--accent)/0.55))] focus-visible:[filter:drop-shadow(0_0_14px_rgb(var(--accent)/0.55))]"
+                title={captionOf(it)}
+                className="group transition-transform duration-300 ease-out hover:scale-105 active:scale-110 hover:[filter:drop-shadow(0_0_14px_rgb(var(--accent)/0.55))]"
               >
                 {/* outer hex = the (amber-on-hover) border ring */}
                 <div
-                  className="bg-white/10 p-[2px] transition-colors duration-300 group-hover:bg-accent/70 group-focus-visible:bg-accent/70"
+                  className="bg-white/10 p-[2px] transition-colors duration-300 group-hover:bg-accent/70"
                   style={{ clipPath: HEX, aspectRatio: '1 / 1.1547' }}
                 >
                   {/* inner hex holds the photo + hover caption */}
@@ -106,10 +90,10 @@ export default function GallerySection({ lang = 'en' }) {
                       src={it.url}
                       alt={altOf(it)}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                      className="h-full w-full object-cover"
                     />
                     {/* caption on hover, clipped to the hexagon */}
-                    <figcaption className="absolute inset-0 flex items-center justify-center bg-black/55 px-2 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+                    <figcaption className="absolute inset-0 flex items-center justify-center bg-black/55 px-2 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       <span className="font-mono text-[10px] leading-tight text-accent-light sm:text-[11px]">
                         {captionOf(it)}
                       </span>
@@ -121,9 +105,6 @@ export default function GallerySection({ lang = 'en' }) {
           </div>
         )}
       </div>
-
-      {/* shared memory detail modal (photo + metadata panel) */}
-      <MemoryDetailModal item={active} onClose={() => setActive(null)} />
     </section>
   )
 }
