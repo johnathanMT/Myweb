@@ -7,6 +7,7 @@ import PageShell from './components/PageShell.jsx'
 import PythonAutomation from './components/PythonAutomation.jsx'
 import StudyingLibrary from './components/StudyingLibrary.jsx'
 import Bibliography from './components/Bibliography.jsx'
+import GalleryPage from './components/GalleryPage.jsx'
 import './index.css'
 
 // ── TIERED EXPERIENCE SWITCH (single-repo, two Vercel deployments) ────────────
@@ -36,6 +37,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/python"       element={<PageShell><PythonAutomation /></PageShell>} />
         <Route path="/studying"     element={<PageShell><StudyingLibrary /></PageShell>} />
         <Route path="/bibliography" element={<PageShell><Bibliography /></PageShell>} />
+        <Route path="/gallery"      element={<PageShell><GalleryPage /></PageShell>} />
         {/* unknown paths fall back to the homepage (mode-aware) */}
         <Route path="*" element={<Home />} />
       </Routes>

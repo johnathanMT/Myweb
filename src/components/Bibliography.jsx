@@ -1,32 +1,54 @@
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { Compass, HeartHandshake, BookMarked, GraduationCap, Terminal, Code2, Cpu } from 'lucide-react'
+
+import { Compass, HeartHandshake, BookMarked, GraduationCap, Terminal, Code2, Cpu, BuildingIcon, Building2, Flashlight, PlaneTakeoff, School, AwardIcon, Briefcase, Hotel, Utensils, University } from 'lucide-react'
 
 /**
  * Bibliography — a vertical chronological timeline of the journey, whose visual
  * language MORPHS from "Vintage" (sepia, serif, classic icons) at the top to
  * "Cyber-Modern" (neon glow, mono, tech icons) at the present day.
- *
- * The central line "lights up" as you scroll (Framer Motion useScroll), and each
- * entry reveals with an era-appropriate animation.
- *
- * Edit TIMELINE with your real milestones.  Requires framer-motion + lucide-react.
  */
 const TIMELINE = [
-  { year: '2018', era: 'vintage',    icon: Compass,        title: 'Arrival in Japan',
-    text: 'A new country, a new language. The first chapter — uncertain but determined.' },
-  { year: '2019', era: 'vintage',    icon: HeartHandshake, title: 'Caregiver · Kaigo',
-    text: 'Years of caregiving taught patience, resilience, and deep attention to people.' },
-  { year: '2022', era: 'transition', icon: BookMarked,     title: 'First Lines of Code',
-    text: 'Self-taught HTML, CSS, and JavaScript in the quiet hours between shifts.' },
-  { year: '2023', era: 'transition', icon: GraduationCap,  title: 'IT Student',
-    text: 'Formal study begins — algorithms, OOSAD, and software fundamentals.' },
-  { year: '2024', era: 'cyber',      icon: Terminal,       title: 'Python & Automation',
-    text: 'Writing tools that automate the boring parts. Code as leverage.' },
-  { year: '2025', era: 'cyber',      icon: Code2,          title: 'Full-Stack Builder',
-    text: 'React + .NET + cloud. Shipping real, end-to-end products.' },
-  { year: '2026', era: 'cyber',      icon: Cpu,            title: 'Aspiring AI Engineer',
-    text: 'The present — building with AI, and architecting whatever comes next.' },
+  {
+    year: '2019, December', era: 'vintage', icon: GraduationCap, title: 'Bachelor of Arts in International Relations',
+    text: 'Graduated from Dagon University. Studied — International Politics, Diplomacy, Law & Economics.'
+  },
+  {
+    year: '2020, December', era: 'vintage', icon: Building2, title: 'Worked at MPT & KDDI Joint Operations',
+    text: 'Worked with resilience during the COVID-19 pandemic, including remote work, before resigning in February 2022.'
+  },
+  {
+    year: '2022, September', era: 'transition', icon: PlaneTakeoff, title: 'Relocated to Japan',
+    text: 'A new adventure began. Exciting times ahead...'
+  },
+  {
+    year: '2022, September', era: 'transition', icon: School, title: 'Enrolled at WELL Japanese Language School',
+    text: 'Formal studies began — Japanese language, culture, and society.'
+  },
+  {
+    year: '2022, November', era: 'cyber', icon: Hotel, title: 'Part-Time Role at Hotel Monterey Le Frere',
+    text: 'Supported hotel operations and learned Japanese work culture firsthand.'
+  },
+  {
+    year: '2023, July', era: 'cyber', icon: Utensils, title: 'Part-Time Role at Tendon Tenya Restaurant Namba',
+    text: 'Worked as a line cook and food prep assistant in a busy tourist district.'
+  },
+  {
+    year: '2023, July', era: 'cyber', icon: AwardIcon, title: 'Passed JLPT N3, JFT-Basic A2 & Care Worker Evaluation Tests',
+    text: 'Fully qualified to commence a professional caregiving career in Japan.'
+  },
+  {
+    year: '2024, May', era: 'cyber', icon: GraduationCap, title: 'Graduated from WELL Japanese Language School',
+    text: 'Secured a position as a care worker in a hospital.'
+  },
+  {
+    year: '2024, March', era: 'cyber', icon: Briefcase, title: 'Caregiver at Medical Corporation Shojinkai, Hirashima Hospital',
+    text: 'Providing compassionate patient care whilst honing interpersonal and problem-solving skills.'
+  },
+  {
+    year: '2025, May', era: 'cyber', icon: University, title: 'BSc Computer Science Student ',
+    text: 'Pursuing a Computer Science degree to enhance technical skills through self-paced online learning, (Aiming for 2028 Convo from Univercity of Wolverhampton via NCC Education).'
+  },
 ]
 
 // Era → styling tokens
@@ -54,13 +76,11 @@ const ERA = {
 function Entry({ item, i }) {
   const e = ERA[item.era]
   const Icon = item.icon
-  const left = i % 2 === 0 // alternate sides on desktop
-  // vintage fades/scales up; cyber slides in from its side with a glow
+  const left = i % 2 === 0
   const fromX = item.era === 'cyber' ? (left ? -40 : 40) : 0
 
   return (
     <div className="relative flex items-center">
-      {/* node on the line */}
       <span
         className="absolute left-4 top-6 z-10 grid h-9 w-9 -translate-x-1/2 place-items-center rounded-full md:left-1/2"
         style={{ background: '#0a0c12', border: `2px solid ${e.ring}`, boxShadow: e.glow, color: e.accent }}
@@ -92,7 +112,6 @@ function Entry({ item, i }) {
 export default function Bibliography() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 80%', 'end 60%'] })
-  // the progress line fills as you scroll
   const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1])
 
   return (
@@ -106,9 +125,7 @@ export default function Bibliography() {
       </div>
 
       <div ref={ref} className="relative mx-auto max-w-5xl px-6">
-        {/* base track */}
         <div className="absolute left-4 top-0 h-full w-px -translate-x-1/2 bg-white/10 md:left-1/2" />
-        {/* animated fill: sepia (top) → cyan (bottom) */}
         <motion.div
           aria-hidden
           className="absolute left-4 top-0 w-px -translate-x-1/2 origin-top md:left-1/2"
@@ -121,7 +138,7 @@ export default function Bibliography() {
         />
 
         <div className="space-y-14">
-          {TIMELINE.map((item, i) => <Entry key={item.year} item={item} i={i} />)}
+          {TIMELINE.map((item, i) => <Entry key={i} item={item} i={i} />)}
         </div>
       </div>
     </section>
