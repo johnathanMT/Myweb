@@ -7,8 +7,13 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import Particles, { ParticlesProvider, useParticlesProvider } from '@tsparticles/react'
 import { loadSlim } from '@tsparticles/slim'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Sun as SunIcon, Moon as MoonIcon, Mail, X, Send, Pencil, Sparkles, ArrowRight } from 'lucide-react'
+import { ArrowLeft, Sun as SunIcon, Moon as MoonIcon, Mail, X, Send, Pencil, Sparkles, ArrowRight, Lock } from 'lucide-react'
+import DOMPurify from 'dompurify'
 import { getParticlesOptions } from '../lib/sanctuaryParticles'
+
+// Strip ALL HTML/scripts → plain text. Defense-in-depth for user messages
+// (React already escapes, but we never store anything but clean text).
+const clean = (s) => DOMPurify.sanitize(String(s ?? ''), { ALLOWED_TAGS: [], ALLOWED_ATTR: [], KEEP_CONTENT: true }).trim()
 
 /**
  * Sanctuary — Ghibli "Memory World" (/sanctuary).
@@ -24,19 +29,26 @@ import { getParticlesOptions } from '../lib/sanctuaryParticles'
  * ║  Buildings are AUTO-GROUNDED (base sits on y), so nothing ever floats.     ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
-const G = 0 // ground level
+const G = 0   // ground level
+const RR = 24 // ring radius — the 8 buildings sit symmetrically on this circle
+const ring = (deg, r, y = G) => { const a = (deg * Math.PI) / 180; return [Math.round(r * Math.sin(a) * 100) / 100, y, Math.round(r * Math.cos(a) * 100) / 100] }
+const faceY = (deg) => ((deg + 180) * Math.PI) / 180 // rotate to face the centre tree
 const SCENE_LAYOUT = {
-  // ── centre ──
+  // ── centre + entrance ──
   sakura:        { url: 'sakura.glb',        position: [0, G, 0],       rotation: [0, 0, 0],          size: 4.0 },
-  torii:         { url: 'torigate.glb',      position: [0, G, 12],      rotation: [0, Math.PI, 0],    size: 5.5 },           // entrance, faces tree
-  // ── cozy ring (tighter radius, no overlap) ──
-  plaza_night:   { url: 'plaza_night.glb',   position: [18, G, 9],      rotation: [0, -2.2, 0],       size: 22, fit: 'footprint', city: true },
-  village:       { url: 'village.glb',       position: [-15, G, 6],     rotation: [0, 1.4, 0],        size: 6 },
-  ferris_wheel:  { url: 'ferris_wheel.glb',  position: [-22, G, 2],     rotation: [Math.PI / 2, 0, 0], size: 9, city: true }, // upright, next to village
-  jp_castle:     { url: 'jp_castle.glb',     position: [8, G, -18],     rotation: [0, 3.0, 0],        size: 9 },
-  castle_sakura: { url: 'castle_sakura.glb', position: [-10, G, -15],   rotation: [0, 2.4, 0],        size: 7 },
-  ship:          { url: 'ship.glb',          position: [16, G + 0.4, -16], rotation: [0, -0.79, 0],   size: 5, float: { amp: 0.18, speed: 1.1 } }, // beside castle, faces tree
-  // ── sky extras ──
+  torii:         { url: 'torigate.glb',      position: ring(0, 13),     rotation: [0, Math.PI, 0],    size: 5.5 },
+  // ── SYMMETRIC RING: 8 ground buildings, exactly 45° apart ──
+  plaza_night:   { url: 'plaza_night.glb',   position: ring(22.5, RR),  rotation: [0, faceY(22.5), 0],  size: 22, fit: 'footprint', city: true },
+  bagan:         { url: 'bagan.glb',         position: ring(67.5, RR),  rotation: [0, faceY(67.5), 0],  size: 8 },
+  ferris_wheel:  { url: 'ferris_wheel.glb',  position: ring(112.5, RR), rotation: [Math.PI / 2, 0, 0],  size: 9, city: true },
+  hospital:      { url: 'hospital.glb',      position: ring(157.5, RR), rotation: [0, faceY(157.5), 0], size: 9 },
+  london_university: { url: 'london_university.glb', position: ring(202.5, RR), rotation: [0, faceY(202.5), 0], size: 12 },
+  jp_castle:     { url: 'jp_castle.glb',     position: ring(247.5, RR), rotation: [0, faceY(247.5), 0], size: 9 },
+  castle_sakura: { url: 'castle_sakura.glb', position: ring(292.5, RR), rotation: [0, faceY(292.5), 0], size: 7 },
+  village:       { url: 'village.glb',       position: ring(337.5, RR), rotation: [0, faceY(337.5), 0], size: 6 },
+  ship:          { url: 'ship.glb',          position: ring(247.5, 33, G + 0.4), rotation: [0, faceY(247.5), 0], size: 5, float: { amp: 0.18, speed: 1.1 } }, // beside castle
+  // ── sky ──
+  satellite:     { url: 'satellite.glb',     position: [0, 24, -6],     rotation: [0.35, 0.6, 0],     size: 3.2, sky: true, float: { amp: 0.6, speed: 0.4 } },
   sun:           { url: 'sun.glb',           position: [-15, 13, -24],  rotation: [0, 0, 0],          size: 2.2, sky: true, celestial: 'sun' },
   moon:          { url: 'moon.glb',          position: [15, 13, -24],   rotation: [0, 0, 0],          size: 2.2, sky: true, celestial: 'moon' },
   glider:        { url: 'glider.glb',        position: [6, 9, -4],      rotation: [0, -0.6, 0],       size: 2.2, sky: true, float: { amp: 0.4, speed: 0.6 } },
@@ -217,13 +229,17 @@ function World({ night, tags, paused, operatorId, onOpen }) {
 
   return (
     <>
+      <Safe><Asset cfg={SCENE_LAYOUT.satellite} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.sun} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.moon} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.glider} night={night} /></Safe>
 
       <Safe><Asset cfg={SCENE_LAYOUT.ship} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.plaza_night} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.bagan} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.ferris_wheel} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.hospital} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.london_university} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.village} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.jp_castle} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.castle_sakura} night={night} /></Safe>
@@ -289,7 +305,7 @@ function Scene({ night, tags, paused, operatorId, onOpen }) {
 }
 
 /* ───────── overlay UI ───────── */
-function ReadModal({ tag, t, canEdit, onEdit, onClose }) {
+function ReadModal({ tag, t, canRead, canEdit, onEdit, onClose }) {
   useEffect(() => {
     if (!tag) return
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
@@ -306,7 +322,15 @@ function ReadModal({ tag, t, canEdit, onEdit, onClose }) {
             <p className="font-serif text-[11px] uppercase tracking-[0.3em] text-amber-200/80">{t.from}</p>
             <h3 className="mt-1 font-serif text-2xl font-bold">{tag.author}</h3>
             {t.lm[tag.landmark] && <p className="mt-0.5 font-mono text-[11px] text-amber-200/70">{t.at} {t.lm[tag.landmark]}</p>}
-            <p className="mt-4 whitespace-pre-line font-serif text-[15px] leading-relaxed text-white/90">“{tag.message}”</p>
+            {/* PRIVACY: message is shown only to its author or the admin; everyone
+                else sees a locked placeholder. (Server also masks it — see SECURITY.md.) */}
+            {canRead ? (
+              <p className="mt-4 whitespace-pre-line font-serif text-[15px] leading-relaxed text-white/90">“{tag.message}”</p>
+            ) : (
+              <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/15 bg-black/25 px-4 py-3 font-mono text-sm text-amber-200/80">
+                <Lock size={15} /> 🔒 Private Message
+              </div>
+            )}
             <div className="mt-6 flex items-center justify-between">
               {canEdit ? (
                 <button type="button" onClick={() => onEdit(tag)} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-300 to-rose-300 px-4 py-2 font-serif text-sm font-semibold text-amber-950 transition hover:brightness-105"><Pencil size={14} /> {t.edit}</button>
@@ -407,6 +431,9 @@ function WelcomeModal({ open, onClose }) {
 /* ───────── main page ───────── */
 export default function Sanctuary() {
   const operatorId = useRef(getOperatorId()).current
+  // Admin flag is a CLIENT hint only (for showing the UI). Real read-access is
+  // enforced server-side via the HttpOnly JWT 'Admin' role — see SECURITY.md.
+  const isAdmin = useMemo(() => { try { return localStorage.getItem('mtn_admin') === '1' } catch { return false } }, [])
   const [lang, setLang] = useState(() => { try { return localStorage.getItem('mtn_lang') || 'en' } catch { return 'en' } })
   useEffect(() => { try { localStorage.setItem('mtn_lang', lang) } catch { /* ignore */ } }, [lang])
   const t = T[lang] || T.en
@@ -428,12 +455,15 @@ export default function Sanctuary() {
   const editFromRead = (tag) => { setActiveTag(null); setEditing(tag); setWriteOpen(true) }
 
   const submitMemory = ({ author, message, landmark }) => {
+    // Sanitize every field to plain text before it ever enters state/storage.
+    const a = clean(author), m = clean(message)
+    if (!a || !m) return
     if (editing) {
-      const updated = { ...editing, author, message, landmark }
+      const updated = { ...editing, author: a, message: m, landmark }
       setTags((prev) => prev.map((x) => (x.id === editing.id ? updated : x)))
       saveMyMemory(updated)
     } else if (!myTag) {
-      const created = { id: Date.now(), ownerId: operatorId, author, message, landmark, date: new Date().toISOString().slice(0, 10) }
+      const created = { id: Date.now(), ownerId: operatorId, author: a, message: m, landmark, date: new Date().toISOString().slice(0, 10) }
       setTags((prev) => [...prev, created])
       saveMyMemory(created)
     }
@@ -465,8 +495,8 @@ export default function Sanctuary() {
               ))}
             </div>
             <button type="button" onClick={() => setNight((n) => !n)} aria-label={night ? t.day : t.night} className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/40 px-3 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60">{night ? <SunIcon size={15} /> : <MoonIcon size={15} />}<span className="hidden sm:inline">{night ? t.day : t.night}</span></button>
-            <button type="button" onClick={openWrite} className="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 to-rose-300 px-4 py-2 font-serif text-sm font-semibold text-amber-950 shadow-lg transition hover:brightness-105 active:scale-[0.98]">
-              {myTag ? <Pencil size={15} /> : <Mail size={16} />}<span className="hidden sm:inline">{myTag ? t.editMine : t.leave}</span>
+            <button type="button" onClick={openWrite} className="sanctuary-pulse group inline-flex items-center gap-1.5 rounded-full border border-amber-100/70 bg-gradient-to-r from-amber-300 to-rose-300 px-4 py-2.5 font-serif text-sm font-bold text-amber-950 ring-1 ring-white/40 backdrop-blur-sm transition hover:brightness-110 active:scale-[0.97]">
+              {myTag ? <Pencil size={16} /> : <Mail size={17} className="transition-transform group-hover:-translate-y-0.5" />}<span className="hidden sm:inline">{myTag ? t.editMine : t.leave}</span>
             </button>
           </div>
         </div>
@@ -477,7 +507,7 @@ export default function Sanctuary() {
           <p className="mt-1 hidden font-serif text-xs text-white/80 drop-shadow sm:block">{t.sub}</p>
         </div>
 
-        <ReadModal tag={activeTag} t={t} canEdit={!!activeTag && activeTag.ownerId === operatorId} onEdit={editFromRead} onClose={() => setActiveTag(null)} />
+        <ReadModal tag={activeTag} t={t} canRead={!!activeTag && (activeTag.ownerId === operatorId || isAdmin)} canEdit={!!activeTag && activeTag.ownerId === operatorId} onEdit={editFromRead} onClose={() => setActiveTag(null)} />
         <WriteModal open={writeOpen} editing={editing} t={t} onClose={() => { setWriteOpen(false); setEditing(null) }} onSubmit={submitMemory} />
         <WelcomeModal open={welcome} onClose={() => setWelcome(false)} />
       </div>

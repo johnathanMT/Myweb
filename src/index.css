@@ -1294,3 +1294,12 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   .sanctuary-tag, .sanctuary-lantern { animation: none; }
 }
+
+/* Sanctuary — prominent pulsing "Leave a Memory" button glow. */
+@keyframes sanctuary-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(253, 224, 140, 0.55); }
+  70%  { box-shadow: 0 0 0 12px rgba(253, 224, 140, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(253, 224, 140, 0); }
+}
+.sanctuary-pulse { animation: sanctuary-pulse 2.2s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .sanctuary-pulse { animation: none; } }

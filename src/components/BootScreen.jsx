@@ -9,7 +9,7 @@ const LINES = [
   '> initializing MyoThantNaing.Operation System kernel ...........',
   '> ငုပ်မိသဲတိုင် တက်နိုင်ဖျားရောက်: max_depth & peak_target locked ... [OK]',
   '> 改善 (Kaizen): initiating continuous_improvement_protocol ....... [OK]',
- '> DETECTING UNKNOWN PAYLOAD. . . . . .  .',
+  '> DETECTING UNKNOWN PAYLOAD. . . . . .  .',
   '> .......................................................',
   '> contacting → ai@myothant.dev ...... [OK]',
   '>      ▲ ▲ ▲  ',
