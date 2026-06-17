@@ -2,12 +2,12 @@ import { Suspense, useEffect, useMemo, useRef, useState, Component } from 'react
 import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, Grid, Html, OrbitControls, AdaptiveDpr, AdaptiveEvents, Float } from '@react-three/drei'
+import { useGLTF, Grid, Html, OrbitControls, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import Particles, { ParticlesProvider, useParticlesProvider } from '@tsparticles/react'
 import { loadSlim } from '@tsparticles/slim'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Sun as SunIcon, Moon as MoonIcon, Mail, X, Send, Pencil, Sparkles, ArrowRight, Lock } from 'lucide-react'
+import { ArrowLeft, Sun as SunIcon, Moon as MoonIcon, Mail, X, Send, Pencil, Sparkles, ArrowRight, Lock, Shield } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { getParticlesOptions } from '../lib/sanctuaryParticles'
 import { SITE } from '../config/site'
@@ -38,10 +38,10 @@ const SCENE_LAYOUT = {
   sakura:        { url: 'sakura.glb',        position: [0, G, 0],     rotation: [0, 0, 0],                 size: 4.0 },
   torii:         { url: 'torigate.glb',      position: [0, G, 14],    rotation: [0, Math.PI, 0],           size: 5.5 },
   // ── CITY DISTRICT: london_university + hospital, parallel & side-by-side (north) ──
-  london_university: { url: 'london_university.glb', position: [-26, G, -62], rotation: faceCenter([-70, G, -48]), size: 12 },
-  hospital:          { url: 'hospital.glb',          position: [26, G, -58],  rotation: faceCenter([5, G, -370]),  size: 9 },
+  london_university: { url: 'london_university.glb', position: [-26, G, -62], rotation: faceCenter([-70, G, -48]), size: 12, heavy: true },
+  hospital:          { url: 'hospital.glb',          position: [26, G, -58],  rotation: faceCenter([5, G, -370]),  size: 9, heavy: true },
   // ── SPACIOUS RING (~R30, 60 deg apart -> no touching) ──
-  plaza_night:   { url: 'plaza_night.glb',   position: [15, G, 26],   rotation: faceCenter([15, G, 26]),   size: 16, fit: 'footprint', city: true },
+  plaza_night:   { url: 'plaza_night.glb',   position: [15, G, 26],   rotation: faceCenter([15, G, 26]),   size: 16, fit: 'footprint', city: true, heavy: true },
   village:       { url: 'village.glb',       position: [-15, G, 26],  rotation: faceCenter([-15, G, 26]),  size: 6 },
   bagan:         { url: 'bagan.glb',         position: [30, G, 0],    rotation: faceCenter([30, G, 0]),    size: 8 },
   castle_sakura: { url: 'castle_sakura.glb', position: [-30, G, 0],   rotation: faceCenter([-30, G, 0]),   size: 7 },
@@ -57,11 +57,17 @@ const SCENE_LAYOUT = {
 }
 const BASE = import.meta.env.BASE_URL || '/'
 const u = (f) => `${BASE}${f}`
-Object.values(SCENE_LAYOUT).forEach((m) => useGLTF.preload(u(m.url)))
-const ALL_URLS = Object.values(SCENE_LAYOUT).map((m) => u(m.url))
 
-// Phones get a lower pixel ratio, no MSAA, and no Bloom — big perf wins.
+// Phones get a lower pixel ratio, no MSAA, no Bloom — and SKIP the heaviest
+// models entirely (they're the iOS-Safari WebGL out-of-memory culprits).
 const IS_MOBILE = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
+// On a model config: render it on this device? (heavy models are desktop-only)
+const showOnDevice = (cfg) => !(IS_MOBILE && cfg.heavy)
+
+// Preload (and later clear) ONLY the models this device will actually render —
+// preloading a heavy GLB still downloads + decodes it into memory even if unused.
+const ALL_URLS = Object.values(SCENE_LAYOUT).filter(showOnDevice).map((m) => u(m.url))
+ALL_URLS.forEach((url) => useGLTF.preload(url))
 
 // Welcome copy (exact, trilingual).
 const WELCOME = {
@@ -82,11 +88,17 @@ const LANDMARK_KEYS = Object.keys(LANDMARKS)
 
 /* ───────── i18n (EN / 日本語 / မြန်မာ) ───────── */
 const T = {
-  en: { title: 'The Memory World', sub: 'Drag to look · scroll to fly out · tap a tag', day: 'Day', night: 'Night', leave: 'Leave a Memory', editMine: 'Edit your memory', from: 'A memory from', at: 'at the', place: 'Place it at', name: 'Your name', msg: 'Message', hang: 'Hang it', save: 'Save changes', demo: 'One memory per visitor · editable, never deleted.', edit: 'Edit', namePh: 'e.g. Nomura-san', msgPh: 'A few words to remember…', home: 'Home',
+  en: { title: 'The Memory World', sub: 'Drag to look · scroll to fly out · tap a tag', day: 'Day', night: 'Night', leave: 'Leave a Memory', editMine: 'Edit your memory', from: 'A memory from', at: 'at the', place: 'Place it at', name: 'Your name', msg: 'Message', hang: 'Hang it', save: 'Save changes', demo: 'One memory per visitor · editable, never deleted.', edit: 'Edit', namePh: 'Please input your name', msgPh: 'A few words to remember…', home: 'Home',
+    placeHint: 'Step 1 — Click anywhere in the 3D world to choose a spot',
+    steps: ['Click anywhere in the 3D world to choose a location.', 'Write your name and memory.', "Click 'Leave a Memory' to plant it."],
     lm: { tree: 'Sakura Tree', ship: "Ship's Deck", village: 'Village Gate', castle: 'Castle Gates', plaza: 'Night Plaza' } },
-  jp: { title: '思い出の世界', sub: 'ドラッグで視点 · スクロールで俯瞰 · タグをタップ', day: '昼', night: '夜', leave: '思い出を残す', editMine: '思い出を編集', from: '思い出をくれた人', at: '場所：', place: '場所を選ぶ', name: 'お名前', msg: 'メッセージ', hang: '木に掛ける', save: '変更を保存', demo: '一人につき一つ · 編集可・削除不可。', edit: '編集', namePh: '例：野村さん', msgPh: 'ひとことどうぞ…', home: 'ホーム',
+  jp: { title: '思い出の世界', sub: 'ドラッグで視点 · スクロールで俯瞰 · タグをタップ', day: '昼', night: '夜', leave: '思い出を残す', editMine: '思い出を編集', from: '思い出をくれた人', at: '場所：', place: '場所を選ぶ', name: 'お名前', msg: 'メッセージ', hang: '木に掛ける', save: '変更を保存', demo: '一人につき一つ · 編集可・削除不可。', edit: '編集', namePh: 'お名前を入力してください', msgPh: 'ひとことどうぞ…', home: 'ホーム',
+    placeHint: 'ステップ1 — 3Dの世界をクリックして場所を選んでください',
+    steps: ['3Dの世界をクリックして場所を選びます。', 'お名前と思い出を書きます。', '「思い出を残す」を押して残します。'],
     lm: { tree: '桜の木', ship: '船の甲板', village: '村の入口', castle: '城門', plaza: '夜の広場' } },
-  mm: { title: 'အမှတ်တရ ကမ္ဘာ', sub: 'ကြည့်ရန် ဖိဆွဲ · အပြင်ထွက်ရန် scroll · tag ကိုနှိပ်', day: 'နေ့', night: 'ည', leave: 'အမှတ်တရ ချန်ထားရန်', editMine: 'သင့်စာ ပြင်ရန်', from: 'အမှတ်တရ ပေးသူ', at: 'နေရာ —', place: 'နေရာ ရွေးပါ', name: 'သင့်အမည်', msg: 'စာ', hang: 'ချိတ်ဆွဲရန်', save: 'သိမ်းရန်', demo: 'တစ်ဦးလျှင် တစ်ခု · ပြင်နိုင်၊ ဖျက်၍မရ။', edit: 'ပြင်ရန်', namePh: 'ဥပမာ — Nomura-san', msgPh: 'မှတ်မိစရာ စကားအနည်းငယ်…', home: 'ပင်မ',
+  mm: { title: 'အမှတ်တရ ကမ္ဘာ', sub: 'ကြည့်ရန် ဖိဆွဲ · အပြင်ထွက်ရန် scroll · tag ကိုနှိပ်', day: 'နေ့', night: 'ည', leave: 'အမှတ်တရ ချန်ထားရန်', editMine: 'သင့်စာ ပြင်ရန်', from: 'အမှတ်တရ ပေးသူ', at: 'နေရာ —', place: 'နေရာ ရွေးပါ', name: 'သင့်အမည်', msg: 'စာ', hang: 'ချိတ်ဆွဲရန်', save: 'သိမ်းရန်', demo: 'တစ်ဦးလျှင် တစ်ခု · ပြင်နိုင်၊ ဖျက်၍မရ။', edit: 'ပြင်ရန်', namePh: 'သင့်အမည် ထည့်ပါ', msgPh: 'မှတ်မိစရာ စကားအနည်းငယ်…', home: 'ပင်မ',
+    placeHint: 'အဆင့် ၁ — နေရာရွေးရန် 3D ကမ္ဘာတွင် နှိပ်ပါ',
+    steps: ['နေရာရွေးရန် 3D ကမ္ဘာတွင် နှိပ်ပါ။', 'သင့်အမည်နှင့် အမှတ်တရစာ ရေးပါ။', '“အမှတ်တရ ချန်ထားရန်” ကိုနှိပ်ပါ။'],
     lm: { tree: 'ဆာကူရာပင်', ship: 'သင်္ဘောကုန်း', village: 'ရွာဝင်ပေါက်', castle: 'ရဲတိုက်တံခါး', plaza: 'ညဈေး' } },
 }
 const LANGS = [{ code: 'en', label: 'EN' }, { code: 'jp', label: '日本語' }, { code: 'mm', label: 'မြန်မာ' }]
@@ -222,11 +234,33 @@ function TagPlaque({ tag, index, paused, mine, onOpen }) {
   )
 }
 
-function World({ night, tags, paused, operatorId, onOpen }) {
+// Satellite that continuously orbits across the sky (useFrame animation loop).
+function OrbitingSatellite() {
+  const fit = useFitted(SCENE_LAYOUT.satellite)
+  const ref = useRef()
+  useFrame((s) => {
+    const t = s.clock.elapsedTime * 0.12
+    if (ref.current) {
+      ref.current.position.set(Math.cos(t) * 36, 26 + Math.sin(t * 0.7) * 3, Math.sin(t) * 36)
+      ref.current.rotation.y = -t + Math.PI / 2
+    }
+  })
+  return <group ref={ref}><primitive object={fit.obj} scale={fit.scale} position={fit.offset} /></group>
+}
+
+function World({ night, tags, paused, operatorId, onOpen, placing, onPlace }) {
   const placedTags = useMemo(() => {
-    const byLm = {}
-    tags.forEach((t) => { const k = LANDMARKS[t.landmark] ? t.landmark : 'tree'; (byLm[k] ||= []).push(t) })
     const out = []
+    const byLm = {}
+    tags.forEach((tag) => {
+      if (Array.isArray(tag.position)) {
+        // explicit click-placed coordinates → lift the plaque above the spot
+        out.push({ tag, index: 0, position: [tag.position[0], tag.position[1] + 2.2, tag.position[2]] })
+      } else {
+        const k = LANDMARKS[tag.landmark] ? tag.landmark : 'tree'
+        ;(byLm[k] ||= []).push(tag)
+      }
+    })
     for (const [k, arr] of Object.entries(byLm)) {
       const a = LANDMARKS[k].anchor
       arr.forEach((tag, i) => {
@@ -239,21 +273,26 @@ function World({ night, tags, paused, operatorId, onOpen }) {
 
   return (
     <>
-      <Safe>
-        <Float speed={2} rotationIntensity={0.8} floatIntensity={1.6} floatingRange={[-0.5, 0.7]}>
-          <Asset cfg={SCENE_LAYOUT.satellite} night={night} />
-        </Float>
-      </Safe>
+      <Safe><OrbitingSatellite /></Safe>
+
+      {/* click-catcher: only while placing a memory → captures the clicked 3D point */}
+      {placing && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, G + 0.02, 0]} onClick={(e) => { e.stopPropagation(); onPlace([e.point.x, e.point.y, e.point.z]) }}>
+          <planeGeometry args={[400, 400]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
+      )}
+
       <Safe><Asset cfg={SCENE_LAYOUT.sun} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.moon} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.glider} night={night} /></Safe>
 
       <Safe><Asset cfg={SCENE_LAYOUT.ship} night={night} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.plaza_night} night={night} /></Safe>
+      {showOnDevice(SCENE_LAYOUT.plaza_night) && <Safe><Asset cfg={SCENE_LAYOUT.plaza_night} night={night} /></Safe>}
       <Safe><Asset cfg={SCENE_LAYOUT.bagan} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.ferris_wheel} night={night} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.hospital} night={night} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.london_university} night={night} /></Safe>
+      {showOnDevice(SCENE_LAYOUT.hospital) && <Safe><Asset cfg={SCENE_LAYOUT.hospital} night={night} /></Safe>}
+      {showOnDevice(SCENE_LAYOUT.london_university) && <Safe><Asset cfg={SCENE_LAYOUT.london_university} night={night} /></Safe>}
       <Safe><Asset cfg={SCENE_LAYOUT.village} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.jp_castle} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.castle_sakura} night={night} /></Safe>
@@ -278,12 +317,12 @@ function World({ night, tags, paused, operatorId, onOpen }) {
   )
 }
 
-function Scene({ night, tags, paused, operatorId, onOpen }) {
+function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace }) {
   return (
     <Canvas
       camera={{ position: [0, 16, 56], fov: 50, near: 0.1, far: 2000 }}
       dpr={IS_MOBILE ? [1, 1] : [1, 1.5]}             // phones render at 1x → big win
-      gl={{ alpha: true, antialias: !IS_MOBILE, powerPreference: 'high-performance' }}
+      gl={{ alpha: true, antialias: !IS_MOBILE, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false }}
       performance={{ min: 0.5 }}                      // allow auto-throttle under load
       style={{ background: 'transparent' }}
     >
@@ -295,7 +334,7 @@ function Scene({ night, tags, paused, operatorId, onOpen }) {
         sectionSize={5} sectionThickness={1.1} sectionColor={night ? '#7c5cff' : '#b8860b'}
         fadeDistance={120} fadeStrength={1.4} followCamera={false}
       />
-      <World night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={onOpen} />
+      <World night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={onOpen} placing={placing} onPlace={onPlace} />
 
       {night && !IS_MOBILE && (
         <EffectComposer>
@@ -384,7 +423,18 @@ function WriteModal({ open, editing, t, onClose, onSubmit }) {
             className="relative w-full max-w-md rounded-3xl border border-white/25 bg-white/15 p-7 text-white shadow-2xl backdrop-blur-2xl">
             <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"><X size={18} /></button>
             <h3 className="font-serif text-2xl font-bold">{editing ? t.editMine : t.leave}</h3>
-            <label className="mt-5 block">
+
+            {/* step-by-step guide for new visitors */}
+            <ol className="mt-3 space-y-1.5 rounded-xl border border-white/15 bg-white/5 p-3">
+              {t.steps.map((s, i) => (
+                <li key={i} className="flex items-start gap-2 font-serif text-[13px] leading-snug text-white/85">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-300 text-[10px] font-bold text-amber-950">{i + 1}</span>
+                  {s}
+                </li>
+              ))}
+            </ol>
+
+            <label className="mt-4 block">
               <span className="font-mono text-[11px] uppercase tracking-wider text-amber-200/80">{t.place}</span>
               <select value={landmark} onChange={(e) => setLandmark(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white outline-none transition focus:border-amber-200/60 focus:bg-white/15">
                 {LANDMARK_KEYS.map((k) => <option key={k} value={k} className="text-black">{t.lm[k]}</option>)}
@@ -448,6 +498,9 @@ export default function Sanctuary() {
   // Admin flag is a CLIENT hint only (for showing the UI). Real read-access is
   // enforced server-side via the HttpOnly JWT 'Admin' role — see SECURITY.md.
   const isAdmin = useMemo(() => { try { return localStorage.getItem('mtn_admin') === '1' } catch { return false } }, [])
+  // True once you've signed into the admin dashboard (JWT present) → reveals a
+  // discreet "Admin" link. Non-admins never see it.
+  const hasAdminSession = useMemo(() => { try { return !!localStorage.getItem('mtn_admin_jwt') } catch { return false } }, [])
   const [lang, setLang] = useState(() => { try { return localStorage.getItem('mtn_lang') || 'en' } catch { return 'en' } })
   useEffect(() => { try { localStorage.setItem('mtn_lang', lang) } catch { /* ignore */ } }, [lang])
   const t = T[lang] || T.en
@@ -459,6 +512,8 @@ export default function Sanctuary() {
   const [editing, setEditing] = useState(null)
   const [welcome, setWelcome] = useState(true) // magical intro popup on entry
   const [apiError, setApiError] = useState(null) // 'offline' | 'save' | null
+  const [placing, setPlacing] = useState(false)  // "click the world to pick a spot" mode
+  const [placedPoint, setPlacedPoint] = useState(null) // [x,y,z] from the click
   const paused = !!activeTag || writeOpen || welcome
 
   // Free GPU memory (geometries/materials/textures) when leaving the page, so
@@ -482,6 +537,8 @@ export default function Sanctuary() {
           author: m.author,
           message: m.message,                                  // server already masks non-owned
           landmark: LANDMARKS[m.landmark] ? m.landmark : 'tree',
+          // explicit click-placed coords if present → render exactly there
+          position: (m.position && typeof m.position.x === 'number') ? [m.position.x, m.position.y, m.position.z] : undefined,
           date: (m.createdAt || '').slice(0, 10),
           ownerId: m.mine ? operatorId : `other-${m.id}`,      // drives edit/read rights
         })))
@@ -495,15 +552,25 @@ export default function Sanctuary() {
   }, [operatorId])
 
   const myTag = tags.find((x) => x.ownerId === operatorId) || null
-  const openWrite = () => { setEditing(myTag); setWriteOpen(true) }
-  const editFromRead = (tag) => { setActiveTag(null); setEditing(tag); setWriteOpen(true) }
+
+  // "Leave a Memory": if you already have one → edit it (location unchanged);
+  // otherwise enter placement mode so you click a spot in the world first.
+  const openWrite = () => {
+    if (myTag) { setEditing(myTag); setPlacedPoint(null); setWriteOpen(true) }
+    else { setEditing(null); setPlacedPoint(null); setPlacing(true) }
+  }
+  const editFromRead = (tag) => { setActiveTag(null); setEditing(tag); setPlacedPoint(null); setWriteOpen(true) }
+
+  // Called when the user clicks the ground while placing → open the form there.
+  const onPlace = (point) => { setPlacedPoint(point); setPlacing(false); setWriteOpen(true) }
 
   const submitMemory = async ({ author, message, landmark }) => {
     // Sanitize every field to plain text before it leaves the browser.
     const a = clean(author), m = clean(message)
     if (!a || !m) return
     const lm = LANDMARKS[landmark] ? landmark : 'tree'
-    const anchor = LANDMARKS[lm].anchor
+    // Exact coords: the spot you clicked → else keep the edited tag's spot → else the landmark anchor.
+    const coords = placedPoint || (editing && editing.position) || LANDMARKS[lm].anchor
 
     // POST to the .NET API (payload + headers match SanctuaryController exactly).
     try {
@@ -513,7 +580,7 @@ export default function Sanctuary() {
         credentials: 'include',
         body: JSON.stringify({
           author: a, message: m, landmark: lm,
-          positionX: anchor[0], positionY: anchor[1], positionZ: anchor[2],
+          positionX: coords[0], positionY: coords[1], positionZ: coords[2],
         }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -524,16 +591,17 @@ export default function Sanctuary() {
     }
 
     // Optimistic local update (works whether or not the server is reachable).
+    const position = placedPoint || (editing && editing.position) || undefined
     if (editing) {
-      const updated = { ...editing, author: a, message: m, landmark: lm }
+      const updated = { ...editing, author: a, message: m, landmark: lm, position }
       setTags((prev) => prev.map((x) => (x.id === editing.id ? updated : x)))
       saveMyMemory(updated)
     } else if (!myTag) {
-      const created = { id: Date.now(), ownerId: operatorId, author: a, message: m, landmark: lm, date: new Date().toISOString().slice(0, 10) }
+      const created = { id: Date.now(), ownerId: operatorId, author: a, message: m, landmark: lm, position, date: new Date().toISOString().slice(0, 10) }
       setTags((prev) => [...prev, created])
       saveMyMemory(created)
     }
-    setWriteOpen(false); setEditing(null)
+    setWriteOpen(false); setEditing(null); setPlacedPoint(null)
   }
 
   return (
@@ -543,7 +611,7 @@ export default function Sanctuary() {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#070b1c] via-[#141a38] to-[#2a1a3a] transition-opacity duration-[1200ms]" style={{ opacity: night ? 1 : 0, backgroundImage: 'radial-gradient(1px 1px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 28% 32%, #fff, transparent), radial-gradient(1.5px 1.5px at 45% 12%, #fff, transparent), radial-gradient(1px 1px at 63% 26%, #fff, transparent), radial-gradient(1px 1px at 78% 14%, #fff, transparent), radial-gradient(1.5px 1.5px at 88% 30%, #fff, transparent), linear-gradient(to bottom, #070b1c, #141a38, #2a1a3a)' }} aria-label="Starry night sky" />
 
         <div className="absolute inset-0 z-[15]">
-          <Scene night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={setActiveTag} />
+          <Scene night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={setActiveTag} placing={placing} onPlace={onPlace} />
         </div>
 
         <div className="pointer-events-none absolute inset-0 z-[18] transition-opacity duration-[1200ms]" style={{ opacity: night ? 1 : 0, background: 'radial-gradient(circle at 50% 40%, transparent 30%, rgba(6,10,28,0.55) 100%)' }} aria-hidden />
@@ -561,6 +629,9 @@ export default function Sanctuary() {
               ))}
             </div>
             <button type="button" onClick={() => setNight((n) => !n)} aria-label={night ? t.day : t.night} className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/40 px-3 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60">{night ? <SunIcon size={15} /> : <MoonIcon size={15} />}<span className="hidden sm:inline">{night ? t.day : t.night}</span></button>
+            {hasAdminSession && (
+              <Link to="/sanctuary-admin" title="Admin dashboard" className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/40 px-3 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60"><Shield size={14} /><span className="hidden sm:inline">Admin</span></Link>
+            )}
             <button type="button" onClick={openWrite} className="sanctuary-pulse group inline-flex items-center gap-1.5 rounded-full border border-amber-100/70 bg-gradient-to-r from-amber-300 to-rose-300 px-4 py-2.5 font-serif text-sm font-bold text-amber-950 ring-1 ring-white/40 backdrop-blur-sm transition hover:brightness-110 active:scale-[0.97]">
               {myTag ? <Pencil size={16} /> : <Mail size={17} className="transition-transform group-hover:-translate-y-0.5" />}<span className="hidden sm:inline">{myTag ? t.editMine : t.leave}</span>
             </button>
@@ -577,6 +648,14 @@ export default function Sanctuary() {
             </p>
           )}
         </div>
+
+        {/* placement-mode hint banner (Step 1) */}
+        {placing && (
+          <div className="absolute left-1/2 bottom-24 z-[46] flex -translate-x-1/2 items-center gap-3 rounded-full border border-amber-300/50 bg-black/70 px-5 py-2.5 backdrop-blur-md">
+            <span className="font-serif text-sm text-amber-100">{t.placeHint}</span>
+            <button type="button" onClick={() => setPlacing(false)} className="rounded-full border border-white/20 px-2.5 py-1 font-mono text-[11px] text-white/70 transition hover:text-white">✕</button>
+          </div>
+        )}
 
         <ReadModal tag={activeTag} t={t} canRead={!!activeTag && (activeTag.ownerId === operatorId || isAdmin)} canEdit={!!activeTag && activeTag.ownerId === operatorId} onEdit={editFromRead} onClose={() => setActiveTag(null)} />
         <WriteModal open={writeOpen} editing={editing} t={t} onClose={() => { setWriteOpen(false); setEditing(null) }} onSubmit={submitMemory} />
