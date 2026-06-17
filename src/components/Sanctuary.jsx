@@ -2,7 +2,7 @@ import { Suspense, useEffect, useMemo, useRef, useState, Component } from 'react
 import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, Grid, Html, OrbitControls, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei'
+import { useGLTF, Grid, Html, OrbitControls, AdaptiveDpr, AdaptiveEvents, Float } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import Particles, { ParticlesProvider, useParticlesProvider } from '@tsparticles/react'
 import { loadSlim } from '@tsparticles/slim'
@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, Sun as SunIcon, Moon as MoonIcon, Mail, X, Send, Pencil, Sparkles, ArrowRight, Lock } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { getParticlesOptions } from '../lib/sanctuaryParticles'
+import { SITE } from '../config/site'
 
 // Strip ALL HTML/scripts → plain text. Defense-in-depth for user messages
 // (React already escapes, but we never store anything but clean text).
@@ -30,28 +31,29 @@ const clean = (s) => DOMPurify.sanitize(String(s ?? ''), { ALLOWED_TAGS: [], ALL
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 const G = 0   // ground level
-const RR = 24 // ring radius — the 8 buildings sit symmetrically on this circle
-const ring = (deg, r, y = G) => { const a = (deg * Math.PI) / 180; return [Math.round(r * Math.sin(a) * 100) / 100, y, Math.round(r * Math.cos(a) * 100) / 100] }
-const faceY = (deg) => ((deg + 180) * Math.PI) / 180 // rotate to face the centre tree
+// Rotate a building to face the central Sakura tree, given its world position.
+const faceCenter = (p) => [0, Math.atan2(p[0], p[2]) + Math.PI, 0]
 const SCENE_LAYOUT = {
   // ── centre + entrance ──
-  sakura:        { url: 'sakura.glb',        position: [0, G, 0],       rotation: [0, 0, 0],          size: 4.0 },
-  torii:         { url: 'torigate.glb',      position: ring(0, 13),     rotation: [0, Math.PI, 0],    size: 5.5 },
-  // ── SYMMETRIC RING: 8 ground buildings, exactly 45° apart ──
-  plaza_night:   { url: 'plaza_night.glb',   position: ring(22.5, RR),  rotation: [0, faceY(22.5), 0],  size: 22, fit: 'footprint', city: true },
-  bagan:         { url: 'bagan.glb',         position: ring(67.5, RR),  rotation: [0, faceY(67.5), 0],  size: 8 },
-  ferris_wheel:  { url: 'ferris_wheel.glb',  position: ring(112.5, RR), rotation: [Math.PI / 2, 0, 0],  size: 9, city: true },
-  hospital:      { url: 'hospital.glb',      position: ring(157.5, RR), rotation: [0, faceY(157.5), 0], size: 9 },
-  london_university: { url: 'london_university.glb', position: ring(202.5, RR), rotation: [0, faceY(202.5), 0], size: 12 },
-  jp_castle:     { url: 'jp_castle.glb',     position: ring(247.5, RR), rotation: [0, faceY(247.5), 0], size: 9 },
-  castle_sakura: { url: 'castle_sakura.glb', position: ring(292.5, RR), rotation: [0, faceY(292.5), 0], size: 7 },
-  village:       { url: 'village.glb',       position: ring(337.5, RR), rotation: [0, faceY(337.5), 0], size: 6 },
-  ship:          { url: 'ship.glb',          position: ring(247.5, 33, G + 0.4), rotation: [0, faceY(247.5), 0], size: 5, float: { amp: 0.18, speed: 1.1 } }, // beside castle
-  // ── sky ──
-  satellite:     { url: 'satellite.glb',     position: [0, 24, -6],     rotation: [0.35, 0.6, 0],     size: 3.2, sky: true, float: { amp: 0.6, speed: 0.4 } },
-  sun:           { url: 'sun.glb',           position: [-15, 13, -24],  rotation: [0, 0, 0],          size: 2.2, sky: true, celestial: 'sun' },
-  moon:          { url: 'moon.glb',          position: [15, 13, -24],   rotation: [0, 0, 0],          size: 2.2, sky: true, celestial: 'moon' },
-  glider:        { url: 'glider.glb',        position: [6, 9, -4],      rotation: [0, -0.6, 0],       size: 2.2, sky: true, float: { amp: 0.4, speed: 0.6 } },
+  sakura:        { url: 'sakura.glb',        position: [0, G, 0],     rotation: [0, 0, 0],                 size: 4.0 },
+  torii:         { url: 'torigate.glb',      position: [0, G, 14],    rotation: [0, Math.PI, 0],           size: 5.5 },
+  // ── CITY DISTRICT: london_university + hospital, parallel & side-by-side (north) ──
+  london_university: { url: 'london_university.glb', position: [-26, G, -62], rotation: faceCenter([-70, G, -48]), size: 12 },
+  hospital:          { url: 'hospital.glb',          position: [26, G, -58],  rotation: faceCenter([5, G, -370]),  size: 9 },
+  // ── SPACIOUS RING (~R30, 60 deg apart -> no touching) ──
+  plaza_night:   { url: 'plaza_night.glb',   position: [15, G, 26],   rotation: faceCenter([15, G, 26]),   size: 16, fit: 'footprint', city: true },
+  village:       { url: 'village.glb',       position: [-15, G, 26],  rotation: faceCenter([-15, G, 26]),  size: 6 },
+  bagan:         { url: 'bagan.glb',         position: [30, G, 0],    rotation: faceCenter([30, G, 0]),    size: 8 },
+  castle_sakura: { url: 'castle_sakura.glb', position: [-30, G, 0],   rotation: faceCenter([-30, G, 0]),   size: 7 },
+  ferris_wheel:  { url: 'ferris_wheel.glb',  position: [10, G, -30],  rotation: faceCenter([5, G, -200]),  size: 9, city: true }, // upright: Y-only rotation; clear of the district
+  jp_castle:     { url: 'jp_castle.glb',     position: [-16, G, -26], rotation: faceCenter([-16, G, -26]), size: 9 },
+  // ── accent ──
+  ship:          { url: 'ship.glb',          position: [27, G + 0.4, 20], rotation: faceCenter([27, G, 20]), size: 5, float: { amp: 0.18, speed: 1.1 } },
+  // ── sky (kept within the camera's clip planes) ──
+  satellite:     { url: 'satellite.glb',     position: [0, 30, 2],     rotation: [0.3, 0.6, 0],            size: 5.5, sky: true, float:  { amp: 0.3, speed: 0.8 } },
+  sun:           { url: 'sun.glb',           position: [-26, 19, -34], rotation: [0, 0, 0],                size: 2.6, sky: true, celestial: 'sun' },
+  moon:          { url: 'moon.glb',          position: [26, 19, -34],  rotation: [0, 0, 0],                size: 2.6, sky: true, celestial: 'moon' },
+  glider:        { url: 'glider.glb',        position: [8, 12, 2],     rotation: [0, -0.6, 0],             size: 2.4, sky: true, float: { amp: 0.4, speed: 0.6 } },
 }
 const BASE = import.meta.env.BASE_URL || '/'
 const u = (f) => `${BASE}${f}`
@@ -88,6 +90,14 @@ const T = {
     lm: { tree: 'ဆာကူရာပင်', ship: 'သင်္ဘောကုန်း', village: 'ရွာဝင်ပေါက်', castle: 'ရဲတိုက်တံခါး', plaza: 'ညဈေး' } },
 }
 const LANGS = [{ code: 'en', label: 'EN' }, { code: 'jp', label: '日本語' }, { code: 'mm', label: 'မြန်မာ' }]
+
+// API status banner copy.
+const API_MSG = {
+  en: { offline: 'Server offline — showing sample memories.', save: 'Couldn’t save to the server — kept on this device.' },
+  jp: { offline: 'サーバーオフライン — サンプルを表示中。', save: 'サーバーに保存できませんでした（端末に保存）。' },
+  mm: { offline: 'ဆာဗာ အော့ဖ်လိုင်း — နမူနာများ ပြသနေသည်။', save: 'ဆာဗာသို့ မသိမ်းနိုင်ပါ — စက်တွင်းသာ သိမ်းထားသည်။' },
+}
+const API = `${SITE.apiUrl}/api/sanctuary/memories`
 
 /* ───────── operator identity + persistence ───────── */
 function getOperatorId() {
@@ -229,7 +239,11 @@ function World({ night, tags, paused, operatorId, onOpen }) {
 
   return (
     <>
-      <Safe><Asset cfg={SCENE_LAYOUT.satellite} night={night} /></Safe>
+      <Safe>
+        <Float speed={2} rotationIntensity={0.8} floatIntensity={1.6} floatingRange={[-0.5, 0.7]}>
+          <Asset cfg={SCENE_LAYOUT.satellite} night={night} />
+        </Float>
+      </Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.sun} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.moon} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.glider} night={night} /></Safe>
@@ -267,13 +281,13 @@ function World({ night, tags, paused, operatorId, onOpen }) {
 function Scene({ night, tags, paused, operatorId, onOpen }) {
   return (
     <Canvas
-      camera={{ position: [0, 8, 40], fov: 50 }}
+      camera={{ position: [0, 16, 56], fov: 50, near: 0.1, far: 2000 }}
       dpr={IS_MOBILE ? [1, 1] : [1, 1.5]}             // phones render at 1x → big win
       gl={{ alpha: true, antialias: !IS_MOBILE, powerPreference: 'high-performance' }}
       performance={{ min: 0.5 }}                      // allow auto-throttle under load
       style={{ background: 'transparent' }}
     >
-      <fog attach="fog" args={[night ? '#0a0e1f' : '#dfe7ee', 45, 180]} />
+      <fog attach="fog" args={[night ? '#0a0e1f' : '#dfe7ee', 60, 220]} />
       <Lights night={night} />
       <Grid
         position={[0, G, 0]} args={[200, 200]} infiniteGrid
@@ -444,26 +458,78 @@ export default function Sanctuary() {
   const [writeOpen, setWriteOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [welcome, setWelcome] = useState(true) // magical intro popup on entry
+  const [apiError, setApiError] = useState(null) // 'offline' | 'save' | null
   const paused = !!activeTag || writeOpen || welcome
 
   // Free GPU memory (geometries/materials/textures) when leaving the page, so
   // navigating away from this heavy 3D route is smooth (no lingering WebGL).
   useEffect(() => () => { try { useGLTF.clear(ALL_URLS) } catch { /* ignore */ } }, [])
 
+  // ── LOAD memories from the .NET API on mount (falls back to mock if offline) ──
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(API, {
+          headers: { 'X-Operator-Token': operatorId },
+          credentials: 'include',
+        })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        if (cancelled || !Array.isArray(data?.memories)) return
+        setTags(data.memories.map((m) => ({
+          id: m.id,
+          author: m.author,
+          message: m.message,                                  // server already masks non-owned
+          landmark: LANDMARKS[m.landmark] ? m.landmark : 'tree',
+          date: (m.createdAt || '').slice(0, 10),
+          ownerId: m.mine ? operatorId : `other-${m.id}`,      // drives edit/read rights
+        })))
+        setApiError(null)
+      } catch (err) {
+        console.error('[Sanctuary] GET /memories failed:', err)
+        if (!cancelled) setApiError('offline') // keep the mock tags already in state
+      }
+    })()
+    return () => { cancelled = true }
+  }, [operatorId])
+
   const myTag = tags.find((x) => x.ownerId === operatorId) || null
   const openWrite = () => { setEditing(myTag); setWriteOpen(true) }
   const editFromRead = (tag) => { setActiveTag(null); setEditing(tag); setWriteOpen(true) }
 
-  const submitMemory = ({ author, message, landmark }) => {
-    // Sanitize every field to plain text before it ever enters state/storage.
+  const submitMemory = async ({ author, message, landmark }) => {
+    // Sanitize every field to plain text before it leaves the browser.
     const a = clean(author), m = clean(message)
     if (!a || !m) return
+    const lm = LANDMARKS[landmark] ? landmark : 'tree'
+    const anchor = LANDMARKS[lm].anchor
+
+    // POST to the .NET API (payload + headers match SanctuaryController exactly).
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Operator-Token': operatorId },
+        credentials: 'include',
+        body: JSON.stringify({
+          author: a, message: m, landmark: lm,
+          positionX: anchor[0], positionY: anchor[1], positionZ: anchor[2],
+        }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      setApiError(null)
+    } catch (err) {
+      console.error('[Sanctuary] POST /memories failed:', err)
+      setApiError('save') // still update locally below so the UX never stalls
+    }
+
+    // Optimistic local update (works whether or not the server is reachable).
     if (editing) {
-      const updated = { ...editing, author: a, message: m, landmark }
+      const updated = { ...editing, author: a, message: m, landmark: lm }
       setTags((prev) => prev.map((x) => (x.id === editing.id ? updated : x)))
       saveMyMemory(updated)
     } else if (!myTag) {
-      const created = { id: Date.now(), ownerId: operatorId, author: a, message: m, landmark, date: new Date().toISOString().slice(0, 10) }
+      const created = { id: Date.now(), ownerId: operatorId, author: a, message: m, landmark: lm, date: new Date().toISOString().slice(0, 10) }
       setTags((prev) => [...prev, created])
       saveMyMemory(created)
     }
@@ -505,6 +571,11 @@ export default function Sanctuary() {
         <div className="pointer-events-none absolute left-1/2 z-[44] -translate-x-1/2 text-center" style={{ top: 'calc(max(0.85rem, env(safe-area-inset-top)) + 3.3rem)' }}>
           <h1 className="font-serif text-xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-3xl">{t.title}</h1>
           <p className="mt-1 hidden font-serif text-xs text-white/80 drop-shadow sm:block">{t.sub}</p>
+          {apiError && (
+            <p className="mx-auto mt-2 w-fit rounded-full border border-amber-300/40 bg-black/55 px-3 py-1 font-mono text-[11px] text-amber-200/90 backdrop-blur-md">
+              {(API_MSG[lang] || API_MSG.en)[apiError]}
+            </p>
+          )}
         </div>
 
         <ReadModal tag={activeTag} t={t} canRead={!!activeTag && (activeTag.ownerId === operatorId || isAdmin)} canEdit={!!activeTag && activeTag.ownerId === operatorId} onEdit={editFromRead} onClose={() => setActiveTag(null)} />

@@ -12,6 +12,7 @@ import './index.css'
 
 // Lazy: pulls in tsparticles — code-split out of the main bundle.
 const Sanctuary = lazy(() => import('./components/Sanctuary.jsx'))
+const SanctuaryAdmin = lazy(() => import('./components/SanctuaryAdmin.jsx'))
 
 // ── TIERED EXPERIENCE SWITCH (single-repo, two Vercel deployments) ────────────
 // One codebase, two builds chosen at BUILD time by an env var:
@@ -43,6 +44,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/gallery"      element={<PageShell><GalleryPage /></PageShell>} />
         {/* Sanctuary is full-screen immersive → no PageShell. */}
         <Route path="/sanctuary"    element={<Suspense fallback={<div style={{minHeight:'100vh',background:'#070b1c'}} />}><Sanctuary /></Suspense>} />
+        <Route path="/sanctuary-admin" element={<Suspense fallback={<div style={{minHeight:'100vh',background:'#0b0e1a'}} />}><SanctuaryAdmin /></Suspense>} />
         {/* unknown paths fall back to the homepage (mode-aware) */}
         <Route path="*" element={<Home />} />
       </Routes>
