@@ -69,6 +69,20 @@ const showOnDevice = (cfg) => !(IS_MOBILE && cfg.heavy)
 const ALL_URLS = Object.values(SCENE_LAYOUT).filter(showOnDevice).map((m) => u(m.url))
 ALL_URLS.forEach((url) => useGLTF.preload(url))
 
+// Reverse lookup: a cfg object → its SCENE_LAYOUT key (so a clicked model knows
+// its own identity without threading an id prop through every <Asset>).
+const KEY_OF = new Map(Object.entries(SCENE_LAYOUT).map(([k, v]) => [v, k]))
+// Readable names for every clickable place (shown in the memory modal). Includes
+// legacy landmark keys (tree/castle/plaza) so older saved memories still label.
+const BUILDING_LABEL = {
+  sakura: 'Sakura Tree', torii: 'Torii Gate', ship: "Ship's Deck", village: 'Village',
+  bagan: 'Bagan Temple', ferris_wheel: 'Ferris Wheel', jp_castle: 'Japanese Castle',
+  castle_sakura: 'Sakura Castle', plaza_night: 'Night Plaza', hospital: 'Hospital',
+  london_university: 'University', tree: 'Sakura Tree', castle: 'Castle', plaza: 'Plaza',
+}
+// Options offered in the "Place it at" dropdown (canonical building keys).
+const PLACE_KEYS = ['sakura', 'torii', 'ship', 'village', 'bagan', 'ferris_wheel', 'jp_castle', 'castle_sakura', 'plaza_night', 'hospital', 'london_university']
+
 // Welcome copy (exact, trilingual).
 const WELCOME = {
   en: 'Welcome to the Memory World. You can choose your favorite spot to leave a message for Ko Myo Thant Naing.',
@@ -174,16 +188,38 @@ function Floating({ amp = 0.15, speed = 1, children }) {
   return <group ref={ref}>{children}</group>
 }
 
-function Asset({ cfg, night }) {
+function Asset({ cfg, night, onPick }) {
   const fit = useFitted(cfg)
+  const [hovered, setHovered] = useState(false)
+  const id = KEY_OF.get(cfg)
+  const pickable = !!onPick && !!id && !cfg.sky   // ground buildings only (not sun/moon/satellite)
+
   useEffect(() => {
     if (cfg.celestial === 'sun') applyEmissive(fit.obj, '#ffd27a', night ? 0.12 : 2.6)
     else if (cfg.celestial === 'moon') applyEmissive(fit.obj, '#cdd6ff', night ? 2.6 : 0.12)
     else if (cfg.city) applyEmissive(fit.obj, '#ffc04d', night ? 1.1 : 0.0) // plaza + ferris glow at night
   }, [fit.obj, night, cfg])
+
+  // Pointer cursor while hovering a clickable building.
+  useEffect(() => {
+    if (!pickable || !hovered) return
+    document.body.style.cursor = 'pointer'
+    return () => { document.body.style.cursor = 'auto' }
+  }, [pickable, hovered])
+
   const inner = <primitive object={fit.obj} scale={fit.scale} position={fit.offset} />
+  // a tag should float roughly at the building's top (footprint models are flat).
+  const liftY = cfg.fit === 'footprint' ? 4 : (cfg.size ?? 4)
+  // Events live on the WRAPPER group → they bubble up from every child mesh of
+  // the cloned GLTF, and the existing position/rotation/fit logic is untouched.
+  const events = pickable ? {
+    onPointerOver: (e) => { e.stopPropagation(); setHovered(true) },
+    onPointerOut: () => setHovered(false),
+    onClick: (e) => { e.stopPropagation(); onPick(id, [cfg.position[0], liftY, cfg.position[2]]) },
+  } : {}
+
   return (
-    <group position={cfg.position}>
+    <group position={cfg.position} scale={pickable && hovered ? 1.03 : 1} {...events}>
       {cfg.float ? <Floating {...cfg.float}>{inner}</Floating> : inner}
     </group>
   )
@@ -248,7 +284,7 @@ function OrbitingSatellite() {
   return <group ref={ref}><primitive object={fit.obj} scale={fit.scale} position={fit.offset} /></group>
 }
 
-function World({ night, tags, paused, operatorId, onOpen, placing, onPlace }) {
+function World({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPick }) {
   const placedTags = useMemo(() => {
     const out = []
     const byLm = {}
@@ -283,23 +319,23 @@ function World({ night, tags, paused, operatorId, onOpen, placing, onPlace }) {
         </mesh>
       )}
 
-      <Safe><Asset cfg={SCENE_LAYOUT.sun} night={night} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.moon} night={night} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.glider} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.sun} night={night} onPick={onPick} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.moon} night={night} onPick={onPick} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.glider} night={night} onPick={onPick} /></Safe>
 
-      <Safe><Asset cfg={SCENE_LAYOUT.ship} night={night} /></Safe>
-      {showOnDevice(SCENE_LAYOUT.plaza_night) && <Safe><Asset cfg={SCENE_LAYOUT.plaza_night} night={night} /></Safe>}
-      <Safe><Asset cfg={SCENE_LAYOUT.bagan} night={night} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.ferris_wheel} night={night} /></Safe>
-      {showOnDevice(SCENE_LAYOUT.hospital) && <Safe><Asset cfg={SCENE_LAYOUT.hospital} night={night} /></Safe>}
-      {showOnDevice(SCENE_LAYOUT.london_university) && <Safe><Asset cfg={SCENE_LAYOUT.london_university} night={night} /></Safe>}
-      <Safe><Asset cfg={SCENE_LAYOUT.village} night={night} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.jp_castle} night={night} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.castle_sakura} night={night} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.torii} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.ship} night={night} onPick={onPick} /></Safe>
+      {showOnDevice(SCENE_LAYOUT.plaza_night) && <Safe><Asset cfg={SCENE_LAYOUT.plaza_night} night={night} onPick={onPick} /></Safe>}
+      <Safe><Asset cfg={SCENE_LAYOUT.bagan} night={night} onPick={onPick} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.ferris_wheel} night={night} onPick={onPick} /></Safe>
+      {showOnDevice(SCENE_LAYOUT.hospital) && <Safe><Asset cfg={SCENE_LAYOUT.hospital} night={night} onPick={onPick} /></Safe>}
+      {showOnDevice(SCENE_LAYOUT.london_university) && <Safe><Asset cfg={SCENE_LAYOUT.london_university} night={night} onPick={onPick} /></Safe>}
+      <Safe><Asset cfg={SCENE_LAYOUT.village} night={night} onPick={onPick} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.jp_castle} night={night} onPick={onPick} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.castle_sakura} night={night} onPick={onPick} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.torii} night={night} onPick={onPick} /></Safe>
 
       <SwayGroup>
-        <Safe><Asset cfg={SCENE_LAYOUT.sakura} night={night} /></Safe>
+        <Safe><Asset cfg={SCENE_LAYOUT.sakura} night={night} onPick={onPick} /></Safe>
         {night && [[-1.0, 2.3, 0.4], [1.0, 2.6, 0.2], [0.0, 1.9, 0.8]].map((o, i) => (
           <mesh key={`lantern-${i}`} position={o}>
             <sphereGeometry args={[0.09, 12, 12]} />
@@ -317,13 +353,23 @@ function World({ night, tags, paused, operatorId, onOpen, placing, onPlace }) {
   )
 }
 
-function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace }) {
+function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPick }) {
   return (
     <Canvas
       camera={{ position: [0, 16, 56], fov: 50, near: 0.1, far: 2000 }}
-      dpr={IS_MOBILE ? [1, 1] : [1, 1.5]}             // phones render at 1x → big win
-      gl={{ alpha: true, antialias: !IS_MOBILE, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false }}
-      performance={{ min: 0.5 }}                      // allow auto-throttle under load
+      // ── HARD PIXEL CAP ──  phones render at exactly 1x (no retina 2x/3x), so the
+      // GPU pushes 4–9× fewer pixels → the single biggest mobile FPS win.
+      dpr={IS_MOBILE ? [1, 1] : [1, 1.5]}
+      gl={{
+        alpha: true,
+        antialias: !IS_MOBILE,                  // MSAA off on phones (expensive, barely visible at 1x)
+        powerPreference: 'high-performance',
+        failIfMajorPerformanceCaveat: false,    // never hard-fail on weak mobile GPUs
+        stencil: false,                         // we don't use the stencil buffer → save memory/bandwidth
+        depth: true,
+        preserveDrawingBuffer: false,           // lets the browser reclaim the buffer → less OOM risk
+      }}
+      performance={{ min: 0.5 }}                // allow AdaptiveDpr to auto-throttle under load
       style={{ background: 'transparent' }}
     >
       <fog attach="fog" args={[night ? '#0a0e1f' : '#dfe7ee', 60, 220]} />
@@ -334,7 +380,7 @@ function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace }) {
         sectionSize={5} sectionThickness={1.1} sectionColor={night ? '#7c5cff' : '#b8860b'}
         fadeDistance={120} fadeStrength={1.4} followCamera={false}
       />
-      <World night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={onOpen} placing={placing} onPlace={onPlace} />
+      <World night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={onOpen} placing={placing} onPlace={onPlace} onPick={onPick} />
 
       {night && !IS_MOBILE && (
         <EffectComposer>
@@ -342,10 +388,17 @@ function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace }) {
         </EffectComposer>
       )}
 
-      {/* smooth 360 orbit + zoom; floor-locked; far bird's-eye */}
+      {/* Smooth 360° orbit + zoom; floor-locked; far bird's-eye.
+          Touch tuning: one finger rotates, two fingers pinch-zoom (pan stays off so
+          the world can't drift off-centre). Speeds are gentler on phones so a small
+          thumb swipe doesn't whip the camera around. Low dampingFactor = buttery,
+          inertial glide that settles instead of stopping dead. */}
       <OrbitControls
-        makeDefault enabled={!paused} enablePan={false} enableZoom enableDamping dampingFactor={0.05}
-        rotateSpeed={0.6} zoomSpeed={0.8}
+        makeDefault enabled={!paused} enablePan={false} enableZoom
+        enableDamping dampingFactor={IS_MOBILE ? 0.08 : 0.05}
+        rotateSpeed={IS_MOBILE ? 0.4 : 0.6}
+        zoomSpeed={IS_MOBILE ? 0.6 : 0.8}
+        touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
         minDistance={5} maxDistance={150} minPolarAngle={0.1} maxPolarAngle={Math.PI / 2 - 0.05}
         target={[0, 1, 0]}
       />
@@ -371,10 +424,10 @@ function ReadModal({ tag, t, canRead, canEdit, onEdit, onClose }) {
         <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} role="dialog" aria-modal="true">
           <motion.div onClick={(e) => e.stopPropagation()} initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} transition={{ type: 'spring', stiffness: 240, damping: 22 }}
             className="relative w-full max-w-md rounded-3xl border border-white/25 bg-white/15 p-7 text-white shadow-2xl backdrop-blur-2xl">
-            <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"><X size={18} /></button>
+            <button type="button" onClick={onClose} aria-label="Close" className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"><X size={18} /></button>
             <p className="font-serif text-[11px] uppercase tracking-[0.3em] text-amber-200/80">{t.from}</p>
             <h3 className="mt-1 font-serif text-2xl font-bold">{tag.author}</h3>
-            {t.lm[tag.landmark] && <p className="mt-0.5 font-mono text-[11px] text-amber-200/70">{t.at} {t.lm[tag.landmark]}</p>}
+            {tag.landmark && <p className="mt-0.5 font-mono text-[11px] text-amber-200/70">{t.at} {labelOf(tag.landmark, t)}</p>}
             {/* PRIVACY: message is shown only to its author or the admin; everyone
                 else sees a locked placeholder. (Server also masks it — see SECURITY.md.) */}
             {canRead ? (
@@ -397,19 +450,31 @@ function ReadModal({ tag, t, canRead, canEdit, onEdit, onClose }) {
   )
 }
 
-function WriteModal({ open, editing, t, onClose, onSubmit }) {
+// A human label for any place key: prefer the translated landmark name, then the
+// building label, then the raw key as a last resort.
+const labelOf = (k, t) => (t?.lm && t.lm[k]) || BUILDING_LABEL[k] || k
+
+function WriteModal({ open, editing, presetPlace, t, onClose, onSubmit }) {
   const [author, setAuthor] = useState('')
   const [message, setMessage] = useState('')
-  const [landmark, setLandmark] = useState(LANDMARK_KEYS[0])
+  const [landmark, setLandmark] = useState(PLACE_KEYS[0])
+  // If a building was clicked, that key may not be in PLACE_KEYS (legacy zones);
+  // make sure it's selectable so the dropdown shows the picked building.
+  const options = useMemo(() => {
+    const base = [...PLACE_KEYS]
+    if (presetPlace && !base.includes(presetPlace)) base.unshift(presetPlace)
+    return base
+  }, [presetPlace])
   useEffect(() => {
     if (!open) return
     setAuthor(editing?.author || '')
     setMessage(editing?.message || '')
-    setLandmark(editing?.landmark || LANDMARK_KEYS[0])
+    // Priority: building you just clicked → the tag you're editing → first place.
+    setLandmark(presetPlace || editing?.landmark || PLACE_KEYS[0])
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [open, editing, onClose])
+  }, [open, editing, presetPlace, onClose])
   const submit = (e) => {
     e.preventDefault()
     if (!author.trim() || !message.trim()) return
@@ -420,8 +485,9 @@ function WriteModal({ open, editing, t, onClose, onSubmit }) {
       {open && (
         <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} role="dialog" aria-modal="true">
           <motion.form onClick={(e) => e.stopPropagation()} onSubmit={submit} initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} transition={{ type: 'spring', stiffness: 240, damping: 22 }}
-            className="relative w-full max-w-md rounded-3xl border border-white/25 bg-white/15 p-7 text-white shadow-2xl backdrop-blur-2xl">
-            <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"><X size={18} /></button>
+            className="relative max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-3xl border border-white/25 bg-white/15 p-6 text-white shadow-2xl backdrop-blur-2xl sm:p-7"
+            style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+            <button type="button" onClick={onClose} aria-label="Close" className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"><X size={18} /></button>
             <h3 className="font-serif text-2xl font-bold">{editing ? t.editMine : t.leave}</h3>
 
             {/* step-by-step guide for new visitors */}
@@ -436,17 +502,20 @@ function WriteModal({ open, editing, t, onClose, onSubmit }) {
 
             <label className="mt-4 block">
               <span className="font-mono text-[11px] uppercase tracking-wider text-amber-200/80">{t.place}</span>
-              <select value={landmark} onChange={(e) => setLandmark(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white outline-none transition focus:border-amber-200/60 focus:bg-white/15">
-                {LANDMARK_KEYS.map((k) => <option key={k} value={k} className="text-black">{t.lm[k]}</option>)}
+              <select value={landmark} onChange={(e) => setLandmark(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base sm:py-2.5 sm:text-sm text-white outline-none transition focus:border-amber-200/60 focus:bg-white/15">
+                {options.map((k) => <option key={k} value={k} className="text-black">{labelOf(k, t)}</option>)}
               </select>
+              {presetPlace && (
+                <span className="mt-1.5 block font-mono text-[11px] text-amber-200/70">📍 {labelOf(presetPlace, t)}</span>
+              )}
             </label>
             <label className="mt-4 block">
               <span className="font-mono text-[11px] uppercase tracking-wider text-amber-200/80">{t.name}</span>
-              <input value={author} onChange={(e) => setAuthor(e.target.value)} maxLength={40} required placeholder={t.namePh} className="mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none transition focus:border-amber-200/60 focus:bg-white/15" />
+              <input value={author} onChange={(e) => setAuthor(e.target.value)} maxLength={40} required placeholder={t.namePh} className="mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base sm:py-2.5 sm:text-sm text-white placeholder-white/40 outline-none transition focus:border-amber-200/60 focus:bg-white/15" />
             </label>
             <label className="mt-4 block">
               <span className="font-mono text-[11px] uppercase tracking-wider text-amber-200/80">{t.msg}</span>
-              <textarea value={message} onChange={(e) => setMessage(e.target.value)} maxLength={240} required rows={4} placeholder={t.msgPh} className="mt-1.5 w-full resize-none rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none transition focus:border-amber-200/60 focus:bg-white/15" />
+              <textarea value={message} onChange={(e) => setMessage(e.target.value)} maxLength={240} required rows={4} placeholder={t.msgPh} className="mt-1.5 w-full resize-none rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base sm:py-2.5 sm:text-sm text-white placeholder-white/40 outline-none transition focus:border-amber-200/60 focus:bg-white/15" />
               <span className="mt-1 block text-right font-mono text-[10px] text-white/40">{message.length}/240</span>
             </label>
             <button type="submit" className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-300 to-rose-300 px-5 py-3 font-serif text-sm font-semibold text-amber-950 shadow-lg transition hover:brightness-105 active:scale-[0.99]">{editing ? t.save : t.hang} <Send size={15} /></button>
@@ -471,7 +540,8 @@ function WelcomeModal({ open, onClose }) {
       {open && (
         <motion.div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 p-4 backdrop-blur-md" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true">
           <motion.div initial={{ scale: 0.9, opacity: 0, y: 24 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.92, opacity: 0, y: 12 }} transition={{ type: 'spring', stiffness: 220, damping: 22 }}
-            className="relative w-full max-w-lg rounded-[28px] border border-white/25 bg-white/15 p-7 text-center text-white shadow-2xl backdrop-blur-2xl sm:p-9">
+            className="relative max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-[28px] border border-white/25 bg-white/15 p-6 text-center text-white shadow-2xl backdrop-blur-2xl sm:p-9"
+            style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-rose-300 text-amber-950 shadow-[0_0_24px_rgba(253,224,140,0.6)]">
               <Sparkles size={22} />
             </div>
@@ -514,6 +584,7 @@ export default function Sanctuary() {
   const [apiError, setApiError] = useState(null) // 'offline' | 'save' | null
   const [placing, setPlacing] = useState(false)  // "click the world to pick a spot" mode
   const [placedPoint, setPlacedPoint] = useState(null) // [x,y,z] from the click
+  const [pickedPlace, setPickedPlace] = useState(null) // building key when a model was clicked
   const paused = !!activeTag || writeOpen || welcome
 
   // Free GPU memory (geometries/materials/textures) when leaving the page, so
@@ -536,7 +607,7 @@ export default function Sanctuary() {
           id: m.id,
           author: m.author,
           message: m.message,                                  // server already masks non-owned
-          landmark: LANDMARKS[m.landmark] ? m.landmark : 'tree',
+          landmark: m.landmark || 'tree',                       // may be any building key
           // explicit click-placed coords if present → render exactly there
           position: (m.position && typeof m.position.x === 'number') ? [m.position.x, m.position.y, m.position.z] : undefined,
           date: (m.createdAt || '').slice(0, 10),
@@ -556,21 +627,34 @@ export default function Sanctuary() {
   // "Leave a Memory": if you already have one → edit it (location unchanged);
   // otherwise enter placement mode so you click a spot in the world first.
   const openWrite = () => {
+    setPickedPlace(null)
     if (myTag) { setEditing(myTag); setPlacedPoint(null); setWriteOpen(true) }
     else { setEditing(null); setPlacedPoint(null); setPlacing(true) }
   }
-  const editFromRead = (tag) => { setActiveTag(null); setEditing(tag); setPlacedPoint(null); setWriteOpen(true) }
+  const editFromRead = (tag) => { setActiveTag(null); setPickedPlace(null); setEditing(tag); setPlacedPoint(null); setWriteOpen(true) }
 
   // Called when the user clicks the ground while placing → open the form there.
-  const onPlace = (point) => { setPlacedPoint(point); setPlacing(false); setWriteOpen(true) }
+  const onPlace = (point) => { setPickedPlace(null); setPlacedPoint(point); setPlacing(false); setWriteOpen(true) }
+
+  // Called when a specific BUILDING is clicked → open the form pre-targeted at it,
+  // with the tag positioned at/just above the building's coordinates.
+  const onPickBuilding = (id, position) => {
+    setPlacing(false)
+    setPlacedPoint(position)
+    setPickedPlace(id)
+    setEditing(myTag || null)   // still one-memory-per-operator: re-aim the existing tag
+    setWriteOpen(true)
+  }
 
   const submitMemory = async ({ author, message, landmark }) => {
     // Sanitize every field to plain text before it leaves the browser.
     const a = clean(author), m = clean(message)
     if (!a || !m) return
-    const lm = LANDMARKS[landmark] ? landmark : 'tree'
-    // Exact coords: the spot you clicked → else keep the edited tag's spot → else the landmark anchor.
-    const coords = placedPoint || (editing && editing.position) || LANDMARKS[lm].anchor
+    // Accept either a legacy landmark zone or a specific building key.
+    const lm = (LANDMARKS[landmark] || PLACE_KEYS.includes(landmark)) ? landmark : 'tree'
+    // Exact coords: the spot you clicked / the building you picked → else keep the
+    // edited tag's spot → else the landmark anchor → else a safe default.
+    const coords = placedPoint || (editing && editing.position) || LANDMARKS[lm]?.anchor || [0, 4, 0]
 
     // POST to the .NET API (payload + headers match SanctuaryController exactly).
     try {
@@ -601,17 +685,17 @@ export default function Sanctuary() {
       setTags((prev) => [...prev, created])
       saveMyMemory(created)
     }
-    setWriteOpen(false); setEditing(null); setPlacedPoint(null)
+    setWriteOpen(false); setEditing(null); setPlacedPoint(null); setPickedPlace(null)
   }
 
   return (
     <ParticlesProvider init={initEngine}>
-      <div className="relative h-screen w-screen overflow-hidden bg-black font-sans">
+      <div className="relative h-[100dvh] w-screen overflow-hidden overscroll-none bg-black font-sans" style={{ WebkitTapHighlightColor: 'transparent' }}>
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-sky-300 via-rose-200 to-amber-100 transition-opacity duration-[1200ms]" style={{ opacity: night ? 0 : 1 }} aria-label="Daytime sky" />
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#070b1c] via-[#141a38] to-[#2a1a3a] transition-opacity duration-[1200ms]" style={{ opacity: night ? 1 : 0, backgroundImage: 'radial-gradient(1px 1px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 28% 32%, #fff, transparent), radial-gradient(1.5px 1.5px at 45% 12%, #fff, transparent), radial-gradient(1px 1px at 63% 26%, #fff, transparent), radial-gradient(1px 1px at 78% 14%, #fff, transparent), radial-gradient(1.5px 1.5px at 88% 30%, #fff, transparent), linear-gradient(to bottom, #070b1c, #141a38, #2a1a3a)' }} aria-label="Starry night sky" />
 
         <div className="absolute inset-0 z-[15]">
-          <Scene night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={setActiveTag} placing={placing} onPlace={onPlace} />
+          <Scene night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={setActiveTag} placing={placing} onPlace={onPlace} onPick={onPickBuilding} />
         </div>
 
         <div className="pointer-events-none absolute inset-0 z-[18] transition-opacity duration-[1200ms]" style={{ opacity: night ? 1 : 0, background: 'radial-gradient(circle at 50% 40%, transparent 30%, rgba(6,10,28,0.55) 100%)' }} aria-hidden />
@@ -620,19 +704,19 @@ export default function Sanctuary() {
 
         {/* TOP control bar — moved up so mobile browser chrome (bottom bars) never covers it */}
         <div className="absolute inset-x-0 top-0 z-[45] flex items-start justify-between gap-2 px-3 sm:px-4" style={{ paddingTop: 'max(0.85rem, env(safe-area-inset-top))' }}>
-          <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/40 px-3.5 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60"><ArrowLeft size={15} /><span className="hidden sm:inline">{t.home}</span></Link>
+          <Link to="/" aria-label={t.home} className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-full border border-white/25 bg-black/40 px-3.5 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60 sm:min-w-0"><ArrowLeft size={15} /><span className="hidden sm:inline">{t.home}</span></Link>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             <div className="flex items-center gap-1 rounded-full border border-white/20 bg-black/40 p-1 backdrop-blur-md">
               {LANGS.map((l) => (
-                <button key={l.code} type="button" onClick={() => setLang(l.code)} className={`rounded-full px-2.5 py-1 font-mono text-[11px] transition ${lang === l.code ? 'bg-accent/70 text-white' : 'text-white/70 hover:text-white'}`}>{l.label}</button>
+                <button key={l.code} type="button" onClick={() => setLang(l.code)} className={`min-h-[36px] min-w-[40px] rounded-full px-3 py-1.5 font-mono text-[11px] transition ${lang === l.code ? 'bg-accent/70 text-white' : 'text-white/70 hover:text-white'}`}>{l.label}</button>
               ))}
             </div>
-            <button type="button" onClick={() => setNight((n) => !n)} aria-label={night ? t.day : t.night} className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/40 px-3 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60">{night ? <SunIcon size={15} /> : <MoonIcon size={15} />}<span className="hidden sm:inline">{night ? t.day : t.night}</span></button>
+            <button type="button" onClick={() => setNight((n) => !n)} aria-label={night ? t.day : t.night} className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-full border border-white/25 bg-black/40 px-3 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60 sm:min-w-0">{night ? <SunIcon size={15} /> : <MoonIcon size={15} />}<span className="hidden sm:inline">{night ? t.day : t.night}</span></button>
             {hasAdminSession && (
-              <Link to="/sanctuary-admin" title="Admin dashboard" className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-black/40 px-3 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60"><Shield size={14} /><span className="hidden sm:inline">Admin</span></Link>
+              <Link to="/sanctuary-admin" aria-label="Admin dashboard" title="Admin dashboard" className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-full border border-white/25 bg-black/40 px-3 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60 sm:min-w-0"><Shield size={14} /><span className="hidden sm:inline">Admin</span></Link>
             )}
-            <button type="button" onClick={openWrite} className="sanctuary-pulse group inline-flex items-center gap-1.5 rounded-full border border-amber-100/70 bg-gradient-to-r from-amber-300 to-rose-300 px-4 py-2.5 font-serif text-sm font-bold text-amber-950 ring-1 ring-white/40 backdrop-blur-sm transition hover:brightness-110 active:scale-[0.97]">
+            <button type="button" onClick={openWrite} aria-label={myTag ? t.editMine : t.leave} className="sanctuary-pulse group inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-full border border-amber-100/70 bg-gradient-to-r from-amber-300 to-rose-300 px-4 py-2.5 font-serif text-sm font-bold text-amber-950 ring-1 ring-white/40 backdrop-blur-sm transition hover:brightness-110 active:scale-[0.97] sm:min-w-0">
               {myTag ? <Pencil size={16} /> : <Mail size={17} className="transition-transform group-hover:-translate-y-0.5" />}<span className="hidden sm:inline">{myTag ? t.editMine : t.leave}</span>
             </button>
           </div>
@@ -651,14 +735,15 @@ export default function Sanctuary() {
 
         {/* placement-mode hint banner (Step 1) */}
         {placing && (
-          <div className="absolute left-1/2 bottom-24 z-[46] flex -translate-x-1/2 items-center gap-3 rounded-full border border-amber-300/50 bg-black/70 px-5 py-2.5 backdrop-blur-md">
+          <div className="absolute left-1/2 z-[46] flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-amber-300/50 bg-black/70 px-5 py-2.5 backdrop-blur-md"
+            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 5.5rem)' }}>
             <span className="font-serif text-sm text-amber-100">{t.placeHint}</span>
-            <button type="button" onClick={() => setPlacing(false)} className="rounded-full border border-white/20 px-2.5 py-1 font-mono text-[11px] text-white/70 transition hover:text-white">✕</button>
+            <button type="button" onClick={() => setPlacing(false)} aria-label="Cancel placement" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 font-mono text-[13px] text-white/70 transition hover:text-white">✕</button>
           </div>
         )}
 
         <ReadModal tag={activeTag} t={t} canRead={!!activeTag && (activeTag.ownerId === operatorId || isAdmin)} canEdit={!!activeTag && activeTag.ownerId === operatorId} onEdit={editFromRead} onClose={() => setActiveTag(null)} />
-        <WriteModal open={writeOpen} editing={editing} t={t} onClose={() => { setWriteOpen(false); setEditing(null) }} onSubmit={submitMemory} />
+        <WriteModal open={writeOpen} editing={editing} presetPlace={pickedPlace} t={t} onClose={() => { setWriteOpen(false); setEditing(null); setPickedPlace(null) }} onSubmit={submitMemory} />
         <WelcomeModal open={welcome} onClose={() => setWelcome(false)} />
       </div>
     </ParticlesProvider>
