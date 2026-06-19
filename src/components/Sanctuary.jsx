@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState, Component } from 'react'
 import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, Grid, Html, OrbitControls, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import Particles, { ParticlesProvider, useParticlesProvider } from '@tsparticles/react'
@@ -124,6 +124,8 @@ const API_MSG = {
   mm: { offline: 'ဆာဗာ အော့ဖ်လိုင်း — နမူနာများ ပြသနေသည်။', save: 'ဆာဗာသို့ မသိမ်းနိုင်ပါ — စက်တွင်းသာ သိမ်းထားသည်။' },
 }
 const API = `${SITE.apiUrl}/api/sanctuary/memories`
+const FAREWELL_API = `${SITE.apiUrl}/api/farewell/plants`
+const PENDING_PLANT_KEY = 'mtn_pending_plant'   // handoff payload from /farewell
 
 /* ───────── operator identity + persistence ───────── */
 function getOperatorId() {
@@ -284,7 +286,109 @@ function OrbitingSatellite() {
   return <group ref={ref}><primitive object={fit.obj} scale={fit.scale} position={fit.offset} /></group>
 }
 
-function World({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPick }) {
+/* ════════════ FAREWELL "living monument" plants ════════════ */
+// Reuses sakura.glb for both plant types (orchid = smaller + a violet tint),
+// per the chosen approach. Each plant carries an <Html> "Planted by [name]" tag.
+function plantCfgFor(type) {
+  return { url: 'sakura.glb', rotation: [0, 0, 0], size: type === 'orchid' ? 1.9 : 3.4 }
+}
+
+// Small glass nametag pinned above a plant. Greenish to read as "growth", and
+// distinct from the amber memory plaques.
+function PlantTag({ name, show, paused }) {
+  return (
+    <div className="sanctuary-tag" style={{ opacity: show ? 1 : 0, transition: 'opacity 700ms ease', animationPlayState: paused ? 'paused' : 'running' }}>
+      <span className="mx-auto block h-6 w-px bg-gradient-to-b from-emerald-100/80 to-emerald-700/30" />
+      <span className="relative -mt-px block whitespace-nowrap rounded-md border border-emerald-900/40 bg-gradient-to-b from-emerald-200 to-emerald-400 px-3 py-1.5 font-serif text-xs font-semibold text-emerald-950 shadow-[0_5px_12px_rgba(0,0,0,0.4)]">
+        <span className="absolute -top-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-emerald-900/70" />
+        🌱 Planted by {name}
+      </span>
+    </div>
+  )
+}
+
+function FarewellPlant({ plant, paused, drop = false, onDropDone }) {
+  const cfg = useMemo(() => plantCfgFor(plant.plantType), [plant.plantType])
+  const fit = useFitted(cfg)
+  const grp = useRef()
+  const startRef = useRef(null)
+  const doneRef = useRef(false)
+  const [landed, setLanded] = useState(!drop)   // non-dropping plants show their tag immediately
+
+  // Orchid tint (Bulbophyllum triste reads reddish-violet).
+  useEffect(() => { if (plant.plantType === 'orchid') applyEmissive(fit.obj, '#b14ad6', 0.22) }, [fit.obj, plant.plantType])
+
+  // One-time "drop from the sky + grow" animation for the freshly-planted one.
+  useFrame((s) => {
+    if (!drop || !grp.current || doneRef.current) return
+    if (startRef.current == null) startRef.current = s.clock.elapsedTime
+    const t = s.clock.elapsedTime - startRef.current
+    const delay = 0.4, dur = 1.6
+    const p = Math.min(1, Math.max(0, (t - delay) / dur))
+    const ease = 1 - Math.pow(1 - p, 3)               // easeOutCubic
+    grp.current.position.y = (1 - ease) * 11            // fall from +11 → ground
+    const sc = 0.15 + ease * 0.85
+    grp.current.scale.setScalar(sc)
+    if (p >= 1) { doneRef.current = true; setLanded(true); onDropDone && onDropDone() }
+  })
+
+  const nameY = plant.plantType === 'orchid' ? 2.6 : 4.4
+  return (
+    <group position={plant.position}>
+      <group ref={grp} scale={drop ? 0.15 : 1} position={drop ? [0, 11, 0] : [0, 0, 0]}>
+        <primitive object={fit.obj} scale={fit.scale} position={fit.offset} />
+      </group>
+      <Html position={[0, nameY, 0]} center distanceFactor={11} zIndexRange={[30, 0]}>
+        <PlantTag name={plant.name} show={landed} paused={paused} />
+      </Html>
+    </group>
+  )
+}
+
+function FarewellPlants({ plants, pendingId, paused, onPlanted }) {
+  return (
+    <>
+      {plants.map((p) => (
+        <Safe key={p.id}>
+          <FarewellPlant plant={p} paused={paused} drop={p.id === pendingId} onDropDone={p.id === pendingId ? onPlanted : undefined} />
+        </Safe>
+      ))}
+    </>
+  )
+}
+
+// Flies the camera once to frame the newly-planted monument, then hands control
+// back to OrbitControls. Mounted only while a planting is in progress.
+function PlantingDirector({ target, onDone }) {
+  const { camera, controls } = useThree()
+  const startRef = useRef(null)
+  const fromPos = useRef(new THREE.Vector3())
+  const fromTgt = useRef(new THREE.Vector3())
+  const doneRef = useRef(false)
+  const destPos = useMemo(() => new THREE.Vector3(target[0] + 8, target[1] + 6, target[2] + 12), [target])
+  const destTgt = useMemo(() => new THREE.Vector3(target[0], target[1] + 1.5, target[2]), [target])
+
+  useFrame((s) => {
+    if (doneRef.current) return
+    if (startRef.current == null) {
+      if (!controls?.target) return                  // wait until OrbitControls is ready
+      startRef.current = s.clock.elapsedTime
+      fromPos.current.copy(camera.position)
+      fromTgt.current.copy(controls.target)
+      controls.enabled = false                        // suspend user input during the flight
+    }
+    const dur = 2.8
+    const t = Math.min(1, (s.clock.elapsedTime - startRef.current) / dur)
+    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2 // easeInOutCubic
+    camera.position.lerpVectors(fromPos.current, destPos, e)
+    if (controls?.target) { controls.target.lerpVectors(fromTgt.current, destTgt, e); controls.update() }
+    else camera.lookAt(destTgt)
+    if (t >= 1) { doneRef.current = true; if (controls) controls.enabled = true; onDone && onDone() }
+  })
+  return null
+}
+
+function World({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPick, plants = [], pendingId = null, onPlanted }) {
   const placedTags = useMemo(() => {
     const out = []
     const byLm = {}
@@ -349,11 +453,14 @@ function World({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPi
           <TagPlaque tag={tag} index={index} paused={paused} mine={tag.ownerId === operatorId} onOpen={onOpen} />
         </Html>
       ))}
+
+      {/* Farewell living monuments (sakura/orchid + "Planted by" nametags) */}
+      <FarewellPlants plants={plants} pendingId={pendingId} paused={paused} onPlanted={onPlanted} />
     </>
   )
 }
 
-function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPick }) {
+function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPick, plants, pendingId, plantingTarget, onPlanted }) {
   return (
     <Canvas
       camera={{ position: [0, 16, 56], fov: 50, near: 0.1, far: 2000 }}
@@ -380,7 +487,10 @@ function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPi
         sectionSize={5} sectionThickness={1.1} sectionColor={night ? '#7c5cff' : '#b8860b'}
         fadeDistance={120} fadeStrength={1.4} followCamera={false}
       />
-      <World night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={onOpen} placing={placing} onPlace={onPlace} onPick={onPick} />
+      <World night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={onOpen} placing={placing} onPlace={onPlace} onPick={onPick} plants={plants} pendingId={pendingId} onPlanted={onPlanted} />
+
+      {/* one-time camera flight to frame the freshly-planted monument */}
+      {plantingTarget && <PlantingDirector target={plantingTarget} onDone={onPlanted} />}
 
       {night && !IS_MOBILE && (
         <EffectComposer>
@@ -580,12 +690,28 @@ export default function Sanctuary() {
   const [activeTag, setActiveTag] = useState(null)
   const [writeOpen, setWriteOpen] = useState(false)
   const [editing, setEditing] = useState(null)
-  const [welcome, setWelcome] = useState(true) // magical intro popup on entry
+  // Skip the intro popup if we arrived from /farewell to plant a monument (so the
+  // planting animation isn't hidden behind it).
+  const [welcome, setWelcome] = useState(() => { try { return !localStorage.getItem(PENDING_PLANT_KEY) } catch { return true } })
   const [apiError, setApiError] = useState(null) // 'offline' | 'save' | null
   const [placing, setPlacing] = useState(false)  // "click the world to pick a spot" mode
   const [placedPoint, setPlacedPoint] = useState(null) // [x,y,z] from the click
   const [pickedPlace, setPickedPlace] = useState(null) // building key when a model was clicked
-  const paused = !!activeTag || writeOpen || welcome
+
+  // ── Farewell "living monuments" ──
+  const [plants, setPlants] = useState([])
+  // Read the one-time handoff payload from /farewell (then clear it so a refresh
+  // doesn't replay the planting animation).
+  const [pending, setPending] = useState(() => {
+    try {
+      const s = localStorage.getItem(PENDING_PLANT_KEY)
+      localStorage.removeItem(PENDING_PLANT_KEY)
+      const p = s ? JSON.parse(s) : null
+      return (p && Array.isArray(p.position)) ? p : null
+    } catch { return null }
+  })
+  const [planting, setPlanting] = useState(() => !!pending) // animation in progress
+  const paused = !!activeTag || writeOpen || welcome || planting
 
   // Free GPU memory (geometries/materials/textures) when leaving the page, so
   // navigating away from this heavy 3D route is smooth (no lingering WebGL).
@@ -621,6 +747,39 @@ export default function Sanctuary() {
     })()
     return () => { cancelled = true }
   }, [operatorId])
+
+  // ── LOAD farewell monuments (public projection) ──
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(FAREWELL_API, { headers: { 'X-Operator-Token': operatorId }, credentials: 'include' })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        if (cancelled || !Array.isArray(data?.plants)) return
+        setPlants(data.plants
+          .filter((p) => p.position && typeof p.position.x === 'number')
+          .map((p) => ({ id: p.id, name: p.name, plantType: p.plantType || 'sakura', position: [p.position.x, p.position.y, p.position.z] })))
+      } catch (err) {
+        console.error('[Sanctuary] GET /farewell/plants failed:', err)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [operatorId])
+
+  // Ensure the freshly-planted monument is on screen even if the GET hasn't
+  // returned it yet (or the API was offline). Give a local-only one a temp id.
+  const pendingId = pending ? (pending.id ?? 'pending-local') : null
+  const allPlants = useMemo(() => {
+    if (!pending) return plants
+    const exists = plants.some((p) => p.id === pending.id)
+    if (exists) return plants
+    return [...plants, { id: pendingId, name: pending.name, plantType: pending.plantType || 'sakura', position: pending.position }]
+  }, [plants, pending, pendingId])
+
+  const onPlanted = () => setPlanting(false)
+  // Failsafe: never let the world stay paused if the flight is interrupted.
+  useEffect(() => { if (!planting) return; const id = setTimeout(() => setPlanting(false), 6000); return () => clearTimeout(id) }, [planting])
 
   const myTag = tags.find((x) => x.ownerId === operatorId) || null
 
@@ -695,7 +854,8 @@ export default function Sanctuary() {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#070b1c] via-[#141a38] to-[#2a1a3a] transition-opacity duration-[1200ms]" style={{ opacity: night ? 1 : 0, backgroundImage: 'radial-gradient(1px 1px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 28% 32%, #fff, transparent), radial-gradient(1.5px 1.5px at 45% 12%, #fff, transparent), radial-gradient(1px 1px at 63% 26%, #fff, transparent), radial-gradient(1px 1px at 78% 14%, #fff, transparent), radial-gradient(1.5px 1.5px at 88% 30%, #fff, transparent), linear-gradient(to bottom, #070b1c, #141a38, #2a1a3a)' }} aria-label="Starry night sky" />
 
         <div className="absolute inset-0 z-[15]">
-          <Scene night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={setActiveTag} placing={placing} onPlace={onPlace} onPick={onPickBuilding} />
+          <Scene night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={setActiveTag} placing={placing} onPlace={onPlace} onPick={onPickBuilding}
+            plants={allPlants} pendingId={pendingId} plantingTarget={planting && pending ? pending.position : null} onPlanted={onPlanted} />
         </div>
 
         <div className="pointer-events-none absolute inset-0 z-[18] transition-opacity duration-[1200ms]" style={{ opacity: night ? 1 : 0, background: 'radial-gradient(circle at 50% 40%, transparent 30%, rgba(6,10,28,0.55) 100%)' }} aria-hidden />
