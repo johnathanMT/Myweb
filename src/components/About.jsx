@@ -53,13 +53,17 @@ export default function About({ lang }) {
                 style={{ background: 'conic-gradient(from 0deg, rgb(var(--accent)), rgb(var(--accent)), #ff1e3c, rgb(var(--accent)))' }} />
               <div className="relative w-64 h-64 rounded-3xl overflow-hidden bg-card flex items-center justify-center ring-1 ring-white/10">
                 <span className="absolute text-5xl font-bold text-accent/30 select-none">MTN</span>
-                <img
-                  src={PERSONAL.photo}
-                  alt={PERSONAL.name}
-                  className="relative w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  loading="lazy"
-                  onError={(e) => { e.currentTarget.style.display = 'none' }}
-                />
+                <picture>
+                  {PERSONAL.photoWebp && <source srcSet={PERSONAL.photoWebp} type="image/webp" />}
+                  <img
+                    src={PERSONAL.photo}
+                    alt={PERSONAL.name}
+                    width="256" height="256"
+                    className="relative w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="eager" decoding="async" fetchPriority="high"
+                    onError={(e) => { e.currentTarget.style.visibility = 'hidden' }}
+                  />
+                </picture>
                 {/* HUD corner brackets */}
                 <span className="absolute left-2 top-2 w-5 h-5 border-l-2 border-t-2 border-cyan/70 rounded-tl" />
                 <span className="absolute right-2 bottom-2 w-5 h-5 border-r-2 border-b-2 border-cyan/70 rounded-br" />

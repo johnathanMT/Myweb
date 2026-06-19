@@ -23,6 +23,7 @@
 
 // —— 1) BUNDLED imports (hashed + domain-proof) ——————————————————————————————
 import profile from '../assets/images/profile.jpg'
+import profileWebp from '../assets/images/profile.webp' // lighter sibling (browsers pick this first)
 // Add more like:  import m5stack from '../assets/images/m5stack.jpg'
 
 // —— 2) BUNDLED imports ——————————————————————————————————————————————
@@ -44,6 +45,7 @@ const unsplash = (id, w = 1200) => `https://images.unsplash.com/${id}?w=${w}&q=9
 export const ASSETS = {
   // Profile: bundled (used by the React About section — domain-proof, no 404).
   profile,
+  profileWebp,
   // Same photo as a stable PUBLIC url (used by blog.html's OG/share tag).
   profilePublic: publicAsset('Myweb_photo/My_profile2_for_myweb.jpg'),
 
