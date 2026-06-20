@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, Send, ArrowLeft, Calendar, Utensils, Languages, Check, X, Sprout } from 'lucide-react'
+import { Sparkles, Send, ArrowLeft, Calendar, Utensils, Languages, Check, X, Sprout, Cherry } from 'lucide-react'
 import { SITE } from '../config/site'
 
 /**
@@ -9,7 +9,8 @@ import { SITE } from '../config/site'
  *
  *  1. Anti-spam: after a successful submit we set localStorage `mtn_farewell_planted`.
  *     On mount, if it's set, we skip the form and show a "thank you" card instead.
- *  2. Plant choice removed — every monument is the Friendship Sakura (plantType:'sakura').
+ *  2. A single pre-selected "Friendship Sakura" card (visual only — plantType is
+ *     always sent as 'sakura').
  *  3. Smart branching — "Can you join the party?" Yes shows all fields; No hides
  *     dates + food (everyone can still plant a tree).
  *  4. 8-language i18n (EN/JA/MY/VI/ID/ZH/NE/MN).
@@ -42,9 +43,10 @@ const LANGS = [
 const T = {
   en: {
     title: 'Plant a Living Memory for ナイン',
-    subtitle: 'Before you go, leave your mark on our shared world. 🌱',
+    subtitle: 'Thank you for your friendship and the lasting memories we share. As a token of our bond, I invite you to plant a Friendship Cherry Blossom tree in this little 3D world, along with a memorable message.',
     joinQ: 'Can you join the farewell party?',
     joinYes: "Yes, I'll join", joinNo: "No, but I'll leave a memory",
+    plant: 'Choose your plant', sakura: 'Friendship Sakura', sakuraSub: 'Cherry blossom — a beautiful symbol of our friendship',
     name: 'Your name', namePh: 'e.g. Aiko Tanaka',
     dates: 'Dates available', datesPh: 'e.g. Jul 4, Jul 6 (Latest: 13.7.2026)',
     food: 'Food preference', foodPh: 'e.g. Vegetarian / No pork',
@@ -57,9 +59,10 @@ const T = {
   },
   ja: {
     title: 'ナインへ 思い出の木を植えよう',
-    subtitle: '旅立つ前に、私たちの世界に印を残してください。🌱',
+    subtitle: 'これまでの友情と、共に重ねた思い出に心から感謝します。私たちの絆のしるしとして、この小さな3Dの世界に「友情の桜」を、心に残るメッセージとともに植えていただけませんか。',
     joinQ: '送別会に参加できますか？',
     joinYes: 'はい、参加します', joinNo: 'いいえ、でも思い出を残します',
+    plant: '植物を選ぶ', sakura: '友情の桜', sakuraSub: '桜 — 私たちの友情の美しい象徴',
     name: 'お名前', namePh: '例：田中 愛子',
     dates: '参加可能な日', datesPh: '例：7月4日、6日（締切：2026年7月13日）',
     food: '食べ物の希望', foodPh: '例：ベジタリアン／豚肉なし',
@@ -75,6 +78,7 @@ const T = {
     subtitle: 'ခင်မင်ရင်းနှီးခဲ့ရတဲ့အတွက် အမြဲတမ်းအမှတ်တရနဲ့ ကျေးဇူးတင်ရှိပါတယ်။ ခင်မင်ရင်းနှီးမှု အမှတ်တရအတွက် 3D ကမ္ဘာလေးထဲမှာ မိတ်ဆွေဖြစ်ချယ်ရီပင်လေးကို အမှတ်တရစာလေးနဲ့အတူ စိုက်ပျိုးခဲ့ပေးဖို့ တောင်းဆိုပါတယ်။',
     joinQ: 'နှုတ်ဆက်ပွဲသို့ တက်ရောက်နိုင်ပါသလား?',
     joinYes: 'ဟုတ်ကဲ့၊ တက်ရောက်ပါမည်', joinNo: 'မတက်နိုင်ပါ၊ ဒါပေမယ့် အမှတ်တရ ချန်ထားမည်',
+    plant: 'သင့်အပင်ကို ရွေးပါ', sakura: 'မိတ်ဆွေဖြစ် ချယ်ရီပင်', sakuraSub: 'ချယ်ရီပန်း — ကျွန်ုပ်တို့၏ ခင်မင်ရင်းနှီးမှု၏ လှပသော သင်္ကေတ',
     name: 'သင့်အမည်', namePh: 'ဥပမာ - အိကို တာနာကာ',
     dates: 'အားလပ်သည့်ရက်များ', datesPh: 'ဥပမာ - ဇူလိုင် ၄၊ ၆ (နောက်ဆုံး - ၁၃.၇.၂၀၂၆)',
     food: 'အစားအစာ ရွေးချယ်မှု', foodPh: 'ဥပမာ - သက်သတ်လွတ် / ဝက်သားမပါ',
@@ -87,9 +91,10 @@ const T = {
   },
   vi: {
     title: 'Trồng một kỷ niệm sống cho ナイン',
-    subtitle: 'Trước khi rời đi, hãy để lại dấu ấn của bạn trong thế giới chung của chúng ta. 🌱',
+    subtitle: 'Cảm ơn tình bạn của bạn và những kỷ niệm bền lâu mà chúng ta cùng chia sẻ. Như một biểu tượng cho tình bạn của chúng ta, tôi mời bạn trồng một cây Hoa Anh Đào Tình Bạn trong thế giới 3D nhỏ bé này, kèm theo một lời nhắn đáng nhớ.',
     joinQ: 'Bạn có thể tham gia tiệc chia tay không?',
     joinYes: 'Có, tôi sẽ tham gia', joinNo: 'Không, nhưng tôi sẽ để lại kỷ niệm',
+    plant: 'Chọn cây của bạn', sakura: 'Hoa anh đào tình bạn', sakuraSub: 'Hoa anh đào — biểu tượng đẹp đẽ cho tình bạn của chúng ta',
     name: 'Tên của bạn', namePh: 'ví dụ: Aiko Tanaka',
     dates: 'Ngày có thể tham gia', datesPh: 'ví dụ: 4/7, 6/7 (Hạn chót: 13.7.2026)',
     food: 'Sở thích ăn uống', foodPh: 'ví dụ: Ăn chay / Không thịt heo',
@@ -102,9 +107,10 @@ const T = {
   },
   id: {
     title: 'Tanam Kenangan Hidup untuk ナイン',
-    subtitle: 'Sebelum pergi, tinggalkan jejakmu di dunia bersama kita. 🌱',
+    subtitle: 'Terima kasih atas persahabatan dan kenangan abadi yang kita bagikan. Sebagai tanda ikatan kita, saya mengundangmu menanam pohon Sakura Persahabatan di dunia 3D kecil ini, beserta sebuah pesan yang berkesan.',
     joinQ: 'Bisakah kamu hadir di pesta perpisahan?',
     joinYes: 'Ya, saya hadir', joinNo: 'Tidak, tapi saya tinggalkan kenangan',
+    plant: 'Pilih tanamanmu', sakura: 'Sakura Persahabatan', sakuraSub: 'Bunga sakura — simbol indah persahabatan kita',
     name: 'Namamu', namePh: 'mis. Aiko Tanaka',
     dates: 'Tanggal tersedia', datesPh: 'mis. 4 Jul, 6 Jul (Paling lambat: 13.7.2026)',
     food: 'Preferensi makanan', foodPh: 'mis. Vegetarian / Tanpa babi',
@@ -117,9 +123,10 @@ const T = {
   },
   zh: {
     title: '为 ナイン 种下一段活的回忆',
-    subtitle: '在离开之前，在我们共同的世界留下你的印记。🌱',
+    subtitle: '感谢你的友谊以及我们共同拥有的美好回忆。作为我们情谊的象征，我邀请你在这个小小的3D世界里种下一棵友谊樱花树，并留下一段难忘的留言。',
     joinQ: '你能参加欢送会吗？',
     joinYes: '可以，我会参加', joinNo: '不能，但我要留下回忆',
+    plant: '选择你的植物', sakura: '友谊樱花', sakuraSub: '樱花 — 我们友谊的美丽象征',
     name: '你的名字', namePh: '例如：田中爱子',
     dates: '可参加的日期', datesPh: '例如：7月4日、6日（截止：2026.7.13）',
     food: '饮食偏好', foodPh: '例如：素食 / 不吃猪肉',
@@ -132,9 +139,10 @@ const T = {
   },
   ne: {
     title: 'ナインका लागि जीवित सम्झना रोप्नुहोस्',
-    subtitle: 'जानु अघि, हाम्रो साझा संसारमा आफ्नो छाप छोड्नुहोस्। 🌱',
+    subtitle: 'तपाईंको मित्रता र हामीले साझा गरेका अमिट सम्झनाहरूका लागि धन्यवाद। हाम्रो सम्बन्धको प्रतीकका रूपमा, म तपाईंलाई यो सानो 3D संसारमा एउटा मित्रता चेरी ब्लोसम रूख एउटा यादगार सन्देशसहित रोप्न निमन्त्रणा गर्दछु।',
     joinQ: 'के तपाईं विदाई पार्टीमा सहभागी हुन सक्नुहुन्छ?',
     joinYes: 'हो, म सहभागी हुन्छु', joinNo: 'होइन, तर म सम्झना छोड्छु',
+    plant: 'आफ्नो बिरुवा छान्नुहोस्', sakura: 'मित्रता साकुरा', sakuraSub: 'चेरी फूल — हाम्रो मित्रताको सुन्दर प्रतीक',
     name: 'तपाईंको नाम', namePh: 'जस्तै: Aiko Tanaka',
     dates: 'उपलब्ध मितिहरू', datesPh: 'जस्तै: जुलाई ४, ६ (अन्तिम: 13.7.2026)',
     food: 'खानाको रुचि', foodPh: 'जस्तै: शाकाहारी / सुँगुर बाहेक',
@@ -147,9 +155,10 @@ const T = {
   },
   mn: {
     title: 'ナイン-д зориулж амьд дурсамж тарь',
-    subtitle: 'Явахаасаа өмнө манай нийтлэг ертөнцөд мөрөө үлдээ. 🌱',
+    subtitle: 'Найрсал болон бидний хуваалцсан мөнхийн дурсамжуудад чин сэтгэлээсээ талархаж байна. Бидний холбооны бэлгэдэл болгон энэ жижигхэн 3D ертөнцөд Найрамдлын Сакура модыг дурсгалт захидлын хамт тарихыг урьж байна.',
     joinQ: 'Та үдэлтийн үдэшлэгт оролцож чадах уу?',
     joinYes: 'Тийм, би оролцоно', joinNo: 'Үгүй, гэхдээ дурсамж үлдээнэ',
+    plant: 'Ургамлаа сонго', sakura: 'Найрамдлын сакура', sakuraSub: 'Интоорын цэцэг — бидний найрамдлын үзэсгэлэнт бэлгэдэл',
     name: 'Таны нэр', namePh: 'ж: Айко Танака',
     dates: 'Боломжтой өдрүүд', datesPh: 'ж: 7-р сарын 4, 6 (Эцсийн хугацаа: 2026.7.13)',
     food: 'Хоолны сонголт', foodPh: 'ж: Цагаан хоолтон / Гахайн махгүй',
@@ -206,6 +215,8 @@ export default function FarewellRSVP() {
   const [dates, setDates] = useState('')
   const [food, setFood] = useState('')
   const [message, setMessage] = useState('')
+  // Visual-only "tap" feedback on the (single) Sakura card; payload is always 'sakura'.
+  const [plantPulse, setPlantPulse] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -315,6 +326,25 @@ export default function FarewellRSVP() {
         <AnimatePresence initial={false}>
           {attending !== null && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} style={{ overflow: 'hidden' }}>
+              {/* Plant choice — single, pre-selected Friendship Sakura card */}
+              <div className="mt-5">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-amber-200/80">{t.plant}</span>
+                <button type="button" aria-pressed="true"
+                  onClick={() => { setPlantPulse(true); setTimeout(() => setPlantPulse(false), 220) }}
+                  className={`mt-2 flex w-full items-center gap-3 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-rose-300/15 to-amber-300/15 px-4 py-3 text-left ring-1 ring-amber-200/60 shadow-[0_0_26px_rgba(251,191,153,0.35)] transition ${plantPulse ? 'scale-[0.98]' : 'scale-100'}`}>
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-300 to-amber-300 text-rose-950 shadow-[0_0_18px_rgba(251,191,153,0.7)]">
+                    <Cherry size={22} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-serif text-sm font-semibold leading-tight">{t.sakura}</span>
+                    <span className="mt-0.5 block font-mono text-[10px] leading-snug text-white/70">{t.sakuraSub}</span>
+                  </span>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-300 text-amber-950">
+                    <Check size={14} />
+                  </span>
+                </button>
+              </div>
+
               <label className="mt-5 block">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-amber-200/80">{t.name}</span>
                 <input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} required placeholder={t.namePh} className={inputCls} />
