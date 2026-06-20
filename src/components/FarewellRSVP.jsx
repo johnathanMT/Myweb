@@ -173,15 +173,32 @@ const T = {
 
 const inputCls = 'mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/40 outline-none transition focus:border-amber-200/60 focus:bg-white/15 sm:py-2.5 sm:text-sm'
 
-// Shared full-screen shell (starry backdrop + scroll-safe layout on mobile).
+// Shared full-screen shell — guarantees smooth vertical scrolling on every phone.
+//   • Background is FIXED to the viewport (never scrolls / never clips).
+//   • The scroll VIEWPORT is exactly one dynamic-viewport tall (h-[100dvh]) with
+//     overflow-y-auto + momentum touch scrolling → adapts as the mobile address
+//     bar shows/hides, and actually engages its own scrollbar (a min-h container
+//     can't, because it just grows to fit its content).
+//   • The content uses `m-auto` (not justify-center): it centres when short, but
+//     when it's taller than the screen the auto-margins collapse to 0 so the TOP
+//     stays reachable — fixing the "stuck / clipped at the top" bug.
+//   • Generous safe bottom padding keeps the Submit button clear of the iOS/
+//     Android bottom bars.
 function Shell({ children }) {
   return (
-    <div className="relative flex min-h-[100dvh] w-screen items-start justify-center overflow-y-auto overscroll-contain px-4 py-10 font-sans sm:items-center"
-      style={{ WebkitOverflowScrolling: 'touch', WebkitTapHighlightColor: 'transparent' }}>
-      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-[#070b1c] via-[#141a38] to-[#2a1a3a]"
+    <>
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-b from-[#070b1c] via-[#141a38] to-[#2a1a3a]"
         style={{ backgroundImage: 'radial-gradient(1px 1px at 14% 20%, #fff, transparent), radial-gradient(1px 1px at 30% 34%, #fff, transparent), radial-gradient(1.5px 1.5px at 47% 14%, #fff, transparent), radial-gradient(1px 1px at 65% 28%, #fff, transparent), radial-gradient(1px 1px at 80% 16%, #fff, transparent), radial-gradient(1.5px 1.5px at 90% 32%, #fff, transparent), linear-gradient(to bottom, #070b1c, #141a38, #2a1a3a)' }} />
-      {children}
-    </div>
+      <div className="relative h-[100dvh] w-screen overflow-y-auto overscroll-contain font-sans"
+        style={{ WebkitOverflowScrolling: 'touch', WebkitTapHighlightColor: 'transparent' }}>
+        <div className="flex min-h-[100dvh] w-full flex-col px-4 pt-12"
+          style={{ paddingBottom: 'max(8rem, calc(env(safe-area-inset-bottom) + 6rem))' }}>
+          <div className="m-auto w-full max-w-lg">
+            {children}
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -220,11 +237,9 @@ export default function FarewellRSVP() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
-  }, [])
+  // NOTE: we deliberately do NOT lock document.body scroll here. Locking it was
+  // what made the page feel "stuck" on phones — the Shell now owns a real scroll
+  // viewport, so the body must stay free.
 
   const submit = async (e) => {
     e.preventDefault()
@@ -270,7 +285,7 @@ export default function FarewellRSVP() {
     return (
       <Shell>
         <motion.div initial={{ scale: 0.94, opacity: 0, y: 24 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 220, damping: 24 }}
-          className="relative w-full max-w-md rounded-[28px] border border-white/25 bg-white/15 p-8 text-center text-white shadow-2xl backdrop-blur-2xl">
+          className="relative mx-auto w-full max-w-md rounded-[28px] border border-white/25 bg-white/15 p-8 text-center text-white shadow-2xl backdrop-blur-2xl">
           <LangBar lang={lang} setLang={setLang} />
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-300 to-amber-300 text-emerald-950 shadow-[0_0_28px_rgba(110,231,183,0.6)]">
             <Sprout size={26} />
@@ -297,7 +312,6 @@ export default function FarewellRSVP() {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 220, damping: 24 }}
         className="relative w-full max-w-lg rounded-[28px] border border-white/25 bg-white/15 p-6 text-white shadow-2xl backdrop-blur-2xl sm:p-8"
-        style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
       >
         <LangBar lang={lang} setLang={setLang} />
 
