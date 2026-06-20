@@ -81,9 +81,9 @@ export default function SanctuaryAdmin() {
 
   // Export the RSVP logistics as CSV for planning the real send-off.
   const exportCsv = () => {
-    const head = ['Name', 'Dates Available', 'Food Preference', 'Plant', 'Message', 'Submitted']
+    const head = ['Name', 'Attending', 'Dates Available', 'Food Preference', 'Plant', 'Message', 'Submitted']
     const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
-    const rows = filteredRsvps.map((r) => [r.name, r.datesAvailable, r.foodPreference, r.plantType, r.message, (r.createdAt || '').slice(0, 10)].map(esc).join(','))
+    const rows = filteredRsvps.map((r) => [r.name, r.attending ? 'Yes' : 'No', r.datesAvailable, r.foodPreference, r.plantType, r.message, (r.createdAt || '').slice(0, 10)].map(esc).join(','))
     const blob = new Blob(['﻿' + [head.map(esc).join(','), ...rows].join('\r\n')], { type: 'text/csv;charset=utf-8;' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
@@ -188,6 +188,7 @@ export default function SanctuaryAdmin() {
                   <thead className="bg-white/5 font-mono text-[11px] uppercase tracking-wider text-white/50">
                     <tr>
                       <th className="px-4 py-3">Name</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Joining?</th>
                       <th className="px-4 py-3 whitespace-nowrap">Dates available</th>
                       <th className="px-4 py-3 whitespace-nowrap">Food</th>
                       <th className="px-4 py-3">Plant</th>
@@ -197,10 +198,15 @@ export default function SanctuaryAdmin() {
                   </thead>
                   <tbody>
                     {filteredRsvps.length === 0 ? (
-                      <tr><td colSpan={6} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No RSVPs yet.'}</td></tr>
+                      <tr><td colSpan={7} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No RSVPs yet.'}</td></tr>
                     ) : filteredRsvps.map((r) => (
                       <tr key={r.id} className="border-t border-white/5 align-top hover:bg-white/[0.03]">
                         <td className="px-4 py-3 font-medium text-emerald-200">{r.name}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {r.attending
+                            ? <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 font-mono text-[11px] text-emerald-200">Yes</span>
+                            : <span className="rounded-full bg-rose-400/15 px-2 py-0.5 font-mono text-[11px] text-rose-200">No</span>}
+                        </td>
                         <td className="px-4 py-3 text-white/80">{r.datesAvailable || <span className="text-white/30">—</span>}</td>
                         <td className="px-4 py-3 text-white/80">{r.foodPreference || <span className="text-white/30">—</span>}</td>
                         <td className="px-4 py-3 font-mono text-xs capitalize text-white/60">{r.plantType}</td>
