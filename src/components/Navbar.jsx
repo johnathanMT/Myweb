@@ -20,6 +20,10 @@ const NAV_LINKS = [
   { href: '#about', key: 'about' },
   { href: '#projects', key: 'projects' },
   { href: '#stack', key: 'stack' },
+  { href: '#lab', key: 'lab' },              // Algorithm Lab (sorting / A* / Dijkstra / BST)
+  { href: '#agent', key: 'agent' },          // Agentic-AI workflow
+  { href: '#quantum', key: 'quantum' },      // 2-qubit circuit
+  { href: '#antimatter', key: 'antimatter' },// annihilation sim
   { href: '#gallery', key: 'gallery' },
   { href: '#exploring', key: 'exploring' },
   { route: '/sanctuary', key: 'sanctuary' },     // dedicated route (#/sanctuary)
@@ -28,13 +32,13 @@ const NAV_LINKS = [
 
 // i18n labels for the nav (falls back to `en` for any missing language).
 const NAV_T = {
-  en: { home: 'Home',      about: 'About',      projects: 'Projects',      stack: 'Stack',     gallery: 'Gallery',  exploring: 'Exploring', sanctuary: 'Sanctuary', blog: 'Blog' },
-  mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာ',   gallery: 'ပြခန်း',    exploring: 'လေ့လာရန်',  sanctuary: 'အောက်မေ့ပင်', blog: 'ဘလော့' },
-  jp: { home: 'ホーム',     about: '概要',        projects: 'プロジェクト',    stack: 'スタック',  gallery: 'ギャラリー', exploring: '探索',      sanctuary: '記憶の木',   blog: 'ブログ' },
-  vn: { home: 'Trang chủ', about: 'Giới thiệu', projects: 'Dự án',         stack: 'Công nghệ', gallery: 'Thư viện', exploring: 'Khám phá',  sanctuary: 'Cây Kỷ Niệm', blog: 'Blog' },
-  ne: { home: 'गृह',        about: 'परिचय',       projects: 'परियोजना',       stack: 'स्ट्याक',    gallery: 'ग्यालरी',   exploring: 'अन्वेषण',    sanctuary: 'सम्झना रूख', blog: 'ब्लग' },
-  id: { home: 'Beranda',   about: 'Tentang',    projects: 'Proyek',        stack: 'Teknologi', gallery: 'Galeri',   exploring: 'Jelajahi',  sanctuary: 'Pohon Kenangan', blog: 'Blog' },
-  zh: { home: '首页',       about: '关于',        projects: '项目',          stack: '技术栈',     gallery: '画廊',      exploring: '探索',      sanctuary: '记忆之树',   blog: '博客' },
+  en: { home: 'Home',      about: 'About',      projects: 'Projects',      stack: 'Stack',     lab: 'Lab',     agent: 'AI',  quantum: 'Quantum',   antimatter: 'Antimatter',  gallery: 'Gallery',  exploring: 'Exploring', sanctuary: 'Sanctuary', blog: 'Blog' },
+  mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာ',   lab: 'Lab',     agent: 'AI',  quantum: 'ကွမ်တမ်',    antimatter: 'Antimatter',  gallery: 'ပြခန်း',    exploring: 'လေ့လာရန်',  sanctuary: 'အောက်မေ့ပင်', blog: 'ဘလော့' },
+  jp: { home: 'ホーム',     about: '概要',        projects: 'プロジェクト',    stack: 'スタック',  lab: 'Lab',     agent: 'AI',  quantum: '量子',      antimatter: '反物質',      gallery: 'ギャラリー', exploring: '探索',      sanctuary: '記憶の木',   blog: 'ブログ' },
+  vn: { home: 'Trang chủ', about: 'Giới thiệu', projects: 'Dự án',         stack: 'Công nghệ', lab: 'Lab',     agent: 'AI',  quantum: 'Lượng tử',  antimatter: 'Phản vật chất', gallery: 'Thư viện', exploring: 'Khám phá',  sanctuary: 'Cây Kỷ Niệm', blog: 'Blog' },
+  ne: { home: 'गृह',        about: 'परिचय',       projects: 'परियोजना',       stack: 'स्ट्याक',    lab: 'Lab',     agent: 'AI',  quantum: 'क्वान्टम',  antimatter: 'प्रतिपदार्थ',   gallery: 'ग्यालरी',   exploring: 'अन्वेषण',    sanctuary: 'सम्झना रूख', blog: 'ब्लग' },
+  id: { home: 'Beranda',   about: 'Tentang',    projects: 'Proyek',        stack: 'Teknologi', lab: 'Lab',     agent: 'AI',  quantum: 'Kuantum',   antimatter: 'Antimateri',  gallery: 'Galeri',   exploring: 'Jelajahi',  sanctuary: 'Pohon Kenangan', blog: 'Blog' },
+  zh: { home: '首页',       about: '关于',        projects: '项目',          stack: '技术栈',     lab: 'Lab',     agent: 'AI',  quantum: '量子',      antimatter: '反物质',      gallery: '画廊',      exploring: '探索',      sanctuary: '记忆之树',   blog: '博客' },
 };
 
 export default function Navbar({ lang, setLang }) {
@@ -47,7 +51,7 @@ export default function Navbar({ lang, setLang }) {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const sections = ['home', 'about', 'projects', 'stack', 'gallery', 'seasonal', 'exploring']
+    const sections = ['home', 'about', 'projects', 'stack', 'lab', 'agent', 'quantum', 'antimatter', 'gallery', 'seasonal', 'exploring']
     let ticking = false
     let lastScrolled = false
     let lastActive = 'home'

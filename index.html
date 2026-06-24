@@ -23,9 +23,48 @@
         connect-src 'self' https://myweb-zqv1.onrender.com https://www.gstatic.com https://api.unsplash.com https://ipapi.co;
     ">
 
+    <!-- ════════════════ SEO / Social ════════════════ -->
+    <title>Myo Thant Naing — Software Engineer &amp; AI Developer | Portfolio</title>
     <meta name="description"
-        content="Myo Thant Naing — IT Student, Aspiring AI Engineer, living in Japan. From caring to coding." />
-    <title>MTN · Myo Thant Naing</title>
+        content="Portfolio of Myo Thant Naing — Computer Science student & Software Engineer in Japan, building full-stack apps (C#/.NET, React, Three.js) and Agentic AI systems. From caring to coding." />
+    <meta name="author" content="Myo Thant Naing" />
+    <meta name="keywords"
+        content="Myo Thant Naing, Software Engineer, AI Engineer, Computer Science, C# .NET, React, Three.js, WebGL, Full-Stack Developer, Portfolio, Japan" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#060607" />
+    <link rel="canonical" href="https://myothant.dev/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Myo Thant Naing" />
+    <meta property="og:title" content="Myo Thant Naing — Software Engineer & AI Developer" />
+    <meta property="og:description"
+        content="Computer Science student & Software Engineer in Japan. Full-stack (C#/.NET, React) + Agentic AI. From caring to coding." />
+    <meta property="og:url" content="https://myothant.dev/" />
+    <meta property="og:image" content="https://myothant.dev/Myweb_photo/My_profile2_for_myweb.jpg" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Myo Thant Naing — Software Engineer & AI Developer" />
+    <meta name="twitter:description" content="CS student & Software Engineer in Japan. Full-stack + Agentic AI." />
+    <meta name="twitter:image" content="https://myothant.dev/Myweb_photo/My_profile2_for_myweb.jpg" />
+
+    <!-- Structured data (Google rich results) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Myo Thant Naing",
+      "alternateName": "MTN",
+      "url": "https://myothant.dev/",
+      "image": "https://myothant.dev/Myweb_photo/My_profile2_for_myweb.jpg",
+      "jobTitle": "Software Engineer & AI Developer",
+      "description": "Computer Science student and Software Engineer in Japan, building full-stack applications (C#/.NET, React) and Agentic AI systems.",
+      "knowsAbout": ["Software Engineering", "Artificial Intelligence", "C#", ".NET", "React", "Three.js", "Computer Science", "Full-Stack Development"],
+      "sameAs": ["https://github.com/johnathanMT"]
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -35,11 +74,13 @@
 </head>
 
 <body>
-    <!-- ဤနေရာတွင် Menu လေး ထည့်ထားပေးပါတယ် -->
-    <nav style="padding: 20px; text-align: right;">
-        <a href="/" style="margin-right: 15px; color: #fff; text-decoration: none;">Home</a>
-        <a href="blog.html" style="color: #fff; text-decoration: none;">Blog</a>
-    </nav>
+    <!-- Crawler / no-JS fallback: gives search engines real content for this SPA -->
+    <noscript>
+        <h1>Myo Thant Naing — Software Engineer &amp; AI Developer</h1>
+        <p>Computer Science student and Software Engineer based in Japan, building full-stack
+           applications with C#/.NET and React, plus Agentic AI systems and 3D WebGL experiences.</p>
+        <p>Please enable JavaScript to view the full interactive portfolio.</p>
+    </noscript>
 
     <div id="root"></div>
     

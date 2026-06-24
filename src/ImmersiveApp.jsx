@@ -15,7 +15,6 @@ import TravelChronicles from './components/TravelChronicles'
 import Exploring        from './components/Exploring'
 import AILineBot        from './components/AILineBot'
 import Footer           from './components/MegaFooter'   // SaaS-style mega footer
-import CyberCursor      from './components/CyberCursor'
 import BootScreen       from './components/BootScreen'
 import HudFrame         from './components/HudFrame'
 
@@ -116,7 +115,6 @@ export default function ImmersiveApp() {
       <div className="relative z-10"><Footer lang={lang} /></div>
 
       <HudFrame />
-      <CyberCursor />
       <BootScreen />
     </div>
   )

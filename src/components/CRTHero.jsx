@@ -83,7 +83,7 @@ export default function CRTHero({ children }) {
 
         <p className="mx-auto mt-5 max-w-xl text-base text-gray-300 sm:text-lg">
           From <span className="text-cyan">Caring</span> to{' '}
-          <span style={{ color: '#ff3df0' }}>Coding</span> in Japan 🇯🇵 — IT Student, Caregiver,
+          <span style={{ color: '#ff3df0' }}>Coding</span> in Japan 🇯🇵 — Computer Science Student, Caregiver,
           aspiring AI Engineer.
         </p>
 

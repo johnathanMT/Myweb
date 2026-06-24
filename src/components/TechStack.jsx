@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 import { Database, ShieldCheck } from 'lucide-react'
 
@@ -69,12 +70,26 @@ const T = {
 
 function LogoTile({ item }) {
   const Icon = item.icon
+  // If the Simple Icons CDN image fails (blocked, offline, or a 404 slug), fall
+  // back to a letter badge so a tile is never an invisible/broken image.
+  const [imgFailed, setImgFailed] = useState(false)
   return (
     <div className="group flex flex-col items-center gap-2 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-accent/50 group-hover:shadow-[0_0_20px_-4px_rgb(var(--accent)/0.6)]">
-        {item.slug
-          ? <img src={logo(item.slug, item.color)} alt={`${item.name} logo`} loading="lazy" className="h-7 w-7" />
-          : <Icon size={26} className="text-accent" />}
+        {item.slug && !imgFailed ? (
+          <img
+            src={logo(item.slug, item.color)}
+            alt={`${item.name} logo`}
+            width="28" height="28"
+            loading="eager" decoding="async"
+            className="h-7 w-7"
+            onError={() => setImgFailed(true)}
+          />
+        ) : Icon ? (
+          <Icon size={26} className="text-accent" />
+        ) : (
+          <span className="font-mono text-base font-bold text-accent">{item.name.charAt(0)}</span>
+        )}
       </div>
       <span className="text-[11px] font-medium leading-tight text-gray-300">{item.name}</span>
     </div>

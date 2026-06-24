@@ -7,14 +7,39 @@
    .theme-batman → Hub (App.jsx) · .theme-cyber → Immersive (ImmersiveApp.jsx)
    ══════════════════════════════════════════════════════════════════ */
 :root, .theme-batman {
-  --space: 20 20 20; --surface: 26 26 26; --card: 30 23 24; --card-hover: 36 26 27;
-  --accent: 184 134 11;        /* dark old gold (rgb(var(--accent))) */
-  --accent-light: 205 164 52;  /* rgb(var(--accent-light)) */
-  --cyan: 184 134 11;          /* legacy cyan → gold in Batman */
-  --coral: 142 42 42;          /* crimson */
-  --maroon: 92 22 22;          /* deep maroon */
-  --maroon-deep: 74 4 4;
-  --muted: 154 154 160;
+  /* ════════ CYBER METAL BLACK — strict 60-30-10 palette ════════
+     60% BASE  → Cyber Metal Black (backgrounds)
+     30% SECONDARY → Forest Green (cards, sections, borders)
+     10% ACCENT → Neon / radioactive maroon (buttons, hovers, highlights) */
+
+  /* ════════ CINEMATIC: obsidian base · DEEP MAROON + JADE GREEN accents ════════
+     Maroon is the STRUCTURAL accent (borders, primary buttons, highlights) but
+     kept deep & muted so it never overpowers. Jade is the LIVELY secondary
+     (active links, success, glows) for balance. */
+
+  /* ULTRA-DEEP obsidian bases — "wet asphalt" so accents glow against them */
+  --space: 6 6 7;              /* #060607 — extremely deep metal black */
+  --surface: 11 13 12;         /* near-black panel */
+
+  /* card / section surfaces (rich jade-tinted charcoal) */
+  --card: 15 21 18;
+  --card-hover: 22 31 26;
+  --forest: 30 120 84;         /* rich jade-green secondary border */
+  --forest-deep: 12 26 20;
+
+  /* PRIMARY accent — RICH, luminous deep maroon (saturated, alive) */
+  --accent: 178 30 52;         /* #b21e34 — vivid deep maroon */
+  --accent-light: 214 56 84;   /* #d63854 — glowing maroon highlight */
+
+  /* JADE secondary — vivid luminous jade (links / success / glows) */
+  --jade: 26 200 132;          /* #1ac884 — vivid jade */
+  --jade-light: 74 240 170;    /* #4af0aa — jade glow */
+  --cyan: 26 200 132;          /* legacy "cyan" usages → jade green */
+
+  --coral: 200 44 64;          /* luminous maroon-coral */
+  --maroon: 132 24 36;         /* #841824 — rich deep maroon (hero text fill) */
+  --maroon-deep: 92 14 22;     /* darkest maroon — deep borders */
+  --muted: 156 164 160;        /* cool gray body text */
 }
 .theme-cyber {
   --space: 7 7 15; --surface: 17 17 24; --card: 22 22 31; --card-hover: 30 30 46;
@@ -331,38 +356,20 @@
   animation: spin-slow 20s linear infinite;
 }
 
-/* Scroll reveal */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.65s ease, transform 0.65s ease;
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reveal-left {
-  opacity: 0;
-  transform: translateX(-24px);
-  transition: opacity 0.65s ease, transform 0.65s ease;
-}
-
-.reveal-left.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.reveal-right {
-  opacity: 0;
-  transform: translateX(24px);
-  transition: opacity 0.65s ease, transform 0.65s ease;
-}
-
-.reveal-right.visible {
-  opacity: 1;
-  transform: translateX(0);
+/* Scroll reveal — DISABLED. Everything is fully visible & opaque by default
+   (no fade-in / scroll-reveal). Kept as no-op classes so existing markup that
+   still references them renders normally. */
+.reveal,
+.reveal-left,
+.reveal-right,
+.reveal.visible,
+.reveal-left.visible,
+.reveal-right.visible,
+[data-reveal] {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
 }
 
 /* ══════════════════════════════════════════
@@ -1150,40 +1157,10 @@ body::before {
 }
 
 /* ══════════════════════════════════════════
-   ELITE 1 — Custom cyber cursor (fine pointers only)
+   Custom cyber cursor — REMOVED. The site uses the browser's native cursor
+   (default arrow, pointer on links). The CyberCursor component is no longer
+   mounted; these styles are intentionally left empty.
 ══════════════════════════════════════════ */
-@media (pointer: fine) {
-  .has-cyber-cursor, .has-cyber-cursor * { cursor: none !important; }
-}
-.cyber-cursor, .cyber-cursor-dot {
-  position: fixed;
-  top: 0; left: 0;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  will-change: transform;
-}
-.cyber-cursor {
-  width: 34px; height: 34px;
-  border: 1.5px solid rgb(var(--accent) / 0.9);
-  border-radius: 50%;
-  box-shadow: 0 0 12px rgb(var(--accent) / 0.6);
-  transition: width .18s ease, height .18s ease, border-color .18s ease, background .18s ease;
-}
-/* crosshair ticks */
-.cyber-cursor::before, .cyber-cursor::after {
-  content: ""; position: absolute; background: rgb(var(--accent) / 0.9);
-}
-.cyber-cursor::before { left: 50%; top: -6px; width: 1px; height: 6px; transform: translateX(-50%); }
-.cyber-cursor::after  { top: 50%; left: -6px; height: 1px; width: 6px; transform: translateY(-50%); }
-.cyber-cursor-dot { width: 5px; height: 5px; background: #fff; border-radius: 50%; box-shadow: 0 0 8px rgb(var(--accent)); }
-/* snap/grow state over interactive elements */
-.cyber-cursor.is-active {
-  width: 56px; height: 56px;
-  border-color: rgb(var(--coral));
-  background: rgb(var(--coral) / 0.12);
-  box-shadow: 0 0 22px rgb(var(--coral) / 0.7);
-}
 
 /* ══════════════════════════════════════════
    ELITE 2 — "System Booting" hacker loader

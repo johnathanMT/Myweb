@@ -16,13 +16,21 @@ import TravelChronicles from './components/TravelChronicles'
 import Exploring        from './components/Exploring'
 import AILineBot        from './components/AILineBot'      // "Talk to my AI agent" promo
 import Footer           from './components/MegaFooter'   // SaaS-style mega footer
-import CyberCursor      from './components/CyberCursor'     // custom crosshair cursor
 import BootScreen       from './components/BootScreen'      // "System Booting…" loader
 import HudFrame         from './components/HudFrame'        // HUD corner overlay
+import TechDecor        from './components/TechDecor'       // edge wireframe SVG decorations
 
 // Lazy-loaded: pulls in three.js (~heavy), so it's code-split out of the main
 // Hub bundle and only fetched when this section is rendered.
 const VisitorGlobe = lazy(() => import('./components/VisitorGlobe'))
+
+// Below-the-fold interactive sections — code-split so the initial mobile load
+// stays light. They only download as the visitor scrolls toward them.
+const LiveCodeShowcase = lazy(() => import('./components/LiveCodeShowcase'))
+const AlgorithmLab     = lazy(() => import('./components/AlgorithmLab'))
+const AgentFlow        = lazy(() => import('./components/AgentFlow'))
+const QuantumLab       = lazy(() => import('./components/QuantumLab'))
+const AntimatterSim    = lazy(() => import('./components/AntimatterSim'))
 
 // ── TIERED EXPERIENCE GATEWAY ────────────────────────────────────────────────
 // This is the lightweight HUB domain: NO heavy three.js here, so it stays fast on
@@ -57,6 +65,8 @@ export default function App() {
       {/* Lightweight, GPU-friendly backdrop (no WebGL): Milky-Way gradient + stars. */}
       <div className="orbit-galaxy fixed inset-0 z-0" aria-hidden />
       <AmbientBackground />
+      {/* Abstract high-tech edge decorations (desktop only, behind content) */}
+      <TechDecor />
 
       <Navbar lang={lang} setLang={setLang} />
       <main className="relative z-10">
@@ -68,6 +78,13 @@ export default function App() {
         <MarqueeGallery />
         <ProjectsSection  lang={lang} />
         <TechStack        lang={lang} />
+        <Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading…</div>}>
+          <LiveCodeShowcase />
+          <AlgorithmLab />
+          <AgentFlow />
+          <QuantumLab />
+          <AntimatterSim />
+        </Suspense>
         <GallerySection   lang={lang} />
         <VideoShowcase    lang={lang} />
         <Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading globe…</div>}>
@@ -83,7 +100,6 @@ export default function App() {
 
       {/* ── Elite cyberpunk overlays (fixed, above everything) ── */}
       <HudFrame />
-      <CyberCursor />
       <BootScreen />
     </div>
   )

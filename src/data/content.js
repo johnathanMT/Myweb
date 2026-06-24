@@ -5,7 +5,7 @@ export const PERSONAL = {
   name: 'Myo Thant Naing',
   handle: 'MTN.Digitosphere',
   tagline: 'From Caring to Coding in Japan 🇯🇵',
-  subtitle: 'IT Student · Care-giver · Aspiring AI Engineer',
+  subtitle: 'Computer Science Student · Care-giver · Aspiring AI Engineer',
   bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.',
   slogan: 'Better Late Than Never',
   email: SITE.email,

@@ -19,6 +19,13 @@ export default {
         maroon: 'rgb(var(--maroon) / <alpha-value>)',
         'maroon-deep': 'rgb(var(--maroon-deep) / <alpha-value>)',
         gold: 'rgb(var(--accent) / <alpha-value>)',
+        // Cyber-Metal-Black palette additions
+        metal: 'rgb(var(--space) / <alpha-value>)',
+        forest: 'rgb(var(--forest) / <alpha-value>)',
+        'forest-deep': 'rgb(var(--forest-deep) / <alpha-value>)',
+        // Jade green secondary (active links, success, glows)
+        jade: 'rgb(var(--jade) / <alpha-value>)',
+        'jade-light': 'rgb(var(--jade-light) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
