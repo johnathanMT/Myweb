@@ -10,28 +10,45 @@ import { Database, ShieldCheck } from 'lucide-react'
  *  (text-accent etc.) so it follows .theme-batman automatically.
  */
 
-// Brand SVG logos via Simple Icons CDN (CSP already allows https img). Dark-on-dark
-// logos (three.js, vercel, render) get a light-gold tint so they stay visible.
-const SI = 'https://cdn.simpleicons.org'
-const logo = (slug, color) => `${SI}/${slug}${color ? `/${color}` : ''}`
 const GOLD = 'c9a13b'
 
+// ── LOGO MAPPING (single source of truth) ───────────────────────────────────
+// Currently sourced from the Simple Icons CDN. The mapping makes self-hosting a
+// 1-line-per-logo change: drop files in src/assets/logos/ and swap the cdn(...)
+// value for a Vite import, e.g.
+//     import reactLogo from '../assets/logos/react.svg'
+//     'React': reactLogo,
+// Bundled imports are the bulletproof option — Vite fingerprints them
+// (react.<hash>.svg), so they're case-proof and can't 404 or be rate-limited.
+const cdn = (slug, color) => `https://cdn.simpleicons.org/${slug}${color ? `/${color}` : ''}`
+
+const techLogos = {
+  'React':         cdn('react'),
+  'Vite':          cdn('vite'),
+  'Tailwind CSS':  cdn('tailwindcss'),
+  'Three.js':      cdn('threedotjs', GOLD),
+  'Framer Motion': cdn('framer', GOLD),
+  'GSAP':          cdn('greensock', GOLD),
+  'C# / .NET 8':   cdn('dotnet', GOLD),
+  'MySQL · Aiven': cdn('mysql'),
+  'Cloudinary':    cdn('cloudinary'),
+  'Vercel':        cdn('vercel', GOLD),
+  'Render':        cdn('render', GOLD),
+}
+
+// Each item is just a name (→ looked up in techLogos) or a lucide `icon`.
 const STACK = [
   {
     group: 'Frontend',
     items: [
-      { name: 'React', slug: 'react' },
-      { name: 'Vite', slug: 'vite' },
-      { name: 'Tailwind CSS', slug: 'tailwindcss' },
-      { name: 'Three.js', slug: 'threedotjs', color: GOLD },
-      { name: 'Framer Motion', slug: 'framer', color: GOLD },
-      { name: 'GSAP', slug: 'greensock' },
+      { name: 'React' }, { name: 'Vite' }, { name: 'Tailwind CSS' },
+      { name: 'Three.js' }, { name: 'Framer Motion' }, { name: 'GSAP' },
     ],
   },
   {
     group: 'Backend & API',
     items: [
-      { name: 'C# / .NET 8', slug: 'dotnet' },
+      { name: 'C# / .NET 8' },
       { name: 'EF Core', icon: Database },            // no brand logo → lucide icon
       { name: 'JWT Auth', icon: ShieldCheck },
     ],
@@ -39,10 +56,8 @@ const STACK = [
   {
     group: 'Data & Cloud',
     items: [
-      { name: 'MySQL · Aiven', slug: 'mysql' },
-      { name: 'Cloudinary', slug: 'cloudinary' },
-      { name: 'Vercel', slug: 'vercel', color: GOLD },
-      { name: 'Render', slug: 'render', color: GOLD },
+      { name: 'MySQL · Aiven' }, { name: 'Cloudinary' },
+      { name: 'Vercel' }, { name: 'Render' },
     ],
   },
 ]
@@ -68,27 +83,32 @@ const T = {
   zh: { badge: '架构与历程', title: '从护理', accent: '到代码', stackHead: '技术栈' },
 }
 
+// First alphanumeric character → monogram fallback (e.g. "C# / .NET 8" → "C").
+const monogram = (name) => (name.match(/[A-Za-z0-9]/)?.[0] || '?').toUpperCase()
+
 function LogoTile({ item }) {
   const Icon = item.icon
-  // If the Simple Icons CDN image fails (blocked, offline, or a 404 slug), fall
-  // back to a letter badge so a tile is never an invisible/broken image.
+  const src = techLogos[item.name]          // resolved from the central mapping
+  // If a logo image fails to load (CDN throttled, offline, 404, ad-blocker), fall
+  // back to a themed monogram so a tile is NEVER a broken/invisible image.
   const [imgFailed, setImgFailed] = useState(false)
+
   return (
     <div className="group flex flex-col items-center gap-2 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-accent/50 group-hover:shadow-[0_0_20px_-4px_rgb(var(--accent)/0.6)]">
-        {item.slug && !imgFailed ? (
+        {Icon ? (
+          <Icon size={26} className="text-accent" />
+        ) : src && !imgFailed ? (
           <img
-            src={logo(item.slug, item.color)}
+            src={src}
             alt={`${item.name} logo`}
             width="28" height="28"
             loading="eager" decoding="async"
             className="h-7 w-7"
             onError={() => setImgFailed(true)}
           />
-        ) : Icon ? (
-          <Icon size={26} className="text-accent" />
         ) : (
-          <span className="font-mono text-base font-bold text-accent">{item.name.charAt(0)}</span>
+          <span className="font-mono text-lg font-bold text-accent">{monogram(item.name)}</span>
         )}
       </div>
       <span className="text-[11px] font-medium leading-tight text-gray-300">{item.name}</span>
