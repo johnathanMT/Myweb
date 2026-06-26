@@ -5,7 +5,7 @@ import Navbar           from './components/Navbar'
 import Gateway          from './components/Gateway'         // tiered-experience landing
 import About            from './components/About'
 import Philosophy       from './components/Philosophy'
-import MarqueeGallery   from './components/MarqueeGallery' // hover-reveal project marquee
+import CyberPoetry      from './components/CyberPoetry'    // techno-science poems (datapad)
 import ProjectsSection  from './components/ProjectsSection'
 import TechStack        from './components/TechStack'         // Architecture & journey
 import GallerySection    from './components/GallerySection'   // Memory Gallery (photos)
@@ -76,7 +76,7 @@ export default function App() {
 
         <About            lang={lang} />
         <Philosophy />
-        <MarqueeGallery />
+        <CyberPoetry />
         <ProjectsSection  lang={lang} />
         <TechStack        lang={lang} />
         {/* Each heavy section is its OWN lazy chunk + Suspense, so they download

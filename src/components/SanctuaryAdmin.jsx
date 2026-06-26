@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen } from 'lucide-react'
 import { SITE } from '../config/site'
+import AdminPoetryManager from './AdminPoetryManager'
 
 /**
  * SanctuaryAdmin — admin-only dashboard (route /sanctuary-admin).
@@ -135,8 +136,11 @@ export default function SanctuaryAdmin() {
             <div className="mt-6 flex flex-wrap items-center gap-2">
               <TabBtn id="memories" icon={MessageSquare} label="Memories" />
               <TabBtn id="farewell" icon={Sprout} label="Farewell RSVPs" />
+              <TabBtn id="poetry" icon={BookOpen} label="Poetry" />
             </div>
 
+            {/* search/refresh bar — only for the list tabs (not the poetry editor) */}
+            {tab !== 'poetry' && (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
@@ -152,6 +156,10 @@ export default function SanctuaryAdmin() {
               </button>
               <span className="font-mono text-xs text-white/50">{shown} / {total}</span>
             </div>
+            )}
+
+            {/* ── POETRY MANAGER ── */}
+            {tab === 'poetry' && <div className="mt-4"><AdminPoetryManager token={token} /></div>}
 
             {/* ── MEMORIES TABLE ── */}
             {tab === 'memories' && (

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { ChevronDown } from 'lucide-react'
 import { PERSONAL } from '../data/content'
 
 const LANGS = [
@@ -20,30 +21,36 @@ const NAV_LINKS = [
   { href: '#about', key: 'about' },
   { href: '#projects', key: 'projects' },
   { href: '#stack', key: 'stack' },
-  { href: '#lab', key: 'lab' },              // Algorithm Lab (sorting / A* / Dijkstra / BST)
-  { href: '#agent', key: 'agent' },          // Agentic-AI workflow
-  { href: '#quantum', key: 'quantum' },      // 2-qubit circuit
-  { href: '#antimatter', key: 'antimatter' },// annihilation sim
   { href: '#gallery', key: 'gallery' },
   { href: '#exploring', key: 'exploring' },
   { route: '/sanctuary', key: 'sanctuary' },     // dedicated route (#/sanctuary)
   { href: blogPath, key: 'blog', isExternal: true },
 ];
 
+// The four interactive CS sections, grouped under one "Techno Science Lab" menu.
+const LAB_LINKS = [
+  { href: '#lab', key: 'lab' },              // Algorithm Lab (sorting / A* / Dijkstra / BST)
+  { href: '#agent', key: 'agent' },          // Agentic-AI workflow
+  { href: '#quantum', key: 'quantum' },      // 2-qubit circuit
+  { href: '#antimatter', key: 'antimatter' },// annihilation sim
+];
+const LAB_KEYS = LAB_LINKS.map((l) => l.key);
+
 // i18n labels for the nav (falls back to `en` for any missing language).
 const NAV_T = {
-  en: { home: 'Home',      about: 'About',      projects: 'Projects',      stack: 'Stack',     lab: 'Lab',     agent: 'AI',  quantum: 'Quantum',   antimatter: 'Antimatter',  gallery: 'Gallery',  exploring: 'Exploring', sanctuary: 'Sanctuary', blog: 'Blog' },
-  mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာ',   lab: 'Lab',     agent: 'AI',  quantum: 'ကွမ်တမ်',    antimatter: 'Antimatter',  gallery: 'ပြခန်း',    exploring: 'လေ့လာရန်',  sanctuary: 'အောက်မေ့ပင်', blog: 'ဘလော့' },
-  jp: { home: 'ホーム',     about: '概要',        projects: 'プロジェクト',    stack: 'スタック',  lab: 'Lab',     agent: 'AI',  quantum: '量子',      antimatter: '反物質',      gallery: 'ギャラリー', exploring: '探索',      sanctuary: '記憶の木',   blog: 'ブログ' },
-  vn: { home: 'Trang chủ', about: 'Giới thiệu', projects: 'Dự án',         stack: 'Công nghệ', lab: 'Lab',     agent: 'AI',  quantum: 'Lượng tử',  antimatter: 'Phản vật chất', gallery: 'Thư viện', exploring: 'Khám phá',  sanctuary: 'Cây Kỷ Niệm', blog: 'Blog' },
-  ne: { home: 'गृह',        about: 'परिचय',       projects: 'परियोजना',       stack: 'स्ट्याक',    lab: 'Lab',     agent: 'AI',  quantum: 'क्वान्टम',  antimatter: 'प्रतिपदार्थ',   gallery: 'ग्यालरी',   exploring: 'अन्वेषण',    sanctuary: 'सम्झना रूख', blog: 'ब्लग' },
-  id: { home: 'Beranda',   about: 'Tentang',    projects: 'Proyek',        stack: 'Teknologi', lab: 'Lab',     agent: 'AI',  quantum: 'Kuantum',   antimatter: 'Antimateri',  gallery: 'Galeri',   exploring: 'Jelajahi',  sanctuary: 'Pohon Kenangan', blog: 'Blog' },
-  zh: { home: '首页',       about: '关于',        projects: '项目',          stack: '技术栈',     lab: 'Lab',     agent: 'AI',  quantum: '量子',      antimatter: '反物质',      gallery: '画廊',      exploring: '探索',      sanctuary: '记忆之树',   blog: '博客' },
+  en: { home: 'Home',      about: 'About',      projects: 'Projects',      stack: 'Stack',     labMenu: 'Techno Science Lab', lab: 'Lab',     agent: 'AI',  quantum: 'Quantum',   antimatter: 'Antimatter',  gallery: 'Gallery',  exploring: 'Exploring', sanctuary: 'Sanctuary', blog: 'Blog' },
+  mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာ',   labMenu: 'Techno Science Lab', lab: 'Lab',     agent: 'AI',  quantum: 'ကွမ်တမ်',    antimatter: 'Antimatter',  gallery: 'ပြခန်း',    exploring: 'လေ့လာရန်',  sanctuary: 'အောက်မေ့ပင်', blog: 'ဘလော့' },
+  jp: { home: 'ホーム',     about: '概要',        projects: 'プロジェクト',    stack: 'スタック',  labMenu: 'テクノサイエンス', lab: 'Lab',     agent: 'AI',  quantum: '量子',      antimatter: '反物質',      gallery: 'ギャラリー', exploring: '探索',      sanctuary: '記憶の木',   blog: 'ブログ' },
+  vn: { home: 'Trang chủ', about: 'Giới thiệu', projects: 'Dự án',         stack: 'Công nghệ', labMenu: 'Techno Science Lab', lab: 'Lab',     agent: 'AI',  quantum: 'Lượng tử',  antimatter: 'Phản vật chất', gallery: 'Thư viện', exploring: 'Khám phá',  sanctuary: 'Cây Kỷ Niệm', blog: 'Blog' },
+  ne: { home: 'गृह',        about: 'परिचय',       projects: 'परियोजना',       stack: 'स्ट्याक',    labMenu: 'Techno Science Lab', lab: 'Lab',     agent: 'AI',  quantum: 'क्वान्टम',  antimatter: 'प्रतिपदार्थ',   gallery: 'ग्यालरी',   exploring: 'अन्वेषण',    sanctuary: 'सम्झना रूख', blog: 'ब्लग' },
+  id: { home: 'Beranda',   about: 'Tentang',    projects: 'Proyek',        stack: 'Teknologi', labMenu: 'Techno Science Lab', lab: 'Lab',     agent: 'AI',  quantum: 'Kuantum',   antimatter: 'Antimateri',  gallery: 'Galeri',   exploring: 'Jelajahi',  sanctuary: 'Pohon Kenangan', blog: 'Blog' },
+  zh: { home: '首页',       about: '关于',        projects: '项目',          stack: '技术栈',     labMenu: '科技实验室', lab: 'Lab',     agent: 'AI',  quantum: '量子',      antimatter: '反物质',      gallery: '画廊',      exploring: '探索',      sanctuary: '记忆之树',   blog: '博客' },
 };
 
 export default function Navbar({ lang, setLang }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [labOpen, setLabOpen] = useState(false)   // "Techno Science Lab" dropdown
   const [activeSection, setActiveSection] = useState('home')
   const t = NAV_T[lang] || NAV_T.en   // translated nav labels
 
@@ -150,18 +157,67 @@ export default function Navbar({ lang, setLang }) {
               ? location.pathname === route
               : (activeSection === href?.slice(1) && !isExternal && location.pathname === '/');
             return (
-              <li key={key}>
-                <a
-                  href={route ? `#${route}` : href}
-                  onClick={(e) => handleNav(e, item)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
-                    ? 'text-white bg-accent/20'
-                    : 'text-muted hover:text-white hover:bg-white/5'
-                    }`}
-                >
-                  {t[key]}
-                </a>
-              </li>
+              <Fragment key={key}>
+                <li>
+                  <a
+                    href={route ? `#${route}` : href}
+                    onClick={(e) => handleNav(e, item)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                      ? 'text-white bg-accent/20'
+                      : 'text-muted hover:text-white hover:bg-white/5'
+                      }`}
+                  >
+                    {t[key]}
+                  </a>
+                </li>
+
+                {/* ── Techno Science Lab dropdown (right after Stack) ── */}
+                {key === 'stack' && (
+                  <li className="relative"
+                    onMouseEnter={() => setLabOpen(true)}
+                    onMouseLeave={() => setLabOpen(false)}>
+                    <button
+                      type="button"
+                      onClick={() => setLabOpen((o) => !o)}
+                      aria-haspopup="true"
+                      aria-expanded={labOpen}
+                      className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        (LAB_KEYS.includes(activeSection) && location.pathname === '/')
+                          ? 'text-white bg-accent/20'
+                          : 'text-muted hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {t.labMenu}
+                      <ChevronDown size={14} className={`transition-transform duration-200 ${labOpen ? 'rotate-180 text-jade-light' : ''}`} />
+                    </button>
+
+                    {/* glassmorphism panel */}
+                    <div
+                      className={`absolute left-0 top-full mt-2 w-56 rounded-xl border border-jade/25 bg-space/95 p-1.5 backdrop-blur-xl transition-all duration-200 ${
+                        labOpen ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0'
+                      }`}
+                      style={{ boxShadow: '0 0 0 1px rgb(var(--jade) / 0.12), 0 18px 50px -14px rgba(0,0,0,0.85)' }}
+                    >
+                      <p className="px-3 pb-1.5 pt-1 font-mono text-[10px] uppercase tracking-wider text-jade/70">// lab modules</p>
+                      {LAB_LINKS.map((sub) => {
+                        const subActive = activeSection === sub.key && location.pathname === '/';
+                        return (
+                          <a
+                            key={sub.key}
+                            href={sub.href}
+                            onClick={(e) => { handleNav(e, sub); setLabOpen(false); }}
+                            className={`flex items-center gap-2.5 rounded-lg px-3 py-2 font-mono text-xs transition-colors ${
+                              subActive ? 'bg-accent/20 text-accent-light' : 'text-muted hover:bg-jade/10 hover:text-jade-light'
+                            }`}
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full bg-jade/60" /> {t[sub.key]}
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </li>
+                )}
+              </Fragment>
             );
           })}
         </ul>
@@ -210,15 +266,34 @@ export default function Navbar({ lang, setLang }) {
           style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
         >
           {NAV_LINKS.map((item) => (
-            <li key={item.key}>
-              <a
-                href={item.route ? `#${item.route}` : item.href}
-                onClick={(e) => handleNav(e, item)}
-                className="block px-4 py-2.5 rounded-xl text-sm font-medium text-muted hover:text-white hover:bg-white/5 transition-all"
-              >
-                {t[item.key]}
-              </a>
-            </li>
+            <Fragment key={item.key}>
+              <li>
+                <a
+                  href={item.route ? `#${item.route}` : item.href}
+                  onClick={(e) => handleNav(e, item)}
+                  className="block px-4 py-2.5 rounded-xl text-sm font-medium text-muted hover:text-white hover:bg-white/5 transition-all"
+                >
+                  {t[item.key]}
+                </a>
+              </li>
+
+              {/* Techno Science Lab — grouped sub-links (after Stack) */}
+              {item.key === 'stack' && (
+                <li className="my-1 rounded-xl border border-jade/15 bg-jade/[0.04] p-1">
+                  <p className="px-4 pb-1 pt-1.5 font-mono text-[10px] uppercase tracking-wider text-jade/70">{t.labMenu}</p>
+                  {LAB_LINKS.map((sub) => (
+                    <a
+                      key={sub.key}
+                      href={sub.href}
+                      onClick={(e) => handleNav(e, sub)}
+                      className="flex items-center gap-2.5 rounded-lg px-4 py-2 font-mono text-xs text-muted transition-colors hover:bg-jade/10 hover:text-jade-light"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-jade/60" /> {t[sub.key]}
+                    </a>
+                  ))}
+                </li>
+              )}
+            </Fragment>
           ))}
 
           {/* Language flags inside the mobile menu */}
