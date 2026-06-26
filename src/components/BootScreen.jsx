@@ -7,16 +7,15 @@ import { useEffect, useRef, useState } from 'react'
  */
 const LINES = [
   '> initializing MyoThantNaing.Operation System kernel ...........',
-  '> ငုပ်မိသဲတိုင် တက်နိုင်ဖျားရောက်: max_depth & peak_target locked ... [OK]',
-  '> 改善 (Kaizen): initiating continuous_improvement_protocol ....... [OK]',
-  '> DETECTING UNKNOWN PAYLOAD. . . . . .  .',
-  '> .......................................................',
+  '> ငုပ်မိသဲတိုင် တက်နိုင်ဖျားရောက်: . . . .',
+  '> 改善 (Kaizen) , 七転び八起き...: initiating continuous_improvement_protocol ....... [OK]',
   '> contacting → ai@myothant.dev ...... [OK]',
   '>      ▲ ▲ ▲  ',
-  '>     / O O \\   "七転び八起き..."',
-  '>     \\ \\_/ /   ',
-  '>      -----    [ ALL_IT_TAKES_IS_A_LITTLE_PUSH.sys ]',
+  '>     / O O \\   ',
+  '>     \\ \\_/ /  ',
+  '>      -----     ',
   '> WELCOME, OPERATOR.',
+  
 
 ]
 

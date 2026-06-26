@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Cpu, Play, Shuffle, RotateCcw, Route, BarChart3, Binary, Plus, Swords, Gauge } from 'lucide-react'
+import { useInView } from '../hooks/useInView'
 
 /**
  * AlgorithmLab — an interactive "live CS" section: real sorting algorithms and
@@ -66,7 +67,7 @@ function genSortFrames(input, algo) {
   return frames
 }
 
-function SortingViz({ speed = 1 }) {
+function SortingViz({ speed = 1, active = true }) {
   const N = 38
   const rand = () => Array.from({ length: N }, () => 8 + Math.floor(Math.random() * 92))
   const [base, setBase] = useState(rand)
@@ -77,6 +78,8 @@ function SortingViz({ speed = 1 }) {
 
   useEffect(() => { setFrame({ arr: base, active: [], done: [] }) }, [base])
   useEffect(() => () => clearInterval(timer.current), [])
+  // Stop the run if the Lab scrolls off-screen (no CPU spent while invisible).
+  useEffect(() => { if (!active) { clearInterval(timer.current); setRunning(false) } }, [active])
 
   const run = () => {
     clearInterval(timer.current)
@@ -178,13 +181,14 @@ function astar(walls, start, end) {
   return { visited, path: [] }
 }
 
-function PathViz({ speed = 1 }) {
+function PathViz({ speed = 1, active = true }) {
   const [maze, setMaze] = useState(genMaze)
   const [visited, setVisited] = useState(new Set())
   const [path, setPath] = useState(new Set())
   const [running, setRunning] = useState(false)
   const timer = useRef(null)
   useEffect(() => () => clearInterval(timer.current), [])
+  useEffect(() => { if (!active) { clearInterval(timer.current); setRunning(false) } }, [active])
 
   const reset = (m = maze) => { clearInterval(timer.current); setRunning(false); setVisited(new Set()); setPath(new Set()); if (m !== maze) setMaze(m) }
   const regenerate = () => reset(genMaze())
@@ -285,13 +289,14 @@ function bstLayout(root) {
   return { nodes, edges, cols: Math.max(i, 1), maxDepth }
 }
 
-function BSTViz({ speed = 1 }) {
+function BSTViz({ speed = 1, active = true }) {
   const [root, setRoot] = useState(() => bstBuild([50, 30, 70, 20, 40, 60, 80, 35]))
   const [path, setPath] = useState([])     // vals on the compare path (highlight)
   const [hot, setHot] = useState(null)     // just-inserted value (gold)
   const [input, setInput] = useState('')
   const timers = useRef([])
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
+  useEffect(() => { if (!active) { timers.current.forEach(clearTimeout); timers.current = []; setPath([]); setHot(null) } }, [active])
 
   const insert = (raw) => {
     const v = parseInt(raw, 10)
@@ -424,7 +429,7 @@ function RaceGrid({ maze, visited, path, tint }) {
   )
 }
 
-function RaceViz({ speed = 1 }) {
+function RaceViz({ speed = 1, active = true }) {
   const [maze, setMaze] = useState(rGenMaze)
   const [vD, setVD] = useState(new Set()), [vA, setVA] = useState(new Set())
   const [pD, setPD] = useState(new Set()), [pA, setPA] = useState(new Set())
@@ -432,6 +437,7 @@ function RaceViz({ speed = 1 }) {
   const [running, setRunning] = useState(false)
   const timer = useRef(null)
   useEffect(() => () => clearInterval(timer.current), [])
+  useEffect(() => { if (!active) { clearInterval(timer.current); setRunning(false) } }, [active])
 
   const reset = (m = maze) => {
     clearInterval(timer.current); setRunning(false)
@@ -522,6 +528,7 @@ function RaceViz({ speed = 1 }) {
 export default function AlgorithmLab() {
   const [tab, setTab] = useState('sort')
   const [speed, setSpeed] = useState(1)   // animation multiplier (applies on next run)
+  const [viewRef, inView] = useInView({ threshold: 0.12 })
   const tabs = useMemo(() => ([
     { id: 'sort', label: 'Sorting Race', Icon: BarChart3 },
     { id: 'path', label: 'A* Pathfinding', Icon: Route },
@@ -530,7 +537,7 @@ export default function AlgorithmLab() {
   ]), [])
 
   return (
-    <section id="lab" className="relative py-24 sm:py-28">
+    <section id="lab" ref={viewRef} className="relative py-24 sm:py-28">
       <div className="mx-auto max-w-5xl px-6">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-jade">// ALGORITHM LAB</p>
         <h2 className="mt-4 flex items-center gap-3 text-3xl font-bold text-white sm:text-4xl">
@@ -562,7 +569,7 @@ export default function AlgorithmLab() {
         </div>
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-7">
-          {tab === 'sort' ? <SortingViz speed={speed} /> : tab === 'path' ? <PathViz speed={speed} /> : tab === 'race' ? <RaceViz speed={speed} /> : <BSTViz speed={speed} />}
+          {tab === 'sort' ? <SortingViz speed={speed} active={inView} /> : tab === 'path' ? <PathViz speed={speed} active={inView} /> : tab === 'race' ? <RaceViz speed={speed} active={inView} /> : <BSTViz speed={speed} active={inView} />}
         </div>
       </div>
     </section>

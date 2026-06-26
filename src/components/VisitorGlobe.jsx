@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { feature } from 'topojson-client'
 import countriesTopo from 'world-atlas/countries-110m.json'
 import { SITE } from '../config/site'
+import { useInView } from '../hooks/useInView'
 
 /**
  * VisitorGlobe — premium 3D world map (react-globe.gl / three.js) shown below
@@ -114,6 +115,8 @@ export default function VisitorGlobe({ lang = 'en' }) {
   const globeEl = useRef()
   const wrapRef = useRef()
   const [size, setSize] = useState(0) // square px
+  // Pause the globe's render loop + spin when it scrolls out of view (saves GPU/battery).
+  const [viewRef, inView] = useInView({ threshold: 0.05 })
 
   const [geo, setGeo] = useState({ status: 'loading', lat: null, long: null, city: '', country: '' })
   const [visits, setVisits] = useState(null)
@@ -132,7 +135,6 @@ export default function VisitorGlobe({ lang = 'en' }) {
   useEffect(() => {
     if (geo.status !== 'done') return
     const base = SITE.apiUrl
-    console.log('[VisitorGlobe] API base =', base, '| country =', geo.country || '(none)')
     let cancelled = false
     setStatsStatus('loading')
     ;(async () => {
@@ -142,9 +144,7 @@ export default function VisitorGlobe({ lang = 'en' }) {
       const countUrl = counted
         ? `${base}/api/visitors`
         : `${base}/api/visitors/hit?country=${encodeURIComponent(geo.country || '')}`
-      console.log('[VisitorGlobe]', counted ? 'GET' : 'POST', countUrl)
       const countRes = await fetchJson(countUrl, { method: counted ? 'GET' : 'POST' })
-      console.log('[VisitorGlobe] /visitors →', countRes.status, countRes.data ?? countRes.error)
       if (!cancelled && countRes.ok && typeof countRes.data?.totalVisits === 'number') {
         setVisits(countRes.data.totalVisits)
         try { sessionStorage.setItem('mtn_visit_counted', '1') } catch { /* ignore */ }
@@ -152,7 +152,6 @@ export default function VisitorGlobe({ lang = 'en' }) {
 
       // b) country breakdown — drives the always-visible panel's state.
       const cRes = await fetchJson(`${base}/api/visitors/countries`)
-      console.log('[VisitorGlobe] /countries →', cRes.status, cRes.data ?? cRes.error)
       if (cancelled) return
       if (cRes.ok && Array.isArray(cRes.data?.countries)) {
         setCountries(cRes.data.countries)
@@ -216,15 +215,19 @@ export default function VisitorGlobe({ lang = 'en' }) {
     return () => ro.disconnect()
   }, [])
 
-  // 5) AUTO-SPIN once the globe is mounted.
+  // 5) AUTO-SPIN once mounted — and PAUSE the whole render loop when off-screen.
+  //    react-globe.gl's pauseAnimation() stops its internal requestAnimationFrame,
+  //    so zero GPU/CPU is spent while the globe isn't visible.
   useEffect(() => {
     const g = globeEl.current
     if (!g || !size) return
     const controls = g.controls()
-    controls.autoRotate = true
     controls.autoRotateSpeed = 0.6
     controls.enableZoom = false
-  }, [size])
+    controls.autoRotate = inView
+    if (inView) g.resumeAnimation?.()
+    else g.pauseAnimation?.()
+  }, [size, inView])
 
   // 6) FLY the camera to the visitor's coordinates when known.
   useEffect(() => {
@@ -245,7 +248,7 @@ export default function VisitorGlobe({ lang = 'en' }) {
       : ([geo.city, geo.country].filter(Boolean).join(', ') || t.unknown)
 
   return (
-    <section id="network" className="relative overflow-hidden py-24">
+    <section id="network" ref={viewRef} className="relative overflow-hidden py-24">
       <div className="pointer-events-none absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-accent/10 blur-[160px]" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 text-center">

@@ -9,6 +9,7 @@ import MarqueeGallery   from './components/MarqueeGallery' // hover-reveal proje
 import ProjectsSection  from './components/ProjectsSection'
 import TechStack        from './components/TechStack'         // Architecture & journey
 import GallerySection    from './components/GallerySection'   // Memory Gallery (photos)
+import SectionSkeleton  from './components/SectionSkeleton'   // lazy-load fallback
 import VideoShowcase     from './components/VideoShowcase'     // auto-play highlight reel
 import ArticlesSection  from './components/ArticlesSection'
 import SeasonalGallery  from './components/SeasonalGallery'
@@ -78,13 +79,13 @@ export default function App() {
         <MarqueeGallery />
         <ProjectsSection  lang={lang} />
         <TechStack        lang={lang} />
-        <Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading…</div>}>
-          <LiveCodeShowcase />
-          <AlgorithmLab />
-          <AgentFlow />
-          <QuantumLab />
-          <AntimatterSim />
-        </Suspense>
+        {/* Each heavy section is its OWN lazy chunk + Suspense, so they download
+            and reveal independently as the visitor scrolls (not all-or-nothing). */}
+        <Suspense fallback={<SectionSkeleton label="Live code" />}><LiveCodeShowcase /></Suspense>
+        <Suspense fallback={<SectionSkeleton label="Algorithm Lab" />}><AlgorithmLab /></Suspense>
+        <Suspense fallback={<SectionSkeleton label="Agentic AI" />}><AgentFlow /></Suspense>
+        <Suspense fallback={<SectionSkeleton label="Quantum Lab" />}><QuantumLab /></Suspense>
+        <Suspense fallback={<SectionSkeleton label="Antimatter" />}><AntimatterSim /></Suspense>
         <GallerySection   lang={lang} />
         <VideoShowcase    lang={lang} />
         <Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading globe…</div>}>

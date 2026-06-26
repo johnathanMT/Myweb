@@ -1,6 +1,11 @@
-import { useState } from 'react'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 import { Database, ShieldCheck } from 'lucide-react'
+// Authentic CC0 brand icons, bundled locally from the `simple-icons` npm package
+// → ZERO external CDN. Tree-shaken: only these 11 icons ship in the bundle.
+import {
+  siReact, siVite, siTailwindcss, siThreedotjs, siFramer, siGreensock,
+  siDotnet, siMysql, siCloudinary, siVercel, siRender,
+} from 'simple-icons'
 
 /**
  * TechStack — "Architecture & Journey" section (Batman theme).
@@ -10,31 +15,27 @@ import { Database, ShieldCheck } from 'lucide-react'
  *  (text-accent etc.) so it follows .theme-batman automatically.
  */
 
-const GOLD = 'c9a13b'
+const GOLD = '#c9a13b'
 
-// ── LOGO MAPPING (single source of truth) ───────────────────────────────────
-// Currently sourced from the Simple Icons CDN. The mapping makes self-hosting a
-// 1-line-per-logo change: drop files in src/assets/logos/ and swap the cdn(...)
-// value for a Vite import, e.g.
-//     import reactLogo from '../assets/logos/react.svg'
-//     'React': reactLogo,
-// Bundled imports are the bulletproof option — Vite fingerprints them
-// (react.<hash>.svg), so they're case-proof and can't 404 or be rate-limited.
-const cdn = (slug, color) => `https://cdn.simpleicons.org/${slug}${color ? `/${color}` : ''}`
-
+// ── LOGO MAPPING (single source of truth, 100% local) ───────────────────────
+// name → simple-icons icon object ({ path, hex, title }). No network, no CDN.
 const techLogos = {
-  'React':         cdn('react'),
-  'Vite':          cdn('vite'),
-  'Tailwind CSS':  cdn('tailwindcss'),
-  'Three.js':      cdn('threedotjs', GOLD),
-  'Framer Motion': cdn('framer', GOLD),
-  'GSAP':          cdn('greensock', GOLD),
-  'C# / .NET 8':   cdn('dotnet', GOLD),
-  'MySQL · Aiven': cdn('mysql'),
-  'Cloudinary':    cdn('cloudinary'),
-  'Vercel':        cdn('vercel', GOLD),
-  'Render':        cdn('render', GOLD),
+  'React': siReact,
+  'Vite': siVite,
+  'Tailwind CSS': siTailwindcss,
+  'Three.js': siThreedotjs,
+  'Framer Motion': siFramer,
+  'GSAP': siGreensock,
+  'C# / .NET 8': siDotnet,
+  'MySQL · Aiven': siMysql,
+  'Cloudinary': siCloudinary,
+  'Vercel': siVercel,
+  'Render': siRender,
 }
+
+// Use the official brand colour, except near-black marks (three.js / vercel /
+// render = #000000) which we tint gold so they're visible on the dark theme.
+const tintFor = (icon) => (icon.hex === '000000' ? GOLD : `#${icon.hex}`)
 
 // Each item is just a name (→ looked up in techLogos) or a lucide `icon`.
 const STACK = [
@@ -86,27 +87,26 @@ const T = {
 // First alphanumeric character → monogram fallback (e.g. "C# / .NET 8" → "C").
 const monogram = (name) => (name.match(/[A-Za-z0-9]/)?.[0] || '?').toUpperCase()
 
+// Inline SVG built from the bundled icon's path data — always renders, can never
+// 404 or be rate-limited (it's part of the JS bundle, not a network request).
+function BrandIcon({ icon }) {
+  return (
+    <svg role="img" aria-label={`${icon.title} logo`} viewBox="0 0 24 24" className="h-7 w-7" fill={tintFor(icon)}>
+      <path d={icon.path} />
+    </svg>
+  )
+}
+
 function LogoTile({ item }) {
   const Icon = item.icon
-  const src = techLogos[item.name]          // resolved from the central mapping
-  // If a logo image fails to load (CDN throttled, offline, 404, ad-blocker), fall
-  // back to a themed monogram so a tile is NEVER a broken/invisible image.
-  const [imgFailed, setImgFailed] = useState(false)
-
+  const brand = techLogos[item.name]        // bundled simple-icons object (or undefined)
   return (
     <div className="group flex flex-col items-center gap-2 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-accent/50 group-hover:shadow-[0_0_20px_-4px_rgb(var(--accent)/0.6)]">
         {Icon ? (
           <Icon size={26} className="text-accent" />
-        ) : src && !imgFailed ? (
-          <img
-            src={src}
-            alt={`${item.name} logo`}
-            width="28" height="28"
-            loading="eager" decoding="async"
-            className="h-7 w-7"
-            onError={() => setImgFailed(true)}
-          />
+        ) : brand ? (
+          <BrandIcon icon={brand} />
         ) : (
           <span className="font-mono text-lg font-bold text-accent">{monogram(item.name)}</span>
         )}

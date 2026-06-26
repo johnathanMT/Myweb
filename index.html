@@ -5,6 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- LCP: preload the hero background so it starts downloading immediately,
+         in parallel with the JS bundle (Vite rewrites %BASE_URL% to the deploy base). -->
+    <link rel="preload" as="image" href="%BASE_URL%mars_hero.webp" fetchpriority="high" />
+
     <!-- Strict CSP, with the additions WebGL/Three.js need:
          • script-src 'wasm-unsafe-eval' → the Draco decoder is WebAssembly.
          • worker-src 'self' blob:        → the Draco/GLTF loader runs a blob worker.
