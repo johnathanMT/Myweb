@@ -11,29 +11,22 @@ export default defineConfig({
   base: process.env.VITE_BASE || '/Myweb/',
 
   build: {
-    chunkSizeWarningLimit: 900,
-    rollupOptions: {
-      output: {
-        // ── manualChunks: split big vendor libs into SEPARATE, long-cacheable
-        //    files so the main bundle stays tiny and a visitor only downloads a
-        //    heavy chunk when the feature that needs it actually renders. The
-        //    chunk hashes only change when the library changes → repeat visits
-        //    (and other pages) reuse the cached vendor files.
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return
-          // 3D / WebGL stack — only Sanctuary, the Immersive build, and the globe
-          // use it; keep it far from the Hub's first paint.
-          if (/[\\/]node_modules[\\/](three|@react-three|react-globe\.gl|cobe|postprocessing)/.test(id)) return 'three-vendor'
-          if (id.includes('framer-motion')) return 'framer'
-          if (id.includes('tsparticles')) return 'particles'
-          if (id.includes('gsap')) return 'gsap'
-          if (id.includes('simple-icons')) return 'icons'
-          if (id.includes('dompurify')) return 'sanitize'
-          // Core React runtime in its own stable chunk (rarely changes → great caching).
-          if (/[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id)) return 'react-vendor'
-          return 'vendor'
-        },
-      },
-    },
+    // NOTE: we intentionally do NOT use a custom `manualChunks`.
+    //
+    // A hand-rolled manualChunks that split React / three / @react-three /
+    // framer-motion into separate files broke production with:
+    //   "ReferenceError: Cannot access 'wh' before initialization"
+    // When you force interdependent modules into different chunks, Rollup can no
+    // longer guarantee the original module-execution order, so a binding ends up
+    // referenced inside its temporal dead zone (before its module ran) → blank
+    // white screen.
+    //
+    // Rollup's DEFAULT chunking already splits vendor code sensibly AND preserves
+    // a correct topological init order by construction, so it never produces this
+    // class of bug. The app is also already code-split at the route/component
+    // level (React.lazy + Suspense), which is where the real first-load win comes
+    // from. Raising the warning limit just silences the size notice for our
+    // (intentionally lazy-loaded) heavy chunks.
+    chunkSizeWarningLimit: 1200,
   },
 })
