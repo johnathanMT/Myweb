@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App.jsx'
 import ImmersiveApp from './ImmersiveApp.jsx'
 import PageShell from './components/PageShell.jsx'
@@ -32,11 +32,15 @@ const Home = isImmersive ? ImmersiveApp : App
 console.info('[boot] VITE_APP_MODE =', JSON.stringify(import.meta.env.VITE_APP_MODE),
   '→ rendering', isImmersive ? 'ImmersiveApp (3D)' : 'Hub')
 
+// BrowserRouter → clean, indexable URLs (myothant.dev/python, /sanctuary, …).
+// basename = the deploy base (Vite's BASE_URL): '/' on the apex domain, '/Myweb/'
+// on a GitHub-Pages project path. Trailing slash stripped per react-router's rule.
+// NOTE: the server MUST rewrite unknown paths to index.html — see vercel.json.
+const BASENAME = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') || '/'
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* HashRouter works on GitHub Pages with no 404.html redirect needed.
-        Routes are /Myweb/#/python, /Myweb/#/studying, /Myweb/#/bibliography */}
-    <HashRouter>
+    <BrowserRouter basename={BASENAME}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/python"       element={<PageShell><PythonAutomation /></PageShell>} />
@@ -50,6 +54,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         {/* unknown paths fall back to the homepage (mode-aware) */}
         <Route path="*" element={<Home />} />
       </Routes>
-    </HashRouter>
+    </BrowserRouter>
   </React.StrictMode>,
 )

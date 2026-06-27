@@ -140,7 +140,7 @@ export default function Navbar({ lang, setLang }) {
       <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo → Home (smooth scroll to top) */}
         <a
-          href="#/"
+          href="/"
           onClick={goHome}
           aria-label="Back to top / Home"
           className="flex items-center gap-2 font-mono font-semibold text-white hover:text-accent-light transition-colors cursor-pointer"

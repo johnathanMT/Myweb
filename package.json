@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/inject-site.mjs",
+    "sitemap": "node scripts/gen-sitemap.mjs",
+    "build": "node scripts/gen-sitemap.mjs && vite build && node scripts/inject-site.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
