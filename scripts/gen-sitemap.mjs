@@ -3,7 +3,7 @@
 //
 //  Runs BEFORE `vite build` (see package.json), writing public/sitemap.xml and
 //  public/robots.txt. Vite then copies public/* into dist/, so the files ship at
-//  https://www.myothant.dev/sitemap.xml on every deploy — auto-updated, never stale.
+//  https://myothant.dev/sitemap.xml on every deploy — auto-updated, never stale.
 //
 //  It auto-discovers the real, crawlable pages:
 //    • the SPA homepage  "/"
@@ -15,7 +15,10 @@ import { readdirSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
-const SITE = (process.env.VITE_SITE_URL || process.env.SITE_URL || 'https://www.myothant.dev')
+// Default host MUST match the canonical host used by <Seo> (src/config/site.js →
+// SITE.url, default https://myothant.dev). If the sitemap says "www" but the
+// canonical tag says non-www, Google sees conflicting signals. Keep them identical.
+const SITE = (process.env.VITE_SITE_URL || process.env.SITE_URL || 'https://myothant.dev')
   .replace(/\/+$/, '')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
