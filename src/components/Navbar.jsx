@@ -2,6 +2,7 @@ import { useState, useEffect, Fragment } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { PERSONAL } from '../data/content'
+import ThemeToggle from './ThemeToggle'
 
 const LANGS = [
   { code: 'en', flag: '🇬🇧' },
@@ -47,7 +48,7 @@ const NAV_T = {
   zh: { home: '首页',       about: '关于',        projects: '项目',          stack: '技术栈',     labMenu: '科技实验室', lab: 'Lab',     agent: 'AI',  quantum: '量子',      antimatter: '反物质',      gallery: '画廊',      exploring: '探索',      sanctuary: '记忆之树',   blog: '博客' },
 };
 
-export default function Navbar({ lang, setLang }) {
+export default function Navbar({ lang, setLang, theme, toggleTheme }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [labOpen, setLabOpen] = useState(false)   // "Techno Science Lab" dropdown
@@ -239,6 +240,9 @@ export default function Navbar({ lang, setLang }) {
               </button>
             ))}
           </div>
+
+          {/* Light / dark toggle — always visible */}
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
 
           {/* Hamburger — visible below lg */}
           <button

@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
+import { getInitialTheme, applyTheme } from './hooks/useTheme.js'
 import App from './App.jsx'
 import ImmersiveApp from './ImmersiveApp.jsx'
 import PageShell from './components/PageShell.jsx'
@@ -38,6 +39,10 @@ console.info('[boot] VITE_APP_MODE =', JSON.stringify(import.meta.env.VITE_APP_M
 // basename = the deploy base (Vite's BASE_URL): '/' on the apex domain, '/Myweb/'
 // on a GitHub-Pages project path. Trailing slash stripped per react-router's rule.
 // NOTE: the server MUST rewrite unknown paths to index.html — see vercel.json.
+// Set the theme attribute BEFORE React paints, so there's no light/dark flash.
+// (CSP blocks inline <script> in index.html, so we do it here in a module.)
+applyTheme(getInitialTheme())
+
 const BASENAME = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') || '/'
 
 // ── Legacy hash-link shim ─────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { SITE } from './config/site'
+import useTheme from './hooks/useTheme'
 import AmbientBackground from './components/AmbientBackground'
 import Navbar           from './components/Navbar'
 import Gateway          from './components/Gateway'         // tiered-experience landing
@@ -44,6 +45,9 @@ export default function App() {
     try { return localStorage.getItem('mtn_lang') || 'en' } catch { return 'en' }
   })
 
+  // Light / dark theme — drives the `data-theme` attribute on <html>.
+  const { theme, toggle: toggleTheme } = useTheme()
+
   useEffect(() => {
     try { localStorage.setItem('mtn_lang', lang) } catch {}
   }, [lang])
@@ -69,7 +73,7 @@ export default function App() {
       {/* Abstract high-tech edge decorations (desktop only, behind content) */}
       <TechDecor />
 
-      <Navbar lang={lang} setLang={setLang} />
+      <Navbar lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} />
       <main className="relative z-10">
         {/* Tiered-experience landing (neon name + Lite / Immersive choice) */}
         <Gateway />

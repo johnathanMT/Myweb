@@ -8,6 +8,8 @@ export default {
         //    .theme-cyber in index.css). Same class names, different palette
         //    depending on which wrapper the app root uses. ────────────────────
         space: 'rgb(var(--space) / <alpha-value>)',
+        // Primary foreground/text — flips with the theme (near-white ⇆ near-black).
+        fg: 'rgb(var(--fg) / <alpha-value>)',
         surface: 'rgb(var(--surface) / <alpha-value>)',
         card: 'rgb(var(--card) / <alpha-value>)',
         'card-hover': 'rgb(var(--card-hover) / <alpha-value>)',

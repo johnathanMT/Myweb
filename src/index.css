@@ -40,9 +40,11 @@
   --maroon: 132 24 36;         /* #841824 — rich deep maroon (hero text fill) */
   --maroon-deep: 92 14 22;     /* darkest maroon — deep borders */
   --muted: 156 164 160;        /* cool gray body text */
+  --fg: 237 237 242;           /* primary text — near-white in dark mode */
 }
 .theme-cyber {
   --space: 7 7 15; --surface: 17 17 24; --card: 22 22 31; --card-hover: 30 30 46;
+  --fg: 237 237 242;
   --accent: 124 58 237;        /* violet #7c3aed (original) */
   --accent-light: 157 111 239; /* #9d6fef */
   --cyan: 0 212 255;           /* #00d4ff */
@@ -615,7 +617,7 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 0;
-  opacity: 0.18;   /* calmer grain — was 0.5 */
+  opacity: 0.10;   /* calmer grain — was 0.5 → 0.18 → cleaner/minimal */
 }
 
 .glow-text {
@@ -1280,3 +1282,118 @@ body::before {
 }
 .sanctuary-pulse { animation: sanctuary-pulse 2.2s ease-out infinite; }
 @media (prefers-reduced-motion: reduce) { .sanctuary-pulse { animation: none; } }
+
+/* ══════════════════════════════════════════════════════════════════
+   HERO — elegant, theme-aware gradient (replaces the video background).
+   Pure CSS, instant paint, adapts to light/dark via the palette tokens.
+   ══════════════════════════════════════════════════════════════════ */
+.hero-gradient {
+  background:
+    radial-gradient(60% 55% at 50% -10%, rgb(var(--accent) / 0.16), transparent 70%),
+    radial-gradient(45% 45% at 88% 25%, rgb(var(--jade) / 0.12), transparent 70%),
+    radial-gradient(55% 55% at 10% 95%, rgb(var(--accent) / 0.10), transparent 72%),
+    rgb(var(--space));            /* opaque base → fully covers the page backdrop */
+}
+/* faint engineering grid, masked to a soft vignette so it never feels busy */
+.hero-grid {
+  background-image:
+    linear-gradient(rgb(var(--fg) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--fg) / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 38%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(70% 60% at 50% 38%, #000 0%, transparent 78%);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT THEME — palette swap + compatibility layer.
+   Enabled by <html data-theme="light">. Dark stays the default.
+   Most components use semantic tokens (bg-space/bg-card/text-muted/text-fg),
+   so they re-skin for free. The rest of this block is a focused shim for the
+   hardcoded white/black utilities and a few dark-specific component styles.
+   ══════════════════════════════════════════════════════════════════ */
+html[data-theme="light"],
+html[data-theme="light"] .theme-batman {
+  --space: 250 250 251;        /* near-white page base */
+  --surface: 243 243 246;      /* panels */
+  --card: 255 255 255;         /* cards */
+  --card-hover: 247 248 250;
+  --forest: 13 148 96;
+  --forest-deep: 214 234 226;
+  --accent: 159 18 41;         /* deep maroon — strong on white */
+  --accent-light: 183 30 56;
+  --jade: 13 148 96;           /* deeper jade for contrast on white */
+  --jade-light: 6 122 79;
+  --cyan: 13 148 96;
+  --coral: 178 38 58;
+  --maroon: 140 28 44;
+  --maroon-deep: 110 18 32;
+  --muted: 90 96 106;          /* readable muted-gray body text */
+  --fg: 24 24 27;              /* primary text — near-black */
+  color-scheme: light;
+}
+
+html[data-theme="light"] body { color: #1f242e; }
+html[data-theme="light"] body::before { opacity: 0.04; }     /* almost no grain */
+html[data-theme="light"] ::selection { color: #18181b; }
+
+/* — text legibility shim — flip near-white/gray text to dark.
+   No !important: these rules sit after Tailwind's utilities, so they win at
+   equal specificity, while higher-specificity :hover utilities still work. */
+html[data-theme="light"] [class*="text-white"],
+html[data-theme="light"] .text-zinc-100,
+html[data-theme="light"] .text-zinc-200,
+html[data-theme="light"] .text-zinc-300 { color: #27272a; }
+html[data-theme="light"] .text-gray-300,
+html[data-theme="light"] .text-gray-400,
+html[data-theme="light"] .text-gray-500,
+html[data-theme="light"] .text-gray-600,
+html[data-theme="light"] .text-zinc-400,
+html[data-theme="light"] .text-zinc-500 { color: #52525b; }
+
+/* — surface shim — translucent white fills/borders → translucent dark on light. */
+html[data-theme="light"] [class*="bg-white/"] { background-color: rgba(17, 20, 32, 0.04); }
+html[data-theme="light"] [class*="border-white/"] { border-color: rgba(17, 20, 32, 0.10); }
+html[data-theme="light"] [class*="bg-black/"] { background-color: rgba(255, 255, 255, 0.65); }
+
+/* — keep white text where it belongs: on SOLID accent/jade/maroon/coral fills
+   (buttons, badges). The :not([…/…]) guard excludes translucent tints like
+   bg-accent/20, which sit on a light surface and need dark text instead. */
+html[data-theme="light"] [class*="bg-accent"]:not([class*="bg-accent/"]),
+html[data-theme="light"] [class*="bg-accent"]:not([class*="bg-accent/"]) [class*="text-white"],
+html[data-theme="light"] [class*="bg-jade"]:not([class*="bg-jade/"]),
+html[data-theme="light"] [class*="bg-jade"]:not([class*="bg-jade/"]) [class*="text-white"],
+html[data-theme="light"] [class*="bg-maroon"]:not([class*="bg-maroon/"]),
+html[data-theme="light"] [class*="bg-maroon"]:not([class*="bg-maroon/"]) [class*="text-white"],
+html[data-theme="light"] [class*="bg-coral"]:not([class*="bg-coral/"]),
+html[data-theme="light"] [class*="bg-coral"]:not([class*="bg-coral/"]) [class*="text-white"] { color: #fff; }
+
+/* — photo cards: their overlays stay dark, so their captions stay white. */
+html[data-theme="light"] .bento-card .overlay,
+html[data-theme="light"] .season-slide-overlay {
+  background: linear-gradient(to top, rgba(10, 10, 12, 0.92) 0%, rgba(10, 10, 12, 0.32) 60%, transparent 100%);
+}
+html[data-theme="light"] .bento-card [class*="text-white"],
+html[data-theme="light"] .bento-card .info,
+html[data-theme="light"] .season-info,
+html[data-theme="light"] .season-info [class*="text-white"] { color: #fff; }
+
+/* — component-level cleanups for light mode — */
+html[data-theme="light"] .glass-card { background: rgba(255, 255, 255, 0.7); border-color: rgba(17, 20, 32, 0.08); }
+html[data-theme="light"] .glass-panel { background: rgba(255, 255, 255, 0.62); border-color: rgba(17, 20, 32, 0.08); }
+html[data-theme="light"] .section-title,
+html[data-theme="light"] .glow-heading,
+html[data-theme="light"] .text-legible { text-shadow: none; }
+html[data-theme="light"] .section-title { color: #18181b; }
+html[data-theme="light"] .section-subtitle { color: #52525b; }
+html[data-theme="light"] .modal-box { background: #ffffff; border-color: rgba(17, 20, 32, 0.10); color: #1f242e; }
+html[data-theme="light"] .crimson-divider { background: linear-gradient(90deg, transparent, rgba(159, 18, 41, 0.45), transparent); box-shadow: none; }
+
+/* — soften the dark-cinematic decorative overlays so light mode stays calm — */
+html[data-theme="light"] .orbit-galaxy { opacity: 0.10; }
+html[data-theme="light"] .orbit-galaxy::before { opacity: 0.18; }
+html[data-theme="light"] .hud { opacity: 0.22; }
+html[data-theme="light"] .hero-grid {
+  background-image:
+    linear-gradient(rgba(17, 20, 32, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 20, 32, 0.05) 1px, transparent 1px);
+}
