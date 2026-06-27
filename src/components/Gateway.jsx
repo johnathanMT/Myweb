@@ -12,8 +12,10 @@ import { PERSONAL } from '../data/content'
  *  • Two glassmorphism tier buttons (Lite / Immersive) on a z-10 content layer.
  */
 
-// Public asset → resolves on any base path (/, /Myweb/, custom domain).
+// Public assets → resolve on any base path (/, /Myweb/, custom domain).
+// HERO_BG doubles as the video POSTER (instant image while the video buffers).
 const HERO_BG = `${import.meta.env.BASE_URL}mars_hero.webp`
+const HERO_VIDEO = `${import.meta.env.BASE_URL}mtn_mars.mp4`
 
 // Configurable; override per-environment via Vite env without code changes.
 const IMMERSIVE_URL = import.meta.env.VITE_IMMERSIVE_URL || 'https://immersive.myothant.dev'
@@ -63,15 +65,33 @@ export default function Gateway() {
   const enterLite = () => document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' })
 
   return (
-    <section id="home" className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden">
-      {/* ── 1. Full-bleed background image ── */}
+    <section id="home" className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden bg-[#060607]">
+      {/* ── 1. Full-bleed cinematic video background (-z-10) ──
+           • Base color (#060607) + poster image show instantly while it buffers.
+           • muted + playsInline + autoPlay → bypasses mobile autoplay blocking.
+           • pointer-events-none so it never intercepts clicks on the buttons. */}
+      <video
+        className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        poster={HERO_BG}
+        aria-hidden="true"
+      >
+        <source src={HERO_VIDEO} type="video/mp4" />
+        {/* graceful fallback if <video> or the source can't play */}
+      </video>
+      {/* poster also as a CSS layer → covers the gap before the first video frame */}
       <div
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center"
         style={{ backgroundImage: `url("${HERO_BG}")` }}
         aria-hidden
       />
-      {/* ── 1b. Dark gradient overlay → keeps foreground readable ── */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/80 via-black/55 to-black/90" aria-hidden />
+
+      {/* ── 1b. Cinematic dark overlay → readability + blends into the page bg ── */}
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/70 via-black/40 to-[#0a0a0c]" aria-hidden />
       {/* extra vignette so edges sink into the page */}
       <div
         className="absolute inset-0 z-0"
