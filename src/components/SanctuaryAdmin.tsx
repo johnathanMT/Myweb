@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, type LucideIcon } from 'lucide-react'
 import { SITE } from '../config/site'
 import AdminPoetryManager from './AdminPoetryManager'
+import type { Memory, EntityId } from '../types/api'
 
 /**
  * SanctuaryAdmin — admin-only dashboard (route /sanctuary-admin).
@@ -17,20 +18,38 @@ const MEMORIES_URL = `${SITE.apiUrl}/api/sanctuary/admin/memories`
 const FAREWELL_URL = `${SITE.apiUrl}/api/farewell/admin/rsvps`
 const TOKEN_KEY = 'mtn_admin_jwt'
 
+type Tab = 'memories' | 'farewell' | 'poetry'
+
+// Admin view of a farewell RSVP — includes the logistics fields the public
+// FarewellView omits (datesAvailable, foodPreference, plantType).
+interface AdminRsvp {
+  id: EntityId
+  name: string
+  attending?: boolean
+  datesAvailable?: string
+  foodPreference?: string
+  plantType?: string
+  message?: string
+  createdAt?: string
+}
+
+interface LoginResponse { data?: { token?: string; role?: string }; message?: string }
+interface AdminListResponse { memories?: Memory[]; rsvps?: AdminRsvp[] }
+
 export default function SanctuaryAdmin() {
-  const [token, setToken] = useState(() => { try { return localStorage.getItem(TOKEN_KEY) || '' } catch { return '' } })
+  const [token, setToken] = useState<string>(() => { try { return localStorage.getItem(TOKEN_KEY) || '' } catch { return '' } })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [tab, setTab] = useState('memories')        // 'memories' | 'farewell'
-  const [memories, setMemories] = useState([])
-  const [rsvps, setRsvps] = useState([])
+  const [tab, setTab] = useState<Tab>('memories')
+  const [memories, setMemories] = useState<Memory[]>([])
+  const [rsvps, setRsvps] = useState<AdminRsvp[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [q, setQ] = useState('')
 
-  const persist = (tk) => { try { tk ? localStorage.setItem(TOKEN_KEY, tk) : localStorage.removeItem(TOKEN_KEY) } catch { /* ignore */ } }
+  const persist = (tk: string) => { try { tk ? localStorage.setItem(TOKEN_KEY, tk) : localStorage.removeItem(TOKEN_KEY) } catch { /* ignore */ } }
 
-  const login = async (e) => {
+  const login = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(''); setLoading(true)
     try {
@@ -39,19 +58,19 @@ export default function SanctuaryAdmin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password }),
       })
-      const data = await res.json()
+      const data = (await res.json()) as LoginResponse
       const tk = data?.data?.token
       if (!res.ok || !tk) throw new Error(data?.message || `Login failed (${res.status})`)
       if ((data?.data?.role || '').toLowerCase() !== 'admin') throw new Error('This account is not an Admin.')
       setToken(tk); persist(tk); setPassword('')
     } catch (err) {
-      setError(err.message || 'Login failed.')
+      setError(err instanceof Error ? err.message : 'Login failed.')
     } finally { setLoading(false) }
   }
 
   const logout = () => { setToken(''); persist(''); setMemories([]); setRsvps([]) }
 
-  const load = async (which = tab) => {
+  const load = async (which: Tab = tab) => {
     if (!token) return
     setError(''); setLoading(true)
     try {
@@ -59,11 +78,11 @@ export default function SanctuaryAdmin() {
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired or not an Admin. Please log in again.') }
       if (!res.ok) throw new Error(`Failed to load (${res.status})`)
-      const data = await res.json()
+      const data = (await res.json()) as AdminListResponse
       if (which === 'farewell') setRsvps(Array.isArray(data?.rsvps) ? data.rsvps : [])
       else setMemories(Array.isArray(data?.memories) ? data.memories : [])
     } catch (err) {
-      setError(err.message || 'Could not load data.')
+      setError(err instanceof Error ? err.message : 'Could not load data.')
     } finally { setLoading(false) }
   }
 
@@ -83,7 +102,7 @@ export default function SanctuaryAdmin() {
   // Export the RSVP logistics as CSV for planning the real send-off.
   const exportCsv = () => {
     const head = ['Name', 'Attending', 'Dates Available', 'Food Preference', 'Plant', 'Message', 'Submitted']
-    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
     const rows = filteredRsvps.map((r) => [r.name, r.attending ? 'Yes' : 'No', r.datesAvailable, r.foodPreference, r.plantType, r.message, (r.createdAt || '').slice(0, 10)].map(esc).join(','))
     const blob = new Blob(['﻿' + [head.map(esc).join(','), ...rows].join('\r\n')], { type: 'text/csv;charset=utf-8;' })
     const a = document.createElement('a')
@@ -93,7 +112,7 @@ export default function SanctuaryAdmin() {
     URL.revokeObjectURL(a.href)
   }
 
-  const TabBtn = ({ id, icon: Icon, label }) => (
+  const TabBtn = ({ id, icon: Icon, label }: { id: Tab; icon: LucideIcon; label: string }) => (
     <button type="button" onClick={() => setTab(id)}
       className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-xs transition ${tab === id ? 'border-amber-300/60 bg-amber-300/15 text-amber-100' : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10'}`}>
       <Icon size={14} /> {label}

@@ -1,10 +1,11 @@
 import { useCyberReveal } from '../hooks/useCyberReveal'
-import { Database, ShieldCheck } from 'lucide-react'
+import { Database, ShieldCheck, type LucideIcon } from 'lucide-react'
 // Authentic CC0 brand icons, bundled locally from the `simple-icons` npm package
 // → ZERO external CDN. Tree-shaken: only these 11 icons ship in the bundle.
 import {
   siReact, siVite, siTailwindcss, siThreedotjs, siFramer, siGreensock,
   siDotnet, siMysql, siCloudinary, siVercel, siRender,
+  type SimpleIcon,
 } from 'simple-icons'
 
 /**
@@ -19,7 +20,7 @@ const GOLD = '#c9a13b'
 
 // ── LOGO MAPPING (single source of truth, 100% local) ───────────────────────
 // name → simple-icons icon object ({ path, hex, title }). No network, no CDN.
-const techLogos = {
+const techLogos: Record<string, SimpleIcon> = {
   'React': siReact,
   'Vite': siVite,
   'Tailwind CSS': siTailwindcss,
@@ -35,10 +36,13 @@ const techLogos = {
 
 // Use the official brand colour, except near-black marks (three.js / vercel /
 // render = #000000) which we tint gold so they're visible on the dark theme.
-const tintFor = (icon) => (icon.hex === '000000' ? GOLD : `#${icon.hex}`)
+const tintFor = (icon: SimpleIcon): string => (icon.hex === '000000' ? GOLD : `#${icon.hex}`)
 
 // Each item is just a name (→ looked up in techLogos) or a lucide `icon`.
-const STACK = [
+interface StackItem { name: string; icon?: LucideIcon }
+interface StackGroup { group: string; items: StackItem[] }
+
+const STACK: StackGroup[] = [
   {
     group: 'Frontend',
     items: [
@@ -64,32 +68,43 @@ const STACK = [
 ]
 
 // i18n. Only `en` is fully written; other languages fall back to en per key.
-const T = {
-  en: {
-    badge: 'ARCHITECTURE & JOURNEY',
-    title: 'AI Engineering my way',
-    accent: 'from care to code',
-    intro:
-      '',
-    paras: ['International Relations graduate turned Software Engineer. By day, I support those in need as a care worker; by night, I’m deep-diving into CS and building Agentic AI systems. I bring human-centric perspective to every line of code I write.',
-      'That path shaped how I build: patient, detail-driven, and focused on people. I taught myself to ship full-stack systems end-to-end — from database schema to deployed UI.',
-      'My core strength is robust backend engineering with C# / .NET 8 (REST APIs, EF Core, JWT auth, rate limiting), paired with a modern React + Vite + Tailwind frontend and 3D WebGL experiences.',
-      'Everything here runs on a decoupled, security-hardened architecture: a Vercel-hosted frontend talking to a .NET API on Render, backed by Aiven MySQL and Cloudinary media.',
-    ],
-    chips: ['C# / .NET 8', 'React', 'Distributed Systems', 'Security', 'AI'],
-    stackHead: 'The Stack',
-  },
+interface StackText {
+  badge: string
+  title: string
+  accent: string
+  intro: string
+  paras: string[]
+  chips: string[]
+  stackHead: string
+}
+
+const EN: StackText = {
+  badge: 'ARCHITECTURE & JOURNEY',
+  title: 'AI Engineering my way',
+  accent: 'from care to code',
+  intro: '',
+  paras: ['International Relations graduate turned Software Engineer. By day, I support those in need as a care worker; by night, I’m deep-diving into CS and building Agentic AI systems. I bring human-centric perspective to every line of code I write.',
+    'That path shaped how I build: patient, detail-driven, and focused on people. I taught myself to ship full-stack systems end-to-end — from database schema to deployed UI.',
+    'My core strength is robust backend engineering with C# / .NET 8 (REST APIs, EF Core, JWT auth, rate limiting), paired with a modern React + Vite + Tailwind frontend and 3D WebGL experiences.',
+    'Everything here runs on a decoupled, security-hardened architecture: a Vercel-hosted frontend talking to a .NET API on Render, backed by Aiven MySQL and Cloudinary media.',
+  ],
+  chips: ['C# / .NET 8', 'React', 'Distributed Systems', 'Security', 'AI'],
+  stackHead: 'The Stack',
+}
+
+const T: Record<string, Partial<StackText>> = {
+  en: EN,
   mm: { badge: 'ဗိသုကာနှင့် ခရီး', title: 'ပြုစုခြင်းမှ', accent: 'ကုဒ်ရေးခြင်းဆီ', stackHead: 'နည်းပညာများ' },
   jp: { badge: 'アーキテクチャと歩み', title: 'ケアからコードへ', accent: '私の道のり', stackHead: '技術スタック' },
   zh: { badge: '架构与历程', title: '从护理', accent: '到代码', stackHead: '技术栈' },
 }
 
 // First alphanumeric character → monogram fallback (e.g. "C# / .NET 8" → "C").
-const monogram = (name) => (name.match(/[A-Za-z0-9]/)?.[0] || '?').toUpperCase()
+const monogram = (name: string): string => (name.match(/[A-Za-z0-9]/)?.[0] || '?').toUpperCase()
 
 // Inline SVG built from the bundled icon's path data — always renders, can never
 // 404 or be rate-limited (it's part of the JS bundle, not a network request).
-function BrandIcon({ icon }) {
+function BrandIcon({ icon }: { icon: SimpleIcon }) {
   return (
     <svg role="img" aria-label={`${icon.title} logo`} viewBox="0 0 24 24" className="h-7 w-7" fill={tintFor(icon)}>
       <path d={icon.path} />
@@ -97,7 +112,7 @@ function BrandIcon({ icon }) {
   )
 }
 
-function LogoTile({ item }) {
+function LogoTile({ item }: { item: StackItem }) {
   const Icon = item.icon
   const brand = techLogos[item.name]        // bundled simple-icons object (or undefined)
   return (
@@ -116,8 +131,10 @@ function LogoTile({ item }) {
   )
 }
 
-export default function TechStack({ lang = 'en' }) {
-  const t = { ...T.en, ...(T[lang] || {}) }   // fall back to en per missing key
+interface TechStackProps { lang?: string }
+
+export default function TechStack({ lang = 'en' }: TechStackProps) {
+  const t: StackText = { ...EN, ...(T[lang] || {}) }   // fall back to en per missing key
   const ref = useCyberReveal()
 
   return (

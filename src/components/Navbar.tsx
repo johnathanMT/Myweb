@@ -1,10 +1,12 @@
-import { useState, useEffect, Fragment } from 'react'
+import { useState, useEffect, Fragment, type MouseEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { PERSONAL } from '../data/content'
 import ThemeToggle from './ThemeToggle'
+import type { Theme } from '../hooks/useTheme'
 
-const LANGS = [
+interface LangOption { code: string; flag: string }
+const LANGS: LangOption[] = [
   { code: 'en', flag: '🇬🇧' },
   { code: 'mm', flag: '🇲🇲' },
   { code: 'jp', flag: '🇯🇵' },
@@ -14,10 +16,17 @@ const LANGS = [
   { code: 'zh', flag: '🇨🇳' },
 ]
 
-const isGitHub = window.location.hostname.includes('github.io');
-const blogPath = isGitHub ? '/Myweb/blog.html' : '/blog.html';
+const isGitHub = window.location.hostname.includes('github.io')
+const blogPath = isGitHub ? '/Myweb/blog.html' : '/blog.html'
 
-const NAV_LINKS = [
+interface NavLink {
+  key: string
+  href?: string
+  route?: string
+  isExternal?: boolean
+}
+
+const NAV_LINKS: NavLink[] = [
   { href: '#home', key: 'home' },
   { href: '#about', key: 'about' },
   { href: '#projects', key: 'projects' },
@@ -26,19 +35,19 @@ const NAV_LINKS = [
   { href: '#exploring', key: 'exploring' },
   { route: '/sanctuary', key: 'sanctuary' },     // dedicated route (#/sanctuary)
   { href: blogPath, key: 'blog', isExternal: true },
-];
+]
 
 // The four interactive CS sections, grouped under one "Techno Science Lab" menu.
-const LAB_LINKS = [
+const LAB_LINKS: NavLink[] = [
   { href: '#lab', key: 'lab' },              // Algorithm Lab (sorting / A* / Dijkstra / BST)
   { href: '#agent', key: 'agent' },          // Agentic-AI workflow
   { href: '#quantum', key: 'quantum' },      // 2-qubit circuit
   { href: '#antimatter', key: 'antimatter' },// annihilation sim
-];
-const LAB_KEYS = LAB_LINKS.map((l) => l.key);
+]
+const LAB_KEYS = LAB_LINKS.map((l) => l.key)
 
 // i18n labels for the nav (falls back to `en` for any missing language).
-const NAV_T = {
+const NAV_T: Record<string, Record<string, string>> = {
   en: { home: 'Home',      about: 'About',      projects: 'Projects',      stack: 'Stack',     labMenu: 'Techno Science Lab', lab: 'Lab',     agent: 'AI',  quantum: 'Quantum',   antimatter: 'Antimatter',  gallery: 'Gallery',  exploring: 'Exploring', sanctuary: 'Sanctuary', blog: 'Blog' },
   mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာ',   labMenu: 'Techno Science Lab', lab: 'Lab',     agent: 'AI',  quantum: 'ကွမ်တမ်',    antimatter: 'Antimatter',  gallery: 'ပြခန်း',    exploring: 'လေ့လာရန်',  sanctuary: 'အောက်မေ့ပင်', blog: 'ဘလော့' },
   jp: { home: 'ホーム',     about: '概要',        projects: 'プロジェクト',    stack: 'スタック',  labMenu: 'テクノサイエンス', lab: 'Lab',     agent: 'AI',  quantum: '量子',      antimatter: '反物質',      gallery: 'ギャラリー', exploring: '探索',      sanctuary: '記憶の木',   blog: 'ブログ' },
@@ -46,9 +55,16 @@ const NAV_T = {
   ne: { home: 'गृह',        about: 'परिचय',       projects: 'परियोजना',       stack: 'स्ट्याक',    labMenu: 'Techno Science Lab', lab: 'Lab',     agent: 'AI',  quantum: 'क्वान्टम',  antimatter: 'प्रतिपदार्थ',   gallery: 'ग्यालरी',   exploring: 'अन्वेषण',    sanctuary: 'सम्झना रूख', blog: 'ब्लग' },
   id: { home: 'Beranda',   about: 'Tentang',    projects: 'Proyek',        stack: 'Teknologi', labMenu: 'Techno Science Lab', lab: 'Lab',     agent: 'AI',  quantum: 'Kuantum',   antimatter: 'Antimateri',  gallery: 'Galeri',   exploring: 'Jelajahi',  sanctuary: 'Pohon Kenangan', blog: 'Blog' },
   zh: { home: '首页',       about: '关于',        projects: '项目',          stack: '技术栈',     labMenu: '科技实验室', lab: 'Lab',     agent: 'AI',  quantum: '量子',      antimatter: '反物质',      gallery: '画廊',      exploring: '探索',      sanctuary: '记忆之树',   blog: '博客' },
-};
+}
 
-export default function Navbar({ lang, setLang, theme, toggleTheme }) {
+interface NavbarProps {
+  lang: string
+  setLang: (lang: string) => void
+  theme: Theme
+  toggleTheme: () => void
+}
+
+export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [labOpen, setLabOpen] = useState(false)   // "Techno Science Lab" dropdown
@@ -88,7 +104,7 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }) {
 
   // Smooth-scroll to an element id, retrying briefly while the Home page mounts
   // (sections aren't in the DOM the instant we navigate from another route).
-  const scrollToId = (id, tries = 25) => {
+  const scrollToId = (id: string, tries = 25) => {
     const el = document.getElementById(id)
     if (el) { el.scrollIntoView({ behavior: 'smooth' }); return }
     if (tries > 0) setTimeout(() => scrollToId(id, tries - 1), 80)
@@ -100,7 +116,7 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }) {
   //  • on Home ('/')    → scroll right now.
   //  • on another route → navigate('/'), then scroll once Home has mounted.
   //  • 'home' link      → always scroll to the very top.
-  const goToSection = (id) => {
+  const goToSection = (id: string) => {
     const onHome = location.pathname === '/'
     if (id === 'home') {
       if (onHome) scrollTop()
@@ -115,21 +131,21 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }) {
   //  • isExternal (blog)  → let the browser follow the real link.
   //  • route (/sanctuary) → client-side navigate to that route.
   //  • href (#section)    → cross-page smooth-scroll to the section.
-  const handleNav = (e, item) => {
-    if (item.isExternal) return;
-    e.preventDefault();
-    setMenuOpen(false);
-    if (item.route) { navigate(item.route); return; }
-    goToSection(item.href.replace(/^#/, ''));
-  };
+  const handleNav = (e: MouseEvent<HTMLAnchorElement>, item: NavLink) => {
+    if (item.isExternal) return
+    e.preventDefault()
+    setMenuOpen(false)
+    if (item.route) { navigate(item.route); return }
+    if (item.href) goToSection(item.href.replace(/^#/, ''))
+  }
 
   // Logo → Home + smooth-scroll to the very top (works from any route).
-  const goHome = (e) => {
-    e.preventDefault();
-    setMenuOpen(false);
+  const goHome = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    setMenuOpen(false)
     if (location.pathname === '/') scrollTop()
     else { navigate('/'); setTimeout(scrollTop, 120) }
-  };
+  }
 
   return (
     <header
@@ -153,10 +169,10 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }) {
         {/* Desktop nav links — now appear at lg (>=1024px) */}
         <ul className="hidden lg:flex items-center gap-1">
           {NAV_LINKS.map((item) => {
-            const { key, href, route, isExternal = false } = item;
+            const { key, href, route, isExternal = false } = item
             const isActive = route
               ? location.pathname === route
-              : (activeSection === href?.slice(1) && !isExternal && location.pathname === '/');
+              : (activeSection === href?.slice(1) && !isExternal && location.pathname === '/')
             return (
               <Fragment key={key}>
                 <li>
@@ -201,25 +217,25 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }) {
                     >
                       <p className="px-3 pb-1.5 pt-1 font-mono text-[10px] uppercase tracking-wider text-jade/70">// lab modules</p>
                       {LAB_LINKS.map((sub) => {
-                        const subActive = activeSection === sub.key && location.pathname === '/';
+                        const subActive = activeSection === sub.key && location.pathname === '/'
                         return (
                           <a
                             key={sub.key}
                             href={sub.href}
-                            onClick={(e) => { handleNav(e, sub); setLabOpen(false); }}
+                            onClick={(e) => { handleNav(e, sub); setLabOpen(false) }}
                             className={`flex items-center gap-2.5 rounded-lg px-3 py-2 font-mono text-xs transition-colors ${
                               subActive ? 'bg-accent/20 text-accent-light' : 'text-muted hover:bg-jade/10 hover:text-jade-light'
                             }`}
                           >
                             <span className="h-1.5 w-1.5 rounded-full bg-jade/60" /> {t[sub.key]}
                           </a>
-                        );
+                        )
                       })}
                     </div>
                   </li>
                 )}
               </Fragment>
-            );
+            )
           })}
         </ul>
 

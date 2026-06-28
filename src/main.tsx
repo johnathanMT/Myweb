@@ -15,8 +15,8 @@ import './index.css'
 
 // Lazy: pulls in tsparticles — code-split out of the main bundle.
 const Sanctuary = lazy(() => import('./components/Sanctuary.jsx'))
-const SanctuaryAdmin = lazy(() => import('./components/SanctuaryAdmin.jsx'))
-const FarewellRSVP = lazy(() => import('./components/FarewellRSVP.jsx'))
+const SanctuaryAdmin = lazy(() => import('./components/SanctuaryAdmin'))
+const FarewellRSVP = lazy(() => import('./components/FarewellRSVP'))
 
 // ── TIERED EXPERIENCE SWITCH (single-repo, two Vercel deployments) ────────────
 // One codebase, two builds chosen at BUILD time by an env var:

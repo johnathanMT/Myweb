@@ -1,19 +1,32 @@
+import type { CSSProperties } from 'react'
 import { PERSONAL, SKILLS } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 
-const T = {
-  
-  mm: { title: 'ကျတော့် အကြောင်း', bio: 'ဂျပန်တွင် နေထိုင်သည်။ တိုးတက်ပြောင်းလဲနေသော Ai ခေတ်သစ်ဆီသို့', slogan: 'ဘယ်တော့မှ မစတင်ဖြစ်ခဲ့တာထက်စာရင် နောက်ကျတာက ပိုကောင်းပါတယ်။', skills: 'အဓိက ကျွမ်းကျင်မှုများ' },
+// Inline styles that set CSS custom properties (e.g. `--g`) — React's CSSProperties
+// doesn't allow arbitrary `--*` keys in an inline literal, so widen with this.
+type CSSVars = CSSProperties & Record<`--${string}`, string | number>
+
+interface AboutText { title: string; bio: string; slogan: string; skills: string }
+const T: Record<string, AboutText> = {
+  mm: { title: 'ကျတော့် အကြောင်း', bio: 'ဂျပန်တွင် နေထိုင်သည်။ တိုးတက်ပြောင်းလဲနေသော Ai ခေတ်သစ်ဆီသို့', slogan: 'ဘယ်တော့မှ မစတင်ဖြစ်ခဲ့တာထက်စာရင် နောက်ကျတာက ပိုကောင်းပါတယ်။', skills: 'အဓိက ကျွမ်းကျင်မှုများ' },
   en: { title: 'About Me', bio: 'Living in Japan. Advancing towards the evolving new era of AI.', slogan: 'Better late than never.', skills: 'Core Competencies' },
   jp: { title: '私について', bio: '日本在住。進化し続ける新しいAI時代へ。', slogan: '遅れても、全くやらないよりはまし。', skills: 'コアスキル' },
   vn: { title: 'Về Tôi', bio: 'Sống ở Nhật Bản. Hướng tới kỷ nguyên AI mới đang không ngừng phát triển.', slogan: 'Thà muộn còn hơn không.', skills: 'Năng lực cốt lõi' },
   ne: { title: 'मेरो बारेमा', bio: 'जापानमा बसोबास। विकासशील नयाँ एआई (AI) युगको तर्फ।', slogan: 'कहिल्यै सुरु नगर्नुभन्दा ढिलो सुरु गर्नु राम्रो हो।', skills: 'मुख्य दक्षताहरू' },
-  id: { title: 'Tentang Saya', bio: 'Tinggal di Jepang. Melangkah menuju era baru AI yang terus berkembang.', slogan: 'Lebih baik terlambat daripada tidak sama sekali.', skills: 'Kompetensi Inti' }
+  id: { title: 'Tentang Saya', bio: 'Tinggal di Jepang. Melangkah menuju era baru AI yang terus berkembang.', slogan: 'Lebih baik terlambat daripada tidak sama sekali.', skills: 'Kompetensi Inti' },
 }
 
+interface AboutProps { lang?: string }
 
+interface QuickFact { icon: string; label: string; value: string }
+const QUICK_FACTS: QuickFact[] = [
+  { icon: 'fas fa-graduation-cap', label: 'Computer Science University', value: 'Enrolled' },
+  { icon: 'fas fa-briefcase-medical', label: 'Background', value: 'International Relations & Healthcare' },
+  { icon: 'fas fa-code', label: 'Focus', value: 'AI / Web Dev' },
+  { icon: 'fas fa-language', label: 'Languages', value: 'EN · JP · MY' },
+]
 
-export default function About({ lang }) {
+export default function About({ lang = 'en' }: AboutProps) {
   const t = T[lang] || T.en
   // GSAP ScrollTrigger reveals, synced to the same scroll as the 3D camera.
   const sectionRef = useCyberReveal()
@@ -95,12 +108,7 @@ export default function About({ lang }) {
 
             {/* Quick facts — glass tiles with glowing icons */}
             <div className="grid grid-cols-2 gap-3">
-              {[
-                { icon: 'fas fa-graduation-cap', label: 'Computer Science University', value: 'Enrolled' },
-                { icon: 'fas fa-briefcase-medical', label: 'Background', value: 'International Relations & Healthcare' },
-                { icon: 'fas fa-code', label: 'Focus', value: 'AI / Web Dev' },
-                { icon: 'fas fa-language', label: 'Languages', value: 'EN · JP · MY' },
-              ].map(({ icon, label, value }) => (
+              {QUICK_FACTS.map(({ icon, label, value }) => (
                 <div key={label}
                   className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/8 hover:border-accent/40 hover:bg-accent/5 transition-all duration-200">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent-light"
@@ -125,7 +133,7 @@ export default function About({ lang }) {
               <div
                 key={name}
                 className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/8 backdrop-blur-sm hover:-translate-y-0.5 hover:border-white/25 transition-all duration-200 group cursor-default"
-                style={{ '--g': color }}
+                style={{ '--g': color } as CSSVars}
                 onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 18px -4px ${color}` }}
                 onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none' }}
               >

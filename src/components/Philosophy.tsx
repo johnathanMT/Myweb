@@ -4,15 +4,17 @@ import { PERSONAL } from '../data/content'
 /* Matrix-style code rain drawn on a <canvas>, sized to its parent.
    Throttled to ~16fps and disabled for prefers-reduced-motion. */
 function MatrixRain() {
-  const ref = useRef(null)
+  const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     const canvas = ref.current
     if (!canvas) return
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
     const ctx = canvas.getContext('2d')
+    if (!ctx) return
     const chars = 'アイウエオカキ0123456789ABCDEF<>[]{}()=+*/$#@'.split('')
     const fontSize = 14
-    let w, h, drops, raf, last = 0
+    let w = 0, h = 0, raf = 0, last = 0
+    let drops: number[] = []
 
     const resize = () => {
       w = canvas.width = canvas.offsetWidth
@@ -23,7 +25,7 @@ function MatrixRain() {
     const ro = new ResizeObserver(resize)
     ro.observe(canvas)
 
-    const draw = (t) => {
+    const draw = (t: number) => {
       raf = requestAnimationFrame(draw)
       if (t - last < 60) return
       last = t
@@ -48,7 +50,7 @@ function MatrixRain() {
 }
 
 export default function Philosophy() {
-  const sectionRef = useRef(null)
+  const sectionRef = useRef<HTMLElement>(null)
   const [typed, setTyped] = useState('')
   const [done, setDone] = useState(false)
   const fullText = `print("${PERSONAL.quote}")`
@@ -66,7 +68,7 @@ export default function Philosophy() {
           }, 32)
         }
       },
-      { threshold: 0.35 }
+      { threshold: 0.35 },
     )
     if (sectionRef.current) observer.observe(sectionRef.current)
     return () => observer.disconnect()

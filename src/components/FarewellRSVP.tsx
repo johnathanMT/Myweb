@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Send, ArrowLeft, Calendar, Utensils, Languages, Check, X, Sprout, Cherry } from 'lucide-react'
 import { SITE } from '../config/site'
+import type { FarewellRsvp, EntityId } from '../types/api'
 
 /**
- * FarewellRSVP — route /#/farewell.
+ * FarewellRSVP — route /farewell.
  *
  *  1. Anti-spam: after a successful submit we set localStorage `mtn_farewell_planted`.
  *     On mount, if it's set, we skip the form and show a "thank you" card instead.
@@ -16,13 +17,13 @@ import { SITE } from '../config/site'
  *  4. 8-language i18n (EN/JA/MY/VI/ID/ZH/NE/MN).
  *
  * On submit it POSTs to /api/farewell/rsvp, stashes the returned monument under
- * localStorage['mtn_pending_plant'], and redirects to /#/sanctuary.
+ * localStorage['mtn_pending_plant'], and redirects to /sanctuary.
  */
 const API = `${SITE.apiUrl}/api/farewell/rsvp`
 const PENDING_KEY = 'mtn_pending_plant'
 const PLANTED_FLAG = 'mtn_farewell_planted'   // one submission per device
 
-function getOperatorId() {
+function getOperatorId(): string {
   try {
     let id = localStorage.getItem('mtn_operator_id')
     if (!id) {
@@ -34,13 +35,14 @@ function getOperatorId() {
 }
 
 // ───────────────────────── 8-language dictionary ─────────────────────────
-const LANGS = [
+interface LangOption { code: string; label: string }
+const LANGS: LangOption[] = [
   { code: 'en', label: 'EN' }, { code: 'ja', label: '日本語' }, { code: 'my', label: 'မြန်မာ' },
   { code: 'vi', label: 'VI' }, { code: 'id', label: 'ID' }, { code: 'zh', label: '中文' },
   { code: 'ne', label: 'नेपाली' }, { code: 'mn', label: 'MN' },
 ]
 
-const T = {
+const T: Record<string, Record<string, string>> = {
   en: {
     title: 'Plant a Living Memory for ナイン',
     subtitle: 'Thank you for your friendship and the lasting memories we share. As a token of our bond, I invite you to plant a Friendship Cherry Blossom tree in this little 3D world, along with a memorable message.',
@@ -174,17 +176,7 @@ const T = {
 const inputCls = 'mt-1.5 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/40 outline-none transition focus:border-amber-200/60 focus:bg-white/15 sm:py-2.5 sm:text-sm'
 
 // Shared full-screen shell — guarantees smooth vertical scrolling on every phone.
-//   • Background is FIXED to the viewport (never scrolls / never clips).
-//   • The scroll VIEWPORT is exactly one dynamic-viewport tall (h-[100dvh]) with
-//     overflow-y-auto + momentum touch scrolling → adapts as the mobile address
-//     bar shows/hides, and actually engages its own scrollbar (a min-h container
-//     can't, because it just grows to fit its content).
-//   • The content uses `m-auto` (not justify-center): it centres when short, but
-//     when it's taller than the screen the auto-margins collapse to 0 so the TOP
-//     stays reachable — fixing the "stuck / clipped at the top" bug.
-//   • Generous safe bottom padding keeps the Submit button clear of the iOS/
-//     Android bottom bars.
-function Shell({ children }) {
+function Shell({ children }: { children: ReactNode }) {
   return (
     <>
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-b from-[#070b1c] via-[#141a38] to-[#2a1a3a]"
@@ -202,7 +194,7 @@ function Shell({ children }) {
   )
 }
 
-function LangBar({ lang, setLang }) {
+function LangBar({ lang, setLang }: { lang: string; setLang: (code: string) => void }) {
   return (
     <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5">
       <Languages size={14} className="mr-0.5 text-white/50" />
@@ -216,18 +208,30 @@ function LangBar({ lang, setLang }) {
   )
 }
 
+// The monument we stash for the Sanctuary to render — either an optimistic
+// offline placeholder (position null) or the server-assigned plot.
+interface PlantedMonument {
+  id?: EntityId
+  name: string
+  plantType: string
+  position: number[] | null
+}
+
+// What /api/farewell/rsvp returns (plus an optional error message field).
+type FarewellResponse = Partial<FarewellRsvp> & { message?: string }
+
 export default function FarewellRSVP() {
   const navigate = useNavigate()
   const operatorId = useRef(getOperatorId()).current
 
-  const [lang, setLang] = useState(() => { try { return localStorage.getItem('mtn_lang') || 'en' } catch { return 'en' } })
+  const [lang, setLang] = useState<string>(() => { try { return localStorage.getItem('mtn_lang') || 'en' } catch { return 'en' } })
   useEffect(() => { try { localStorage.setItem('mtn_lang', lang) } catch { /* ignore */ } }, [lang])
   const t = T[lang] || T.en
 
   // Anti-spam: one submission per device.
-  const [alreadyPlanted] = useState(() => { try { return localStorage.getItem(PLANTED_FLAG) === 'true' } catch { return false } })
+  const [alreadyPlanted] = useState<boolean>(() => { try { return localStorage.getItem(PLANTED_FLAG) === 'true' } catch { return false } })
 
-  const [attending, setAttending] = useState(null)   // null | true | false
+  const [attending, setAttending] = useState<boolean | null>(null)   // null | true | false
   const [name, setName] = useState('')
   const [dates, setDates] = useState('')
   const [food, setFood] = useState('')
@@ -237,11 +241,7 @@ export default function FarewellRSVP() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  // NOTE: we deliberately do NOT lock document.body scroll here. Locking it was
-  // what made the page feel "stuck" on phones — the Shell now owns a real scroll
-  // viewport, so the body must stay free.
-
-  const submit = async (e) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (attending === null || !name.trim() || !message.trim() || submitting) return
     setSubmitting(true); setError('')
@@ -255,7 +255,7 @@ export default function FarewellRSVP() {
       plantType: 'sakura',                    // every monument is the Friendship Sakura
     }
 
-    let planted = { name: payload.name, plantType: 'sakura', position: null }
+    let planted: PlantedMonument = { name: payload.name, plantType: 'sakura', position: null }
     try {
       const res = await fetch(API, {
         method: 'POST',
@@ -263,7 +263,7 @@ export default function FarewellRSVP() {
         credentials: 'include',
         body: JSON.stringify(payload),
       })
-      const data = await res.json().catch(() => null)
+      const data = (await res.json().catch(() => null)) as FarewellResponse | null
       if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`)
       if (data?.position && typeof data.position.x === 'number') {
         planted = { id: data.id, name: data.name || payload.name, plantType: 'sakura', position: [data.position.x, data.position.y, data.position.z] }
