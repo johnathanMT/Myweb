@@ -1,5 +1,5 @@
 // ============================================================================
-//  assets.js — ONE registry for every image in the app.
+//  assets.ts — ONE registry for every image in the app.
 //
 //  THREE kinds of asset, and when to use each:
 //
@@ -7,6 +7,7 @@
 //     (profile.<hash>.jpg) and rewrites the URL with the correct base
 //     automatically, so it resolves on ANY domain (/, /Myweb/, custom) with
 //     zero path math. ← preferred for app images. Best caching + no 404s.
+//     (TS types these imports as `string` via the `vite/client` ambient types.)
 //
 //  2) PUBLIC   (public/**) — referenced by build-relative path via publicAsset().
 //     The file is served verbatim at <base>/<path>. Use only when a STABLE,
@@ -24,7 +25,6 @@
 // —— 1) BUNDLED imports (hashed + domain-proof) ——————————————————————————————
 import profile from '../assets/images/profile.jpg'
 import profileWebp from '../assets/images/profile.webp' // lighter sibling (browsers pick this first)
-// Add more like:  import m5stack from '../assets/images/m5stack.jpg'
 
 // —— 2) BUNDLED imports ——————————————————————————————————————————————
 import tokyo from '../assets/images/tokyo_night.jpg' // For Travel Chronic Section.
@@ -37,12 +37,21 @@ import kaigo_experience from '../assets/images/diaper_night.png' // For Travel C
 // ('/' for the apex domain, '/Myweb/' for a github.io project page). Always
 // ends with a slash, so paths resolve regardless of domain.
 const BASE = import.meta.env.BASE_URL || '/'
-export const publicAsset = (p) => BASE + String(p).replace(/^\/+/, '')
+export const publicAsset = (p: string): string => BASE + String(p).replace(/^\/+/, '')
 
 // —— 3) REMOTE (centralised; localise by swapping to a bundled import) ————————
-const unsplash = (id, w = 1200) => `https://images.unsplash.com/${id}?w=${w}&q=90`
+const unsplash = (id: string, w = 1200): string => `https://images.unsplash.com/${id}?w=${w}&q=90`
 
-export const ASSETS = {
+export interface AssetRegistry {
+  profile: string
+  profileWebp: string
+  profilePublic: string
+  fallback: string
+  months: Record<string, string>
+  blog: Record<string, string>
+}
+
+export const ASSETS: AssetRegistry = {
   // Profile: bundled (used by the React About section — domain-proof, no 404).
   profile,
   profileWebp,
@@ -72,9 +81,9 @@ export const ASSETS = {
   blog: {
     kyoto:              unsplash('photo-1493976040374-85c8e12f0c0e'),
     osaka:              unsplash('photo-1566073771259-6a8506099945'),
-    tokyo:              tokyo, // bundled import ) 
+    tokyo:              tokyo, // bundled import
     thoughts:           unsplash('photo-1441974231531-c6227db76b6e'),
-    kaigo_experience:   kaigo_experience, // bundled import )
+    kaigo_experience:   kaigo_experience, // bundled import
   },
 }
 

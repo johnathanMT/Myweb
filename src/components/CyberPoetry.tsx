@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { ChevronLeft, ChevronRight, BookOpen } from 'lucide-react'
 import { SITE } from '../config/site'
+import type { Poem, PoetryResponse } from '../types/api'
 
 /**
  * CyberPoetry — an interactive "Holographic Grimoire": a dark, glowing flip-book
  * of techno-science poems. Poems are fetched LIVE from the public API
- * (GET /api/poetry); if that's empty/unreachable we fall back to the bundled
- * defaults so the homepage section is never blank.
+ * (GET /api/poetry → { poems }); if that's empty/unreachable we fall back to the
+ * bundled defaults so the homepage section is never blank.
  *
  * The 3D page-turn is done with framer-motion (no extra library): each page
  * swings on its spine (rotateY) as you click the arrows or drag left/right.
@@ -15,15 +16,15 @@ import { SITE } from '../config/site'
 const API = `${SITE.apiUrl}/api/poetry`
 
 // Fallback poems (original) — shown if the API has none yet or is offline.
-const DEFAULT_POEMS = [
+const DEFAULT_POEMS: Poem[] = [
   { id: 'd1', title: '// run: becoming', subtitle: 'log_001 · ai', content: 'At 03:00 the compiler hums,\na small city of logic learning to wake.\nI feed it intention; it answers in light —\neach bug a teacher, each fix a quiet dawn.\nFrom caring hands to careful code,\nthe same warm logic, a different gate.' },
   { id: 'd2', title: '// observe: superposition', subtitle: 'log_002 · quantum', content: 'Before I look, I am every road at once —\nmaybe and maybe, folded into one.\nTo measure is only a brave decision;\ncollapse is just choosing to begin.\nSo I open my eyes, the wavefunction sings,\nand one path lights up, electric green.' },
 ]
 
-const variants = {
-  enter: (d) => ({ rotateY: d > 0 ? 78 : -78, x: d > 0 ? 70 : -70, opacity: 0 }),
+const variants: Variants = {
+  enter: (d: number) => ({ rotateY: d > 0 ? 78 : -78, x: d > 0 ? 70 : -70, opacity: 0 }),
   center: { rotateY: 0, x: 0, opacity: 1 },
-  exit: (d) => ({ rotateY: d > 0 ? -78 : 78, x: d > 0 ? -70 : 70, opacity: 0 }),
+  exit: (d: number) => ({ rotateY: d > 0 ? -78 : 78, x: d > 0 ? -70 : 70, opacity: 0 }),
 }
 
 function Corners() {
@@ -39,7 +40,7 @@ function Corners() {
 }
 
 export default function CyberPoetry() {
-  const [poems, setPoems] = useState(DEFAULT_POEMS)
+  const [poems, setPoems] = useState<Poem[]>(DEFAULT_POEMS)
   const [index, setIndex] = useState(0)
   const [dir, setDir] = useState(0)
 
@@ -47,7 +48,7 @@ export default function CyberPoetry() {
   useEffect(() => {
     let alive = true
     fetch(API)
-      .then((r) => r.json())
+      .then((r) => r.json() as Promise<Partial<PoetryResponse>>)
       .then((d) => {
         if (alive && Array.isArray(d?.poems) && d.poems.length) { setPoems(d.poems); setIndex(0) }
       })
@@ -57,7 +58,7 @@ export default function CyberPoetry() {
 
   const n = poems.length
   const poem = poems[index]
-  const go = (delta) => { setDir(delta); setIndex((i) => (i + delta + n) % n) }
+  const go = (delta: number) => { setDir(delta); setIndex((i) => (i + delta + n) % n) }
   const lines = (poem?.content || '').split('\n')
 
   return (
@@ -89,7 +90,7 @@ export default function CyberPoetry() {
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.22}
-                onDragEnd={(e, info) => { if (info.offset.x < -70) go(1); else if (info.offset.x > 70) go(-1) }}
+                onDragEnd={(_e, info) => { if (info.offset.x < -70) go(1); else if (info.offset.x > 70) go(-1) }}
                 style={{ transformStyle: 'preserve-3d', transformOrigin: dir > 0 ? 'left center' : 'right center' }}
                 className="relative cursor-grab overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0c0f0e] to-[#070908] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] active:cursor-grabbing sm:p-10"
               >
@@ -113,7 +114,7 @@ export default function CyberPoetry() {
                     {lines.map((line, i) => (
                       <p key={i} className="flex gap-3">
                         <span className="select-none text-jade/30">{String(i + 1).padStart(2, '0')}</span>
-                        <span>{line || ' '}</span>
+                        <span>{line || ' '}</span>
                       </p>
                     ))}
                   </div>

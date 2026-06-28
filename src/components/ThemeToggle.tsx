@@ -1,10 +1,17 @@
 import { Sun, Moon } from 'lucide-react'
+import type { Theme } from '../hooks/useTheme'
+
+interface ThemeToggleProps {
+  theme: Theme
+  onToggle: () => void
+  className?: string
+}
 
 /**
  * ThemeToggle — a single, quiet icon button that flips light ⇆ dark.
  * Colour comes from theme tokens so it reads correctly in either mode.
  */
-export default function ThemeToggle({ theme, onToggle, className = '' }) {
+export default function ThemeToggle({ theme, onToggle, className = '' }: ThemeToggleProps) {
   const isDark = theme !== 'light'
   return (
     <button

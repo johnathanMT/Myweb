@@ -5,9 +5,11 @@ import { useCallback, useEffect, useState } from 'react'
 // is driven by CSS variables (see index.css), so flipping this attribute reskins
 // the site instantly. Default = the visitor's OS preference; their explicit
 // choice (via the toggle) is pinned in localStorage and then wins from then on.
+export type Theme = 'light' | 'dark'
+
 const STORAGE_KEY = 'mtn_theme'
 
-function readPinned() {
+function readPinned(): Theme | null {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved === 'light' || saved === 'dark') return saved
@@ -15,7 +17,7 @@ function readPinned() {
   return null
 }
 
-export function getInitialTheme() {
+export function getInitialTheme(): Theme {
   const pinned = readPinned()
   if (pinned) return pinned
   try {
@@ -25,15 +27,21 @@ export function getInitialTheme() {
 }
 
 // Apply a theme to the document (attribute + browser UI chrome colour).
-export function applyTheme(theme) {
+export function applyTheme(theme: Theme): void {
   const root = document.documentElement
   root.setAttribute('data-theme', theme)
   const meta = document.querySelector('meta[name="theme-color"]')
   if (meta) meta.setAttribute('content', theme === 'light' ? '#fafafb' : '#060607')
 }
 
-export default function useTheme() {
-  const [theme, setThemeState] = useState(getInitialTheme)
+export interface UseThemeResult {
+  theme: Theme
+  setTheme: (t: Theme) => void
+  toggle: () => void
+}
+
+export default function useTheme(): UseThemeResult {
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
 
   // Reflect the active theme to the DOM (does NOT persist — auto-following the OS
   // should stay un-pinned until the user makes an explicit choice).
@@ -41,22 +49,22 @@ export default function useTheme() {
 
   // Persist only on an explicit choice, so the OS-follow logic below can tell
   // "user picked this" apart from "we're just mirroring the system".
-  const pin = (t) => { try { localStorage.setItem(STORAGE_KEY, t) } catch { /* ignore */ } }
+  const pin = (t: Theme): void => { try { localStorage.setItem(STORAGE_KEY, t) } catch { /* ignore */ } }
 
-  const setTheme = useCallback((t) => {
-    const next = t === 'light' ? 'light' : 'dark'
+  const setTheme = useCallback((t: Theme): void => {
+    const next: Theme = t === 'light' ? 'light' : 'dark'
     pin(next); setThemeState(next)
   }, [])
 
-  const toggle = useCallback(() => {
-    setThemeState((t) => { const next = t === 'light' ? 'dark' : 'light'; pin(next); return next })
+  const toggle = useCallback((): void => {
+    setThemeState((t) => { const next: Theme = t === 'light' ? 'dark' : 'light'; pin(next); return next })
   }, [])
 
   // Live-follow the OS preference — but only while the user hasn't pinned a choice.
   useEffect(() => {
-    let mq
+    let mq: MediaQueryList
     try { mq = window.matchMedia('(prefers-color-scheme: light)') } catch { return }
-    const onChange = (e) => { if (!readPinned()) setThemeState(e.matches ? 'light' : 'dark') }
+    const onChange = (e: MediaQueryListEvent): void => { if (!readPinned()) setThemeState(e.matches ? 'light' : 'dark') }
     mq.addEventListener?.('change', onChange)
     return () => mq.removeEventListener?.('change', onChange)
   }, [])

@@ -36,6 +36,7 @@
     "@types/node": "^22.20.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@types/topojson-client": "^3.1.5",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",

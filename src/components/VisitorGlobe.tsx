@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Globe from 'react-globe.gl'
+import Globe, { type GlobeMethods } from 'react-globe.gl'
 import * as THREE from 'three'
 import { feature } from 'topojson-client'
-import countriesTopo from 'world-atlas/countries-110m.json'
+import type { Topology, GeometryCollection } from 'topojson-specification'
+import type { Feature, FeatureCollection, Geometry } from 'geojson'
+import countriesTopoRaw from 'world-atlas/countries-110m.json'
 import { SITE } from '../config/site'
 import { useInView } from '../hooks/useInView'
+import type { CountryVisits, CountryBreakdown, VisitorStats } from '../types/api'
 
 /**
  * VisitorGlobe — premium 3D world map (react-globe.gl / three.js) shown below
@@ -17,13 +20,20 @@ import { useInView } from '../hooks/useInView'
  * bundled, so there's nothing extra to whitelist in the CSP.
  */
 
+// The world-atlas JSON is untyped at the import boundary; assert it to Topology.
+interface CountryProps { name?: string }
+type CountryFeature = Feature<Geometry, CountryProps>
+
+const topo = countriesTopoRaw as unknown as Topology
 // Bundled world polygons (177 countries). Converted from TopoJSON once.
-const COUNTRIES = feature(countriesTopo, countriesTopo.objects.countries).features
+const COUNTRIES: CountryFeature[] = (
+  feature(topo, topo.objects.countries as GeometryCollection) as FeatureCollection<Geometry, CountryProps>
+).features
 
 // —— Country matching (ipapi country_name ↔ GeoJSON properties.name) ——————————
-const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '')
+const norm = (s: string | null | undefined): string => String(s || '').toLowerCase().replace(/[^a-z]/g, '')
 // Aliases for names that differ between ipapi and Natural Earth (world-atlas).
-const ALIASES = {
+const ALIASES: Record<string, string> = {
   unitedstates: 'unitedstatesofamerica',
   usa: 'unitedstatesofamerica',
   democraticrepublicofthecongo: 'demrepcongo',
@@ -36,7 +46,7 @@ const ALIASES = {
   westernsahara: 'wsahara',
   solomonislands: 'solomonis',
 }
-function matchCountry(name) {
+function matchCountry(name: string | null | undefined): CountryFeature | null {
   if (!name) return null
   const target = ALIASES[norm(name)] || norm(name)
   // 1) exact normalized match
@@ -45,13 +55,14 @@ function matchCountry(name) {
   // 2) fuzzy: one name contains the other (handles abbreviations)
   f = COUNTRIES.find((c) => {
     const cn = norm(c.properties.name)
-    return cn && (cn.includes(target) || target.includes(cn))
+    return cn !== '' && (cn.includes(target) || target.includes(cn))
   })
   return f || null
 }
 
+interface Rgb { r: number; g: number; b: number }
 // Active theme accent ("--accent" = "R G B") → { r, g, b } 0..255.
-function readAccent() {
+function readAccent(): Rgb {
   try {
     const v = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
     const [r, g, b] = v.split(/\s+/).map(Number)
@@ -60,7 +71,8 @@ function readAccent() {
   return { r: 184, g: 134, b: 11 } // Batman gold
 }
 
-const T = {
+type Dict = Record<string, string>
+const T: Record<string, Dict> = {
   en: { badge: 'LIVE NETWORK', title: 'Visitors around the globe', sub: 'Every connection, mapped in real time.', ops: 'Total Operators', conn: 'Current Connection', locating: 'Locating…', unknown: 'Unknown location', byCountry: 'Operators by country' },
   mm: { badge: 'တိုက်ရိုက်ကွန်ရက်', title: 'ကမ္ဘာတစ်ဝှမ်းမှ ဧည့်သည်များ', sub: 'ချိတ်ဆက်မှုတိုင်းကို အချိန်နှင့်တပြေးညီ ပြသထားသည်။', ops: 'စုစုပေါင်း ဧည့်သည်', conn: 'လက်ရှိ ချိတ်ဆက်မှု', locating: 'တည်နေရာရှာနေသည်…', unknown: 'တည်နေရာ မသိ', byCountry: 'နိုင်ငံအလိုက် ဧည့်သည်' },
   jp: { badge: 'ライブネットワーク', title: '世界中からの訪問者', sub: 'すべての接続をリアルタイムで可視化。', ops: '総オペレーター数', conn: '現在の接続', locating: '位置情報を取得中…', unknown: '不明な場所', byCountry: '国別オペレーター' },
@@ -72,7 +84,7 @@ const T = {
 
 // Status strings for the breakdown panel (kept separate so the panel can always
 // render a meaningful state — loading / empty / offline — never just vanish).
-const STATUS_T = {
+const STATUS_T: Record<string, Dict> = {
   en: { connecting: 'Connecting to network…', offline: 'Network unavailable — retrying shortly.', empty: 'No operators logged yet.' },
   mm: { connecting: 'ကွန်ရက်နှင့် ချိတ်ဆက်နေသည်…', offline: 'ကွန်ရက် မရနိုင်ပါ — ပြန်ကြိုးစားနေသည်။', empty: 'ဧည့်သည် မှတ်တမ်းမရှိသေးပါ။' },
   jp: { connecting: 'ネットワークに接続中…', offline: 'ネットワークに接続できません — まもなく再試行します。', empty: 'まだ訪問者の記録はありません。' },
@@ -82,12 +94,15 @@ const STATUS_T = {
   zh: { connecting: '正在连接网络…', offline: '网络不可用 — 即将重试。', empty: '暂无访客记录。' },
 }
 
+interface FetchResult<T> { ok: boolean; status: number; data: T | null; error?: unknown }
+interface FetchOptions { method?: string; timeoutMs?: number; retries?: number }
+
 /**
  * Resilient JSON fetch: AbortController timeout + retry on transient failures
  * (network error or 5xx), which is exactly what a Render free-tier COLD START
  * looks like for the first request after the service has spun down.
  */
-async function fetchJson(url, { method = 'GET', timeoutMs = 8000, retries = 2 } = {}) {
+async function fetchJson<T = unknown>(url: string, { method = 'GET', timeoutMs = 8000, retries = 2 }: FetchOptions = {}): Promise<FetchResult<T>> {
   for (let attempt = 0; attempt <= retries; attempt++) {
     const ctrl = new AbortController()
     const timer = setTimeout(() => ctrl.abort(), timeoutMs)
@@ -95,38 +110,48 @@ async function fetchJson(url, { method = 'GET', timeoutMs = 8000, retries = 2 } 
       const res = await fetch(url, { method, signal: ctrl.signal })
       clearTimeout(timer)
       if (res.status >= 500 && attempt < retries) {
-        await new Promise((r) => setTimeout(r, 1200 * (attempt + 1))) // backoff for cold start
+        await new Promise<void>((r) => setTimeout(r, 1200 * (attempt + 1))) // backoff for cold start
         continue
       }
       const text = await res.text()
-      let data = null
-      try { data = text ? JSON.parse(text) : null } catch { /* non-JSON */ }
+      let data: T | null = null
+      try { data = text ? (JSON.parse(text) as T) : null } catch { /* non-JSON */ }
       return { ok: res.ok, status: res.status, data }
     } catch (err) {
       clearTimeout(timer)
-      if (attempt < retries) { await new Promise((r) => setTimeout(r, 1200 * (attempt + 1))); continue }
+      if (attempt < retries) { await new Promise<void>((r) => setTimeout(r, 1200 * (attempt + 1))); continue }
       return { ok: false, status: 0, data: null, error: err }
     }
   }
+  return { ok: false, status: 0, data: null } // unreachable; satisfies the return type
 }
 
-export default function VisitorGlobe({ lang = 'en' }) {
+interface VisitorGlobeProps { lang?: string }
+
+type GeoStatus = 'loading' | 'done'
+interface Geo { status: GeoStatus; lat: number | null; long: number | null; city: string; country: string }
+type StatsStatus = 'loading' | 'ready' | 'empty' | 'error'
+
+// Shape of the bits of ipapi.co/json/ we read (the rest is ignored).
+interface IpapiResponse { latitude?: number | string; longitude?: number | string; city?: string; country_name?: string }
+
+export default function VisitorGlobe({ lang = 'en' }: VisitorGlobeProps) {
   const t = T[lang] || T.en
-  const globeEl = useRef()
-  const wrapRef = useRef()
+  const globeEl = useRef<GlobeMethods | undefined>(undefined)
+  const wrapRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState(0) // square px
   // Pause the globe's render loop + spin when it scrolls out of view (saves GPU/battery).
-  const [viewRef, inView] = useInView({ threshold: 0.05 })
+  const [viewRef, inView] = useInView<HTMLElement>({ threshold: 0.05 })
 
-  const [geo, setGeo] = useState({ status: 'loading', lat: null, long: null, city: '', country: '' })
-  const [visits, setVisits] = useState(null)
+  const [geo, setGeo] = useState<Geo>({ status: 'loading', lat: null, long: null, city: '', country: '' })
+  const [visits, setVisits] = useState<number | null>(null)
   const [display, setDisplay] = useState(0)
-  const [countries, setCountries] = useState([])
-  const [statsStatus, setStatsStatus] = useState('loading') // 'loading' | 'ready' | 'empty' | 'error'
+  const [countries, setCountries] = useState<CountryVisits[]>([])
+  const [statsStatus, setStatsStatus] = useState<StatsStatus>('loading')
   const st = STATUS_T[lang] || STATUS_T.en
 
   const ac = useMemo(readAccent, [])
-  const userCountry = useMemo(() => matchCountry(geo.country), [geo.country])
+  const userCountry = useMemo<CountryFeature | null>(() => matchCountry(geo.country), [geo.country])
   const globeMaterial = useMemo(() => new THREE.MeshPhongMaterial({ color: '#0b0b14' }), [])
 
   // 1) VISIT COUNT + COUNTRY BREAKDOWN — runs once geolocation has settled, so
@@ -144,14 +169,14 @@ export default function VisitorGlobe({ lang = 'en' }) {
       const countUrl = counted
         ? `${base}/api/visitors`
         : `${base}/api/visitors/hit?country=${encodeURIComponent(geo.country || '')}`
-      const countRes = await fetchJson(countUrl, { method: counted ? 'GET' : 'POST' })
+      const countRes = await fetchJson<VisitorStats>(countUrl, { method: counted ? 'GET' : 'POST' })
       if (!cancelled && countRes.ok && typeof countRes.data?.totalVisits === 'number') {
         setVisits(countRes.data.totalVisits)
         try { sessionStorage.setItem('mtn_visit_counted', '1') } catch { /* ignore */ }
       }
 
       // b) country breakdown — drives the always-visible panel's state.
-      const cRes = await fetchJson(`${base}/api/visitors/countries`)
+      const cRes = await fetchJson<CountryBreakdown>(`${base}/api/visitors/countries`)
       if (cancelled) return
       if (cRes.ok && Array.isArray(cRes.data?.countries)) {
         setCountries(cRes.data.countries)
@@ -167,14 +192,14 @@ export default function VisitorGlobe({ lang = 'en' }) {
   // 2) GEOLOCATION — coarse, IP-based, free.
   useEffect(() => {
     let done = false
-    const finish = (partial) => {
+    const finish = (partial: Partial<Geo>) => {
       if (done) return
       done = true
       setGeo({ status: 'done', lat: null, long: null, city: '', country: '', ...partial })
     }
     const timer = setTimeout(() => finish({}), 2500)
     fetch('https://ipapi.co/json/')
-      .then((r) => r.json())
+      .then((r) => r.json() as Promise<IpapiResponse>)
       .then((d) => {
         const lat = Number(d?.latitude)
         const long = Number(d?.longitude)
@@ -193,10 +218,10 @@ export default function VisitorGlobe({ lang = 'en' }) {
   // 3) COUNTER ANIMATION.
   useEffect(() => {
     if (visits == null) return
-    let raf
+    let raf = 0
     const start = performance.now()
     const dur = 1400
-    const tick = (now) => {
+    const tick = (now: number) => {
       const p = Math.min(1, (now - start) / dur)
       setDisplay(Math.round(visits * (1 - Math.pow(1 - p, 3))))
       if (p < 1) raf = requestAnimationFrame(tick)
@@ -225,8 +250,8 @@ export default function VisitorGlobe({ lang = 'en' }) {
     controls.autoRotateSpeed = 0.6
     controls.enableZoom = false
     controls.autoRotate = inView
-    if (inView) g.resumeAnimation?.()
-    else g.pauseAnimation?.()
+    if (inView) g.resumeAnimation()
+    else g.pauseAnimation()
   }, [size, inView])
 
   // 6) FLY the camera to the visitor's coordinates when known.
@@ -237,9 +262,9 @@ export default function VisitorGlobe({ lang = 'en' }) {
   }, [geo.lat, geo.long])
 
   const accentRgb = `rgb(${ac.r}, ${ac.g}, ${ac.b})`
-  const capColor = (d) =>
+  const capColor = (d: object): string =>
     d === userCountry ? `rgba(${ac.r}, ${ac.g}, ${ac.b}, 0.92)` : 'rgba(255, 255, 255, 0.07)'
-  const sideColor = (d) =>
+  const sideColor = (d: object): string =>
     d === userCountry ? `rgba(${ac.r}, ${ac.g}, ${ac.b}, 0.35)` : 'rgba(0, 0, 0, 0.12)'
 
   const connectionText =
@@ -275,7 +300,7 @@ export default function VisitorGlobe({ lang = 'en' }) {
                 polygonCapColor={capColor}
                 polygonSideColor={sideColor}
                 polygonStrokeColor={() => 'rgba(255, 255, 255, 0.22)'}
-                polygonAltitude={(d) => (d === userCountry ? 0.07 : 0.012)}
+                polygonAltitude={(d: object) => (d === userCountry ? 0.07 : 0.012)}
                 polygonsTransitionDuration={800}
               />
             )}
