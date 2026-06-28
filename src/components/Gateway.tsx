@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, type MotionProps } from 'framer-motion'
 import { ArrowRight, Sparkles, ArrowDown } from 'lucide-react'
 import { PERSONAL, SOCIAL } from '../data/content'
 
@@ -10,14 +10,16 @@ import { PERSONAL, SOCIAL } from '../data/content'
  */
 const IMMERSIVE_URL = import.meta.env.VITE_IMMERSIVE_URL || 'https://immersive.myothant.dev'
 
-const fade = (delay = 0) => ({
+// Annotating the return as MotionProps contextually types `ease` as a cubic-bezier
+// tuple (BezierDefinition), so the literal below isn't widened to number[].
+const fade = (delay = 0): MotionProps => ({
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.6, delay, ease: [0.2, 0.7, 0.2, 1] },
 })
 
 export default function Gateway() {
-  const scrollTo = (sel) => document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' })
+  const scrollTo = (sel: string) => document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' })
 
   return (
     <section id="home" className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden">

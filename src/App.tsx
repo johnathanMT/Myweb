@@ -41,7 +41,7 @@ const AntimatterSim    = lazy(() => import('./components/AntimatterSim'))
 // The hub's "stunning but cheap" backdrop is the CSS galaxy + ambient layer.
 
 export default function App() {
-  const [lang, setLang] = useState(() => {
+  const [lang, setLang] = useState<string>(() => {
     try { return localStorage.getItem('mtn_lang') || 'en' } catch { return 'en' }
   })
 
@@ -49,7 +49,7 @@ export default function App() {
   const { theme, toggle: toggleTheme } = useTheme()
 
   useEffect(() => {
-    try { localStorage.setItem('mtn_lang', lang) } catch {}
+    try { localStorage.setItem('mtn_lang', lang) } catch { /* ignore */ }
   }, [lang])
 
   // Warm-up ping: wake the Render free-tier backend on page load so it's up by
