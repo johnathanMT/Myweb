@@ -1,0 +1,86 @@
+# Query: software engineer
+# ContextLines: 1
+
+23 results - 9 files
+
+Myweb_Frontend/index.html:
+  26      <!-- ════════════════ SEO / Social ════════════════ -->
+  27:     <title>Myo Thant Naing — Computer Science Student &amp; Aspiring Software Engineer &amp; AI Enthusiast | Portfolio</title>
+  28      <meta name="description"
+  29:         content="Portfolio of Myo Thant Naing — Computer Science student & Software Engineer in Japan, building full-stack apps (C#/.NET, React, Three.js) and Agentic AI systems. From caring to coding." />
+  30      <meta name="author" content="Myo Thant Naing" />
+  31      <meta name="keywords"
+  32:         content="Myo Thant Naing, Software Engineer, AI Engineer, Computer Science, C# .NET, React, Three.js, WebGL, Full-Stack Developer, Portfolio, Japan" />
+  33      <meta name="robots" content="index, follow" />
+
+  39      <meta property="og:site_name" content="Myo Thant Naing" />
+  40:     <meta property="og:title" content="Myo Thant Naing — Software Engineer & AI Developer" />
+  41      <meta property="og:description"
+  42:         content="Computer Science student & Software Engineer in Japan. Full-stack (C#/.NET, React) + Agentic AI. From caring to coding." />
+  43      <meta property="og:url" content="https://myothant.dev/" />
+
+  47      <meta name="twitter:card" content="summary_large_image" />
+  48:     <meta name="twitter:title" content="Myo Thant Naing — Software Engineer & AI Developer" />
+  49:     <meta name="twitter:description" content="CS student & Software Engineer in Japan. Full-stack + Agentic AI." />
+  50      <meta name="twitter:image" content="https://myothant.dev/Myweb_photo/My_profile2_for_myweb.jpg" />
+
+  60        "image": "https://myothant.dev/Myweb_photo/My_profile2_for_myweb.jpg",
+  61:       "jobTitle": "Software Engineer & AI Developer",
+  62:       "description": "Computer Science student and Software Engineer in Japan, building full-stack applications (C#/.NET, React) and Agentic AI systems.",
+  63:       "knowsAbout": ["Software Engineering", "Artificial Intelligence", "C#", ".NET", "React", "Three.js", "Computer Science", "Full-Stack Development"],
+  64        "sameAs": ["https://github.com/johnathanMT"]
+
+  78      <noscript>
+  79:         <h1>Myo Thant Naing — Software Engineer &amp; AI Developer</h1>
+  80:         <p>Computer Science student and Software Engineer based in Japan, building full-stack
+  81             applications with C#/.NET and React, plus Agentic AI systems and 3D WebGL experiences.</p>
+
+Myweb_Frontend/public/fe-it-study.html:
+  44      <h2><i class="fas fa-book"></i> What is the FE Exam?</h2>
+  45:     <p style="color:rgba(255,255,255,.55);font-size:.9rem;margin-bottom:1rem">The <strong style="color:#06b6d4">Fundamental Information Technology Engineer (FE)</strong> exam is Japan's national IT qualification, testing core knowledge in algorithms, computer architecture, databases, networks, security, management, and system design. It is a benchmark for software engineers in Japan and a goal I am actively working toward.</p>
+  46      <div class="fact-box"><p>The FE exam covers <strong>10 major domains</strong> — from binary arithmetic and Boolean logic to database normalisation and OSI network layers. Passing it demonstrates a solid foundation equivalent to a CS degree's core subjects.</p></div>
+
+  55        <div class="card"><div class="icon"><i class="fas fa-shield-alt"></i></div><h3>Security</h3><p>Cryptography, PKI, common attack vectors, secure development lifecycle.</p></div>
+  56:       <div class="card"><div class="icon"><i class="fas fa-code-branch"></i></div><h3>Software Engineering</h3><p>SDLC models, design patterns, UML, agile methodologies, testing strategies.</p></div>
+  57      </div>
+
+Myweb_Frontend/public/myweb.css:
+  396  
+  397: /* Software Engineering - မီးခိုးပြာရောင် */
+  398  .skill-icon.se {
+
+Myweb_Frontend/public/quantum-theory.html:
+  401              algorithm</strong> offers quadratic speedup for database search. The quantum revolution is coming to
+  402:           software engineering.</p>
+  403        </div>
+
+Myweb_Frontend/src/main.tsx:
+  50            <Route path="/python" element={<><Seo title="Python Automation" path="/python" description="Python automation scripts and projects — practical tools, scrapers, and workflow automations by Myo Thant Naing." /><PageShell><PythonAutomation /></PageShell></>} />
+  51:           <Route path="/studying" element={<><Seo title="Studying Library" path="/studying" description="My self-taught Computer Science journey — notes, resources, and study tracks across CS, AI, and software engineering." /><PageShell><StudyingLibrary /></PageShell></>} />
+  52            <Route path="/bibliography" element={<><Seo title="Bibliography" path="/bibliography" description="Books, papers, and references that shaped my path from caregiving to coding and AI engineering." /><PageShell><Bibliography /></PageShell></>} />
+
+Myweb_Frontend/src/components/Gateway.tsx:
+  54            className="mt-5 text-[clamp(1.15rem,3.6vw,2rem)] font-light text-muted">
+  55:           Software Engineer <span className="text-accent">&amp;</span> AI Developer
+  56          </motion.p>
+
+Myweb_Frontend/src/components/Seo.tsx:
+  25  const SITE_NAME = 'Myo Thant Naing'
+  26: const DEFAULT_TITLE = 'Myo Thant Naing — Software Engineer & AI Developer'
+  27  const DEFAULT_DESC =
+  28:   'Computer Science student & Software Engineer in Japan, building full-stack apps (C#/.NET, React, Three.js) and Agentic AI systems. From caring to coding.'
+  29  const DEFAULT_IMAGE = `${SITE.url}/Myweb_photo/My_profile2_for_myweb.jpg`
+
+Myweb_Frontend/src/components/TechStack.tsx:
+  12   * TechStack — "Architecture & Journey" section (Batman theme).
+  13:  *  Left  : professional narrative (transition into IT / software engineering in JP).
+  14   *  Right : the real senior-level stack in glassmorphism category cards, gold accents.
+
+  85    intro: '',
+  86:   paras: ['International Relations graduate turned Software Engineer. By day, I support those in need as a care worker; by night, I’m deep-diving into CS and building Agentic AI systems. I bring human-centric perspective to every line of code I write.',
+  87      'That path shaped how I build: patient, detail-driven, and focused on people. I taught myself to ship full-stack systems end-to-end — from database schema to deployed UI.',
+
+Myweb_Frontend/src/data/content.js:
+  35    { name: 'IoT (M5Stack)', icon: 'fas fa-microchip', color: '#10b981' },
+  36:   { name: 'Software Engineering', icon: 'fas fa-laptop-code', color: '#0ea5e9' },
+  37  

@@ -4,36 +4,18 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { getInitialTheme, applyTheme } from './hooks/useTheme'
 import App from './App'
-import ImmersiveApp from './ImmersiveApp.jsx'
-import PageShell from './components/PageShell.jsx'
+import PageShell from './components/PageShell'
 import Seo from './components/Seo'
-import PythonAutomation from './components/PythonAutomation.jsx'
-import StudyingLibrary from './components/StudyingLibrary.jsx'
-import Bibliography from './components/Bibliography.jsx'
-import GalleryPage from './components/GalleryPage.jsx'
+import PythonAutomation from './components/PythonAutomation'
+import StudyingLibrary from './components/StudyingLibrary'
+import Bibliography from './components/Bibliography'
+import GalleryPage from './components/GalleryPage'
 import './index.css'
 
 // Lazy: pulls in tsparticles — code-split out of the main bundle.
-const Sanctuary = lazy(() => import('./components/Sanctuary.jsx'))
+const Sanctuary = lazy(() => import('./components/Sanctuary'))
 const SanctuaryAdmin = lazy(() => import('./components/SanctuaryAdmin'))
 const FarewellRSVP = lazy(() => import('./components/FarewellRSVP'))
-
-// ── TIERED EXPERIENCE SWITCH (single-repo, two Vercel deployments) ────────────
-// One codebase, two builds chosen at BUILD time by an env var:
-//   VITE_APP_MODE=immersive  → heavy WebGL build (immersive.myothant.dev)
-//   (unset / anything else)  → lightweight Gateway Hub (myothant.dev)
-// Vite inlines import.meta.env at build, so the unused app is tree-shaken out of
-// each bundle — the Hub never ships three.js, the immersive build never ships a
-// dead Hub.
-// Tolerate stray whitespace / casing in the Vercel env value (e.g. "Immersive ").
-const APP_MODE = (import.meta.env.VITE_APP_MODE || '').trim().toLowerCase()
-const isImmersive = APP_MODE === 'immersive'
-const Home = isImmersive ? ImmersiveApp : App
-
-// DEBUG: prints in the browser console of the DEPLOYED site so you can confirm
-// which build/branch actually ran. Remove once verified.
-console.info('[boot] VITE_APP_MODE =', JSON.stringify(import.meta.env.VITE_APP_MODE),
-  '→ rendering', isImmersive ? 'ImmersiveApp (3D)' : 'Hub')
 
 // Set the theme attribute BEFORE React paints, so there's no light/dark flash.
 // (CSP blocks inline <script> in index.html, so we do it here in a module.)
@@ -64,7 +46,7 @@ ReactDOM.createRoot(rootEl).render(
     <HelmetProvider>
       <BrowserRouter basename={BASENAME}>
         <Routes>
-          <Route path="/" element={<><Seo /><Home /></>} />
+          <Route path="/" element={<><Seo /><App /></>} />
           <Route path="/python" element={<><Seo title="Python Automation" path="/python" description="Python automation scripts and projects — practical tools, scrapers, and workflow automations by Myo Thant Naing." /><PageShell><PythonAutomation /></PageShell></>} />
           <Route path="/studying" element={<><Seo title="Studying Library" path="/studying" description="My self-taught Computer Science journey — notes, resources, and study tracks across CS, AI, and software engineering." /><PageShell><StudyingLibrary /></PageShell></>} />
           <Route path="/bibliography" element={<><Seo title="Bibliography" path="/bibliography" description="Books, papers, and references that shaped my path from caregiving to coding and AI engineering." /><PageShell><Bibliography /></PageShell></>} />
@@ -75,7 +57,7 @@ ReactDOM.createRoot(rootEl).render(
           <Route path="/farewell" element={<><Seo title="Farewell RSVP" path="/farewell" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#070b1c' }} />}><FarewellRSVP /></Suspense></>} />
           <Route path="/sanctuary-admin" element={<><Seo title="Admin" path="/sanctuary-admin" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b0e1a' }} />}><SanctuaryAdmin /></Suspense></>} />
           {/* unknown paths fall back to the homepage (mode-aware), not indexed */}
-          <Route path="*" element={<><Seo noindex /><Home /></>} />
+          <Route path="*" element={<><Seo noindex /><App /></>} />
         </Routes>
       </BrowserRouter>
     </HelmetProvider>

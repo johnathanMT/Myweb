@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════════
-   SCOPED THEMES — palette via CSS vars (channels for Tailwind alpha).
-   .theme-batman → Hub (App.jsx) · .theme-cyber → Immersive (ImmersiveApp.jsx)
+   THEME PALETTE — colours via CSS vars (channels for Tailwind alpha).
+   .theme-batman is the app root palette (App.tsx); light mode overrides
+   the same vars under html[data-theme="light"] further down.
    ══════════════════════════════════════════════════════════════════ */
 :root, .theme-batman {
   /* ════════ CYBER METAL BLACK — strict 60-30-10 palette ════════
@@ -42,18 +43,6 @@
   --muted: 156 164 160;        /* cool gray body text */
   --fg: 237 237 242;           /* primary text — near-white in dark mode */
 }
-.theme-cyber {
-  --space: 7 7 15; --surface: 17 17 24; --card: 22 22 31; --card-hover: 30 30 46;
-  --fg: 237 237 242;
-  --accent: 124 58 237;        /* violet #7c3aed (original) */
-  --accent-light: 157 111 239; /* #9d6fef */
-  --cyan: 0 212 255;           /* #00d4ff */
-  --coral: 255 107 107;        /* #ff6b6b */
-  --maroon: 124 58 237;        /* maroon usages → violet in cyber */
-  --maroon-deep: 88 28 135;
-  --muted: 107 114 128;
-}
-
 
 @layer base {
   * {

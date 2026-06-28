@@ -85,6 +85,8 @@ export interface Memory {
   color?: string | null   // verify vs DTO
   /** Server timestamp; the UI shows it as `date`. */
   createdAt?: string
+  /** True when this memory belongs to the requesting operator (drives edit/read rights). */
+  mine?: boolean
 }
 
 /** Mirrors `CreateMemoryDto` — exactly the body the form POSTs. */

@@ -23,7 +23,7 @@ interface SeoProps {
 }
 
 const SITE_NAME = 'Myo Thant Naing'
-const DEFAULT_TITLE = 'Myo Thant Naing — Software Engineer & AI Developer'
+const DEFAULT_TITLE = 'Myo Thant Naing — Computer Science Student & Aspiring Software Engineer & AI Enthusiast | Portfolio'
 const DEFAULT_DESC =
   'Computer Science student & Software Engineer in Japan, building full-stack apps (C#/.NET, React, Three.js) and Agentic AI systems. From caring to coding.'
 const DEFAULT_IMAGE = `${SITE.url}/Myweb_photo/My_profile2_for_myweb.jpg`

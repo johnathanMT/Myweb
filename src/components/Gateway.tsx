@@ -1,5 +1,5 @@
 import { motion, type MotionProps } from 'framer-motion'
-import { ArrowRight, Sparkles, ArrowDown } from 'lucide-react'
+import { ArrowRight, Mail, ArrowDown } from 'lucide-react'
 import { PERSONAL, SOCIAL } from '../data/content'
 
 /**
@@ -8,7 +8,6 @@ import { PERSONAL, SOCIAL } from '../data/content'
  *  • Clear hierarchy: kicker → name → role → one line of context → two CTAs.
  *  • Generous whitespace; reads well in both light and dark.
  */
-const IMMERSIVE_URL = import.meta.env.VITE_IMMERSIVE_URL || 'https://immersive.myothant.dev'
 
 // Annotating the return as MotionProps contextually types `ease` as a cubic-bezier
 // tuple (BezierDefinition), so the literal below isn't widened to number[].
@@ -74,12 +73,11 @@ export default function Gateway() {
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
           </button>
           <a
-            href={IMMERSIVE_URL}
-            rel="noopener"
+            href={`mailto:${PERSONAL.email}`}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-fg/15 px-7 py-3 text-sm font-semibold text-fg transition hover:border-fg/35 hover:bg-fg/5 sm:w-auto"
           >
-            <Sparkles size={15} className="text-jade" />
-            Immersive 3D
+            <Mail size={15} className="text-jade" />
+            Get in touch
           </a>
         </motion.div>
 

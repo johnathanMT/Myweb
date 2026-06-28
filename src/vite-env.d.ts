@@ -9,8 +9,6 @@ interface ImportMetaEnv {
   readonly VITE_CONTACT_EMAIL?: string
   readonly VITE_LINE_URL?: string
   readonly VITE_COFFEE_URL?: string
-  readonly VITE_IMMERSIVE_URL?: string
-  readonly VITE_APP_MODE?: string
   readonly VITE_BASE?: string
 }
 
