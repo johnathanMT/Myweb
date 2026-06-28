@@ -92,7 +92,7 @@ export default function CyberPoetry() {
                 dragElastic={0.22}
                 onDragEnd={(_e, info) => { if (info.offset.x < -70) go(1); else if (info.offset.x > 70) go(-1) }}
                 style={{ transformStyle: 'preserve-3d', transformOrigin: dir > 0 ? 'left center' : 'right center' }}
-                className="relative cursor-grab overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0c0f0e] to-[#070908] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] active:cursor-grabbing sm:p-10"
+                className="dark-island relative cursor-grab overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0c0f0e] to-[#070908] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] active:cursor-grabbing sm:p-10"
               >
                 {/* book spine (left edge sheen) + edge glow */}
                 <span className="pointer-events-none absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-jade/25 to-transparent" />

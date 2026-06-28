@@ -132,7 +132,7 @@ export default function About({ lang = 'en' }: AboutProps) {
             {SKILLS.map(({ name, icon, color }) => (
               <div
                 key={name}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/8 backdrop-blur-sm hover:-translate-y-0.5 hover:border-white/25 transition-all duration-200 group cursor-default"
+                className="skill-chip flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/8 backdrop-blur-sm hover:-translate-y-0.5 hover:border-white/25 transition-all duration-200 group cursor-default"
                 style={{ '--g': color } as CSSVars}
                 onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 18px -4px ${color}` }}
                 onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none' }}

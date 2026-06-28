@@ -96,7 +96,7 @@ export default function Philosophy() {
           </div>
 
           {/* Body */}
-          <div className="relative bg-[#141414] p-7 md:p-12 font-mono text-base md:text-lg leading-relaxed min-h-[340px]">
+          <div className="dark-island relative bg-[#141414] p-7 md:p-12 font-mono text-base md:text-lg leading-relaxed min-h-[340px]">
             <MatrixRain />
             {/* scanline sheen */}
             <div className="term-scanlines absolute inset-0 pointer-events-none" aria-hidden />

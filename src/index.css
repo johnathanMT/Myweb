@@ -1332,9 +1332,11 @@ html[data-theme="light"] ::selection { background: rgb(var(--accent) / 0.18); co
    No !important: these rules sit after Tailwind's utilities, so they win at
    equal specificity, while higher-specificity :hover utilities still work. */
 html[data-theme="light"] [class*="text-white"],
+html[data-theme="light"] .text-gray-100,
+html[data-theme="light"] .text-gray-200,
 html[data-theme="light"] .text-zinc-100,
 html[data-theme="light"] .text-zinc-200,
-html[data-theme="light"] .text-zinc-300 { color: rgb(var(--fg)); }            /* slate-900 */
+html[data-theme="light"] .text-zinc-300 { color: rgb(var(--fg)); }            /* slate-900 — prominent text */
 html[data-theme="light"] .text-gray-300,
 html[data-theme="light"] .text-gray-400,
 html[data-theme="light"] .text-gray-500,
@@ -1389,6 +1391,47 @@ html[data-theme="light"] .section-title { color: rgb(var(--fg)); }
 html[data-theme="light"] .section-subtitle { color: rgb(var(--muted)); }
 html[data-theme="light"] .modal-box { background: rgb(var(--card)); border-color: rgb(var(--fg) / 0.10); color: rgb(var(--fg)); box-shadow: 0 24px 60px -20px rgb(var(--fg) / 0.28); }
 html[data-theme="light"] .crimson-divider { background: linear-gradient(90deg, transparent, rgb(var(--accent) / 0.45), transparent); box-shadow: none; }
+
+/* — Dark "islands" — surfaces that stay dark in BOTH themes (the philosophy.py
+   terminal, the Digital-Poetry "grimoire" book). Re-declaring the dark palette
+   tokens for their subtree means the light-mode text shim — which colours via
+   rgb(var(--fg)) / rgb(var(--muted)) — now resolves to LIGHT text again, so
+   every word stays legible against the dark background. — */
+html[data-theme="light"] .dark-island {
+  --space: 6 6 7;
+  --surface: 11 13 12;
+  --card: 15 21 18;
+  --card-hover: 22 31 26;
+  --forest: 30 120 84;
+  --forest-deep: 12 26 20;
+  --accent: 178 30 52;
+  --accent-light: 214 56 84;
+  --jade: 26 200 132;
+  --jade-light: 74 240 170;
+  --cyan: 26 200 132;
+  --coral: 200 44 64;
+  --maroon: 132 24 36;
+  --maroon-deep: 92 14 22;
+  --muted: 156 164 160;
+  --fg: 237 237 242;
+}
+
+/* — Core Competencies skill chips (light mode) — crisp pill on a subtle tinted
+   surface; the icon's dark-mode coloured glow washes out on white, so we swap it
+   for a tight neutral micro-shadow that keeps each brand colour full-opacity and
+   crisp. Dark mode is untouched (these rules only apply under data-theme=light). */
+html[data-theme="light"] .skill-chip {
+  background: rgb(var(--fg) / 0.045);
+  border-color: rgb(var(--fg) / 0.14);
+  box-shadow: 0 1px 2px rgb(var(--fg) / 0.05);
+}
+html[data-theme="light"] .skill-chip:hover {
+  background: rgb(var(--fg) / 0.06);
+  border-color: rgb(var(--accent) / 0.3);
+}
+html[data-theme="light"] .skill-chip i {
+  filter: drop-shadow(0 1px 1px rgb(15 23 42 / 0.22)) !important;  /* crisp lift, no coloured haze */
+}
 
 /* — soften the dark-cinematic decorative overlays so light mode stays calm — */
 html[data-theme="light"] .orbit-galaxy { opacity: 0.10; }
