@@ -15,8 +15,10 @@ import { useGallery } from '../hooks/useGallery'
 // Pointy-top regular hexagon (aspect ratio 1 : 1.1547 keeps it regular).
 const HEX = 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
 
+interface SectionText { badge: string; title: string; accent: string; sub: string; cta: string; all: string }
+
 // Section copy (i18n). Per-photo captions come from galleryData.js (optional).
-const T = {
+const T: Record<string, SectionText> = {
   en: { badge: 'GALLERY',   title: 'A collection of', accent: 'moments & memories', sub: 'Photos from the journey — places, projects, and people along the way.', cta: 'Read the blog', all: 'See all photos' },
   mm: { badge: 'ပြခန်း',     title: 'စုဆောင်းထားသော', accent: 'အမှတ်တရ ခဏများ',     sub: 'ခရီးတစ်လျှောက်မှ ဓာတ်ပုံများ — နေရာများ၊ ပရောဂျက်များနှင့် လူများ။',        cta: 'ဘလော့ဖတ်ရန်', all: 'ဓာတ်ပုံအားလုံး' },
   jp: { badge: 'ギャラリー', title: '集めた',          accent: '瞬間と思い出',       sub: '旅の写真 — 場所、プロジェクト、出会った人々。',                                cta: 'ブログを読む', all: 'すべて見る' },
@@ -26,7 +28,7 @@ const T = {
   zh: { badge: '画廊',      title: '收藏',           accent: '瞬间与回忆',          sub: '旅途中的照片 —— 地方、项目与遇见的人。',                                      cta: '阅读博客', all: '查看全部照片' },
 }
 
-export default function GallerySection({ lang = 'en' }) {
+export default function GallerySection({ lang = 'en' }: { lang?: string }) {
   const t = T[lang] || T.en
   const ref = useCyberReveal()
   const { highlights, captionOf, altOf } = useGallery(lang)

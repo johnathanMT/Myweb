@@ -3,7 +3,7 @@
  * sections. No images, no libraries — just a themed shimmer so the page never
  * jumps and the visitor sees a smooth placeholder while the chunk downloads.
  */
-export default function SectionSkeleton({ label = 'Loading' }) {
+export default function SectionSkeleton({ label = 'Loading' }: { label?: string }) {
   return (
     <section className="relative py-24 sm:py-28" aria-busy="true" aria-label={`${label} (loading)`}>
       <div className="mx-auto max-w-5xl px-6">

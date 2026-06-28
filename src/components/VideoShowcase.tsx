@@ -7,25 +7,21 @@ import { useCyberReveal } from '../hooks/useCyberReveal'
  * VideoShowcase — interactive MASTER-DETAIL video gallery (Batman theme).
  *
  *  • Large cinematic "master" player on top; click a thumbnail to switch it.
- *  • Each thumbnail has a one-line caption; the selected reel's longer
- *    description cross-fades in under the master player (Framer Motion).
- *  • Audio: master starts MUTED (so autoplay works), with a custom glassmorphism
- *    Mute/Unmute toggle. Clicking a thumbnail is a user gesture, so sound is
- *    allowed after that.
- *  • Performance: the master <video> only loads when the section is in view;
- *    thumbnails use lightweight poster images.
+ *  • Master starts MUTED (autoplay), with a custom Mute/Unmute toggle.
+ *  • Performance: the master <video> only loads when the section is in view.
  *
  *  PLUG IN YOUR REELS: drop files in public/reels/  → reel-1.mp4 … reel-4.mp4
- *  (+ optional reel-1.webp … posters). Or edit the REELS array below.
  */
 
 const BASE = import.meta.env.BASE_URL || '/'
-const reel = (id) => `${BASE}reels/${id}.mp4`
-const shot = (id) => `${BASE}reels/${id}.webp`
+const reel = (id: string) => `${BASE}reels/${id}.mp4`
+const shot = (id: string) => `${BASE}reels/${id}.webp`
 
-// 4 selectable reels. `caption`/`desc` are i18n objects ({ en, mm, jp, zh, vn,
-// ne, id }) — only `en` is required; the picker falls back to en per key.
-const REELS = [
+type I18nText = Record<string, string>
+interface Reel { id: string; accent: string; caption: I18nText; desc: I18nText }
+
+// 4 selectable reels. `caption`/`desc` are i18n objects ({ en, mm, jp, … }).
+const REELS: Reel[] = [
   {
     id: 'reel-1', accent: '#b8860b',
     caption: { en: 'The Journey', mm: 'ခရီး', jp: '旅', zh: '旅程', vn: 'Hành trình', ne: 'यात्रा', id: 'Perjalanan' },
@@ -80,7 +76,8 @@ const REELS = [
   },
 ]
 
-const T = {
+interface SectionText { badge: string; title: string; sub: string }
+const T: Record<string, SectionText> = {
   en: { badge: 'Showreel', title: 'Highlights in Motion', sub: 'A cinematic look — A 10-second glimpse of life in motion' },
   mm: { badge: 'ရှိုးရီး', title: 'လှုပ်ရှားသော မှတ်တိုင်များ', sub: 'ရုပ်ရှင်ဆန်သော မြင်ကွင်း — အောက်မှ ရွေးပြီး ကြည့်ပါ။' },
   jp: { badge: 'ショーリール', title: '動きで見るハイライト', sub: '下のリールを選んで再生。' },
@@ -91,9 +88,9 @@ const T = {
 }
 
 // i18n picker: returns the active language string, falling back to `en`.
-const pick = (o, lang) => (o && (o[lang] || o.en)) || ''
+const pick = (o: I18nText, lang: string) => (o && (o[lang] || o.en)) || ''
 
-function Thumb({ r, active, onSelect, lang }) {
+function Thumb({ r, active, onSelect, lang }: { r: Reel; active: boolean; onSelect: () => void; lang: string }) {
   const [ok, setOk] = useState(true)
   return (
     <button
@@ -108,8 +105,6 @@ function Thumb({ r, active, onSelect, lang }) {
         <span className="absolute inset-0" style={{ background: `linear-gradient(150deg, ${r.accent}33, #141414 75%)` }} />
         {ok && (
           <img src={shot(r.id)} alt="" loading="lazy" onError={() => setOk(false)}
-            // 16:9 posters fill without stretching (object-cover); crisp GPU layer;
-            // slightly punchy by default, "sharpened" pop on hover.
             className="absolute inset-0 h-full w-full object-cover object-center transform-gpu [backface-visibility:hidden] saturate-[1.15] contrast-[1.06] brightness-95 transition-all duration-500 ease-out group-hover:scale-[1.08] group-hover:saturate-[1.4] group-hover:contrast-110 group-hover:brightness-110" />
         )}
         {/* dim veil lifts on hover so the poster pops into sharp focus */}
@@ -127,15 +122,15 @@ function Thumb({ r, active, onSelect, lang }) {
   )
 }
 
-export default function VideoShowcase({ lang = 'en' }) {
+export default function VideoShowcase({ lang = 'en' }: { lang?: string }) {
   const t = T[lang] || T.en
   const ref = useCyberReveal()
-  const wrapRef = useRef(null)
-  const videoRef = useRef(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const [active, setActive] = useState(0)
   const [muted, setMuted] = useState(true)
   const [inView, setInView] = useState(false)
-  const [error, setError] = useState(false)
+  const [, setError] = useState(false)
   const current = REELS[active]
 
   // Lazy: only load/play the master video while the section is on screen.
@@ -143,8 +138,8 @@ export default function VideoShowcase({ lang = 'en' }) {
     const el = wrapRef.current
     if (!el) return
     const io = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) setInView(true); else videoRef.current?.pause?.() },
-      { threshold: 0.25 }
+      ([e]) => { if (e.isIntersecting) setInView(true); else videoRef.current?.pause() },
+      { threshold: 0.25 },
     )
     io.observe(el)
     return () => io.disconnect()
@@ -156,7 +151,7 @@ export default function VideoShowcase({ lang = 'en' }) {
     const v = videoRef.current
     if (!v) return
     v.muted = muted
-    if (inView) v.play?.().catch(() => {})
+    if (inView) v.play().catch(() => {})
   }, [muted, active, inView])
 
   return (
@@ -189,9 +184,8 @@ export default function VideoShowcase({ lang = 'en' }) {
               loop playsInline autoPlay preload="none"
               onError={() => setError(true)}
               onLoadedData={() => setError(false)}
-              // crispness: own GPU layer, no sub-pixel softening, full-bleed cover
               className="h-full w-full object-cover transform-gpu [backface-visibility:hidden] [-webkit-backface-visibility:hidden]"
-              style={{ imageRendering: 'high-quality', transform: 'translateZ(0)' }}
+              style={{ transform: 'translateZ(0)' }}
             />
 
             {/* fallback hint behind the video (shows if file missing) */}

@@ -11,21 +11,21 @@ import { MONTHS } from '../data/content'
  *  • Hover anywhere PAUSES the marquee; the hovered card scales up with a gold glow.
  *  • Respects prefers-reduced-motion (falls back to a manual horizontal scroll).
  *  • Images auto-bind from src/assets/images/months/ (slug). Missing → placeholder.
- *  • Festival/desc are i18n; theme-token colours → Batman in Hub, Cyber in Immersive.
  */
 
-const MONTH_IMAGES = import.meta.glob(
+const MONTH_IMAGES = import.meta.glob<string>(
   '../assets/images/months/*.{webp,jpg,jpeg,png,avif}',
-  { eager: true, import: 'default', query: '?url' }
+  { eager: true, import: 'default', query: '?url' },
 )
-const imgForFile = (file) => {
+const imgForFile = (file: string | undefined): string | null => {
   if (!file) return null
   const key = `/${file.toLowerCase()}.`
   const hit = Object.entries(MONTH_IMAGES).find(([path]) => path.toLowerCase().includes(key))
   return hit ? hit[1] : null
 }
 
-const T = {
+interface SectionText { badge: string; title: string; sub: string }
+const T: Record<string, SectionText> = {
   en: { badge: 'Year in Focus', title: 'Myanmar · 12 Months of Festivals', sub: 'One celebration for every month — hover to pause and focus a card.' },
   mm: { badge: 'တစ်နှစ်တာ', title: 'မြန်မာ့ ၁၂ လ ပွဲတော်များ', sub: 'လတိုင်းအတွက် ပွဲတော်တစ်ခု — ရပ်တန့်ကြည့်ရန် mouse တင်ပါ။' },
   jp: { badge: '一年の歩み', title: 'ミャンマー · 12ヶ月の祭り', sub: '毎月ひとつのお祭り — ホバーで一時停止。' },
@@ -35,10 +35,24 @@ const T = {
   zh: { badge: '年度回顾', title: '缅甸 · 十二个月的节日', sub: '每月一个庆典 —— 悬停可暂停并聚焦卡片。' },
 }
 
-function MonthCard({ m, lang = 'en' }) {
+// i18n field (en/mm/jp/…) and a month record from src/data/content (still JS).
+type I18nText = Record<string, string>
+interface Month {
+  name: string
+  mm?: string
+  greg?: string
+  region?: string
+  color: string
+  file?: string
+  img?: string
+  festival: I18nText
+  desc: I18nText
+}
+
+function MonthCard({ m, lang = 'en' }: { m: Month; lang?: string }) {
   const [imgOk, setImgOk] = useState(true)
   const abbr = m.name.slice(0, 3)
-  const pick = (o) => (o && (o[lang] || o.en)) || ''
+  const pick = (o: I18nText) => (o && (o[lang] || o.en)) || ''
   const festival = pick(m.festival)
   const src = imgForFile(m.file) || m.img
 
@@ -82,7 +96,7 @@ function MonthCard({ m, lang = 'en' }) {
   )
 }
 
-export default function SeasonalGallery({ lang = 'en' }) {
+export default function SeasonalGallery({ lang = 'en' }: { lang?: string }) {
   const t = T[lang] || T.en
   const ref = useCyberReveal()
 
@@ -90,7 +104,7 @@ export default function SeasonalGallery({ lang = 'en' }) {
   const x = useMotionValue(0)
   const transform = useMotionTemplate`translateX(${x}%)`
   const paused = useRef(false)
-  const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const reduce = typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false)
 
   useAnimationFrame((_, delta) => {
     if (paused.current || reduce) return

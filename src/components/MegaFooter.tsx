@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { footerData, techStack, techLogo } from '../data/footerData'
 
 // ============================================================================
@@ -9,15 +10,18 @@ import { footerData, techStack, techLogo } from '../data/footerData'
 // ============================================================================
 
 // i18n for footer labels (column titles + section labels). Falls back to en.
-const FT = {
+const FT: Record<string, Record<string, string>> = {
   en: { Product: 'Product', Solutions: 'Solutions', Company: 'Company', Connect: 'Connect', powered: 'Powered by', status: 'System Operational', rights: 'All rights reserved.' },
   zh: { Product: '产品', Solutions: '解决方案', Company: '公司', Connect: '联系', powered: '技术驱动', status: '系统运行正常', rights: '版权所有。' },
   mm: { Product: 'ထုတ်ကုန်', Solutions: 'ဖြေရှင်းချက်', Company: 'ကုမ္ပဏီ', Connect: 'ဆက်သွယ်ရန်', powered: 'အားဖြည့်သည်', status: 'စနစ် ပုံမှန်အလုပ်လုပ်နေသည်', rights: 'မူပိုင်ခွင့်အားလုံး။' },
   jp: { Product: '製品', Solutions: 'ソリューション', Company: '会社', Connect: '連絡', powered: '使用技術', status: 'システム稼働中', rights: '無断転載禁止。' },
 }
 
+// Shape of a footer link (footerData is still JS; this mirrors it).
+interface FooterLinkData { href: string; label: string; external?: boolean; icon?: ReactNode }
+
 // Anchor that auto-handles internal (#hash) vs external (new tab) links.
-function FooterLink({ link }) {
+function FooterLink({ link }: { link: FooterLinkData }) {
   const ext = link.external
   return (
     <a
@@ -31,11 +35,11 @@ function FooterLink({ link }) {
   )
 }
 
-export default function MegaFooter({ lang = 'en' }) {
+export default function MegaFooter({ lang = 'en' }: { lang?: string }) {
   const { brand, socials, columns, certifications } = footerData
   const year = new Date().getFullYear()
   const ft = { ...FT.en, ...(FT[lang] || {}) }   // labels, en fallback per key
-  const tr = (s) => ft[s] || s                    // translate a known label (else passthrough)
+  const tr = (s: string) => ft[s] || s            // translate a known label (else passthrough)
 
   return (
     <footer className="relative z-10 overflow-hidden border-t border-maroon/40 bg-space text-gray-400">

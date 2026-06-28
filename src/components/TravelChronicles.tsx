@@ -1,19 +1,36 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { BLOG_POSTS } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 
-const TAG_CLASS = {
+// Inline style that sets a CSS custom property (--c).
+type CSSVars = CSSProperties & Record<`--${string}`, string | number>
+
+const TAG_CLASS: Record<string, string> = {
   Travel:       'tag-travel',
   Musings:      'tag-musings',
   'Care Giving':'tag-care-giving',
 }
 
-const LANG_LABELS = {
-  en: 'English', mm: 'မြန်မာ', jp: '日本語', vn: 'Tiếng Việt', ne: 'नेपाली', id: 'Bahasa'
+const SIZE_CLASS: Record<string, string> = { large: 'bento-large', medium: 'bento-medium', wide: 'bento-wide' }
+
+const LANG_LABELS: Record<string, string> = {
+  en: 'English', mm: 'မြန်မာ', jp: '日本語', vn: 'Tiếng Việt', ne: 'नेपाली', id: 'Bahasa',
 }
 
-function BentoCard({ post, lang, onClick }) {
-  const sizeClass = { large:'bento-large', medium:'bento-medium', wide:'bento-wide' }[post.size] || 'bento-medium'
+// A blog post from src/data/content (still JS); this mirrors its shape.
+interface PostBody { excerpt: string; body: string }
+interface BlogPost {
+  id: string
+  size: string
+  date: string
+  tag: string
+  img: string
+  title: Record<string, string>
+  translations: Record<string, PostBody>
+}
+
+function BentoCard({ post, onClick, lang }: { post: BlogPost; onClick: (post: BlogPost) => void; lang: string }) {
+  const sizeClass = SIZE_CLASS[post.size] || 'bento-medium'
   const tr = post.translations[lang] || post.translations.en
   const title = post.title[lang] || post.title.en
 
@@ -40,12 +57,12 @@ function BentoCard({ post, lang, onClick }) {
   )
 }
 
-function Modal({ post, lang, setLang, onClose }) {
+function Modal({ post, lang, setLang, onClose }: { post: BlogPost | null; lang: string; setLang: (code: string) => void; onClose: () => void }) {
   const isOpen = Boolean(post)
 
   useEffect(() => {
     if (!isOpen) return
-    const h = (e) => { if (e.key === 'Escape') onClose() }
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', h)
     document.body.style.overflow = 'hidden'
     return () => { window.removeEventListener('keydown', h); document.body.style.overflow = '' }
@@ -111,13 +128,13 @@ function Modal({ post, lang, setLang, onClose }) {
   )
 }
 
-export default function TravelChronicles({ lang, setLang }) {
-  const [activePost, setActivePost] = useState(null)
+export default function TravelChronicles({ lang, setLang }: { lang: string; setLang: (code: string) => void }) {
+  const [activePost, setActivePost] = useState<BlogPost | null>(null)
   const sectionRef = useCyberReveal()   // GSAP ScrollTrigger reveals, synced to the 3D camera
 
   return (
     <section id="blog" ref={sectionRef} className="relative py-24 border-t border-white/5 text-legible"
-      style={{ '--c': 'rgb(var(--coral))' }}>
+      style={{ '--c': 'rgb(var(--coral))' } as CSSVars}>
       {/* crystal-clear: faint tint only, no blur (readability via .text-legible) */}
       <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* Rose-tinted bg */}
@@ -156,7 +173,7 @@ export default function TravelChronicles({ lang, setLang }) {
         </div>
 
         <div data-reveal className="bento-grid">
-          {BLOG_POSTS.map(post => (
+          {BLOG_POSTS.map((post) => (
             <BentoCard key={post.id} post={post} lang={lang} onClick={setActivePost} />
           ))}
         </div>

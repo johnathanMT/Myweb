@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 /**
  * TechDecor — abstract, high-tech wireframe decorations pinned to the screen
  * edges (Azure-landing-page style). Reflects a CS / Software-Engineering / AI
@@ -16,10 +18,10 @@
 const JADE = 'rgb(var(--jade))'
 const MAROON = 'rgb(var(--accent-light))'
 
-const glow = (c, px = 6) => ({ filter: `drop-shadow(0 0 ${px}px ${c})` })
+const glow = (c: string, px = 6): CSSProperties => ({ filter: `drop-shadow(0 0 ${px}px ${c})` })
 
 /* ── Design 1: isometric wireframe cube / tesseract (data node / server) ── */
-function WireCube({ color }) {
+function WireCube({ color }: { color: string }) {
   return (
     <svg viewBox="0 0 200 200" fill="none" stroke={color} strokeWidth="1.1"
       strokeLinejoin="round" style={glow(color, 7)} aria-hidden="true">
@@ -40,13 +42,13 @@ function WireCube({ color }) {
 }
 
 /* ── Design 2: neural-network node graph (AI) ── */
-function NeuralNet({ color }) {
-  const nodes = [
+function NeuralNet({ color }: { color: string }) {
+  const nodes: number[][] = [
     [20, 40], [20, 110], [20, 180],          // input layer
     [110, 25], [110, 80], [110, 135], [110, 190], // hidden layer
     [200, 70], [200, 145],                   // output layer
   ]
-  const edges = [
+  const edges: number[][] = [
     [0, 3], [0, 4], [0, 5], [1, 4], [1, 5], [1, 6], [2, 5], [2, 6],
     [3, 7], [4, 7], [4, 8], [5, 7], [5, 8], [6, 8],
   ]
@@ -67,7 +69,7 @@ function NeuralNet({ color }) {
 }
 
 /* ── Design 3: digital perspective grid + floating binary (data plane) ── */
-function PerspectiveGrid({ color }) {
+function PerspectiveGrid({ color }: { color: string }) {
   // converging "floor" lines toward a vanishing point + horizontal scan rows
   const vp = [130, 30]
   const baseX = [0, 36, 78, 130, 182, 224, 260]

@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Sparkles, ArrowUpRight } from 'lucide-react'
 import { api } from '../lib/portfolioApi'
 import { ASSETS } from '../config/assets'
+import type { Article, EntityId } from '../types/api'
+
+// Inline style that sets a CSS custom property (--b).
+type CSSVars = CSSProperties & Record<`--${string}`, string | number>
 
 /**
  * ArticlesSection — "Cyber Portal".
@@ -11,7 +15,7 @@ import { ASSETS } from '../config/assets'
  * staggered Framer-Motion entrance, as if projected through the gateway.
  */
 export default function ArticlesSection() {
-  const [items, setItems] = useState([])
+  const [items, setItems] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -20,14 +24,17 @@ export default function ArticlesSection() {
     ;(async () => {
       try {
         const r = await api.getArticles({ pageSize: 9 })
-        setItems(r?.data?.items ?? [])
-      } catch (e) { setError(e.message) } finally { setLoading(false) }
+        setItems([...(r?.data?.items ?? [])])   // Paged.items is readonly → copy into mutable state
+      } catch (e) { setError(e instanceof Error ? e.message : 'Failed to load') } finally { setLoading(false) }
     })()
   }, [])
 
-  const blogHref = (id) => `${import.meta.env.BASE_URL}blog.html?id=${id}`
-  const preview = (a) => a.imageUrls?.[0] || a.imageUrl || ASSETS.fallback
-  const reactTotal = (a) => Object.values(a.reactions || {}).reduce((s, n) => s + (n || 0), 0)
+  const blogHref = (id: EntityId) => `${import.meta.env.BASE_URL}blog.html?id=${id}`
+  const preview = (a: Article): string => a.imageUrls?.[0] || a.imageUrl || ASSETS.fallback
+  const reactTotal = (a: Article): number => {
+    const r: Record<string, number> = a.reactions ?? {}
+    return Object.values(r).reduce((s, n) => s + (n || 0), 0)
+  }
 
   return (
     <section id="articles" className="relative overflow-hidden py-28">
@@ -89,7 +96,7 @@ export default function ArticlesSection() {
                     <path d="M0,30 Q12.5,4 25,30 T50,30 T75,30 T100,30 T125,30 T150,30 T175,30 T200,30" />
                   </svg>
                   <div className="radio-bars" aria-hidden>
-                    {Array.from({ length: 20 }).map((_, b) => <span key={b} style={{ '--b': b }} />)}
+                    {Array.from({ length: 20 }).map((_, b) => <span key={b} style={{ '--b': b } as CSSVars} />)}
                   </div>
                   <span className="radio-status">▮ SIGNAL&nbsp;LOCKED</span>
                 </div>

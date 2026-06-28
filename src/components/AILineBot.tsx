@@ -11,8 +11,9 @@ import { SITE } from '../config/site'
  * the app's existing language codes (en, jp = 日本語, mm = မြန်မာ, plus vn/ne/id).
  * Unknown codes fall back to English.
  */
+interface BotText { kicker: string; title: string; sub: string; cta: string; badge: string }
 
-const T = {
+const T: Record<string, BotText> = {
   en: {
     kicker: 'AI ASSISTANT',
     title: 'Talk to my AI agent',
@@ -57,7 +58,7 @@ const T = {
   },
 }
 
-export default function AILineBot({ lang = 'en' }) {
+export default function AILineBot({ lang = 'en' }: { lang?: string }) {
   const t = T[lang] || T.en
 
   return (

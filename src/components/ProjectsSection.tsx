@@ -1,7 +1,8 @@
 import { PROJECTS } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 
-const T = {
+interface SectionText { title: string; sub: string }
+const T: Record<string, SectionText> = {
   en: { title: 'My Projects', sub: "Things I've built and continue to build." },
   mm: { title: 'ကျွန်တော်၏ ပရောဂျက်များ', sub: 'တည်ဆောက်ထားသောနှင့် တည်ဆောက်ဆဲ ပရောဂျက်များ' },
   jp: { title: '私のプロジェクト', sub: '作ったものと作り続けているもの。' },
@@ -11,12 +12,24 @@ const T = {
   zh: { title: '我的项目', sub: '我已构建并持续打造的作品。' },
 }
 
+// Shape of a PROJECTS entry (src/data/content is still JS; this mirrors it).
+interface Project {
+  id: string
+  title: string
+  desc: string
+  icon: string
+  color: string
+  url: string
+  ext: boolean
+  featured?: boolean
+}
+
 /**
  * A premium, borderless project "logo tile": a large glowing icon over a soft
  * colour halo, title + short caption beneath. No cards, no rigid borders — the
  * logo floats on the shared glass surface. Hover lifts + intensifies the glow.
  */
-function ProjectLogo({ project }) {
+function ProjectLogo({ project }: { project: Project }) {
   const c = project.color
   return (
     <a
@@ -58,7 +71,7 @@ function ProjectLogo({ project }) {
   )
 }
 
-export default function ProjectsSection({ lang }) {
+export default function ProjectsSection({ lang = 'en' }: { lang?: string }) {
   const t = T[lang] || T.en
   const ref = useCyberReveal()   // GSAP ScrollTrigger reveals
 

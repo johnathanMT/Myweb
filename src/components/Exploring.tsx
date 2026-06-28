@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import { INTERESTS, PERSONAL } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 import { getSceneImage } from '../lib/sceneImage'
@@ -11,29 +11,27 @@ import { getSceneImage } from '../lib/sceneImage'
  *
  *  Scene source (layered fallback, all graceful):
  *    1. Local still  src/assets/images/scenes/<slug>.webp   (zero-config, fastest)
- *    2. Lazy Unsplash fetch by THEME query (royalty-free) — only on first hover,
- *       cached + single-flight (see lib/sceneImage.js; needs VITE_UNSPLASH_KEY)
+ *    2. Lazy Unsplash fetch by THEME query (royalty-free) — only on first hover
  *    3. Themed Batman/Old-Gold gradient if nothing loads → never a broken image.
- *
- *  NOTE: we use royalty-free imagery + original slogans (not copyrighted film
- *  stills/quotes) so the site is safe to publish. Swap in your own licensed
- *  quotes/images via SLOGANS / the scenes folder anytime.
  */
 
+// Inline styles that set CSS custom properties (--card-c, --c).
+type CSSVars = CSSProperties & Record<`--${string}`, string | number>
+
 // Local stills (optional). Bind by interest slug.
-const SCENES = import.meta.glob(
+const SCENES = import.meta.glob<string>(
   '../assets/images/scenes/*.{webp,jpg,jpeg,png,avif}',
-  { eager: true, import: 'default', query: '?url' }
+  { eager: true, import: 'default', query: '?url' },
 )
-const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-const localScene = (title) => {
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+const localScene = (title: string): string | null => {
   const key = `/${slugify(title)}.`
   const hit = Object.entries(SCENES).find(([p]) => p.toLowerCase().includes(key))
   return hit ? hit[1] : null
 }
 
 // Original cinematic slogans (themes: growth · discipline · journey).
-const SLOGANS = {
+const SLOGANS: Record<string, string> = {
   'Cosmology': 'We are stardust, learning to read the sky.',
   'Quantum Theory': 'Observe boldly — reality answers the curious mind.',
   'Linguistics': 'Every language learned is another window on the world.',
@@ -45,7 +43,7 @@ const SLOGANS = {
 }
 
 // Royalty-free Unsplash search query per interest (evokes the cinematic mood).
-const QUERIES = {
+const QUERIES: Record<string, string> = {
   'Cosmology': 'galaxy nebula cosmos',
   'Quantum Theory': 'abstract light particles',
   'Linguistics': 'old library books',
@@ -56,17 +54,19 @@ const QUERIES = {
   'Unconditional Joke': 'theatre stage spotlight',
 }
 
-function ExploreCard({ item }) {
+interface Interest { title: string; desc: string; icon: string; color: string; page: string }
+
+function ExploreCard({ item }: { item: Interest }) {
   const { title, desc, icon, color, page } = item
   const slogan = SLOGANS[title] || PERSONAL.slogan
-  const [remote, setRemote] = useState(null)
+  const [remote, setRemote] = useState<string | null>(null)
   const tried = useRef(false)
 
   // Lazy-fetch a scene the first time the card is hovered (not on mount).
   const onEnter = () => {
     if (tried.current) return
     tried.current = true
-    if (!localScene(title)) getSceneImage(QUERIES[title] || title).then((u) => u && setRemote(u))
+    if (!localScene(title)) getSceneImage(QUERIES[title] || title).then((u) => { if (u) setRemote(u) })
   }
 
   const scene = localScene(title) || remote
@@ -77,7 +77,7 @@ function ExploreCard({ item }) {
       onMouseEnter={onEnter}
       onFocus={onEnter}
       className="poly-card group relative isolate flex min-h-[190px] flex-col gap-3 overflow-hidden p-5"
-      style={{ '--card-c': color }}
+      style={{ '--card-c': color } as CSSVars}
     >
       {/* ── default content ── */}
       <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
@@ -120,7 +120,7 @@ export default function Exploring() {
 
   return (
     <section id="exploring" ref={sectionRef} className="relative py-24 border-t border-white/5 text-legible"
-      style={{ '--c': 'rgb(var(--accent))' }}>
+      style={{ '--c': 'rgb(var(--accent))' } as CSSVars}>
       <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'linear-gradient(180deg, rgba(20, 20, 20,0.5) 0%, transparent 40%, transparent 60%, rgba(20, 20, 20,0.5) 100%)' }} />

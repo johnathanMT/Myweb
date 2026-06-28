@@ -1,6 +1,6 @@
 // ESM API client for the React app (the static pages use public/api.js instead).
 import { SITE } from '../config/site'
-import type { Article, Paged } from '../types/api'
+import type { ApiResponse, Article, Paged } from '../types/api'
 
 const BASE_URL = SITE.apiUrl
 const VISITOR_KEY = 'mtn_visitor'
@@ -78,10 +78,12 @@ export const api = {
   clearToken: (): void => { _token = null },
   isLoggedIn: (): boolean => !!_token,
 
-  getArticles: ({ page = 1, pageSize = 6, search }: GetArticlesParams = {}): Promise<Paged<Article>> => {
+  // The Articles endpoint wraps its page in the ApiResponse envelope → caller reads
+  // `r.data.items` (data is the paged payload, null on error).
+  getArticles: ({ page = 1, pageSize = 6, search }: GetArticlesParams = {}): Promise<ApiResponse<Paged<Article>>> => {
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize), published: 'true' })
     if (search) q.set('search', search)
-    return req<Paged<Article>>(`/api/Articles?${q.toString()}`)
+    return req<ApiResponse<Paged<Article>>>(`/api/Articles?${q.toString()}`)
   },
 
   getArticle: (id: number | string): Promise<Article> => req<Article>(`/api/Articles/${id}`),

@@ -148,7 +148,13 @@ export interface Article {
   excerpt?: string | null
   body?: string | null
   tag?: string | null
+  author?: string | null
   imageUrl?: string | null
-  published: boolean
+  imageUrls?: string[] | null
+  published?: boolean
+  publishedDate?: string | null
   createdAt?: string
+  likeCount?: number
+  /** reactionKey → count (e.g. { love: 3, fire: 1 }). */
+  reactions?: Record<string, number> | null
 }
