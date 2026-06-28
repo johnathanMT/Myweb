@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Plus, Pencil, Trash2, Save, X, RefreshCw, BookOpen } from 'lucide-react'
 import { SITE } from '../config/site'
+import type { EntityId, Poem } from '../types/api'
 
 /**
  * AdminPoetryManager — CRUD for the homepage poems, embedded in the admin
@@ -9,33 +10,35 @@ import { SITE } from '../config/site'
  *   POST/PUT/DELETE /api/poetry  → Authorization: Bearer <token>  (Role=Admin)
  */
 const API = `${SITE.apiUrl}/api/poetry`
-const EMPTY = { id: null, title: '', subtitle: '', content: '' }
 
-export default function AdminPoetryManager({ token }) {
-  const [poems, setPoems] = useState([])
-  const [form, setForm] = useState(EMPTY)
+interface PoemForm { id: EntityId | null; title: string; subtitle: string; content: string }
+const EMPTY: PoemForm = { id: null, title: '', subtitle: '', content: '' }
+
+export default function AdminPoetryManager({ token }: { token: string }) {
+  const [poems, setPoems] = useState<Poem[]>([])
+  const [form, setForm] = useState<PoemForm>(EMPTY)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const authHeaders = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+  const authHeaders: Record<string, string> = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
 
   const load = useCallback(async () => {
     setError(''); setLoading(true)
     try {
       const res = await fetch(API)
-      const data = await res.json()
+      const data = (await res.json()) as { poems?: Poem[] }
       if (!res.ok) throw new Error(`Load failed (${res.status})`)
       setPoems(Array.isArray(data?.poems) ? data.poems : [])
-    } catch (e) { setError(e.message || 'Could not load poems.') } finally { setLoading(false) }
+    } catch (e) { setError(e instanceof Error ? e.message : 'Could not load poems.') } finally { setLoading(false) }
   }, [])
 
   useEffect(() => { load() }, [load])
 
-  const edit = (p) => { setForm({ id: p.id, title: p.title, subtitle: p.subtitle || '', content: p.content }); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  const edit = (p: Poem) => { setForm({ id: p.id, title: p.title, subtitle: p.subtitle || '', content: p.content }); window.scrollTo({ top: 0, behavior: 'smooth' }) }
   const reset = () => setForm(EMPTY)
 
-  const submit = async (e) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!form.title.trim() || !form.content.trim() || saving) return
     setSaving(true); setError('')
@@ -47,13 +50,13 @@ export default function AdminPoetryManager({ token }) {
         body: JSON.stringify({ title: form.title.trim(), subtitle: form.subtitle.trim(), content: form.content }),
       })
       if (res.status === 401 || res.status === 403) throw new Error('Session expired or not an Admin — please log in again.')
-      const data = await res.json().catch(() => null)
+      const data = (await res.json().catch(() => null)) as { errors?: string[]; message?: string } | null
       if (!res.ok) throw new Error(data?.errors?.[0] || data?.message || `Save failed (${res.status})`)
       reset(); await load()
-    } catch (e) { setError(e.message) } finally { setSaving(false) }
+    } catch (e) { setError(e instanceof Error ? e.message : 'Save failed.') } finally { setSaving(false) }
   }
 
-  const remove = async (id) => {
+  const remove = async (id: EntityId) => {
     if (!window.confirm('Delete this poem permanently?')) return
     setError('')
     try {
@@ -62,7 +65,7 @@ export default function AdminPoetryManager({ token }) {
       if (!res.ok) throw new Error(`Delete failed (${res.status})`)
       if (form.id === id) reset()
       await load()
-    } catch (e) { setError(e.message) }
+    } catch (e) { setError(e instanceof Error ? e.message : 'Delete failed.') }
   }
 
   const inputCls = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none focus:border-jade/50'

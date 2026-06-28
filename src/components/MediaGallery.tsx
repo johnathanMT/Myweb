@@ -7,20 +7,23 @@ import { ASSETS } from '../config/assets'
  *   - a video (HTML5 player) if a video item is present, or
  *   - a swipeable image carousel (with dots) for multiple images, or
  *   - a single image.
- *
- * Props:
- *   media: Array<{ type: 'image' | 'video', url: string, poster?: string }>
- *   (or pass `images: string[]` and optional `videoUrl` for convenience)
- *   className: extra classes for the frame
  */
-export default function MediaGallery({ media, images, videoUrl, alt = '', className = '' }) {
+export interface MediaItem { type: 'image' | 'video'; url: string; poster?: string }
+
+interface MediaGalleryProps {
+  media?: MediaItem[]
+  images?: string[]
+  videoUrl?: string
+  alt?: string
+  className?: string
+}
+
+export default function MediaGallery({ media, images, videoUrl, alt = '', className = '' }: MediaGalleryProps) {
   // Normalise inputs into a single media array
-  const items =
-    media ??
-    [
-      ...(videoUrl ? [{ type: 'video', url: videoUrl }] : []),
-      ...((images || []).map((url) => ({ type: 'image', url }))),
-    ]
+  const items: MediaItem[] = media ?? [
+    ...(videoUrl ? [{ type: 'video' as const, url: videoUrl }] : []),
+    ...(images || []).map((url): MediaItem => ({ type: 'image', url })),
+  ]
 
   const [index, setIndex] = useState(0)
   const fallback = ASSETS.fallback
@@ -34,7 +37,7 @@ export default function MediaGallery({ media, images, videoUrl, alt = '', classN
   }
 
   const current = items[index]
-  const go = (dir) => setIndex((i) => (i + dir + items.length) % items.length)
+  const go = (dir: number) => setIndex((i) => (i + dir + items.length) % items.length)
 
   return (
     <div className={`relative aspect-video w-full overflow-hidden bg-black ${className}`}>
@@ -76,7 +79,7 @@ export default function MediaGallery({ media, images, videoUrl, alt = '', classN
 
           {/* dots */}
           <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
-            {items.map((m, i) => (
+            {items.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setIndex(i)}

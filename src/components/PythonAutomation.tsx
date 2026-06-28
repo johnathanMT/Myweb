@@ -1,16 +1,14 @@
 import { motion } from 'framer-motion'
-import { Terminal, Cpu, Bot, GitBranch, Database, FileCode2, Zap, Play } from 'lucide-react'
+import { Cpu, Bot, GitBranch, Database, FileCode2, Zap, Play, type LucideIcon } from 'lucide-react'
 
 /**
  * PythonAutomation — "Cyber Python" terminal / hacker-IDE aesthetic.
  * Neon-green on deep cyberpunk, terminal-window cards, code-focused icons.
- * Edit TOOLS with your real automation projects.
- *
- * Requires: framer-motion, lucide-react (both already installed).
  */
 const NEON = '#22ff88'
 
-const TOOLS = [
+interface Tool { icon: LucideIcon; name: string; cmd: string; desc: string; tags: string[] }
+const TOOLS: Tool[] = [
   { icon: Bot,       name: 'Auto File Sorter',   cmd: 'python sort_files.py --watch ~/Downloads',
     desc: 'Watches a folder and auto-categorises files by type, date, and rules.', tags: ['os', 'watchdog'] },
   { icon: Database,  name: 'Data Scraper',        cmd: 'python scrape.py --site target --out data.csv',
@@ -25,7 +23,7 @@ const TOOLS = [
     desc: 'A tiny cron-style runner for recurring local automations.', tags: ['schedule'] },
 ]
 
-function ToolCard({ tool, i }) {
+function ToolCard({ tool, i }: { tool: Tool; i: number }) {
   const Icon = tool.icon
   return (
     <motion.a

@@ -1,15 +1,19 @@
-import { MapPin, Heart, Code2, Quote } from 'lucide-react'
+import { MapPin, Heart, Code2, Quote, type LucideIcon } from 'lucide-react'
 
 /**
  * AboutMe — homepage "My Story" section. Image-led card (image_1-inspired)
  * pairing the Wat Arun trip photo with the caregiver → coder narrative.
  *
  * Drop your photo at: public/Myweb_photo/wat-arun.jpg
- * (served at /Myweb/Myweb_photo/wat-arun.jpg in production).
  */
-export default function AboutMe({
-  photo = '/Myweb_photo/wat-arun.jpg',
-}) {
+interface Stat { icon: LucideIcon; label: string; value: string }
+const STATS: Stat[] = [
+  { icon: Heart, label: 'Caregiving', value: 'Kaigo' },
+  { icon: Code2, label: 'Building', value: 'Full-Stack' },
+  { icon: MapPin, label: 'Based in', value: 'Japan 🇯🇵' },
+]
+
+export default function AboutMe({ photo = '/Myweb_photo/wat-arun.jpg' }: { photo?: string }) {
   return (
     <section id="about" className="relative bg-transparent py-24">
       <div className="mx-auto max-w-6xl px-6">
@@ -54,11 +58,7 @@ export default function AboutMe({
             </p>
 
             <div className="mt-8 grid grid-cols-3 gap-4">
-              {[
-                { icon: Heart, label: 'Caregiving', value: 'Kaigo' },
-                { icon: Code2, label: 'Building', value: 'Full-Stack' },
-                { icon: MapPin, label: 'Based in', value: 'Japan 🇯🇵' },
-              ].map(({ icon: Icon, label, value }) => (
+              {STATS.map(({ icon: Icon, label, value }) => (
                 <div key={label} className="rounded-2xl border border-white/5 bg-white/5 p-4 text-center">
                   <Icon className="mx-auto mb-2 text-accent-light" size={20} />
                   <p className="text-xs text-muted">{label}</p>

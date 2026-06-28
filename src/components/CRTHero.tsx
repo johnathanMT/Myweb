@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import type { ReactNode } from 'react'
 import '../crt.css'
 
 /**
@@ -6,12 +7,11 @@ import '../crt.css'
  * A glassmorphism workstation panel over a hex data-grid, with Framer-Motion
  * floating data nodes and a cyberpunk glitch + RGB-split + data-stream name.
  * Pure CSS/SVG + Framer Motion — no 3D libraries. Responsive & accessible.
- *
- * Optional children render inside the panel below the name/CTAs.
  */
+interface NodeData { x: string; y: string; s: number; c: string; d: number }
 
 // Floating quantum "data nodes" (cyan / magenta / electric-blue)
-const NODES = [
+const NODES: NodeData[] = [
   { x: '12%', y: '24%', s: 10, c: '#00e5ff', d: 0 },
   { x: '85%', y: '20%', s: 7, c: '#ff3df0', d: 0.6 },
   { x: '78%', y: '70%', s: 12, c: '#4b7bff', d: 1.1 },
@@ -21,7 +21,7 @@ const NODES = [
   { x: '6%', y: '50%', s: 6, c: '#4b7bff', d: 0.5 },
 ]
 
-function DataNode({ x, y, s, c, d }) {
+function DataNode({ x, y, s, c, d }: NodeData) {
   return (
     <motion.span
       aria-hidden
@@ -35,7 +35,7 @@ function DataNode({ x, y, s, c, d }) {
 }
 
 // A faint rotating hexagon accent
-function HexAccent({ className, size = 120, color = 'rgba(0,229,255,0.25)' }) {
+function HexAccent({ className, size = 120, color = 'rgba(0,229,255,0.25)' }: { className?: string; size?: number; color?: string }) {
   return (
     <motion.svg
       aria-hidden
@@ -50,7 +50,7 @@ function HexAccent({ className, size = 120, color = 'rgba(0,229,255,0.25)' }) {
   )
 }
 
-export default function CRTHero({ children }) {
+export default function CRTHero({ children }: { children?: ReactNode }) {
   return (
     <section id="home" className="q-stage">
       {/* backdrops */}

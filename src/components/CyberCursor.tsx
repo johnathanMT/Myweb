@@ -6,25 +6,25 @@ import { useEffect, useRef } from 'react'
  * Fine-pointer devices only (skipped on touch); hides the native cursor while active.
  */
 export default function CyberCursor() {
-  const ring = useRef(null)
-  const dot = useRef(null)
+  const ring = useRef<HTMLDivElement>(null)
+  const dot = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!window.matchMedia?.('(pointer: fine)').matches) return
+    if (!window.matchMedia?.('(pointer: fine)')?.matches) return
     const r = ring.current, d = dot.current
     if (!r || !d) return
 
     document.documentElement.classList.add('has-cyber-cursor')
 
-    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, raf
+    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, raf = 0
     const INTERACTIVE = 'a,button,[data-cursor],input,textarea,select,label,[role="button"]'
 
-    const onMove = (e) => {
+    const onMove = (e: MouseEvent) => {
       mx = e.clientX; my = e.clientY
       d.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`
     }
-    const onOver = (e) => { if (e.target.closest?.(INTERACTIVE)) r.classList.add('is-active') }
-    const onOut = (e) => { if (e.target.closest?.(INTERACTIVE)) r.classList.remove('is-active') }
+    const onOver = (e: MouseEvent) => { if ((e.target as Element | null)?.closest(INTERACTIVE)) r.classList.add('is-active') }
+    const onOut = (e: MouseEvent) => { if ((e.target as Element | null)?.closest(INTERACTIVE)) r.classList.remove('is-active') }
 
     const loop = () => {
       rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18

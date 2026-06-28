@@ -15,28 +15,27 @@ const LINES = [
   '>     \\ \\_/ /  ',
   '>      -----     ',
   '> WELCOME, OPERATOR.',
-  
-
 ]
 
-
 export default function BootScreen() {
-  const [show, setShow] = useState(() => {
+  const [show, setShow] = useState<boolean>(() => {
     try { return sessionStorage.getItem('mtn_booted') !== '1' } catch { return true }
   })
   const [done, setDone] = useState(false)
   const [text, setText] = useState('')
-  const bar = useRef(null)
+  const bar = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (!show) return
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
     const full = LINES.join('\n')
-    let n = 0, typeT, endT
+    let n = 0
+    let typeT: ReturnType<typeof setTimeout> | undefined
+    let endT: ReturnType<typeof setTimeout> | undefined
 
     const finish = () => {
       endT = setTimeout(() => {
-        try { sessionStorage.setItem('mtn_booted', '1') } catch { }
+        try { sessionStorage.setItem('mtn_booted', '1') } catch { /* ignore */ }
         setDone(true)
         setTimeout(() => setShow(false), 650)   // unmount after fade
       }, reduce ? 150 : 550)
@@ -66,7 +65,7 @@ export default function BootScreen() {
   if (!show) return null
 
   const skip = () => {
-    try { sessionStorage.setItem('mtn_booted', '1') } catch { }
+    try { sessionStorage.setItem('mtn_booted', '1') } catch { /* ignore */ }
     setDone(true); setTimeout(() => setShow(false), 650)
   }
 

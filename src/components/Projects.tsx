@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { PROJECTS } from '../data/content'
 
-const T = {
+interface SectionText { title: string; sub: string }
+const T: Record<string, SectionText> = {
   en: { title: 'My Projects', sub: 'Things I\'ve built and continue to build.' },
   mm: { title: 'ကျွန်တော်၏ ပရောဂျက်များ', sub: 'တည်ဆောက်ထားသောနှင့် တည်ဆောက်ဆဲ ပရောဂျက်များ' },
   jp: { title: '私のプロジェクト',              sub: '作ったものと作り続けているもの。' },
@@ -10,16 +11,29 @@ const T = {
   id: { title: 'Proyek Saya',               sub: 'Hal-hal yang telah dan sedang saya bangun.' },
 }
 
-export default function Projects({ lang }) {
+// Mirrors a PROJECTS entry (src/data/content is still JS).
+interface Project {
+  id: string
+  title: string
+  desc: string
+  icon: string
+  color: string
+  url: string
+  ext: boolean
+  featured?: boolean
+}
+
+export default function Projects({ lang = 'en' }: { lang?: string }) {
   const t = T[lang] || T.en
-  const sectionRef = useRef(null)
+  const sectionRef = useRef<HTMLElement>(null)
+  const projects = PROJECTS as Project[]
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
-      { threshold: 0.1 }
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('visible') }),
+      { threshold: 0.1 },
     )
-    sectionRef.current?.querySelectorAll('.reveal').forEach(el => observer.observe(el))
+    sectionRef.current?.querySelectorAll('.reveal').forEach((el) => observer.observe(el))
     return () => observer.disconnect()
   }, [])
 
@@ -35,7 +49,7 @@ export default function Projects({ lang }) {
         </div>
 
         {/* Featured project */}
-        {PROJECTS.filter(p => p.featured).map(project => (
+        {projects.filter((p) => p.featured).map((project) => (
           <div key={project.id} className="reveal mb-6">
             <a
               href={project.url}
@@ -70,7 +84,7 @@ export default function Projects({ lang }) {
 
         {/* Grid of other projects */}
         <div className="reveal grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
-          {PROJECTS.filter(p => !p.featured).map((project, i) => (
+          {projects.filter((p) => !p.featured).map((project, i) => (
             <a
               key={project.id}
               href={project.url}

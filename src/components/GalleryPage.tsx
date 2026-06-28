@@ -1,18 +1,12 @@
 import { useGallery } from '../hooks/useGallery'
 
 /**
- * GalleryPage — the dedicated /gallery route (rendered inside <PageShell>, which
- * supplies the navbar, footer, ambient background and "back to home" link).
- *
+ * GalleryPage — the dedicated /gallery route (rendered inside <PageShell>).
  * Shows the FULL collection (from src/assets/images/gallery/) grouped by
  * "Month Year — Moment" (newest first) in a responsive CSS-columns masonry.
- * No modal/lightbox — hovering a photo gives a subtle scale-up + caption.
- *
- * Language: PageShell keeps lang in localStorage under 'mtn_lang'; we read the
- * same key so captions match the rest of the site.
  */
-
-const T = {
+interface SectionText { badge: string; title: string; sub: string }
+const T: Record<string, SectionText> = {
   en: { badge: 'GALLERY',   title: 'The full collection', sub: 'Every photo from the journey, grouped by year and chapter.' },
   mm: { badge: 'ပြခန်း',     title: 'ဓာတ်ပုံအားလုံး',        sub: 'ခရီးတစ်လျှောက်မှ ဓာတ်ပုံအားလုံး — နှစ်နှင့် အခန်းကဏ္ဍအလိုက်။' },
   jp: { badge: 'ギャラリー', title: '全コレクション',        sub: '旅のすべての写真を、年と章ごとに。' },

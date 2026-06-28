@@ -7,17 +7,24 @@ import { X } from 'lucide-react'
  * GalleryPage). Dumb/presentational: the caller resolves caption/alt and passes
  * a plain item, so this component knows nothing about i18n or the glob.
  *
- * Props:
- *   item:    { url, caption, alt } | null   (null = closed)
- *   onClose: () => void
- *
  * Behavior: scale-in/fade-in via AnimatePresence, dark blurred backdrop,
  * close button, click-outside, and Escape. Locks body scroll while open.
  */
-export default function Lightbox({ item, onClose }) {
+export interface LightboxItem {
+  url: string
+  caption?: string
+  alt?: string
+}
+
+interface LightboxProps {
+  item: LightboxItem | null   // null = closed
+  onClose: () => void
+}
+
+export default function Lightbox({ item, onClose }: LightboxProps) {
   useEffect(() => {
     if (!item) return
-    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'

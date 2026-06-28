@@ -1,17 +1,16 @@
 import { motion } from 'framer-motion'
-import { Landmark, BookOpen, Globe2, Feather, GraduationCap, ScrollText } from 'lucide-react'
+import { Landmark, BookOpen, Globe2, Feather, GraduationCap, ScrollText, type LucideIcon } from 'lucide-react'
 
 /**
  * StudyingLibrary — "World-Famous University Library" theme:
  * Modern Dark Academia × high-end UI. Elegant serif type, sophisticated
  * glassmorphism, deep wood/navy/parchment palette, classic academic icons.
- *
- * Edit COLLECTIONS with your real study areas / assignment pages.
  */
 const PARCHMENT = '#e8dcc0'
 const GOLD = '#c8a04a'
 
-const COLLECTIONS = [
+interface Collection { icon: LucideIcon; title: string; meta: string; desc: string }
+const COLLECTIONS: Collection[] = [
   { icon: Landmark,      title: 'System Architecture', meta: 'OOSAD · DDOOCP',
     desc: 'Object-oriented analysis, design patterns, and disciplined software architecture.' },
   { icon: BookOpen,      title: 'Algorithms & FE',     meta: 'Fundamental Engineering',
@@ -26,7 +25,7 @@ const COLLECTIONS = [
     desc: 'A curated collection of university projects, notes, and submissions.' },
 ]
 
-function VolumeCard({ item, i }) {
+function VolumeCard({ item, i }: { item: Collection; i: number }) {
   const Icon = item.icon
   return (
     <motion.a

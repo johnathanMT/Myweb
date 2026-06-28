@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import {
   Heart, MessageCircle, Share2, Facebook, Linkedin, Twitter,
-  Link2, MapPin, Flame, Coffee,
+  Link2, MapPin, Flame, Coffee, type LucideIcon,
 } from 'lucide-react'
-import MediaGallery from './MediaGallery'
+import MediaGallery, { type MediaItem } from './MediaGallery'
+import type { EntityId } from '../types/api'
 
+interface ReactionDef { key: string; emoji: string; label: string }
 // Anti-spam "Quick Reaction" palette — users pick from these instead of typing.
-const QUICK_REACTIONS = [
+const QUICK_REACTIONS: ReactionDef[] = [
   { key: 'love', emoji: '❤️', label: 'Love it' },
   { key: 'clap', emoji: '👏', label: 'Bravo' },
   { key: 'fire', emoji: '🔥', label: 'Fire' },
@@ -16,6 +18,34 @@ const QUICK_REACTIONS = [
   { key: 'helpful', emoji: '🙏', label: 'Helpful!' },
 ]
 
+// The article shape ArticleCard consumes (all optional — it's a presentational card).
+interface ArticleCardData {
+  id?: EntityId
+  title?: string
+  content?: string
+  author?: string
+  publishedDate?: string
+  tags?: string
+  likeCount?: number
+  reactions?: Record<string, number>
+  imageUrl?: string
+  images?: string[]
+  videoUrl?: string
+  media?: MediaItem[]
+  origin?: string
+  roastLevel?: string
+  tastingNotes?: string
+}
+
+interface ArticleCardProps {
+  article?: ArticleCardData
+  onLike?: (id: EntityId | undefined, liked: boolean) => unknown
+  onReact?: (id: EntityId | undefined, reactionKey: string) => unknown
+  shareUrl?: string
+}
+
+interface MetaRow { icon: LucideIcon; label: string; value: string }
+
 /**
  * ArticleCard — sleek dark card with a media header (image carousel / collage /
  * video), tasting-style meta, and an interactive footer.
@@ -23,16 +53,8 @@ const QUICK_REACTIONS = [
  *  • Likes  — anonymous, no login required.
  *  • Comments — "Quick Reaction": pick a pre-defined emoji + phrase chip (anti-spam).
  *  • Share  — real Facebook / X / LinkedIn share links + copy link.
- *
- * Props:
- *   article: { id, title, content, author, publishedDate, tags, likeCount,
- *              imageUrl, images?, videoUrl?, media?, reactions?,
- *              origin?, roastLevel?, tastingNotes? }
- *   onLike(id, liked)             — POST/DELETE like (anonymous)
- *   onReact(id, reactionKey)      — POST a quick reaction
- *   shareUrl                      — canonical URL to share
  */
-export default function ArticleCard({ article = {}, onLike, onReact, shareUrl }) {
+export default function ArticleCard({ article = {}, onLike, onReact, shareUrl }: ArticleCardProps) {
   const {
     id, title = 'Untitled', content = '', author = 'Unknown',
     publishedDate, tags, likeCount = 0, reactions = {},
@@ -43,8 +65,8 @@ export default function ArticleCard({ article = {}, onLike, onReact, shareUrl })
   const [liked, setLiked] = useState(false)
   const [likes, setLikes] = useState(likeCount)
   const [showReactions, setShowReactions] = useState(false)
-  const [reactionCounts, setReactionCounts] = useState(reactions)
-  const [sentReaction, setSentReaction] = useState(null)
+  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>(reactions)
+  const [sentReaction, setSentReaction] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
   const url = shareUrl || (typeof window !== 'undefined' ? window.location.href : '')
@@ -54,10 +76,11 @@ export default function ArticleCard({ article = {}, onLike, onReact, shareUrl })
     : ''
 
   // Build the media list (priority: explicit media > images/video > single imageUrl)
-  const mediaList = media
-    ?? (images || videoUrl
-      ? [...(videoUrl ? [{ type: 'video', url: videoUrl }] : []), ...((images || []).map((u) => ({ type: 'image', url: u })))]
-      : imageUrl ? [{ type: 'image', url: imageUrl }] : [])
+  const mediaList: MediaItem[] = media ?? (
+    images || videoUrl
+      ? [...(videoUrl ? [{ type: 'video' as const, url: videoUrl }] : []), ...((images || []).map((u): MediaItem => ({ type: 'image', url: u })))]
+      : imageUrl ? [{ type: 'image' as const, url: imageUrl }] : []
+  )
 
   const toggleLike = async () => {
     const next = !liked
@@ -65,7 +88,7 @@ export default function ArticleCard({ article = {}, onLike, onReact, shareUrl })
     try { await onLike?.(id, next) } catch { /* revert on failure */ setLiked(!next); setLikes((n) => n - (next ? 1 : -1)) }
   }
 
-  const sendReaction = async (r) => {
+  const sendReaction = async (r: ReactionDef) => {
     // optimistic: bump the chosen reaction's counter
     setReactionCounts((c) => ({ ...c, [r.key]: (c[r.key] || 0) + 1 }))
     setSentReaction(r.key)
@@ -75,22 +98,22 @@ export default function ArticleCard({ article = {}, onLike, onReact, shareUrl })
 
   const totalReactions = Object.values(reactionCounts).reduce((a, b) => a + (b || 0), 0)
 
-  const share = (network) => {
+  const share = (network: string) => {
     const u = encodeURIComponent(url), t = encodeURIComponent(title)
-    const links = {
+    const links: Record<string, string> = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${u}`,
       twitter: `https://twitter.com/intent/tweet?url=${u}&text=${t}`,
     }
     if (links[network]) window.open(links[network], '_blank', 'noopener,width=600,height=540')
   }
-  const copyLink = async () => { try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch { } }
+  const copyLink = async () => { try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch { /* ignore */ } }
 
-  const metaRows = [
-    origin && { icon: MapPin, label: 'Origin', value: origin },
-    roastLevel && { icon: Flame, label: 'Roast', value: roastLevel },
-    tastingNotes && { icon: Coffee, label: 'Notes', value: tastingNotes },
-  ].filter(Boolean)
+  const metaRows: MetaRow[] = [
+    origin ? { icon: MapPin, label: 'Origin', value: origin } : null,
+    roastLevel ? { icon: Flame, label: 'Roast', value: roastLevel } : null,
+    tastingNotes ? { icon: Coffee, label: 'Notes', value: tastingNotes } : null,
+  ].filter((r): r is MetaRow => r !== null)
 
   const blogHref = `${import.meta.env.BASE_URL}blog.html?id=${id}`
 

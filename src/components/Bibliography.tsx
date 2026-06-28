@@ -1,14 +1,19 @@
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
-
-import { Compass, HeartHandshake, BookMarked, GraduationCap, Terminal, Code2, Cpu, BuildingIcon, Building2, Flashlight, PlaneTakeoff, School, AwardIcon, Briefcase, Hotel, Utensils, University } from 'lucide-react'
+import {
+  GraduationCap, Building2, PlaneTakeoff, School, AwardIcon, Briefcase, Hotel, Utensils, University,
+  type LucideIcon,
+} from 'lucide-react'
 
 /**
  * Bibliography — a vertical chronological timeline of the journey, whose visual
  * language MORPHS from "Vintage" (sepia, serif, classic icons) at the top to
  * "Cyber-Modern" (neon glow, mono, tech icons) at the present day.
  */
-const TIMELINE = [
+type Era = 'vintage' | 'transition' | 'cyber'
+interface TimelineEntry { year: string; era: Era; icon: LucideIcon; title: string; text: string }
+
+const TIMELINE: TimelineEntry[] = [
   {
     year: '2019, December', era: 'vintage', icon: GraduationCap, title: 'Bachelor of Arts in International Relations',
     text: 'Graduated from Dagon University. Studied — International Politics, Diplomacy, Law & Economics.'
@@ -52,7 +57,8 @@ const TIMELINE = [
 ]
 
 // Era → styling tokens
-const ERA = {
+interface EraStyle { accent: string; ring: string; card: string; border: string; font: string; filter: string; glow: string }
+const ERA: Record<Era, EraStyle> = {
   vintage: {
     accent: '#c8a04a', ring: 'rgba(200,160,74,0.5)',
     card: 'linear-gradient(160deg, rgba(40,34,24,0.6), rgba(24,20,14,0.7))',
@@ -73,7 +79,7 @@ const ERA = {
   },
 }
 
-function Entry({ item, i }) {
+function Entry({ item, i }: { item: TimelineEntry; i: number }) {
   const e = ERA[item.era]
   const Icon = item.icon
   const left = i % 2 === 0
@@ -110,7 +116,7 @@ function Entry({ item, i }) {
 }
 
 export default function Bibliography() {
-  const ref = useRef(null)
+  const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 80%', 'end 60%'] })
   const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1])
 

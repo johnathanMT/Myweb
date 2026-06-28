@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { api } from '../lib/portfolioApi'
+import type { Article } from '../types/api'
 
 /**
  * BlogSnippets — a compact list of recent blog posts linking to the full blog.
  */
 export default function BlogSnippets() {
-  const [items, setItems] = useState([])
+  const [items, setItems] = useState<Article[]>([])
 
   useEffect(() => {
     ;(async () => {
       try {
         const r = await api.getArticles({ pageSize: 4 })
-        setItems(r?.data?.items ?? [])
+        setItems([...(r?.data?.items ?? [])])
       } catch { /* keep section empty on error */ }
     })()
   }, [])

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type MouseEvent } from 'react'
 import { AnimatePresence, motion, useMotionValue, useSpring } from 'framer-motion'
 import { PROJECTS } from '../data/content'
 import { ASSETS } from '../config/assets'
@@ -7,24 +7,22 @@ import '../marquee.css'
 /**
  * MarqueeGallery — a continuous horizontal marquee of project names. Hovering a
  * name reveals its image, which smoothly follows the cursor (Framer Motion).
- *
- * Requires:  npm install framer-motion
- *
- * Props:
- *   items: [{ title, image }]   (defaults to your PROJECTS, mapped to images)
  */
 const FALLBACK = ASSETS.fallback
 
-export default function MarqueeGallery({ items }) {
-  // Map your existing PROJECTS to {title, image}; fall back to a placeholder.
-  const data = items ?? PROJECTS.map((p) => ({
+interface MarqueeItem { title: string; image: string; url?: string }
+
+export default function MarqueeGallery({ items }: { items?: MarqueeItem[] }) {
+  // Map your existing PROJECTS to {title, image}. PROJECTS carry no image field,
+  // so we use the shared placeholder unless explicit `items` are passed in.
+  const data: MarqueeItem[] = items ?? PROJECTS.map((p) => ({
     title: p.title,
-    image: p.image || p.imageUrl || FALLBACK,
+    image: FALLBACK,
     url: p.url,
   }))
 
-  const [hovered, setHovered] = useState(null)
-  const wrapRef = useRef(null)
+  const [hovered, setHovered] = useState<MarqueeItem | null>(null)
+  const wrapRef = useRef<HTMLElement>(null)
 
   // Smooth cursor-following position via springs
   const mx = useMotionValue(0)
@@ -32,7 +30,7 @@ export default function MarqueeGallery({ items }) {
   const x = useSpring(mx, { stiffness: 250, damping: 28, mass: 0.5 })
   const y = useSpring(my, { stiffness: 250, damping: 28, mass: 0.5 })
 
-  const onMove = (e) => {
+  const onMove = (e: MouseEvent<HTMLElement>) => {
     const r = wrapRef.current?.getBoundingClientRect()
     if (!r) return
     mx.set(e.clientX - r.left)

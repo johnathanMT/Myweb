@@ -63,6 +63,7 @@ export interface Poem {
   order?: number          // verify vs DTO (sort/phase position)
   published?: boolean     // verify vs DTO
   createdAt?: string      // ISO-8601; verify vs DTO
+  createdDate?: string    // admin list field; verify vs DTO
 }
 
 export interface PoetryResponse {
