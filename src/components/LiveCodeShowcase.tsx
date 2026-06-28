@@ -8,7 +8,9 @@ import { useInView } from '../hooks/useInView'
  * (VS Code "Dark+" token colours), line numbers and a blinking cursor.
  */
 
-const SNIPPETS = [
+interface Snippet { file: string; lesson: string; code: string }
+
+const SNIPPETS: Snippet[] = [
   {
     file: 'OrdersController.cs', lesson: 'Async REST + Dependency Injection',
     code: `// LESSON: a clean async REST endpoint with constructor injection
@@ -67,7 +69,7 @@ public async Task<Result<User>> GetUser(int id)
 ]
 
 /* ── Lightweight C# tokenizer → colourful spans (robust on partial lines) ── */
-const CS_KW = new Set([
+const CS_KW = new Set<string>([
   'abstract', 'as', 'async', 'await', 'base', 'bool', 'break', 'byte', 'case', 'catch', 'char',
   'class', 'const', 'continue', 'decimal', 'default', 'delegate', 'do', 'double', 'else', 'enum',
   'event', 'explicit', 'extern', 'false', 'finally', 'fixed', 'float', 'for', 'foreach', 'goto',
@@ -78,7 +80,7 @@ const CS_KW = new Set([
   'virtual', 'void', 'volatile', 'while', 'when', 'with', 'get', 'set', 'init', 'not',
 ])
 
-const COLOR = {
+const COLOR: Record<string, string> = {
   comment: '#6A9955', // green
   string: '#CE9178',  // orange
   kw: '#569CD6',      // blue
@@ -89,11 +91,13 @@ const COLOR = {
   punct: '#D4D4D4',
 }
 
-function tokenizeCs(line) {
-  const tokens = []
+type Token = [type: string, text: string]
+
+function tokenizeCs(line: string): Token[] {
+  const tokens: Token[] = []
   // comments, strings (allow unterminated for mid-typing), words, numbers, ws, punctuation
   const re = /(\/\/.*$)|([@$]?"(?:\\.|[^"\\])*"?)|([A-Za-z_]\w*)|(\d[\d_]*\.?\d*[fFdDmMlL]?)|(\s+)|([^\w\s])/g
-  let m
+  let m: RegExpExecArray | null
   while ((m = re.exec(line)) !== null) {
     if (m.index === re.lastIndex) re.lastIndex++ // safety against zero-width
     if (m[1]) tokens.push(['comment', m[1]])
@@ -121,7 +125,7 @@ const BODY_H = MAX_LINES * 24 + 32   // ~24px/line + py-4 padding
 export default function LiveCodeShowcase() {
   const [idx, setIdx] = useState(0)
   const [shown, setShown] = useState('')
-  const timer = useRef(null)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [viewRef, inView] = useInView({ threshold: 0.15 })
 
   useEffect(() => {
@@ -143,7 +147,7 @@ export default function LiveCodeShowcase() {
   const lines = shown.split('\n')
 
   return (
-    <section id="livecode" className="relative py-24 sm:py-28">
+    <section id="livecode" ref={viewRef} className="relative py-24 sm:py-28">
       <div className="mx-auto max-w-5xl px-6">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-jade">// C# · .NET 8 — LIVE LESSONS</p>
         <h2 className="mt-4 flex items-center gap-3 text-3xl font-bold text-white sm:text-4xl">
@@ -183,7 +187,7 @@ export default function LiveCodeShowcase() {
                 const last = i === lines.length - 1
                 return (
                   <div key={i}>
-                    {toks.length === 0 && !last ? ' ' : toks.map(([t, txt], j) => (
+                    {toks.length === 0 && !last ? ' ' : toks.map(([t, txt], j) => (
                       t === 'ws' ? <span key={j}>{txt}</span> : <span key={j} style={{ color: COLOR[t] }}>{txt}</span>
                     ))}
                     {last && <span className="ml-0.5 inline-block h-[1.05em] w-[8px] -translate-y-[1px] animate-pulse align-middle bg-accent-light" />}

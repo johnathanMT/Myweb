@@ -10,18 +10,23 @@ import { Zap } from 'lucide-react'
  * is PAUSED whenever the section is off-screen (IntersectionObserver) to save
  * battery. Everything is cleaned up on unmount.
  */
+interface Particle { anti: boolean; x: number; y: number; vx: number; vy: number; r: number; life: number }
+interface Flash { x: number; y: number; r: number; max: number; a: number; vx?: number; vy?: number; spark?: boolean }
+
 export default function AntimatterSim() {
-  const canvasRef = useRef(null)
-  const wrapRef = useRef(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
     const wrap = wrapRef.current
     if (!canvas || !wrap) return
     const ctx = canvas.getContext('2d')
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (!ctx) return
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
 
-    let W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2)
+    let W = 0, H = 0
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
     const resize = () => {
       W = wrap.clientWidth; H = wrap.clientHeight
       canvas.width = W * dpr; canvas.height = H * dpr
@@ -33,31 +38,31 @@ export default function AntimatterSim() {
 
     const JADE = '38,200,132', MAROON = '214,72,90', GOLD = '212,175,55'
     const MAX = window.innerWidth < 640 ? 26 : 46
-    const rand = (a, b) => a + Math.random() * (b - a)
+    const rand = (a: number, b: number) => a + Math.random() * (b - a)
 
-    const particles = []
-    const flashes = []
-    const spawn = (anti, x, y) => particles.push({
+    const particles: Particle[] = []
+    const flashes: Flash[] = []
+    const spawn = (anti: boolean, x?: number, y?: number) => particles.push({
       anti, x: x ?? rand(0, W), y: y ?? rand(0, H),
       vx: rand(-0.5, 0.5), vy: rand(-0.5, 0.5), r: rand(2.2, 3.6), life: rand(600, 1400),
     })
     for (let i = 0; i < MAX / 2; i++) { spawn(false); spawn(true) }
 
-    const annihilate = (x, y) => {
+    const annihilate = (x: number, y: number) => {
       flashes.push({ x, y, r: 2, max: rand(26, 46), a: 1 })
       // a few photon sparks
       for (let k = 0; k < 6; k++) flashes.push({ x, y, r: 1, max: rand(8, 16), a: 0.8, vx: rand(-2, 2), vy: rand(-2, 2), spark: true })
     }
 
-    const onClick = (e) => {
+    const onClick = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
       const x = e.clientX - rect.left, y = e.clientY - rect.top
       spawn(false, x + rand(-6, 6), y + rand(-6, 6)); spawn(true, x + rand(-6, 6), y + rand(-6, 6))
     }
     canvas.addEventListener('click', onClick)
 
-    let raf = null, running = false, last = performance.now()
-    const tick = (now) => {
+    let raf: number | null = null, running = false, last = performance.now()
+    const tick = (now: number) => {
       const dt = Math.min(40, now - last); last = now
       ctx.clearRect(0, 0, W, H)
 
@@ -89,7 +94,7 @@ export default function AntimatterSim() {
       for (let i = flashes.length - 1; i >= 0; i--) {
         const f = flashes[i]
         f.r += f.spark ? 0.6 : 1.8; f.a -= 0.03
-        if (f.spark) { f.x += f.vx; f.y += f.vy }
+        if (f.spark) { f.x += f.vx ?? 0; f.y += f.vy ?? 0 }
         ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2)
         ctx.strokeStyle = `rgba(${GOLD},${Math.max(0, f.a)})`; ctx.lineWidth = f.spark ? 1 : 2
         ctx.shadowBlur = 14; ctx.shadowColor = `rgba(${GOLD},0.8)`; ctx.stroke(); ctx.shadowBlur = 0
@@ -105,7 +110,7 @@ export default function AntimatterSim() {
     const stop = () => { running = false; if (raf) cancelAnimationFrame(raf); raf = null }
 
     // pause when off-screen
-    const io = new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop() }, { threshold: 0.05 })
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) start(); else stop() }, { threshold: 0.05 })
     io.observe(wrap)
     if (reduce) { // static frame for reduced-motion users
       ctx.clearRect(0, 0, W, H)

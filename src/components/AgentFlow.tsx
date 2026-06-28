@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Brain, Wrench, Eye, Sparkles, CheckCircle2, Play, Pause, RotateCcw } from 'lucide-react'
+import { Brain, Wrench, Eye, Sparkles, CheckCircle2, Play, Pause, RotateCcw, type LucideIcon } from 'lucide-react'
 import { useInView } from '../hooks/useInView'
 
 /**
@@ -9,15 +9,17 @@ import { useInView } from '../hooks/useInView'
  * out each step. Auto-runs; can be paused / restarted. Pure React + timers.
  */
 
-const NODES = [
+interface FlowNode { id: string; label: string; Icon: LucideIcon; color: string }
+const NODES: FlowNode[] = [
   { id: 'plan', label: 'Plan', Icon: Brain, color: 'rgb(var(--jade))' },
   { id: 'tool', label: 'Call Tool', Icon: Wrench, color: 'rgb(var(--accent-light))' },
   { id: 'observe', label: 'Observe', Icon: Eye, color: '#d4af37' },
   { id: 'reflect', label: 'Reflect', Icon: Sparkles, color: 'rgb(var(--jade-light))' },
 ]
 
+interface ScriptStep { node: number; log: string }
 // One scripted run of the loop (2 iterations, then Answer).
-const SCRIPT = [
+const SCRIPT: ScriptStep[] = [
   { node: 0, log: '🧠 plan: break "compare GPUs for training" into sub-tasks' },
   { node: 1, log: '🔧 tool: web_search("RTX 4090 vs A100 throughput")' },
   { node: 2, log: '👁 observe: 5 sources · 2 benchmarks parsed' },
@@ -31,9 +33,9 @@ const SCRIPT = [
 
 export default function AgentFlow() {
   const [step, setStep] = useState(-1)
-  const [logs, setLogs] = useState([])
+  const [logs, setLogs] = useState<string[]>([])
   const [playing, setPlaying] = useState(true)
-  const timer = useRef(null)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [viewRef, inView] = useInView({ threshold: 0.15 })
 
   useEffect(() => {

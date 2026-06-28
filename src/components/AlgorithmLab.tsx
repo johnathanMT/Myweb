@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Cpu, Play, Shuffle, RotateCcw, Route, BarChart3, Binary, Plus, Swords, Gauge } from 'lucide-react'
+import { Cpu, Play, Shuffle, RotateCcw, Route, BarChart3, Binary, Plus, Swords, Gauge, type LucideIcon } from 'lucide-react'
 import { useInView } from '../hooks/useInView'
 
 /**
@@ -15,25 +15,33 @@ const JADE_L = 'rgb(var(--jade-light))'
 const MAROON = 'rgb(var(--accent-light))'
 const GOLD = '#d4af37'
 
+// Shared grid-search maze shape (cells are flat indices into a ROWS×COLS grid).
+interface Maze { walls: Set<number>; start: number; end: number }
+interface SearchResult { visited: number[]; path: number[] }
+
+interface VizProps { speed?: number; active?: boolean }
+
 /* ───────────────────────── Sorting ───────────────────────── */
-const ALGOS = {
+const ALGOS: Record<string, string> = {
   bubble: 'Bubble Sort',
   insertion: 'Insertion Sort',
   selection: 'Selection Sort',
   quick: 'Quick Sort',
 }
-const COMPLEXITY = {
+const COMPLEXITY: Record<string, string> = {
   bubble: 'O(n²) · stable',
   insertion: 'O(n²) · adaptive',
   selection: 'O(n²) · in-place',
   quick: 'O(n log n) avg',
 }
 
-function genSortFrames(input, algo) {
+interface SortFrame { arr: number[]; active: number[]; done: number[] }
+
+function genSortFrames(input: number[], algo: string): SortFrame[] {
   const a = input.slice()
-  const frames = []
-  const snap = (active = [], done = []) => frames.push({ arr: a.slice(), active, done })
-  const swap = (i, j) => { const t = a[i]; a[i] = a[j]; a[j] = t }
+  const frames: SortFrame[] = []
+  const snap = (active: number[] = [], done: number[] = []) => frames.push({ arr: a.slice(), active, done })
+  const swap = (i: number, j: number) => { const t = a[i]; a[i] = a[j]; a[j] = t }
 
   if (algo === 'bubble') {
     for (let i = 0; i < a.length; i++) {
@@ -55,7 +63,7 @@ function genSortFrames(input, algo) {
       swap(i, m); snap([i, m])
     }
   } else if (algo === 'quick') {
-    const qs = (lo, hi) => {
+    const qs = (lo: number, hi: number) => {
       if (lo >= hi) return
       const pivot = a[hi]; let i = lo
       for (let j = lo; j < hi; j++) { snap([j, hi]); if (a[j] < pivot) { swap(i, j); snap([i, j]); i++ } }
@@ -67,14 +75,14 @@ function genSortFrames(input, algo) {
   return frames
 }
 
-function SortingViz({ speed = 1, active = true }) {
+function SortingViz({ speed = 1, active = true }: VizProps) {
   const N = 38
   const rand = () => Array.from({ length: N }, () => 8 + Math.floor(Math.random() * 92))
-  const [base, setBase] = useState(rand)
+  const [base, setBase] = useState<number[]>(rand)
   const [algo, setAlgo] = useState('quick')
-  const [frame, setFrame] = useState({ arr: base, active: [], done: [] })
+  const [frame, setFrame] = useState<SortFrame>({ arr: base, active: [], done: [] })
   const [running, setRunning] = useState(false)
-  const timer = useRef(null)
+  const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
 
   useEffect(() => { setFrame({ arr: base, active: [], done: [] }) }, [base])
   useEffect(() => () => clearInterval(timer.current), [])
@@ -136,10 +144,10 @@ function SortingViz({ speed = 1, active = true }) {
 /* ───────────────────────── A* Pathfinding ───────────────────────── */
 const ROWS = 13
 const COLS = 27
-const idx = (r, c) => r * COLS + c
+const idx = (r: number, c: number) => r * COLS + c
 
-function genMaze() {
-  const walls = new Set()
+function genMaze(): Maze {
+  const walls = new Set<number>()
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
     if (Math.random() < 0.26) walls.add(idx(r, c))
   }
@@ -149,25 +157,26 @@ function genMaze() {
   return { walls, start, end }
 }
 
-function astar(walls, start, end) {
-  const h = (a, b) => Math.abs((a % COLS) - (b % COLS)) + Math.abs(Math.floor(a / COLS) - Math.floor(b / COLS))
-  const open = new Set([start])
-  const came = new Map()
-  const g = new Map([[start, 0]])
-  const f = new Map([[start, h(start, end)]])
-  const visited = []
-  const neighbors = (n) => {
-    const r = Math.floor(n / COLS), c = n % COLS, out = []
+function astar(walls: Set<number>, start: number, end: number): SearchResult {
+  const h = (a: number, b: number) => Math.abs((a % COLS) - (b % COLS)) + Math.abs(Math.floor(a / COLS) - Math.floor(b / COLS))
+  const open = new Set<number>([start])
+  const came = new Map<number, number>()
+  const g = new Map<number, number>([[start, 0]])
+  const f = new Map<number, number>([[start, h(start, end)]])
+  const visited: number[] = []
+  const neighbors = (n: number) => {
+    const r = Math.floor(n / COLS), c = n % COLS, out: number[] = []
     if (r > 0) out.push(idx(r - 1, c)); if (r < ROWS - 1) out.push(idx(r + 1, c))
     if (c > 0) out.push(idx(r, c - 1)); if (c < COLS - 1) out.push(idx(r, c + 1))
     return out.filter((x) => !walls.has(x))
   }
   while (open.size) {
-    let cur = null, best = Infinity
+    let cur: number | null = null, best = Infinity
     for (const n of open) { const fn = f.get(n) ?? Infinity; if (fn < best) { best = fn; cur = n } }
+    if (cur === null) break
     if (cur === end) {
       const path = [cur]; let p = cur
-      while (came.has(p)) { p = came.get(p); path.push(p) }
+      while (came.has(p)) { const next = came.get(p); if (next === undefined) break; p = next; path.push(p) }
       return { visited, path: path.reverse() }
     }
     open.delete(cur); visited.push(cur)
@@ -181,16 +190,16 @@ function astar(walls, start, end) {
   return { visited, path: [] }
 }
 
-function PathViz({ speed = 1, active = true }) {
-  const [maze, setMaze] = useState(genMaze)
-  const [visited, setVisited] = useState(new Set())
-  const [path, setPath] = useState(new Set())
+function PathViz({ speed = 1, active = true }: VizProps) {
+  const [maze, setMaze] = useState<Maze>(genMaze)
+  const [visited, setVisited] = useState<Set<number>>(new Set())
+  const [path, setPath] = useState<Set<number>>(new Set())
   const [running, setRunning] = useState(false)
-  const timer = useRef(null)
+  const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
   useEffect(() => () => clearInterval(timer.current), [])
   useEffect(() => { if (!active) { clearInterval(timer.current); setRunning(false) } }, [active])
 
-  const reset = (m = maze) => { clearInterval(timer.current); setRunning(false); setVisited(new Set()); setPath(new Set()); if (m !== maze) setMaze(m) }
+  const reset = (m: Maze = maze) => { clearInterval(timer.current); setRunning(false); setVisited(new Set()); setPath(new Set()); if (m !== maze) setMaze(m) }
   const regenerate = () => reset(genMaze())
 
   const run = () => {
@@ -199,7 +208,7 @@ function PathViz({ speed = 1, active = true }) {
     const { visited: vOrder, path: pPath } = astar(maze.walls, maze.start, maze.end)
     let i = 0
     setRunning(true)
-    const vAcc = new Set()
+    const vAcc = new Set<number>()
     timer.current = setInterval(() => {
       const step = Math.ceil(vOrder.length / 90) || 1
       for (let k = 0; k < step && i < vOrder.length; k++, i++) vAcc.add(vOrder[i])
@@ -208,7 +217,7 @@ function PathViz({ speed = 1, active = true }) {
         clearInterval(timer.current)
         // draw the path
         let j = 0
-        const pAcc = new Set()
+        const pAcc = new Set<number>()
         timer.current = setInterval(() => {
           pAcc.add(pPath[j]); setPath(new Set(pAcc)); j++
           if (j >= pPath.length) { clearInterval(timer.current); setRunning(false) }
@@ -262,48 +271,53 @@ function PathViz({ speed = 1, active = true }) {
 }
 
 /* ───────────────────────── Binary Search Tree ───────────────────────── */
-function bstInsert(root, val) {
+interface LayoutNode { val: number; x: number; depth: number }
+interface BSTNode { val: number; left: BSTNode | null; right: BSTNode | null; __p?: LayoutNode }
+
+function bstInsert(root: BSTNode | null, val: number): BSTNode {
   if (!root) return { val, left: null, right: null }
   if (val < root.val) root.left = bstInsert(root.left, val)
   else if (val > root.val) root.right = bstInsert(root.right, val)
   return root
 }
-function bstBuild(vals) { let r = null; vals.forEach((v) => { r = bstInsert(r, v) }); return r }
-function bstCount(n) { return n ? 1 + bstCount(n.left) + bstCount(n.right) : 0 }
+function bstBuild(vals: number[]): BSTNode | null { let r: BSTNode | null = null; vals.forEach((v) => { r = bstInsert(r, v) }); return r }
+function bstCount(n: BSTNode | null): number { return n ? 1 + bstCount(n.left) + bstCount(n.right) : 0 }
+
+interface BSTLayout { nodes: LayoutNode[]; edges: [LayoutNode, LayoutNode][]; cols: number; maxDepth: number }
 
 // In-order x index + depth y → tidy tree coordinates, plus parent→child edges.
-function bstLayout(root) {
-  const nodes = [], edges = []
+function bstLayout(root: BSTNode | null): BSTLayout {
+  const nodes: LayoutNode[] = [], edges: [LayoutNode, LayoutNode][] = []
   let i = 0, maxDepth = 0
-  const walk = (n, depth) => {
+  const walk = (n: BSTNode | null, depth: number) => {
     if (!n) return
     walk(n.left, depth + 1)
-    const me = { val: n.val, x: i++, depth }
+    const me: LayoutNode = { val: n.val, x: i++, depth }
     maxDepth = Math.max(maxDepth, depth)
     nodes.push(me); n.__p = me
-    if (n.left) edges.push([me, n.left.__p])
+    if (n.left && n.left.__p) edges.push([me, n.left.__p])
     walk(n.right, depth + 1)
-    if (n.right) edges.push([me, n.right.__p])
+    if (n.right && n.right.__p) edges.push([me, n.right.__p])
   }
   walk(root, 0)
   return { nodes, edges, cols: Math.max(i, 1), maxDepth }
 }
 
-function BSTViz({ speed = 1, active = true }) {
-  const [root, setRoot] = useState(() => bstBuild([50, 30, 70, 20, 40, 60, 80, 35]))
-  const [path, setPath] = useState([])     // vals on the compare path (highlight)
-  const [hot, setHot] = useState(null)     // just-inserted value (gold)
+function BSTViz({ speed = 1, active = true }: VizProps) {
+  const [root, setRoot] = useState<BSTNode | null>(() => bstBuild([50, 30, 70, 20, 40, 60, 80, 35]))
+  const [path, setPath] = useState<number[]>([])     // vals on the compare path (highlight)
+  const [hot, setHot] = useState<number | null>(null)     // just-inserted value (gold)
   const [input, setInput] = useState('')
-  const timers = useRef([])
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
   useEffect(() => { if (!active) { timers.current.forEach(clearTimeout); timers.current = []; setPath([]); setHot(null) } }, [active])
 
-  const insert = (raw) => {
-    const v = parseInt(raw, 10)
+  const insert = (raw: string | number) => {
+    const v = typeof raw === 'number' ? raw : parseInt(raw, 10)
     if (Number.isNaN(v) || v < 1 || v > 99 || bstCount(root) >= 15) return
     timers.current.forEach(clearTimeout); timers.current = []
     // compare path from root to insertion point
-    const p = []; let cur = root
+    const p: number[] = []; let cur: BSTNode | null = root
     while (cur) { p.push(cur.val); if (v === cur.val) return; cur = v < cur.val ? cur.left : cur.right }
     setPath([]); setHot(null)
     const D = Math.max(60, 230 / speed)
@@ -316,8 +330,8 @@ function BSTViz({ speed = 1, active = true }) {
 
   const { nodes, edges, cols, maxDepth } = bstLayout(root)
   const W = cols * 56, H = (maxDepth + 1) * 70
-  const px = (x) => (x + 0.5) * (W / cols)
-  const py = (d) => (d + 0.5) * (H / (maxDepth + 1))
+  const px = (x: number) => (x + 0.5) * (W / cols)
+  const py = (d: number) => (d + 0.5) * (H / (maxDepth + 1))
 
   return (
     <div>
@@ -371,10 +385,10 @@ function BSTViz({ speed = 1, active = true }) {
 
 /* ───────────────────────── Dijkstra vs A* race ───────────────────────── */
 const RR = 11, RC = 19
-const rIdx = (r, c) => r * RC + c
+const rIdx = (r: number, c: number) => r * RC + c
 
-function rGenMaze() {
-  const walls = new Set()
+function rGenMaze(): Maze {
+  const walls = new Set<number>()
   for (let r = 0; r < RR; r++) for (let c = 0; c < RC; c++) if (Math.random() < 0.24) walls.add(rIdx(r, c))
   const start = rIdx(Math.floor(RR / 2), 1)
   const end = rIdx(Math.floor(RR / 2), RC - 2)
@@ -384,23 +398,24 @@ function rGenMaze() {
 
 // One search, heuristic toggled: useH=false → Dijkstra (uniform cost),
 // useH=true → A* (Manhattan). Same code path makes the comparison honest.
-function rSearch(walls, start, end, useH) {
-  const h = (a, b) => useH ? Math.abs((a % RC) - (b % RC)) + Math.abs(Math.floor(a / RC) - Math.floor(b / RC)) : 0
-  const open = new Set([start]), came = new Map()
-  const g = new Map([[start, 0]]), f = new Map([[start, h(start, end)]])
-  const visited = []
-  const nbrs = (n) => {
-    const r = Math.floor(n / RC), c = n % RC, o = []
+function rSearch(walls: Set<number>, start: number, end: number, useH: boolean): SearchResult {
+  const h = (a: number, b: number) => useH ? Math.abs((a % RC) - (b % RC)) + Math.abs(Math.floor(a / RC) - Math.floor(b / RC)) : 0
+  const open = new Set<number>([start]), came = new Map<number, number>()
+  const g = new Map<number, number>([[start, 0]]), f = new Map<number, number>([[start, h(start, end)]])
+  const visited: number[] = []
+  const nbrs = (n: number) => {
+    const r = Math.floor(n / RC), c = n % RC, o: number[] = []
     if (r > 0) o.push(rIdx(r - 1, c)); if (r < RR - 1) o.push(rIdx(r + 1, c))
     if (c > 0) o.push(rIdx(r, c - 1)); if (c < RC - 1) o.push(rIdx(r, c + 1))
     return o.filter((x) => !walls.has(x))
   }
   while (open.size) {
-    let cur = null, best = Infinity
+    let cur: number | null = null, best = Infinity
     for (const n of open) { const fn = f.get(n) ?? Infinity; if (fn < best) { best = fn; cur = n } }
+    if (cur === null) break
     if (cur === end) {
       const path = [cur]; let p = cur
-      while (came.has(p)) { p = came.get(p); path.push(p) }
+      while (came.has(p)) { const next = came.get(p); if (next === undefined) break; p = next; path.push(p) }
       return { visited, path: path.reverse() }
     }
     open.delete(cur); visited.push(cur)
@@ -412,7 +427,7 @@ function rSearch(walls, start, end, useH) {
   return { visited, path: [] }
 }
 
-function RaceGrid({ maze, visited, path, tint }) {
+function RaceGrid({ maze, visited, path, tint }: { maze: Maze; visited: Set<number>; path: Set<number>; tint: string }) {
   return (
     <div className="grid gap-[2px]" style={{ gridTemplateColumns: `repeat(${RC}, minmax(0, 1fr))` }}>
       {Array.from({ length: RR * RC }, (_, i) => {
@@ -429,17 +444,19 @@ function RaceGrid({ maze, visited, path, tint }) {
   )
 }
 
-function RaceViz({ speed = 1, active = true }) {
-  const [maze, setMaze] = useState(rGenMaze)
-  const [vD, setVD] = useState(new Set()), [vA, setVA] = useState(new Set())
-  const [pD, setPD] = useState(new Set()), [pA, setPA] = useState(new Set())
-  const [stats, setStats] = useState(null)
+interface RaceStats { d: number; a: number }
+
+function RaceViz({ speed = 1, active = true }: VizProps) {
+  const [maze, setMaze] = useState<Maze>(rGenMaze)
+  const [vD, setVD] = useState<Set<number>>(new Set()), [vA, setVA] = useState<Set<number>>(new Set())
+  const [pD, setPD] = useState<Set<number>>(new Set()), [pA, setPA] = useState<Set<number>>(new Set())
+  const [stats, setStats] = useState<RaceStats | null>(null)
   const [running, setRunning] = useState(false)
-  const timer = useRef(null)
+  const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
   useEffect(() => () => clearInterval(timer.current), [])
   useEffect(() => { if (!active) { clearInterval(timer.current); setRunning(false) } }, [active])
 
-  const reset = (m = maze) => {
+  const reset = (m: Maze = maze) => {
     clearInterval(timer.current); setRunning(false)
     setVD(new Set()); setVA(new Set()); setPD(new Set()); setPA(new Set()); setStats(null)
     if (m !== maze) setMaze(m)
@@ -453,7 +470,7 @@ function RaceViz({ speed = 1, active = true }) {
     const FRAMES = 64
     const stepD = Math.max(1, Math.ceil(d.visited.length / FRAMES))
     const stepA = Math.max(1, Math.ceil(a.visited.length / FRAMES))
-    let iD = 0, iA = 0; const accD = new Set(), accA = new Set()
+    let iD = 0, iA = 0; const accD = new Set<number>(), accA = new Set<number>()
     setRunning(true)
     timer.current = setInterval(() => {
       for (let k = 0; k < stepD && iD < d.visited.length; k++, iD++) accD.add(d.visited[iD])
@@ -461,7 +478,7 @@ function RaceViz({ speed = 1, active = true }) {
       setVD(new Set(accD)); setVA(new Set(accA))
       if (iD >= d.visited.length && iA >= a.visited.length) {
         clearInterval(timer.current)
-        let j = 0; const ppD = new Set(), ppA = new Set(); const maxLen = Math.max(d.path.length, a.path.length)
+        let j = 0; const ppD = new Set<number>(), ppA = new Set<number>(); const maxLen = Math.max(d.path.length, a.path.length)
         timer.current = setInterval(() => {
           if (j < d.path.length) ppD.add(d.path[j]); if (j < a.path.length) ppA.add(a.path[j]); j++
           setPD(new Set(ppD)); setPA(new Set(ppA))
@@ -472,6 +489,11 @@ function RaceViz({ speed = 1, active = true }) {
   }
 
   const saved = stats && stats.d > 0 ? Math.round((1 - stats.a / stats.d) * 100) : 0
+
+  const panels = [
+    { title: 'Dijkstra', sub: 'no heuristic — explores everywhere', v: vD, p: pD, tint: 'rgb(var(--accent) / 0.22)', color: MAROON },
+    { title: 'A*', sub: 'Manhattan heuristic — heads for the goal', v: vA, p: pA, tint: 'rgb(var(--jade) / 0.26)', color: JADE_L },
+  ]
 
   return (
     <div>
@@ -492,10 +514,7 @@ function RaceViz({ speed = 1, active = true }) {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {[
-          { title: 'Dijkstra', sub: 'no heuristic — explores everywhere', v: vD, p: pD, tint: 'rgb(var(--accent) / 0.22)', color: MAROON },
-          { title: 'A*', sub: 'Manhattan heuristic — heads for the goal', v: vA, p: pA, tint: 'rgb(var(--jade) / 0.26)', color: JADE_L },
-        ].map((panel) => (
+        {panels.map((panel) => (
           <div key={panel.title} className="rounded-xl border border-white/10 bg-black/30 p-3">
             <div className="mb-2 flex items-baseline justify-between">
               <span className="font-mono text-sm font-semibold text-white">{panel.title}</span>
@@ -525,11 +544,13 @@ function RaceViz({ speed = 1, active = true }) {
   )
 }
 
+interface LabTab { id: string; label: string; Icon: LucideIcon }
+
 export default function AlgorithmLab() {
   const [tab, setTab] = useState('sort')
   const [speed, setSpeed] = useState(1)   // animation multiplier (applies on next run)
   const [viewRef, inView] = useInView({ threshold: 0.12 })
-  const tabs = useMemo(() => ([
+  const tabs = useMemo<LabTab[]>(() => ([
     { id: 'sort', label: 'Sorting Race', Icon: BarChart3 },
     { id: 'path', label: 'A* Pathfinding', Icon: Route },
     { id: 'race', label: 'Dijkstra vs A*', Icon: Swords },

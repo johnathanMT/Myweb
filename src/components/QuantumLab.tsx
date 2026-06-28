@@ -11,26 +11,30 @@ import { Atom, RotateCcw } from 'lucide-react'
  */
 
 // ── minimal complex helpers ──
-const c = (re, im = 0) => ({ re, im })
-const cadd = (a, b) => ({ re: a.re + b.re, im: a.im + b.im })
-const cmul = (a, b) => ({ re: a.re * b.re - a.im * b.im, im: a.re * b.im + a.im * b.re })
-const cabs2 = (a) => a.re * a.re + a.im * a.im
+interface Complex { re: number; im: number }
+const c = (re: number, im = 0): Complex => ({ re, im })
+const cadd = (a: Complex, b: Complex): Complex => ({ re: a.re + b.re, im: a.im + b.im })
+const cmul = (a: Complex, b: Complex): Complex => ({ re: a.re * b.re - a.im * b.im, im: a.re * b.im + a.im * b.re })
+const cabs2 = (a: Complex): number => a.re * a.re + a.im * a.im
 const INV_SQRT2 = 1 / Math.SQRT2
 
+type GateName = 'I' | 'H' | 'X' | 'Z'
+type Gate = Complex[][] | null
+
 // single-qubit gates (2×2 complex)
-const GATES = {
+const GATES: Record<GateName, Gate> = {
   I: null,
   H: [[c(INV_SQRT2), c(INV_SQRT2)], [c(INV_SQRT2), c(-INV_SQRT2)]],
   X: [[c(0), c(1)], [c(1), c(0)]],
   Z: [[c(1), c(0)], [c(0), c(-1)]],
 }
-const GATE_CYCLE = ['I', 'H', 'X', 'Z']
+const GATE_CYCLE: GateName[] = ['I', 'H', 'X', 'Z']
 
 const COLS = 5
 const QUBITS = 2
 
 // apply a 2×2 gate to qubit q of a 4-amplitude state
-function applyGate(state, G, q) {
+function applyGate(state: Complex[], G: Gate, q: number): Complex[] {
   if (!G) return state
   const out = state.map(() => c(0))
   for (let i = 0; i < 4; i++) {
@@ -46,7 +50,7 @@ function applyGate(state, G, q) {
 }
 
 // CNOT: control q0, target q1 → flip target when control bit = 1
-function applyCNOT(state) {
+function applyCNOT(state: Complex[]): Complex[] {
   const out = state.slice()
   // basis indices: 0:00 1:01 2:10 3:11 ; control=q0 (high bit), target=q1 (low bit)
   // swap |10> (2) and |11> (3)
@@ -54,8 +58,8 @@ function applyCNOT(state) {
   return out
 }
 
-function simulate(grid, cnots) {
-  let state = [c(1), c(0), c(0), c(0)]   // |00>
+function simulate(grid: GateName[][], cnots: boolean[]): Complex[] {
+  let state: Complex[] = [c(1), c(0), c(0), c(0)]   // |00>
   for (let col = 0; col < COLS; col++) {
     for (let q = 0; q < QUBITS; q++) state = applyGate(state, GATES[grid[q][col]], q)
     if (cnots[col]) state = applyCNOT(state)
@@ -65,9 +69,12 @@ function simulate(grid, cnots) {
 
 const BASIS = ['00', '01', '10', '11']
 
+const emptyGrid = (): GateName[][] => Array.from({ length: QUBITS }, () => Array.from({ length: COLS }, (): GateName => 'I'))
+const emptyCnots = (): boolean[] => Array.from({ length: COLS }, () => false)
+
 export default function QuantumLab() {
-  const [grid, setGrid] = useState(() => Array.from({ length: QUBITS }, () => Array(COLS).fill('I')))
-  const [cnots, setCnots] = useState(() => Array(COLS).fill(false))
+  const [grid, setGrid] = useState<GateName[][]>(emptyGrid)
+  const [cnots, setCnots] = useState<boolean[]>(emptyCnots)
 
   const state = useMemo(() => simulate(grid, cnots), [grid, cnots])
   const probs = state.map(cabs2)
@@ -77,22 +84,22 @@ export default function QuantumLab() {
     return Math.abs(p00 * p11 - p01 * p10) > 0.02
   }, [probs])
 
-  const cycle = (q, col) => setGrid((g) => {
+  const cycle = (q: number, col: number) => setGrid((g) => {
     const ng = g.map((r) => r.slice())
     ng[q][col] = GATE_CYCLE[(GATE_CYCLE.indexOf(ng[q][col]) + 1) % GATE_CYCLE.length]
     return ng
   })
-  const reset = () => { setGrid(Array.from({ length: QUBITS }, () => Array(COLS).fill('I'))); setCnots(Array(COLS).fill(false)) }
-  const preset = (name) => {
-    const g = Array.from({ length: QUBITS }, () => Array(COLS).fill('I'))
-    const cn = Array(COLS).fill(false)
+  const reset = () => { setGrid(emptyGrid()); setCnots(emptyCnots()) }
+  const preset = (name: 'bell' | 'super' | 'flip') => {
+    const g = emptyGrid()
+    const cn = emptyCnots()
     if (name === 'bell') { g[0][0] = 'H'; cn[1] = true }            // Bell pair (entangled)
     if (name === 'super') { g[0][0] = 'H'; g[1][0] = 'H' }          // uniform superposition
     if (name === 'flip') { g[0][0] = 'X'; g[1][0] = 'X' }           // |11>
     setGrid(g); setCnots(cn)
   }
 
-  const gateColor = (gt) => gt === 'H' ? 'rgb(var(--jade))' : gt === 'X' ? 'rgb(var(--accent-light))' : gt === 'Z' ? '#d4af37' : 'transparent'
+  const gateColor = (gt: string): string => gt === 'H' ? 'rgb(var(--jade))' : gt === 'X' ? 'rgb(var(--accent-light))' : gt === 'Z' ? '#d4af37' : 'transparent'
 
   return (
     <section id="quantum" className="relative py-24 sm:py-28">
