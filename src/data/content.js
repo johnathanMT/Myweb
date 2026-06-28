@@ -16,10 +16,11 @@ export const PERSONAL = {
   heinlein: `"A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a ship, design a building, write a sonnet, balance accounts, build a wall, set a bone, comfort the dying, take orders, give orders, cooperate, act alone, solve equations, analyze a new problem, pitch manure, program a computer, cook a tasty meal, fight efficiently, die gallantly. Specialization is for insects." – Robert A. Heinlein`,
 }
 
+// Real, personal channels only. The LINE link is intentionally NOT here — it
+// reaches an automated AI assistant, not me personally (see the AI-agent section).
 export const SOCIAL = [
-  { label: 'LINE', icon: 'fab fa-line', url: 'https://lin.ee/s72ayHD' },
   { label: 'GitHub', icon: 'fab fa-github', url: 'https://github.com/johnathanMT' },
-  { label: 'LinkedIn', icon: 'fab fa-linkedin-in', url: 'https://www.linkedin.com/in/johnathanmt/' },
+  { label: 'LinkedIn', icon: 'fab fa-linkedin-in', url: 'https://www.linkedin.com/in/myothantnaing' },
 ]
 
 export const SKILLS = [

@@ -8,7 +8,7 @@ import { SITE } from '../config/site'
  * Self-contained: drop <AILineBot lang={lang} /> anywhere and it renders.
  *
  * To edit copy later, change ONLY the T object below. Each language key mirrors
- * the app's existing language codes (en, jp = 日本語, mm = မြန်မာ, plus vn/ne/id).
+ * the app's existing language codes (en, jp, mm, vn, ne, id).
  * Unknown codes fall back to English.
  */
 interface BotText { kicker: string; title: string; sub: string; cta: string; badge: string }
@@ -58,8 +58,19 @@ const T: Record<string, BotText> = {
   },
 }
 
+// Honest disclaimer: the LINE endpoint is an automated AI agent, NOT me personally.
+const DISCLAIMER: Record<string, string> = {
+  en: 'Heads up: this is an automated AI assistant trained on my background — not me personally. To reach me directly, use LinkedIn or email.',
+  jp: 'ご注意：これは私の経歴を学習した自動AIアシスタントで、本人ではありません。直接のご連絡はLinkedInまたはメールへ。',
+  mm: 'သတိပြုရန် — ၎င်းသည် ကျွန်တော့်အကြောင်း လေ့ကျင့်ထားသော အလိုအလျောက် AI အကူအညီဖြစ်ပြီး ကျွန်တော်ကိုယ်တိုင် မဟုတ်ပါ။ တိုက်ရိုက်ဆက်သွယ်ရန် LinkedIn သို့မဟုတ် အီးမေးလ်ကို သုံးပါ။',
+  vn: 'Lưu ý: đây là trợ lý AI tự động được huấn luyện về tôi — không phải tôi. Để liên hệ trực tiếp, hãy dùng LinkedIn hoặc email.',
+  ne: 'सूचना: यो मेरो बारेमा तालिम प्राप्त स्वचालित AI सहायक हो — म आफैं होइन। प्रत्यक्ष सम्पर्कका लागि LinkedIn वा इमेल प्रयोग गर्नुहोस्।',
+  id: 'Catatan: ini asisten AI otomatis yang dilatih tentang saya — bukan saya pribadi. Untuk menghubungi saya langsung, gunakan LinkedIn atau email.',
+}
+
 export default function AILineBot({ lang = 'en' }: { lang?: string }) {
   const t = T[lang] || T.en
+  const disclaimer = DISCLAIMER[lang] || DISCLAIMER.en
 
   return (
     <section id="ai-agent" className="relative py-24">
@@ -107,6 +118,12 @@ export default function AILineBot({ lang = 'en' }: { lang?: string }) {
 
             <h2 className="text-3xl font-bold text-white sm:text-4xl">{t.title}</h2>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-gray-300">{t.sub}</p>
+
+            {/* Honest disclaimer — this is an AI agent, not the real person. */}
+            <p className="mx-auto mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-amber-400/30 bg-amber-400/[0.07] px-4 py-2.5 text-left text-[13px] leading-relaxed text-amber-200/90">
+              <i className="fas fa-robot mt-0.5 shrink-0 text-amber-300/80" aria-hidden />
+              <span>{disclaimer}</span>
+            </p>
 
             {/* CTA */}
             <a

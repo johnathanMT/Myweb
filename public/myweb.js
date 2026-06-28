@@ -118,7 +118,7 @@ const translations = {
         footer_contact: "Contact Me"
     },
 
-    // --- Myanmar (မြန်မာ) ---
+    // --- Myanmar ---
     mm: {
         nav_home: "ပင်မစာမျက်နှာ",
         nav_about: "အကြောင်း",
@@ -198,7 +198,7 @@ const translations = {
         footer_contact: "ဆက်သွယ်ရန်"
     },
 
-    // --- Japanese (日本語) ---
+    // --- Japanese ---
     jp: {
         nav_home: "ホーム",
         nav_about: "私について",
@@ -542,7 +542,7 @@ function changeLang(lang) {
     elements.forEach(element => {
         const key = element.getAttribute('data-i18n');
 
-        // Dictionary ထဲမှာ အဲဒီ key ရှိ၊ မရှိ စစ်မယ်
+        // Check whether that key exists in the dictionary
         if (translations[lang] && translations[lang][key]) {
             element.innerText = translations[lang][key];
         }
@@ -580,7 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const lensCarousel = document.getElementById('lensCarousel');
     const cards = document.querySelectorAll('.lens-card');
 
-    // ၁။ Ticks (မျဉ်းကြောင်းများ) ဖန်တီးခြင်း
+    // 1. Create the ticks (scale lines)
     const totalTicks = 12 * 5;
     for (let i = 0; i < totalTicks + 5; i++) {
         const tick = document.createElement('div');
@@ -591,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dialTrack.appendChild(tick);
     }
 
-    // ၂။ Dial Scroll Logic (Dial ရွေ့ရင် ပုံပါလိုက်ရွေ့မယ်)
+    // 2. Dial scroll logic (moving the dial moves the images too)
     dialTrack.addEventListener('scroll', () => {
         const maxDialScroll = dialTrack.scrollWidth - dialTrack.clientWidth;
         const scrollRatio = dialTrack.scrollLeft / maxDialScroll;
@@ -613,7 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ၃။ Mouse Drag Logic (Dial ကို လက်နဲ့ဆွဲခြင်း)
+    // 3. Mouse drag logic (dragging the dial by hand)
     let isDown = false;
     let startX, scrollLeft;
 
@@ -633,7 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dialTrack.scrollLeft = scrollLeft - walk;
     });
 
-    // ၄။ Carousel Drag Logic (ပုံတွေကို လက်နဲ့ဆွဲခြင်း)
+    // 4. Carousel drag logic (dragging the images by hand)
     let isCarouselDown = false;
     let cStartX, cScrollLeft;
 
@@ -651,38 +651,38 @@ document.addEventListener("DOMContentLoaded", () => {
         const x = e.pageX - lensCarousel.offsetLeft;
         const walk = (x - cStartX) * 2;
         lensCarousel.scrollLeft = cScrollLeft - walk;
-        // Carousel ရွေ့ရင် Dial ကိုပါ ပြန်ရွေ့ခိုင်းမယ် (Sync)
+        // When the carousel moves, sync the dial to it
         const maxC = lensCarousel.scrollWidth - lensCarousel.clientWidth;
         const ratio = lensCarousel.scrollLeft / maxC;
         dialTrack.scrollLeft = ratio * (dialTrack.scrollWidth - dialTrack.clientWidth);
     });
 
     // ===========================================
-    // 🔥 ၅။ AUTO SCROLL LOGIC (အလိုအလျောက် ရွေ့ခြင်း) 🔥
+    // 5. Auto-scroll logic (automatic movement)
     // ===========================================
-    let autoScrollSpeed = 1; // 0.5 = နှေး, 2 = မြန်
+    let autoScrollSpeed = 1; // 0.5 = slow, 2 = fast
     let isHovering = false;
 
-    // Mouse တင်ရင် ရပ်မယ်
+    // Pause on mouse hover
     const section = document.querySelector('.lens-section');
     section.addEventListener('mouseenter', () => isHovering = true);
     section.addEventListener('mouseleave', () => isHovering = false);
 
     function autoLoop() {
-        // Mouse မနှိပ်၊ Mouse မတင်ထားမှ ရွေ့မယ်
+        // Only move when the mouse isn't pressed or hovering
         if (!isDown && !isCarouselDown && !isHovering) {
 
             dialTrack.scrollLeft += autoScrollSpeed;
 
-            // အဆုံးရောက်ရင် အစပြန်ပတ် (Reset)
+            // Loop back to the start when reaching the end (reset)
             if (dialTrack.scrollLeft >= (dialTrack.scrollWidth - dialTrack.clientWidth - 2)) {
                 dialTrack.scrollLeft = 0;
             }
         }
-        requestAnimationFrame(autoLoop); // အမြဲတမ်း Loop ပတ်နေမယ်
+        requestAnimationFrame(autoLoop); // Keep looping continuously
     }
 
-    // Auto Scroll စမယ်
+    // Start auto-scroll
     autoLoop();
 
 });
@@ -694,16 +694,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-// ၁။ ဆောင်းပါး အချက်အလက်များ (Database အသေးစား)
+// 1. Article data (a small in-file database)
 
 
 const diaryData = {
     // 1. KYOTO
     'kyoto': {
-        // Hero Image (စာမျက်နှာထိပ်ဆုံးပုံ)
+        // Hero image (top-of-page image)
         img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&q=80",
 
-        // Album Images (ပုံများကို ဒီနေရာမှာပဲ တစ်ခါတည်းထည့်ပါ - ဘာသာစကားတိုင်းအတွက် အလုပ်လုပ်ပါမည်)
+        // Album images (add them all here once — shared across every language)
         gallery: [
             "https://media.istockphoto.com/id/538810794/photo/pristine-bamboo-forest-at-sunrise.jpg?s=612x612&w=0&k=20&c=SvLGK2UlJVI3DCADeqqJrwg0JWuOIAtlxMduQWrCQng=",
             "https://images.unsplash.com/photo-1624253321171-1be53e12f5f4?w=400&q=80",
@@ -711,7 +711,7 @@ const diaryData = {
             "https://images.unsplash.com/photo-1492571350019-22de08371fd3?w=400&q=80"
         ],
 
-        // ဘာသာစကားအလိုက် စာသားများ
+        // Per-language text
         en: {
             title: "Kyoto: The Timeless City",
             date: "JAN 15, 2026",
@@ -915,7 +915,7 @@ const diaryData = {
         }
     },
 
-    // 4. KAIGO (HTML Key: 'kaigo' ဟု ယူဆသည်)
+    // 4. KAIGO (assumes the HTML key 'kaigo')
     'kaigo-experience': {
         img: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&q=80",
         gallery: [
@@ -997,7 +997,7 @@ const diaryData = {
 // ===========================================
 
 function openArticle(id) {
-    // ၁။ ID နဲ့ Data ရှာမယ်
+    // 1. Find the data by ID
     const locationData = diaryData[id];
 
     if (!locationData) {
@@ -1005,48 +1005,48 @@ function openArticle(id) {
         return;
     }
 
-    // ၂။ လက်ရှိ ဘာသာစကားကို LocalStorage ကနေ စစ်မယ်
+    // 2. Read the current language from localStorage
     // (Default: 'en')
     const currentLang = localStorage.getItem('myPortfolioLang') || 'en';
 
-    // ၃။ သက်ဆိုင်ရာ ဘာသာစကားစာသားကို ဆွဲထုတ်မယ်
-    // (အကယ်၍ အဲ့ဒီဘာသာစကားမရှိရင် English ကို Fallback ယူမယ်)
+    // 3. Pull out the text for that language
+    // (fall back to English if that language is missing)
     const contentData = locationData[currentLang] || locationData['en'];
 
-    // ၄။ Static Data (Image, Date, Title) ထည့်သွင်းခြင်း
+    // 4. Inject the static data (image, date, title)
     document.getElementById('modalImg').style.backgroundImage = `url('${locationData.img}')`;
     document.getElementById('modalDate').innerText = contentData.date;
     document.getElementById('modalTitle').innerText = contentData.title;
 
-    // ၅။ Content HTML ထည့်သွင်းခြင်း
+    // 5. Inject the content HTML
     const modalContent = document.getElementById('modalContent');
     modalContent.innerHTML = contentData.content;
 
-    // ၆။ Gallery Injection Logic (ပုံများကို အလိုအလျောက် ထည့်သွင်းခြင်း)
-    // HTML ထဲမှာ <div class="insert-gallery"></div> ကို ရှာမယ်
+    // 6. Gallery injection logic (auto-insert images)
+    // Find <div class="insert-gallery"></div> in the HTML
     const galleryPlaceholder = modalContent.querySelector('.insert-gallery');
 
-    // Placeholder ရှိပြီး၊ Gallery ပုံတွေလည်း ရှိမယ်ဆိုမှ အလုပ်လုပ်မယ်
+    // Only run when both the placeholder and gallery images exist
     if (galleryPlaceholder && locationData.gallery && locationData.gallery.length > 0) {
 
-        // Gallery Container ဖန်တီးမယ်
+        // Create the gallery container
         const galleryContainer = document.createElement('div');
         galleryContainer.className = 'article-gallery';
 
-        // ပုံတစ်ပုံချင်းစီကို Loop ပတ်ပြီး ထည့်မယ်
+        // Loop over each image and add it
         locationData.gallery.forEach(imgSrc => {
             const imgTag = document.createElement('img');
             imgTag.src = imgSrc;
             imgTag.className = 'gallery-img';
-            imgTag.alt = "Gallery Image"; // Accessibility အတွက်
+            imgTag.alt = "Gallery Image"; // For accessibility
             galleryContainer.appendChild(imgTag);
         });
 
-        // Placeholder နေရာမှာ Gallery အစစ်နဲ့ အစားထိုးလိုက်မယ်
+        // Replace the placeholder with the real gallery
         galleryPlaceholder.replaceWith(galleryContainer);
     }
 
-    // ၇။ Modal ပြသခြင်း
+    // 7. Show the modal
     document.getElementById('articleModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -1063,46 +1063,46 @@ function closeArticle() {
 
 
 // The Best Snow Effect (Using Official Preset)
-// နှင်းကျသည့် Effect (Preset သုံးထားသဖြင့် ပိုမိုသဘာဝကျသည်)
+// Snowfall effect (uses a preset for a more natural look)
 
 // The Best Snow Effect (Final Fixed Version)
-// နှင်းကျသည့် Effect (Bundle Version)
+// Snowfall effect (bundle version)
 
 tsParticles.load("tsparticles", {
     particles: {
         number: {
-            value: 50, // နှင်းပွင့် အရေအတွက်
+            value: 50, // Number of snowflakes
             density: {
                 enable: true,
                 area: 800
             }
         },
         color: {
-            value: "#87CEFA" // အဖြူရောင်
+            value: "#87CEFA" // Snowflake colour
         },
         shape: {
-            type: "circle" // အဝိုင်း
+            type: "circle" // Circle
         },
         opacity: {
             value: 0.5,
-            random: true, // မှိန်လိုက် လင်းလိုက်
+            random: true, // Fades in and out
             anim: {
                 enable: false
             }
         },
         size: {
             value: 4,
-            random: true, // အကြီးအသေး မျှမယ်
+            random: true, // Vary the sizes
             anim: {
                 enable: false
             }
         },
         move: {
             enable: true,
-            speed: 2, // ကျမည့် အမြန်နှုန်း
-            direction: "bottom", // အောက်ကိုကျမယ်
+            speed: 2, // Falling speed
+            direction: "bottom", // Falls downward
             random: false,
-            straight: false, // ယိမ်းနွဲ့ပြီးကျမယ်
+            straight: false, // Falls with a gentle sway
             out_mode: "out",
             attract: {
                 enable: false,
@@ -1114,7 +1114,7 @@ tsParticles.load("tsparticles", {
     interactivity: {
         events: {
             onhover: {
-                enable: false // Mouse တင်ရင် ဘာမှမဖြစ်စေနဲ့ (ရိုးရှင်းအောင်)
+                enable: false // No hover interaction (keep it simple)
             },
             onclick: {
                 enable: false
@@ -1124,7 +1124,7 @@ tsParticles.load("tsparticles", {
     },
     retina_detect: true,
     background: {
-        color: "transparent" // နောက်ခံအကြည်
+        color: "transparent" // Transparent background
     }
 });
 

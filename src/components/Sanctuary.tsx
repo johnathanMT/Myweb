@@ -94,7 +94,7 @@ const LANDMARKS: Record<string, { anchor: Vec3 }> = {
   plaza:   { anchor: [SCENE_LAYOUT.plaza_night.position[0], 4.0, SCENE_LAYOUT.plaza_night.position[2]] },
 }
 
-/* ───────── i18n (EN / 日本語 / မြန်မာ) ───────── */
+/* ───────── i18n (EN / JP / MM) ───────── */
 const T: Record<string, TLang> = {
   en: { title: 'The Memory World', sub: 'Drag to look · scroll to fly out · tap a tag', day: 'Day', night: 'Night', leave: 'Leave a Memory', editMine: 'Edit your memory', from: 'A memory from', at: 'at the', place: 'Place it at', name: 'Your name', msg: 'Message', hang: 'Hang it', save: 'Save changes', demo: 'One memory per visitor · editable, never deleted.', edit: 'Edit', namePh: 'Please input your name', msgPh: 'A few words to remember…', home: 'Home',
     placeHint: 'Step 1 — Click anywhere in the 3D world to choose a spot',

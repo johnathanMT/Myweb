@@ -80,7 +80,7 @@ export const GALLERY = [
   //   date: '2025-05-03',
   //   moment: 'Travel',
   //   alt: { en: 'A day at the zoo' },
-  //   caption: { en: 'At the Zoo', mm: 'တိရစ္ဆာန်ဥယျာဉ်တွင်', jp: '動物園にて' },
+  //   caption: { en: 'At the Zoo', jp: '<japanese>', mm: '<burmese>' },
   // },
   {
     id: 'mtn-tarot',

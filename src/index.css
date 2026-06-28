@@ -1302,31 +1302,31 @@ body::before {
    ══════════════════════════════════════════════════════════════════ */
 html[data-theme="light"],
 html[data-theme="light"] .theme-batman {
-  /* ── Colourful "Italian-flag" light palette: RED · WHITE · GREEN.
-     Lively but kept legible — accents are saturated, surfaces stay clean white,
-     body text stays neutral dark so reading is never tiring. ── */
-  --space: 250 250 248;        /* warm near-white page base */
-  --surface: 244 245 243;      /* panels */
-  --card: 255 255 255;         /* clean white cards */
-  --card-hover: 248 250 247;
-  --forest: 15 156 103;        /* fresh emerald green */
-  --forest-deep: 211 238 225;
-  --accent: 190 28 47;         /* deeper red (#BE1C2F) — stronger contrast on white */
-  --accent-light: 214 52 72;   /* lighter red highlight */
-  --jade: 15 156 103;          /* fresh green secondary (links / success / dots) */
-  --jade-light: 11 134 88;
-  --cyan: 15 156 103;
-  --coral: 206 46 68;          /* warm rose-red */
-  --maroon: 172 26 44;
-  --maroon-deep: 138 20 36;
-  --muted: 88 92 102;          /* readable muted-gray body text */
-  --fg: 26 26 29;              /* primary text — near-black */
+  /* ── Light palette — crisp white surfaces, deep-crimson + fresh-green accents,
+     slate text. Every value is tuned for WCAG AA contrast on a white background;
+     depth comes from structured shadows (see .glass-card below), not grey fills. ── */
+  --space: 250 250 250;        /* #fafafa — page base */
+  --surface: 241 243 245;      /* #f1f3f5 — inset panels */
+  --card: 255 255 255;         /* #ffffff — cards (lifted by shadow, not colour) */
+  --card-hover: 247 248 250;   /* #f7f8fa */
+  --forest: 21 128 61;         /* emerald-700 */
+  --forest-deep: 209 250 229;  /* emerald-100 tint */
+  --accent: 190 18 60;         /* deep crimson #BE123C — AA as text on white (~5.8:1) */
+  --accent-light: 220 38 84;   /* #DC2654 — brighter crimson highlight */
+  --jade: 21 128 61;           /* fresh green #15803D — AA as text on white (~5.0:1) */
+  --jade-light: 16 110 78;     /* #0E6E4E — deeper jade for hover/borders */
+  --cyan: 21 128 61;           /* legacy "cyan" usages → fresh green */
+  --coral: 200 30 74;          /* #C81E4A — rose-crimson secondary */
+  --maroon: 159 18 57;         /* deep maroon #9F1239 */
+  --maroon-deep: 124 16 44;
+  --muted: 71 85 105;          /* slate-600 #475569 — readable muted text (~7:1) */
+  --fg: 15 23 42;              /* slate-900 #0F172A — primary text */
   color-scheme: light;
 }
 
-html[data-theme="light"] body { color: #1f242e; }
-html[data-theme="light"] body::before { opacity: 0.04; }     /* almost no grain */
-html[data-theme="light"] ::selection { color: #18181b; }
+html[data-theme="light"] body { color: rgb(var(--fg)); }
+html[data-theme="light"] body::before { opacity: 0.03; }     /* almost no grain */
+html[data-theme="light"] ::selection { background: rgb(var(--accent) / 0.18); color: rgb(var(--fg)); }
 
 /* — text legibility shim — flip near-white/gray text to dark.
    No !important: these rules sit after Tailwind's utilities, so they win at
@@ -1334,18 +1334,18 @@ html[data-theme="light"] ::selection { color: #18181b; }
 html[data-theme="light"] [class*="text-white"],
 html[data-theme="light"] .text-zinc-100,
 html[data-theme="light"] .text-zinc-200,
-html[data-theme="light"] .text-zinc-300 { color: #27272a; }
+html[data-theme="light"] .text-zinc-300 { color: rgb(var(--fg)); }            /* slate-900 */
 html[data-theme="light"] .text-gray-300,
 html[data-theme="light"] .text-gray-400,
 html[data-theme="light"] .text-gray-500,
 html[data-theme="light"] .text-gray-600,
 html[data-theme="light"] .text-zinc-400,
-html[data-theme="light"] .text-zinc-500 { color: #52525b; }
+html[data-theme="light"] .text-zinc-500 { color: rgb(var(--muted)); }          /* slate-600 */
 
-/* — surface shim — translucent white fills/borders → translucent dark on light. */
-html[data-theme="light"] [class*="bg-white/"] { background-color: rgba(17, 20, 32, 0.04); }
-html[data-theme="light"] [class*="border-white/"] { border-color: rgba(17, 20, 32, 0.10); }
-html[data-theme="light"] [class*="bg-black/"] { background-color: rgba(255, 255, 255, 0.65); }
+/* — surface shim — translucent white fills/borders → crisp slate-tinted equivalents. */
+html[data-theme="light"] [class*="bg-white/"] { background-color: rgb(var(--fg) / 0.04); }
+html[data-theme="light"] [class*="border-white/"] { border-color: rgb(var(--fg) / 0.12); }
+html[data-theme="light"] [class*="bg-black/"] { background-color: rgb(255 255 255 / 0.72); }
 
 /* — keep white text where it belongs: on SOLID accent/jade/maroon/coral fills
    (buttons, badges). The :not([…/…]) guard excludes translucent tints like
@@ -1369,16 +1369,26 @@ html[data-theme="light"] .bento-card .info,
 html[data-theme="light"] .season-info,
 html[data-theme="light"] .season-info [class*="text-white"] { color: #fff; }
 
-/* — component-level cleanups for light mode — */
-html[data-theme="light"] .glass-card { background: rgba(255, 255, 255, 0.7); border-color: rgba(17, 20, 32, 0.08); }
-html[data-theme="light"] .glass-panel { background: rgba(255, 255, 255, 0.62); border-color: rgba(17, 20, 32, 0.08); }
+/* — component-level cleanups for light mode —
+   Cards lift off the page with crisp white + a subtle, structured two-layer
+   shadow (ambient + key light) rather than relying on grey fills for depth. */
+html[data-theme="light"] .glass-card,
+html[data-theme="light"] .glass-panel {
+  background: rgb(var(--card));
+  border-color: rgb(var(--fg) / 0.08);
+  box-shadow: 0 1px 2px rgb(var(--fg) / 0.04), 0 6px 16px -4px rgb(var(--fg) / 0.08);
+}
+html[data-theme="light"] .glass-card:hover {
+  border-color: rgb(var(--accent) / 0.28);
+  box-shadow: 0 2px 6px rgb(var(--fg) / 0.06), 0 14px 32px -8px rgb(var(--fg) / 0.16);
+}
 html[data-theme="light"] .section-title,
 html[data-theme="light"] .glow-heading,
 html[data-theme="light"] .text-legible { text-shadow: none; }
-html[data-theme="light"] .section-title { color: #18181b; }
-html[data-theme="light"] .section-subtitle { color: #52525b; }
-html[data-theme="light"] .modal-box { background: #ffffff; border-color: rgba(17, 20, 32, 0.10); color: #1f242e; }
-html[data-theme="light"] .crimson-divider { background: linear-gradient(90deg, transparent, rgba(159, 18, 41, 0.45), transparent); box-shadow: none; }
+html[data-theme="light"] .section-title { color: rgb(var(--fg)); }
+html[data-theme="light"] .section-subtitle { color: rgb(var(--muted)); }
+html[data-theme="light"] .modal-box { background: rgb(var(--card)); border-color: rgb(var(--fg) / 0.10); color: rgb(var(--fg)); box-shadow: 0 24px 60px -20px rgb(var(--fg) / 0.28); }
+html[data-theme="light"] .crimson-divider { background: linear-gradient(90deg, transparent, rgb(var(--accent) / 0.45), transparent); box-shadow: none; }
 
 /* — soften the dark-cinematic decorative overlays so light mode stays calm — */
 html[data-theme="light"] .orbit-galaxy { opacity: 0.10; }
@@ -1386,8 +1396,8 @@ html[data-theme="light"] .orbit-galaxy::before { opacity: 0.18; }
 html[data-theme="light"] .hud { opacity: 0.22; }
 html[data-theme="light"] .hero-grid {
   background-image:
-    linear-gradient(rgba(17, 20, 32, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 20, 32, 0.05) 1px, transparent 1px);
+    linear-gradient(rgb(var(--fg) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--fg) / 0.05) 1px, transparent 1px);
 }
 
 /* — boot loader — theme-aware, on the red·white·green light palette.
