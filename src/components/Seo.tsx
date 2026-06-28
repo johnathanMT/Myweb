@@ -9,16 +9,29 @@ import { SITE } from '../config/site'
  *
  *   <Seo title="Python Automation" description="…" path="/python" />
  */
+interface SeoProps {
+  /** Page title; composed as `${title} — ${SITE_NAME}`. Omit on the homepage. */
+  title?: string
+  /** Meta description / OG + Twitter description. Falls back to the site default. */
+  description?: string
+  /** Path appended to the canonical origin, e.g. "/python". Empty = homepage. */
+  path?: string
+  /** Absolute OG/Twitter image URL. Falls back to the profile image. */
+  image?: string
+  /** When true, emits `robots: noindex, nofollow` (private/admin routes). */
+  noindex?: boolean
+}
+
 const SITE_NAME = 'Myo Thant Naing'
 const DEFAULT_TITLE = 'Myo Thant Naing — Software Engineer & AI Developer'
 const DEFAULT_DESC =
   'Computer Science student & Software Engineer in Japan, building full-stack apps (C#/.NET, React, Three.js) and Agentic AI systems. From caring to coding.'
 const DEFAULT_IMAGE = `${SITE.url}/Myweb_photo/My_profile2_for_myweb.jpg`
 
-export default function Seo({ title, description, path = '', image, noindex = false }) {
+export default function Seo({ title, description, path = '', image, noindex = false }: SeoProps) {
   const fullTitle = title ? `${title} — ${SITE_NAME}` : DEFAULT_TITLE
   const desc = description || DEFAULT_DESC
-  const url = `${SITE.url}${path}`            // canonical (one host — see SITE.url)
+  const url = `${SITE.url}${path}` // canonical (one host — see SITE.url)
   const img = image || DEFAULT_IMAGE
 
   return (

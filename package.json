@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "sitemap": "node scripts/gen-sitemap.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "build": "node scripts/gen-sitemap.mjs && vite build && node scripts/inject-site.mjs",
     "preview": "vite preview"
   },
@@ -32,11 +33,15 @@
     "world-atlas": "^2.0.2"
   },
   "devDependencies": {
+    "@types/node": "^22.20.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",
     "simple-icons": "^16.24.0",
     "tailwindcss": "^3.4.1",
+    "typescript": "~5.6.0",
     "vite": "^5.0.12"
   }
 }

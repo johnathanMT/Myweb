@@ -6,7 +6,7 @@ import { getInitialTheme, applyTheme } from './hooks/useTheme.js'
 import App from './App.jsx'
 import ImmersiveApp from './ImmersiveApp.jsx'
 import PageShell from './components/PageShell.jsx'
-import Seo from './components/Seo.jsx'
+import Seo from './components/Seo'
 import PythonAutomation from './components/PythonAutomation.jsx'
 import StudyingLibrary from './components/StudyingLibrary.jsx'
 import Bibliography from './components/Bibliography.jsx'
@@ -35,14 +35,14 @@ const Home = isImmersive ? ImmersiveApp : App
 console.info('[boot] VITE_APP_MODE =', JSON.stringify(import.meta.env.VITE_APP_MODE),
   '→ rendering', isImmersive ? 'ImmersiveApp (3D)' : 'Hub')
 
-// BrowserRouter → clean, indexable URLs (myothant.dev/python, /sanctuary, …).
-// basename = the deploy base (Vite's BASE_URL): '/' on the apex domain, '/Myweb/'
-// on a GitHub-Pages project path. Trailing slash stripped per react-router's rule.
-// NOTE: the server MUST rewrite unknown paths to index.html — see vercel.json.
 // Set the theme attribute BEFORE React paints, so there's no light/dark flash.
 // (CSP blocks inline <script> in index.html, so we do it here in a module.)
 applyTheme(getInitialTheme())
 
+// BrowserRouter → clean, indexable URLs (myothant.dev/python, /sanctuary, …).
+// basename = the deploy base (Vite's BASE_URL): '/' on the apex domain, '/Myweb/'
+// on a GitHub-Pages project path. Trailing slash stripped per react-router's rule.
+// NOTE: the server MUST rewrite unknown paths to index.html — see vercel.json.
 const BASENAME = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') || '/'
 
 // ── Legacy hash-link shim ─────────────────────────────────────────────────────
@@ -55,7 +55,11 @@ if (typeof window !== 'undefined' && window.location.hash.startsWith('#/')) {
   window.history.replaceState(null, '', target)
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+// #root is guaranteed by index.html; guard keeps TS strict-null happy without `!`.
+const rootEl = document.getElementById('root')
+if (!rootEl) throw new Error('Root element #root not found in index.html')
+
+ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
     <HelmetProvider>
       <BrowserRouter basename={BASENAME}>
