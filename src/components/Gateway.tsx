@@ -49,10 +49,11 @@ export default function Gateway() {
           Myo Thant Naing
         </motion.h1>
 
-        {/* role / subheadline */}
+        {/* role / subheadline — wraps gracefully on small screens (text-balance);
+            sizing clamps down a touch since this line is longer than before. */}
         <motion.p {...fade(0.18)}
-          className="mt-5 text-[clamp(1.15rem,3.6vw,2rem)] font-light text-muted">
-          Software Engineer <span className="text-accent">&amp;</span> AI Developer
+          className="mx-auto mt-5 max-w-2xl text-balance text-[clamp(1.05rem,2.6vw,1.6rem)] font-light leading-snug text-muted">
+          Computer Science Student <span className="px-0.5 text-fg/40">|</span> Aspiring Software Engineer <span className="text-accent">&amp;</span> AI Enthusiast
         </motion.p>
 
         {/* one line of context */}
