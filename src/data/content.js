@@ -65,9 +65,9 @@ export const PROJECTS = [
   },
   {
     id: 'github', title: 'GitHub Projects',
-    desc: 'Explore all repositories, source codes, and categorized projects.',
+    desc: 'AI bots, IoT, full-stack web apps, and automation scripts — all repositories in one place.',
     icon: 'fab fa-github', color: '#e2e2f0',
-    url: SITE.asset('myweb_github_project.html'), ext: false,
+    url: '/github', ext: false,
   },
 ]
 
