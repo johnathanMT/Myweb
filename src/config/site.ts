@@ -14,6 +14,7 @@
 //    VITE_CONTACT_EMAIL  public contact address      → ai@myothant.dev
 //    VITE_LINE_URL       LINE / AI-bot chat link     → https://lin.ee/s72ayHD
 //    VITE_COFFEE_URL     external "Bean Boutique" project link
+//    VITE_GITHUB_URL     GitHub profile URL          → https://github.com/johnathanMT
 //  (BASE path comes from Vite's own `base` config via import.meta.env.BASE_URL)
 // ============================================================================
 
@@ -32,8 +33,10 @@ export interface SiteConfig {
   readonly mailto: string
   lineUrl: string
   coffeeUrl: string
+  github: string
   asset(path: string): string
   abs(path: string): string
+  ghRepo(name: string): string
 }
 
 export const SITE: SiteConfig = {
@@ -56,12 +59,18 @@ export const SITE: SiteConfig = {
   // External "Bean Boutique" demo project (lives in a separate repo).
   coffeeUrl: import.meta.env.VITE_COFFEE_URL || 'https://johnathanmt.github.io/bean-boutique-coffee-shop/',
 
+  // Canonical GitHub profile — single source of truth for every GitHub link/icon.
+  github: trimSlash(import.meta.env.VITE_GITHUB_URL || 'https://github.com/johnathanMT'),
+
   // ---- helpers --------------------------------------------------------------
   // Build-relative path to a file in /public (e.g. asset('blog.html') → '/Myweb/blog.html').
   asset(path: string): string { return BASE + stripLead(path) },
 
   // Absolute URL on the canonical domain (e.g. abs('blog.html') → 'https://myothant.dev/blog.html').
   abs(path: string): string { return `${this.url}/${stripLead(path)}` },
+
+  // Absolute URL to one of this profile's repos (e.g. ghRepo('Myweb') → 'https://github.com/johnathanMT/Myweb').
+  ghRepo(name: string): string { return `${this.github}/${stripLead(name)}` },
 }
 
 export default SITE

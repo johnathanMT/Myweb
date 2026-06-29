@@ -19,7 +19,7 @@ export const PERSONAL = {
 // Real, personal channels only. The LINE link is intentionally NOT here — it
 // reaches an automated AI assistant, not me personally (see the AI-agent section).
 export const SOCIAL = [
-  { label: 'GitHub', icon: 'fab fa-github', url: 'https://github.com/johnathanMT' },
+  { label: 'GitHub', icon: 'fab fa-github', url: SITE.github },
   { label: 'LinkedIn', icon: 'fab fa-linkedin-in', url: 'https://www.linkedin.com/in/myothantnaing' },
 ]
 
@@ -38,38 +38,95 @@ export const SKILLS = [
 
 ]
 
+// Project card categories, in display order. ProjectsSection groups the tiles
+// under these headings. `label` is an i18n object ({ en, mm, jp, zh, vn, ne, id })
+// resolved against the active language (falls back to `en` per key).
+export const PROJECT_CATEGORIES = [
+  {
+    id: 'code',
+    label: { en: 'Code & Automation', mm: 'ကုဒ်နှင့် အလိုအလျောက်စနစ်', jp: 'コードと自動化', zh: '代码与自动化', vn: 'Mã & Tự động hóa', ne: 'कोड र स्वचालन', id: 'Kode & Otomasi' },
+  },
+  {
+    id: 'web',
+    label: { en: 'Web & Apps', mm: 'ဝဘ်နှင့် အက်ပ်များ', jp: 'ウェブとアプリ', zh: '网站与应用', vn: 'Web & Ứng dụng', ne: 'वेब र एप्स', id: 'Web & Aplikasi' },
+  },
+  {
+    id: 'learning',
+    label: { en: 'Learning & Writing', mm: 'သင်ယူမှုနှင့် စာရေးသားမှု', jp: '学習と執筆', zh: '学习与写作', vn: 'Học tập & Viết lách', ne: 'सिकाइ र लेखन', id: 'Belajar & Menulis' },
+  },
+]
+
+// Each project may carry:
+//   • `category`  — one of PROJECT_CATEGORIES[].id (controls grouping)
+//   • `repo`      — public GitHub URL (renders a "View on GitHub" link on the tile)
+// `title` / `desc` stay plain English here for backward-compatible consumers; the
+// per-language strings live in PROJECT_I18N below (ProjectsSection merges them).
 export const PROJECTS = [
   {
     id: 'python', title: 'Python Automation',
     desc: 'Tools created to help with daily tasks and workflows.',
     icon: 'fab fa-python', color: '#3b82f6',
     url: '#/python', ext: false,            // routed React page
+    category: 'code',
+    repo: SITE.ghRepo('Myweb'),
   },
   {
-    id: 'studying', title: 'Personal Studying',
-    desc: 'University assignments, web designs, and learning projects.',
-    icon: 'fas fa-laptop-code', color: '#a855f7',
-    url: '#/studying', ext: false,          // routed React page
-  },
-  {
-    id: 'bibliography', title: 'Bibliography',
-    desc: 'A chronological journey — from analog beginnings to a cyber-modern present.',
-    icon: 'fas fa-book', color: '#06b6d4',
-    url: '#/bibliography', ext: false,      // routed React page
+    id: 'github', title: 'GitHub Projects',
+    desc: 'Explore all repositories, source codes, and categorized projects.',
+    icon: 'fab fa-github', color: '#e2e2f0',
+    url: SITE.github, ext: true,
+    category: 'code',
+    repo: SITE.github,
   },
   {
     id: 'coffee', title: 'Bean Boutique Coffee Shop',
     desc: 'A modern website showcasing premium coffee beans and brewing equipment.',
     icon: 'fas fa-coffee', color: '#f59e0b',
     url: SITE.coffeeUrl, ext: true, featured: true,
+    category: 'web',
+    repo: SITE.ghRepo('bean-boutique-coffee-shop'),
   },
   {
-    id: 'github', title: 'GitHub Projects',
-    desc: 'Explore all repositories, source codes, and categorized projects.',
-    icon: 'fab fa-github', color: '#e2e2f0',
-    url: SITE.asset('myweb_github_project.html'), ext: false,
+    id: 'studying', title: 'Personal Studying',
+    desc: 'University assignments, web designs, and learning projects.',
+    icon: 'fas fa-laptop-code', color: '#a855f7',
+    url: '#/studying', ext: false,          // routed React page
+    category: 'learning',
+  },
+  {
+    id: 'bibliography', title: 'Bibliography',
+    desc: 'A chronological journey — from analog beginnings to a cyber-modern present.',
+    icon: 'fas fa-book', color: '#06b6d4',
+    url: '#/bibliography', ext: false,      // routed React page
+    category: 'learning',
   },
 ]
+
+// Localized titles/descriptions for the project tiles, keyed by project id then
+// language. ProjectsSection resolves the active language and falls back to the
+// plain `title` / `desc` on the PROJECTS entry (English) when a key is missing.
+export const PROJECT_I18N = {
+  python: {
+    title: { en: 'Python Automation', mm: 'Python အလိုအလျောက်စနစ်', jp: 'Python 自動化', zh: 'Python 自动化', vn: 'Tự động hóa Python', ne: 'Python स्वचालन', id: 'Otomasi Python' },
+    desc: { en: 'Tools created to help with daily tasks and workflows.', mm: 'နေ့စဉ်လုပ်ငန်းများကို ကူညီရန် ဖန်တီးထားသော ကိရိယာများ။', jp: '日々の作業とワークフローを助けるために作ったツール。', zh: '为简化日常任务和工作流程而打造的工具。', vn: 'Công cụ giúp xử lý công việc và quy trình hằng ngày.', ne: 'दैनिक काम र वर्कफ्लोमा सहयोग गर्न बनाइएका उपकरणहरू।', id: 'Alat yang dibuat untuk membantu tugas dan alur kerja harian.' },
+  },
+  github: {
+    title: { en: 'GitHub Projects', mm: 'GitHub ပရောဂျက်များ', jp: 'GitHub プロジェクト', zh: 'GitHub 项目', vn: 'Dự án GitHub', ne: 'GitHub परियोजनाहरू', id: 'Proyek GitHub' },
+    desc: { en: 'Explore all repositories, source codes, and categorized projects.', mm: 'repository များ၊ source code များနှင့် အမျိုးအစားခွဲထားသော ပရောဂျက်များကို လေ့လာပါ။', jp: 'すべてのリポジトリ、ソースコード、分類済みプロジェクトを見る。', zh: '浏览所有代码仓库、源代码与分类项目。', vn: 'Khám phá toàn bộ kho mã, mã nguồn và dự án theo danh mục.', ne: 'सबै रिपोजिटरी, स्रोत कोड र वर्गीकृत परियोजनाहरू हेर्नुहोस्।', id: 'Jelajahi semua repositori, kode sumber, dan proyek terkategori.' },
+  },
+  coffee: {
+    title: { en: 'Bean Boutique Coffee Shop', mm: 'Bean Boutique ကော်ဖီဆိုင်', jp: 'Bean Boutique コーヒーショップ', zh: 'Bean Boutique 咖啡店', vn: 'Quán cà phê Bean Boutique', ne: 'Bean Boutique कफी पसल', id: 'Kedai Kopi Bean Boutique' },
+    desc: { en: 'A modern website showcasing premium coffee beans and brewing equipment.', mm: 'အရည်အသွေးမြင့် ကော်ဖီစေ့များနှင့် ဖျော်စက်ပစ္စည်းများ ပြသသည့် ခေတ်မီ ဝဘ်ဆိုက်။', jp: 'プレミアムなコーヒー豆と抽出器具を紹介するモダンなウェブサイト。', zh: '展示精品咖啡豆与冲煮器具的现代网站。', vn: 'Trang web hiện đại giới thiệu hạt cà phê cao cấp và dụng cụ pha chế.', ne: 'प्रिमियम कफी बिउ र ब्रुइङ उपकरण देखाउने आधुनिक वेबसाइट।', id: 'Situs modern yang menampilkan biji kopi premium dan peralatan seduh.' },
+  },
+  studying: {
+    title: { en: 'Personal Studying', mm: 'ကိုယ်ပိုင် လေ့လာမှု', jp: '個人学習', zh: '个人学习', vn: 'Học tập cá nhân', ne: 'व्यक्तिगत अध्ययन', id: 'Belajar Pribadi' },
+    desc: { en: 'University assignments, web designs, and learning projects.', mm: 'တက္ကသိုလ် အလုပ်များ၊ ဝဘ်ဒီဇိုင်းများနှင့် သင်ယူမှု ပရောဂျက်များ။', jp: '大学の課題、ウェブデザイン、学習プロジェクト。', zh: '大学作业、网页设计与学习项目。', vn: 'Bài tập đại học, thiết kế web và các dự án học tập.', ne: 'विश्वविद्यालयका असाइनमेन्ट, वेब डिजाइन र सिकाइ परियोजनाहरू।', id: 'Tugas kuliah, desain web, dan proyek pembelajaran.' },
+  },
+  bibliography: {
+    title: { en: 'Bibliography', mm: 'အတ္ထုပ္ပတ္တိ', jp: '経歴', zh: '个人编年史', vn: 'Tiểu sử', ne: 'जीवनवृत्त', id: 'Bibliografi' },
+    desc: { en: 'A chronological journey — from analog beginnings to a cyber-modern present.', mm: 'အနలဂ်ခေတ်မှ ဆိုက်ဘာခေတ်မီ ပစ္စုပ္ပန်အထိ အချိန်အလိုက် ခရီးစဉ်။', jp: 'アナログな始まりからサイバーな現在までの時系列の旅。', zh: '从模拟时代起步到赛博现代的时间之旅。', vn: 'Hành trình theo dòng thời gian — từ thuở analog đến hiện tại cyber.', ne: 'एनालग सुरुवातदेखि साइबर-आधुनिक वर्तमानसम्मको कालक्रमिक यात्रा।', id: 'Perjalanan kronologis — dari era analog hingga masa kini siber.' },
+  },
+}
 
 // The 12 BURMESE LUNAR MONTHS and their signature festivals (calendar order,
 // Tagu → Tabaung). `file` is the image slug in src/assets/images/months/
