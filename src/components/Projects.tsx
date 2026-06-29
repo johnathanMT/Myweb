@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { PROJECTS } from '../data/content'
 
 interface SectionText { title: string; sub: string }
@@ -21,6 +22,28 @@ interface Project {
   url: string
   ext: boolean
   featured?: boolean
+}
+
+function ProjectLink({
+  project,
+  className,
+  children,
+}: {
+  project: Project
+  className: string
+  children: ReactNode
+}) {
+  if (project.ext) {
+    return (
+      <a href={project.url} target="_blank" rel="noopener noreferrer" className={className}>
+        {children}
+      </a>
+    )
+  }
+  if (project.url.startsWith('/')) {
+    return <Link to={project.url} className={className}>{children}</Link>
+  }
+  return <a href={project.url} className={className}>{children}</a>
 }
 
 export default function Projects({ lang = 'en' }: { lang?: string }) {
@@ -51,10 +74,8 @@ export default function Projects({ lang = 'en' }: { lang?: string }) {
         {/* Featured project */}
         {projects.filter((p) => p.featured).map((project) => (
           <div key={project.id} className="reveal mb-6">
-            <a
-              href={project.url}
-              target={project.ext ? '_blank' : '_self'}
-              rel={project.ext ? 'noopener noreferrer' : undefined}
+            <ProjectLink
+              project={project}
               className="block group rounded-2xl border border-white/10 bg-card hover:border-accent/30 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1"
             >
               <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
@@ -78,20 +99,17 @@ export default function Projects({ lang = 'en' }: { lang?: string }) {
                   </span>
                 </div>
               </div>
-            </a>
+            </ProjectLink>
           </div>
         ))}
 
         {/* Grid of other projects */}
         <div className="reveal grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
           {projects.filter((p) => !p.featured).map((project, i) => (
-            <a
+            <ProjectLink
               key={project.id}
-              href={project.url}
-              target={project.ext ? '_blank' : '_self'}
-              rel={project.ext ? 'noopener noreferrer' : undefined}
+              project={project}
               className="group glass-card p-6 flex flex-col gap-4"
-              style={{ animationDelay: `${i * 80}ms` }}
             >
               <div className="flex items-center justify-between">
                 <div
@@ -106,7 +124,7 @@ export default function Projects({ lang = 'en' }: { lang?: string }) {
                 <h3 className="text-base font-semibold text-white mb-1 group-hover:text-accent-light transition-colors">{project.title}</h3>
                 <p className="text-muted text-sm leading-relaxed">{project.desc}</p>
               </div>
-            </a>
+            </ProjectLink>
           ))}
         </div>
       </div>

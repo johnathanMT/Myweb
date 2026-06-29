@@ -1,9 +1,11 @@
 import { useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import {
   GraduationCap, Building2, PlaneTakeoff, School, AwardIcon, Briefcase, Hotel, Utensils, University,
   type LucideIcon,
 } from 'lucide-react'
+import JourneyCrosslink from './JourneyCrosslink'
 
 /**
  * Bibliography — a vertical chronological timeline of the journey, whose visual
@@ -121,12 +123,16 @@ export default function Bibliography() {
   const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1])
 
   return (
-    <section id="bibliography" className="relative overflow-hidden bg-transparent py-24">
+    <section id="bibliography" className="relative overflow-hidden bg-transparent py-16 sm:py-24">
       <div className="mb-16 px-6 text-center">
         <p className="font-mono text-sm uppercase tracking-[0.3em] text-accent-light">// chronology</p>
         <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Bibliography</h2>
-        <p className="mx-auto mt-2 max-w-xl text-muted">
-          A journey told year by year — from analog beginnings to a digital present.
+        <p className="mx-auto mt-3 max-w-2xl text-muted">
+          The “where” in my story — from International Relations in Myanmar to caregiving in Osaka,
+          and now a BSc in Computer Science. This timeline connects to what I study in{' '}
+          <Link to="/studying" className="text-accent-light underline-offset-2 hover:underline">Personal Studying</Link>
+          {' '}and the scripts I build in{' '}
+          <Link to="/python" className="text-accent-light underline-offset-2 hover:underline">Python Automation</Link>.
         </p>
       </div>
 
@@ -146,6 +152,10 @@ export default function Bibliography() {
         <div className="space-y-14">
           {TIMELINE.map((item, i) => <Entry key={i} item={item} i={i} />)}
         </div>
+      </div>
+
+      <div className="mx-auto max-w-5xl px-6">
+        <JourneyCrosslink current="bibliography" />
       </div>
     </section>
   )

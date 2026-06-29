@@ -43,19 +43,19 @@ export const PROJECTS = [
     id: 'python', title: 'Python Automation',
     desc: 'Tools created to help with daily tasks and workflows.',
     icon: 'fab fa-python', color: '#3b82f6',
-    url: '#/python', ext: false,            // routed React page
+    url: '/python', ext: false,             // journey hub — React route
   },
   {
     id: 'studying', title: 'Personal Studying',
-    desc: 'University assignments, web designs, and learning projects.',
+    desc: 'NCC Diploma, IBM AI certs, and university coursework — the reading room of my CS path.',
     icon: 'fas fa-laptop-code', color: '#a855f7',
-    url: '#/studying', ext: false,          // routed React page
+    url: '/studying', ext: false,           // journey hub — React route
   },
   {
     id: 'bibliography', title: 'Bibliography',
-    desc: 'A chronological journey — from analog beginnings to a cyber-modern present.',
+    desc: 'A chronological journey — from Myanmar to Japan, caregiving to Computer Science.',
     icon: 'fas fa-book', color: '#06b6d4',
-    url: '#/bibliography', ext: false,      // routed React page
+    url: '/bibliography', ext: false,       // journey hub — React route
   },
   {
     id: 'coffee', title: 'Bean Boutique Coffee Shop',

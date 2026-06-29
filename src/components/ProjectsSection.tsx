@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { PROJECTS } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 
@@ -31,13 +32,9 @@ interface Project {
  */
 function ProjectLogo({ project }: { project: Project }) {
   const c = project.color
-  return (
-    <a
-      href={project.url}
-      target={project.ext ? '_blank' : '_self'}
-      rel={project.ext ? 'noopener noreferrer' : undefined}
-      className="group relative flex flex-col items-center gap-4 rounded-3xl p-6 text-center outline-none transition-transform duration-300 hover:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-white/30"
-    >
+  const className = 'group relative flex flex-col items-center gap-4 rounded-3xl p-6 text-center outline-none transition-transform duration-300 hover:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-white/30'
+  const inner = (
+    <>
       <span className="relative flex h-28 w-28 items-center justify-center">
         {/* soft colour glow behind the icon — grows on hover */}
         <span
@@ -67,8 +64,20 @@ function ProjectLogo({ project }: { project: Project }) {
           {project.desc}
         </p>
       </div>
-    </a>
+    </>
   )
+
+  if (project.ext) {
+    return (
+      <a href={project.url} target="_blank" rel="noopener noreferrer" className={className}>
+        {inner}
+      </a>
+    )
+  }
+  if (project.url.startsWith('/')) {
+    return <Link to={project.url} className={className}>{inner}</Link>
+  }
+  return <a href={project.url} className={className}>{inner}</a>
 }
 
 export default function ProjectsSection({ lang = 'en' }: { lang?: string }) {

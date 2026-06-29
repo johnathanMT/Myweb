@@ -2,7 +2,9 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import useTheme from '../hooks/useTheme'
+import type { JourneyPage } from '../data/journeyHub'
 import AmbientBackground from './AmbientBackground'
+import JourneyHubNav from './JourneyHubNav'
 import Navbar from './Navbar'
 import Footer from './MegaFooter'
 
@@ -10,8 +12,15 @@ import Footer from './MegaFooter'
  * PageShell — shared layout for routed sub-pages (/python, /studying, …).
  * Provides the navbar, ambient background, footer, a "back to home" link,
  * and scrolls to top on mount. Keeps language state in sync via localStorage.
+ * Pass `journeyHub` to show cross-navigation between Bibliography, Studying, Python.
  */
-export default function PageShell({ children }: { children: ReactNode }) {
+export default function PageShell({
+  children,
+  journeyHub,
+}: {
+  children: ReactNode
+  journeyHub?: JourneyPage
+}) {
   const [lang, setLang] = useState<string>(() => {
     try { return localStorage.getItem('mtn_lang') || 'en' } catch { return 'en' }
   })
@@ -29,6 +38,11 @@ export default function PageShell({ children }: { children: ReactNode }) {
             <ArrowLeft size={16} /> Back to home
           </Link>
         </div>
+        {journeyHub && (
+          <div className="mx-auto max-w-6xl px-6 pt-6">
+            <JourneyHubNav active={journeyHub} />
+          </div>
+        )}
         {children}
       </main>
       <Footer />
