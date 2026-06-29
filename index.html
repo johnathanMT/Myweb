@@ -3,25 +3,18 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      viewport-fit=cover → safe-area-inset env() works on iPhone notch + Dynamic Island.
+      interactive-widget=resizes-visual → prevents layout reflow when virtual keyboard opens on mobile.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-    <!-- Strict CSP, with the additions WebGL/Three.js need:
-         • script-src 'wasm-unsafe-eval' → the Draco decoder is WebAssembly.
-         • worker-src 'self' blob:        → the Draco/GLTF loader runs a blob worker.
-         • img-src blob:                  → GLTFLoader decodes textures to blob URLs.
-         • connect-src gstatic            → the Draco decoder is fetched from gstatic. -->
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        base-uri 'self';
-        object-src 'none';
-        script-src 'self' 'wasm-unsafe-eval';
-        worker-src 'self' blob:;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
-        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-        img-src 'self' data: blob: https:;
-        media-src 'self' https://res.cloudinary.com blob:;
-        connect-src 'self' https://myweb-zqv1.onrender.com https://www.gstatic.com https://api.unsplash.com https://ipapi.co;
-    ">
+    <!-- Prevent iOS from auto-linking phone/address/dates in content -->
+    <meta name="format-detection" content="telephone=no, address=no, email=no" />
+
+    <!-- CSP is enforced at the HTTP header level via vercel.json (harder to bypass than a meta tag).
+         This meta tag is kept as a defence-in-depth fallback for non-Vercel environments only. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; media-src 'self' https://res.cloudinary.com blob:; connect-src 'self' https://myweb-zqv1.onrender.com https://www.gstatic.com https://api.unsplash.com https://ipapi.co; frame-ancestors 'none'; upgrade-insecure-requests;">
 
     <!-- ════════════════ SEO / Social ════════════════ -->
     <title>Myo Thant Naing — Computer Science Student &amp; Aspiring Software Engineer &amp; AI Enthusiast | Portfolio
@@ -86,8 +79,12 @@
     <div id="root"></div>
 
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Load api.js with a leading "/" so the path resolves reliably from any route. -->
-    <script src="api.js"></script>
+    <!--
+      api.js: the static blog/admin PortfolioAPI client. Loaded with defer so it
+      never blocks the React bundle. Not type="module" so it exposes window.PortfolioAPI
+      for the legacy static pages (blog.html, admin.html) that rely on a global.
+    -->
+    <script defer src="/api.js"></script>
 
 </body>
 

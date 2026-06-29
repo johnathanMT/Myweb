@@ -28,5 +28,31 @@ export default defineConfig({
     // from. Raising the warning limit just silences the size notice for our
     // (intentionally lazy-loaded) heavy chunks.
     chunkSizeWarningLimit: 1200,
+
+    // Content-hashed filenames → long-term immutable cache headers work correctly.
+    // Vite does this by default, but being explicit makes it clear this is intentional.
+    rollupOptions: {
+      output: {
+        // Keep Vite's default content-hash naming so the Vercel immutable cache rule
+        // in vercel.json (/assets/(.*) → max-age=31536000, immutable) applies correctly.
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+      },
+    },
+  },
+
+  // Dev server: mirror the production Vercel security headers so local behaviour
+  // matches production. The CSP here is intentionally looser (adds 'unsafe-eval'
+  // for Vite HMR's eval-based hot-reload) — production always uses vercel.json.
+  server: {
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'X-Permitted-Cross-Domain-Policies': 'none',
+    },
   },
 })

@@ -183,16 +183,16 @@ export default function StudyingLibrary() {
       <div className="pointer-events-none absolute inset-0"
            style={{ background: 'radial-gradient(120% 90% at 50% 120%, rgba(120,80,40,0.10), transparent 60%)' }} />
 
-      <div className="relative mx-auto max-w-6xl px-6">
-        <div className="mb-12 text-center">
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mb-10 text-center sm:mb-12">
           <p className="text-xs uppercase tracking-[0.35em]" style={{ color: GOLD, fontFamily: 'Georgia, serif' }}>
             Bibliotheca · Studii
           </p>
-          <h2 className="mt-3 text-4xl text-[#f3ead6]" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+          <h2 className="mt-3 text-3xl text-[#f3ead6] sm:text-4xl" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
             The Personal Library
           </h2>
           <div className="mx-auto mt-4 h-px w-24" style={{ background: GOLD }} />
-          <p className="mx-auto mt-4 max-w-2xl text-[#cfc4ad]/70">
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#cfc4ad]/70 sm:text-base">
             The “what” in my story — NCC Diploma modules, IBM AI certifications, and self-study that
             followed the path laid out in my{' '}
             <Link to="/bibliography" className="text-[#e8dcc0] underline-offset-2 hover:underline">Bibliography</Link>
@@ -201,38 +201,43 @@ export default function StudyingLibrary() {
           </p>
         </div>
 
-        <div className="mb-14 grid grid-cols-3 gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center backdrop-blur-sm">
+        {/* Stats bar: 3 equal columns, compressed on xs */}
+        <div className="mb-12 grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center backdrop-blur-sm sm:gap-4 sm:p-6">
           {STATS.map((s) => (
-            <div key={s.label}>
-              <p className="text-3xl font-bold text-[#f3ead6]" style={{ fontFamily: 'Georgia, serif' }}>{s.value}</p>
-              <p className="mt-1 text-xs text-[#cfc4ad]/60">{s.label}</p>
+            <div key={s.label} className="min-w-0">
+              <p className="text-2xl font-bold text-[#f3ead6] sm:text-3xl" style={{ fontFamily: 'Georgia, serif' }}>{s.value}</p>
+              <p className="mt-1 text-[10px] leading-tight text-[#cfc4ad]/60 sm:text-xs">{s.label}</p>
             </div>
           ))}
         </div>
 
-        <h3 className="mb-6 text-center text-sm uppercase tracking-[0.25em] text-[#cfc4ad]/60">Current curriculum</h3>
-        <div className="mb-16 grid gap-6 lg:grid-cols-3">
+        <h3 className="mb-5 text-center text-[11px] uppercase tracking-[0.25em] text-[#cfc4ad]/60 sm:mb-6 sm:text-sm">Current curriculum</h3>
+        {/* Single col on xs, 2-col on sm, 3-col on lg */}
+        <div className="mb-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {CURRICULUM.map((c, i) => <CurriculumCard key={c.title} item={c} i={i} />)}
         </div>
 
-        <h3 className="mb-6 text-center text-sm uppercase tracking-[0.25em] text-[#cfc4ad]/60">Reading room shelves</h3>
-        <div className="mb-14 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+        <h3 className="mb-5 text-center text-[11px] uppercase tracking-[0.25em] text-[#cfc4ad]/60 sm:mb-6 sm:text-sm">Reading room shelves</h3>
+        <div className="mb-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {COLLECTIONS.map((c, i) => <VolumeCard key={c.title} item={c} i={i} />)}
         </div>
 
-        <h3 className="mb-6 text-center text-sm uppercase tracking-[0.25em] text-[#cfc4ad]/60">Assignment showcase</h3>
+        <h3 className="mb-5 text-center text-[11px] uppercase tracking-[0.25em] text-[#cfc4ad]/60 sm:mb-6 sm:text-sm">Assignment showcase</h3>
         <div className="mb-8 grid gap-4 sm:grid-cols-2">
           {ASSIGNMENTS.map((a) => {
             const Icon = a.icon
             return (
-              <div key={a.title} className="flex gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg text-[#c8a04a]" style={{ background: 'rgba(200,160,74,0.1)' }}>
-                  <Icon size={22} />
+              <div key={a.title} className="flex gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <span
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-[#c8a04a] sm:h-12 sm:w-12"
+                  style={{ background: 'rgba(200,160,74,0.1)' }}
+                >
+                  <Icon size={20} />
                 </span>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[10px] uppercase tracking-widest text-[#c8a04a]/80">{a.module}</p>
-                  <h4 className="mt-0.5 font-semibold text-[#f3ead6]">{a.title}</h4>
-                  <p className="mt-1 text-sm text-[#cfc4ad]/70">{a.desc}</p>
+                  <h4 className="mt-0.5 text-sm font-semibold text-[#f3ead6] sm:text-base">{a.title}</h4>
+                  <p className="mt-1 text-xs leading-relaxed text-[#cfc4ad]/70 sm:text-sm">{a.desc}</p>
                 </div>
               </div>
             )
