@@ -328,7 +328,16 @@
     footer a {
       color: #a78bfa
     }
-  </style>
+  
+/* — CSP-safe reveal fallback — the scroll animation now lives in /reveal.js
+   (external, allowed by script-src 'self'). reveal.js adds .js-reveal to <html>
+   BEFORE paint; if it is ever blocked, sections stay fully visible instead of
+   being trapped at opacity:0 (the bug that hid this page's body). — */
+.section{opacity:1;transform:none}
+.js-reveal .section{opacity:0;transform:translateY(20px);transition:.6s ease}
+.js-reveal .section.visible{opacity:1;transform:none}
+</style>
+  <script src="/reveal.js"></script>
 </head>
 
 <body>
@@ -410,7 +419,7 @@
     <p>Part of <a href="index.html">MTN.Digitosphere</a> — Exploring the Infinite 🌌</p>
     <p style="margin-top:.5rem">© 2026 Myo Thant Naing</p>
   </footer>
-  <script>const obs = new IntersectionObserver(e => e.forEach(x => { if (x.isIntersecting) x.target.classList.add('visible') }), { threshold: .1 }); document.querySelectorAll('.section').forEach(el => obs.observe(el));</script>
+
 </body>
 
 </html>

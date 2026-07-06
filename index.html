@@ -61,10 +61,32 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&family=Padauk:wght@400;700&family=Noto+Sans+Myanmar:wght@400;500;600&display=swap"
-        rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+
+    <!-- Fonts + Font Awesome load NON-render-blocking (preload → stylesheet via
+         /css-swap.js) so third-party CSS latency never delays first paint on
+         mobile. <noscript> keeps them working when JS is unavailable. -->
+    <link rel="preload" as="style" data-async-style
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&family=Padauk:wght@400;700&family=Noto+Sans+Myanmar:wght@400;500;600&display=swap" />
+    <link rel="preload" as="style" data-async-style
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&family=Padauk:wght@400;700&family=Noto+Sans+Myanmar:wght@400;500;600&display=swap" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    </noscript>
+    <script src="/css-swap.js" defer></script>
+
+    <!-- Instant boot-splash styles (inline <style> is allowed by style-src
+         'unsafe-inline'; contains NO inline JS, so it is CSP-safe). The splash is
+         faded out and removed by main.tsx once React has mounted. -->
+    <style>
+        #boot-splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#060607;transition:opacity .35s ease}
+        #boot-splash .bs-spin{width:38px;height:38px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:#e11d48;animation:bs-rot .8s linear infinite}
+        #boot-splash.bs-hide{opacity:0;pointer-events:none}
+        @keyframes bs-rot{to{transform:rotate(360deg)}}
+        @media (prefers-reduced-motion: reduce){#boot-splash .bs-spin{animation-duration:2.4s}}
+    </style>
 </head>
 
 <body>
@@ -77,6 +99,15 @@
     </noscript>
 
     <div id="root"></div>
+
+    <!-- Instant loading splash: paints immediately (pure CSS, no JS) so mobile
+         never shows a blank screen during the JS bootstrap. main.tsx fades and
+         removes it once React mounts. If JS is disabled, the <noscript> below
+         hides it so the crawler/no-JS fallback content stays visible. -->
+    <div id="boot-splash" aria-hidden="true"><div class="bs-spin"></div></div>
+    <noscript>
+        <style>#boot-splash{display:none !important}</style>
+    </noscript>
 
     <script type="module" src="/src/main.tsx"></script>
     <!--

@@ -65,3 +65,13 @@ ReactDOM.createRoot(rootEl).render(
     </HelmetProvider>
   </React.StrictMode>,
 )
+
+// Fade out and remove the instant boot splash now that React has mounted, so
+// mobile users see a spinner during the JS bootstrap instead of a blank screen.
+const bootSplash = document.getElementById('boot-splash')
+if (bootSplash) {
+  requestAnimationFrame(() => {
+    bootSplash.classList.add('bs-hide')
+    window.setTimeout(() => bootSplash.remove(), 400)
+  })
+}

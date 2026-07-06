@@ -11,6 +11,7 @@ import ProjectsSection  from './components/ProjectsSection'
 import TechStack        from './components/TechStack'         // Architecture & journey
 import GallerySection    from './components/GallerySection'   // Memory Gallery (photos)
 import SectionSkeleton  from './components/SectionSkeleton'   // lazy-load fallback
+import DeferUntilVisible from './components/DeferUntilVisible' // gate heavy chunks by scroll
 import VideoShowcase     from './components/VideoShowcase'     // auto-play highlight reel
 import ArticlesSection  from './components/ArticlesSection'
 import SeasonalGallery  from './components/SeasonalGallery'
@@ -92,9 +93,13 @@ export default function App() {
         <Suspense fallback={<SectionSkeleton label="Antimatter" />}><AntimatterSim /></Suspense>
         <GallerySection   lang={lang} />
         <VideoShowcase    lang={lang} />
-        <Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading globe…</div>}>
-          <VisitorGlobe   lang={lang} />
-        </Suspense>
+        {/* Heaviest chunk on the page (~1.4 MB three.js). Deferred until the
+            visitor scrolls near it, so it never touches the initial mobile load. */}
+        <DeferUntilVisible minHeight={520} fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading globe…</div>}>
+          <Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading globe…</div>}>
+            <VisitorGlobe   lang={lang} />
+          </Suspense>
+        </DeferUntilVisible>
         <ArticlesSection />
         <SeasonalGallery lang={lang} />
         <TravelChronicles lang={lang} setLang={setLang} />

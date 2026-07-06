@@ -105,7 +105,7 @@ export default function Projects({ lang = 'en' }: { lang?: string }) {
 
         {/* Grid of other projects */}
         <div className="reveal grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
-          {projects.filter((p) => !p.featured).map((project, i) => (
+          {projects.filter((p) => !p.featured).map((project) => (
             <ProjectLink
               key={project.id}
               project={project}

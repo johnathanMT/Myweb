@@ -29,7 +29,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .fact-box p{font-size:.88rem;color:rgba(255,255,255,.65);line-height:1.8}.fact-box strong{color:#06b6d4}
 .hero-img{width:100%;height:260px;object-fit:cover;border-radius:20px;margin:1.5rem 0;border:1px solid rgba(255,255,255,.06)}
 footer{text-align:center;padding:2rem;border-top:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.25);font-size:.78rem}footer a{color:#06b6d4}
+
+/* — CSP-safe reveal fallback — the scroll animation now lives in /reveal.js
+   (external, allowed by script-src 'self'). reveal.js adds .js-reveal to <html>
+   BEFORE paint; if it is ever blocked, sections stay fully visible instead of
+   being trapped at opacity:0 (the bug that hid this page's body). — */
+.section{opacity:1;transform:none}
+.js-reveal .section{opacity:0;transform:translateY(20px);transition:.6s ease}
+.js-reveal .section.visible{opacity:1;transform:none}
 </style>
+  <script src="/reveal.js"></script>
 </head>
 <body>
 <nav><div class="nav-logo"><span>M</span>MTN.Digitosphere</div><a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Portfolio</a></nav>
@@ -75,5 +84,5 @@ footer{text-align:center;padding:2rem;border-top:1px solid rgba(255,255,255,.06)
   </div>
 </div>
 <footer><p>Part of <a href="index.html">MTN.Digitosphere</a> — Exploring the Infinite 🌌</p><p style="margin-top:.5rem">© 2026 Myo Thant Naing</p></footer>
-<script>const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')}),{threshold:.1});document.querySelectorAll('.section').forEach(el=>obs.observe(el));</script>
+
 </body></html>

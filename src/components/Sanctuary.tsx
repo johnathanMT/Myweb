@@ -724,6 +724,10 @@ export default function Sanctuary() {
           .map((p): Plant => ({ id: p.id, name: p.name, plantType: p.plantType || 'sakura', position: [p.position.x, p.position.y, p.position.z] })))
       } catch (err) {
         console.error('[Sanctuary] GET /farewell/plants failed:', err)
+        // Cherry-tree monuments have no mock fallback, so a silent failure makes
+        // them simply disappear. Surface the offline banner (without clobbering a
+        // more specific 'save' error) so an outage is visible, not invisible.
+        if (!cancelled) setApiError((prev) => prev ?? 'offline')
       }
     })()
     return () => { cancelled = true }
