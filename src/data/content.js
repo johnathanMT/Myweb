@@ -24,17 +24,17 @@ export const SOCIAL = [
 ]
 
 export const SKILLS = [
-  { name: 'AI & Agentic AI', icon: 'fas fa-brain', color: '#a855f7' },
-  { name: 'Python', icon: 'fab fa-python', color: '#3b82f6' },
-  { name: 'C#', icon: 'fas fa-code', color: '#6366f1' },
-  { name: 'HTML / CSS', icon: 'fab fa-html5', color: '#f97316' },
-  { name: 'JavaScript', icon: 'fab fa-js', color: '#eab308' },
-  { name: 'Japanese', icon: 'fas fa-language', color: '#ef4444' },
-  { name: 'Kaigo Care', icon: 'fas fa-hands-helping', color: '#ec4899' },
-  { name: 'English', icon: 'fas fa-globe-americas', color: '#06b6d4' },
-  { name: 'UI / UX', icon: 'fas fa-pen-nib', color: '#8b5cf6' },
-  { name: 'IoT (M5Stack)', icon: 'fas fa-microchip', color: '#10b981' },
-  { name: 'Software Engineering', icon: 'fas fa-laptop-code', color: '#0ea5e9' },
+  { name: 'AI & Agentic AI', icon: 'fas fa-brain', color: '#a855f7' },      // psychedelic violet
+  { name: 'Python', icon: 'fab fa-python', color: '#10b981' },              // emerald
+  { name: 'C#', icon: 'fas fa-code', color: '#8b5cf6' },                    // violet
+  { name: 'HTML / CSS', icon: 'fab fa-html5', color: '#fb923c' },           // sunset orange
+  { name: 'JavaScript', icon: 'fab fa-js', color: '#84cc16' },              // lime
+  { name: 'Japanese', icon: 'fas fa-language', color: '#d946ef' },          // fuchsia
+  { name: 'Kaigo Care', icon: 'fas fa-hands-helping', color: '#2dd4bf' },   // teal
+  { name: 'English', icon: 'fas fa-globe-americas', color: '#14b8a6' },     // teal-green
+  { name: 'UI / UX', icon: 'fas fa-pen-nib', color: '#c084fc' },            // orchid
+  { name: 'IoT (M5Stack)', icon: 'fas fa-microchip', color: '#65a30d' },    // moss
+  { name: 'Software Engineering', icon: 'fas fa-laptop-code', color: '#22c55e' }, // green
 
 ]
 
@@ -532,12 +532,12 @@ export const BLOG_POSTS = [
 ]
 
 export const INTERESTS = [
-  { title: 'Cosmology', desc: 'Unraveling the mysteries of the universe and celestial mechanics.', icon: 'fas fa-globe-asia', color: '#0ea5e9', page: 'cosmology.html' },
-  { title: 'Quantum Theory', desc: 'Exploring the fundamental nature of reality and particles.', icon: 'fas fa-atom', color: '#10b981', page: 'quantum-theory.html' },
-  { title: 'Linguistics', desc: 'Mastering Japanese (N3+) & English communication arts.', icon: 'fas fa-language', color: '#f97316', page: 'linguistics.html' },
-  { title: 'FE / IT Study', desc: 'Fundamental Engineering, Algorithms & System Architecture.', icon: 'fas fa-laptop-code', color: '#06b6d4', page: 'fe-it-study.html' },
-  { title: 'Occultism', desc: 'Ancient wisdom, symbolism, and the hidden arts.', icon: 'fas fa-eye', color: '#8b5cf6', page: 'occultism.html' },
+  { title: 'Cosmology', desc: 'Unraveling the mysteries of the universe and celestial mechanics.', icon: 'fas fa-globe-asia', color: '#a855f7', page: 'cosmology.html' },
+  { title: 'Quantum Theory', desc: 'Exploring the fundamental nature of reality and particles.', icon: 'fas fa-atom', color: '#2dd4bf', page: 'quantum-theory.html' },
+  { title: 'Linguistics', desc: 'Mastering Japanese (N3+) & English communication arts.', icon: 'fas fa-language', color: '#fb923c', page: 'linguistics.html' },
+  { title: 'FE / IT Study', desc: 'Fundamental Engineering, Algorithms & System Architecture.', icon: 'fas fa-laptop-code', color: '#84cc16', page: 'fe-it-study.html' },
+  { title: 'Occultism', desc: 'Ancient wisdom, symbolism, and the hidden arts.', icon: 'fas fa-eye', color: '#9333ea', page: 'occultism.html' },
   { title: 'Fortune Prediction', desc: 'Astrology, Tarot, and analyzing destiny\'s path.', icon: 'fas fa-star', color: '#f59e0b', page: 'fortune-prediction.html' },
-  { title: 'General Knowledge', desc: 'History, Philosophy, and Random Curiosities.', icon: 'fas fa-lightbulb', color: '#ef4444', page: 'general-knowledge.html' },
-  { title: 'Unconditional Joke', desc: 'Humor, Satire, and Light-hearted moments.', icon: 'fas fa-theater-masks', color: '#eab308', page: 'unconditional-jokes.html' },
+  { title: 'General Knowledge', desc: 'History, Philosophy, and Random Curiosities.', icon: 'fas fa-lightbulb', color: '#16a34a', page: 'general-knowledge.html' },
+  { title: 'Unconditional Joke', desc: 'Humor, Satire, and Light-hearted moments.', icon: 'fas fa-theater-masks', color: '#e879f9', page: 'unconditional-jokes.html' },
 ]

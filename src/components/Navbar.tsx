@@ -2,8 +2,6 @@ import { useState, useEffect, Fragment, type MouseEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { PERSONAL } from '../data/content'
-import ThemeToggle from './ThemeToggle'
-import type { Theme } from '../hooks/useTheme'
 
 interface LangOption { code: string; flag: string }
 const LANGS: LangOption[] = [
@@ -60,11 +58,9 @@ const NAV_T: Record<string, Record<string, string>> = {
 interface NavbarProps {
   lang: string
   setLang: (lang: string) => void
-  theme: Theme
-  toggleTheme: () => void
 }
 
-export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProps) {
+export default function Navbar({ lang, setLang }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [labOpen, setLabOpen] = useState(false)   // "Techno Science Lab" dropdown
@@ -256,9 +252,6 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
               </button>
             ))}
           </div>
-
-          {/* Light / dark toggle — always visible */}
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
 
           {/* Hamburger — visible below lg */}
           <button

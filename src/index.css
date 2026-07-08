@@ -4,45 +4,51 @@
 
 /* ══════════════════════════════════════════════════════════════════
    THEME PALETTE — colours via CSS vars (channels for Tailwind alpha).
-   .theme-batman is the app root palette (App.tsx); light mode overrides
-   the same vars under html[data-theme="light"] further down.
+   Single "hippie" theme, pinned via <html data-theme="dark"> (see useTheme).
+   Every component consumes these tokens, so the whole site skins from here.
    ══════════════════════════════════════════════════════════════════ */
 :root, .theme-batman {
-  /* ════════ CYBER METAL BLACK — strict 60-30-10 palette ════════
-     60% BASE  → Cyber Metal Black (backgrounds)
-     30% SECONDARY → Forest Green (cards, sections, borders)
-     10% ACCENT → Neon / radioactive maroon (buttons, hovers, highlights) */
+  /* ════════ HIPPIE / 420 — smoky forest base · LIME accent · PURPLE+ORANGE trip ════════
+     60% BASE  → smoky forest-charcoal (backgrounds) — deep, earthy, late-night
+     30% SECONDARY → olive / emerald charcoal (cards, sections, borders)
+     10% ACCENT → vibrant lime / sage green (buttons, active states, hovers)
+     Psychedelic touches → deep purple + sunset orange (glowing orbs, gradients).
+     Text is soft beige (never pure white) for a relaxed, low-strain feel. */
 
-  /* ════════ CINEMATIC: obsidian base · DEEP MAROON + JADE GREEN accents ════════
-     Maroon is the STRUCTURAL accent (borders, primary buttons, highlights) but
-     kept deep & muted so it never overpowers. Jade is the LIVELY secondary
-     (active links, success, glows) for balance. */
+  /* Smoky, earthy bases — deep forest charcoal so lime glows against them */
+  --space: 14 20 17;           /* #0E1411 — smoky forest charcoal */
+  --surface: 20 28 23;         /* #141C17 — muted olive panel */
 
-  /* ULTRA-DEEP obsidian bases — "wet asphalt" so accents glow against them */
-  --space: 6 6 7;              /* #060607 — extremely deep metal black */
-  --surface: 11 13 12;         /* near-black panel */
+  /* card / section surfaces (emerald-tinted charcoal, glassy) */
+  --card: 22 32 26;            /* #16201A */
+  --card-hover: 30 42 34;      /* #1E2A22 */
+  --forest: 34 150 96;         /* sage/emerald secondary border */
+  --forest-deep: 14 28 21;
 
-  /* card / section surfaces (rich jade-tinted charcoal) */
-  --card: 15 21 18;
-  --card-hover: 22 31 26;
-  --forest: 30 120 84;         /* rich jade-green secondary border */
-  --forest-deep: 12 26 20;
+  /* PRIMARY accent — vibrant LIME / neon green (buttons, active, hovers) */
+  --accent: 132 204 22;        /* #84cc16 — lime-500 */
+  --accent-light: 163 230 53;  /* #a3e635 — lime-400 glow */
 
-  /* PRIMARY accent — RICH, luminous deep maroon (saturated, alive) */
-  --accent: 178 30 52;         /* #b21e34 — vivid deep maroon */
-  --accent-light: 214 56 84;   /* #d63854 — glowing maroon highlight */
+  /* JADE secondary — luminous emerald (links / success / glows) */
+  --jade: 52 211 153;          /* #34d399 — emerald-400 */
+  --jade-light: 110 231 183;   /* #6ee7b7 — emerald glow */
+  --cyan: 52 211 153;          /* legacy "cyan" usages → emerald green */
 
-  /* JADE secondary — vivid luminous jade (links / success / glows) */
-  --jade: 26 200 132;          /* #1ac884 — vivid jade */
-  --jade-light: 74 240 170;    /* #4af0aa — jade glow */
-  --cyan: 26 200 132;          /* legacy "cyan" usages → jade green */
+  /* PSYCHEDELIC — sunset orange + deep purple (60s/70s freedom orbs & gradients) */
+  --coral: 251 146 60;         /* #fb923c — sunset orange */
+  --maroon: 147 51 234;        /* #9333ea — deep psychedelic purple */
+  --maroon-deep: 88 28 135;    /* #581c87 — deepest purple */
 
-  --coral: 200 44 64;          /* luminous maroon-coral */
-  --maroon: 132 24 36;         /* #841824 — rich deep maroon (hero text fill) */
-  --maroon-deep: 92 14 22;     /* darkest maroon — deep borders */
-  --muted: 156 164 160;        /* cool gray body text */
-  --fg: 237 237 242;           /* primary text — near-white in dark mode */
+  --muted: 168 170 158;        /* warm sage-gray body text */
+  --fg: 231 229 228;           /* #e7e5e4 — soft beige (stone-200), never pure white */
 }
+
+/* On the hippie palette the accent (lime) and jade are LIGHT colours, so SOLID
+   fills need DARK text for contrast (the mirror of the light-mode rule below).
+   Opacity fills like bg-accent/20 sit over the dark base and keep light text. */
+html[data-theme="dark"] [class*="bg-accent"]:not([class*="bg-accent/"]),
+html[data-theme="dark"] [class*="bg-jade"]:not([class*="bg-jade/"]),
+html[data-theme="dark"] [class*="bg-lime"]:not([class*="bg-lime/"]) { color: #0E1411; }
 
 @layer base {
   * {
@@ -64,7 +70,7 @@
 
   body {
     background-color: rgb(var(--space));
-    color: #e2e2f0;
+    color: rgb(var(--fg));
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -74,8 +80,8 @@
   }
 
   ::selection {
-    background: rgb(var(--accent) / 0.27);
-    color: #e2e2f0;
+    background: rgb(var(--accent) / 0.30);
+    color: rgb(var(--fg));
   }
 
   ::-webkit-scrollbar {
@@ -160,7 +166,7 @@
   }
 
   .glass-card {
-    @apply bg-white/[0.03] border border-white/[0.06] rounded-2xl backdrop-blur-sm;
+    @apply bg-white/[0.04] border border-white/[0.08] rounded-3xl backdrop-blur-md;
     transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   }
 
@@ -747,9 +753,11 @@ body::before {
 ══════════════════════════════════════════ */
 .orbit-galaxy {
   background:
-    radial-gradient(circle at 50% 40%, rgb(var(--maroon) / 0.35), transparent 60%),
-    /* translucent (was opaque rgb(var(--space))) so the 3D city shows through; the
-       twinkling starfield ::before still overlays for the cosmic feel */
+    /* psychedelic freedom orbs — deep purple + sunset orange smoke */
+    radial-gradient(circle at 28% 28%, rgb(var(--maroon) / 0.32), transparent 55%),
+    radial-gradient(circle at 76% 62%, rgb(var(--coral) / 0.20), transparent 55%),
+    radial-gradient(circle at 55% 45%, rgb(var(--accent) / 0.10), transparent 60%),
+    /* translucent base so layers below show through; starfield ::before overlays */
     rgb(var(--space) / 0.3);
 }
 
@@ -1292,185 +1300,3 @@ body::before {
   -webkit-mask-image: radial-gradient(70% 60% at 50% 38%, #000 0%, transparent 78%);
   mask-image: radial-gradient(70% 60% at 50% 38%, #000 0%, transparent 78%);
 }
-
-/* ══════════════════════════════════════════════════════════════════
-   LIGHT THEME — palette swap + compatibility layer.
-   Enabled by <html data-theme="light">. Dark stays the default.
-   Most components use semantic tokens (bg-space/bg-card/text-muted/text-fg),
-   so they re-skin for free. The rest of this block is a focused shim for the
-   hardcoded white/black utilities and a few dark-specific component styles.
-   ══════════════════════════════════════════════════════════════════ */
-html[data-theme="light"],
-html[data-theme="light"] .theme-batman {
-  /* ── Light palette — crisp white surfaces, deep-crimson + fresh-green accents,
-     slate text. Every value is tuned for WCAG AA contrast on a white background;
-     depth comes from structured shadows (see .glass-card below), not grey fills. ── */
-  --space: 250 250 250;        /* #fafafa — page base */
-  --surface: 241 243 245;      /* #f1f3f5 — inset panels */
-  --card: 255 255 255;         /* #ffffff — cards (lifted by shadow, not colour) */
-  --card-hover: 247 248 250;   /* #f7f8fa */
-  --forest: 21 128 61;         /* emerald-700 */
-  --forest-deep: 209 250 229;  /* emerald-100 tint */
-  --accent: 190 18 60;         /* deep crimson #BE123C — AA as text on white (~5.8:1) */
-  --accent-light: 220 38 84;   /* #DC2654 — brighter crimson highlight */
-  --jade: 21 128 61;           /* fresh green #15803D — AA as text on white (~5.0:1) */
-  --jade-light: 16 110 78;     /* #0E6E4E — deeper jade for hover/borders */
-  --cyan: 21 128 61;           /* legacy "cyan" usages → fresh green */
-  --coral: 200 30 74;          /* #C81E4A — rose-crimson secondary */
-  --maroon: 159 18 57;         /* deep maroon #9F1239 */
-  --maroon-deep: 124 16 44;
-  --muted: 71 85 105;          /* slate-600 #475569 — readable muted text (~7:1) */
-  --fg: 15 23 42;              /* slate-900 #0F172A — primary text */
-  color-scheme: light;
-}
-
-html[data-theme="light"] body { color: rgb(var(--fg)); }
-html[data-theme="light"] body::before { opacity: 0.03; }     /* almost no grain */
-html[data-theme="light"] ::selection { background: rgb(var(--accent) / 0.18); color: rgb(var(--fg)); }
-
-/* — text legibility shim — flip near-white/gray text to dark.
-   No !important: these rules sit after Tailwind's utilities, so they win at
-   equal specificity, while higher-specificity :hover utilities still work. */
-html[data-theme="light"] [class*="text-white"],
-html[data-theme="light"] .text-gray-100,
-html[data-theme="light"] .text-gray-200,
-html[data-theme="light"] .text-zinc-100,
-html[data-theme="light"] .text-zinc-200,
-html[data-theme="light"] .text-zinc-300 { color: rgb(var(--fg)); }            /* slate-900 — prominent text */
-html[data-theme="light"] .text-gray-300,
-html[data-theme="light"] .text-gray-400,
-html[data-theme="light"] .text-gray-500,
-html[data-theme="light"] .text-gray-600,
-html[data-theme="light"] .text-zinc-400,
-html[data-theme="light"] .text-zinc-500 { color: rgb(var(--muted)); }          /* slate-600 */
-
-/* — surface shim — translucent white fills/borders → crisp slate-tinted equivalents. */
-html[data-theme="light"] [class*="bg-white/"] { background-color: rgb(var(--fg) / 0.04); }
-html[data-theme="light"] [class*="border-white/"] { border-color: rgb(var(--fg) / 0.12); }
-html[data-theme="light"] [class*="bg-black/"] { background-color: rgb(255 255 255 / 0.72); }
-
-/* — keep white text where it belongs: on SOLID accent/jade/maroon/coral fills
-   (buttons, badges). The :not([…/…]) guard excludes translucent tints like
-   bg-accent/20, which sit on a light surface and need dark text instead. */
-html[data-theme="light"] [class*="bg-accent"]:not([class*="bg-accent/"]),
-html[data-theme="light"] [class*="bg-accent"]:not([class*="bg-accent/"]) [class*="text-white"],
-html[data-theme="light"] [class*="bg-jade"]:not([class*="bg-jade/"]),
-html[data-theme="light"] [class*="bg-jade"]:not([class*="bg-jade/"]) [class*="text-white"],
-html[data-theme="light"] [class*="bg-maroon"]:not([class*="bg-maroon/"]),
-html[data-theme="light"] [class*="bg-maroon"]:not([class*="bg-maroon/"]) [class*="text-white"],
-html[data-theme="light"] [class*="bg-coral"]:not([class*="bg-coral/"]),
-html[data-theme="light"] [class*="bg-coral"]:not([class*="bg-coral/"]) [class*="text-white"] { color: #fff; }
-
-/* — photo cards: their overlays stay dark, so their captions stay white. */
-html[data-theme="light"] .bento-card .overlay,
-html[data-theme="light"] .season-slide-overlay {
-  background: linear-gradient(to top, rgba(10, 10, 12, 0.92) 0%, rgba(10, 10, 12, 0.32) 60%, transparent 100%);
-}
-html[data-theme="light"] .bento-card [class*="text-white"],
-html[data-theme="light"] .bento-card .info,
-html[data-theme="light"] .season-info,
-html[data-theme="light"] .season-info [class*="text-white"] { color: #fff; }
-
-/* — component-level cleanups for light mode —
-   Cards lift off the page with crisp white + a subtle, structured two-layer
-   shadow (ambient + key light) rather than relying on grey fills for depth. */
-html[data-theme="light"] .glass-card,
-html[data-theme="light"] .glass-panel {
-  background: rgb(var(--card));
-  border-color: rgb(var(--fg) / 0.08);
-  box-shadow: 0 1px 2px rgb(var(--fg) / 0.04), 0 6px 16px -4px rgb(var(--fg) / 0.08);
-}
-html[data-theme="light"] .glass-card:hover {
-  border-color: rgb(var(--accent) / 0.28);
-  box-shadow: 0 2px 6px rgb(var(--fg) / 0.06), 0 14px 32px -8px rgb(var(--fg) / 0.16);
-}
-html[data-theme="light"] .section-title,
-html[data-theme="light"] .glow-heading,
-html[data-theme="light"] .text-legible { text-shadow: none; }
-html[data-theme="light"] .section-title { color: rgb(var(--fg)); }
-html[data-theme="light"] .section-subtitle { color: rgb(var(--muted)); }
-html[data-theme="light"] .modal-box { background: rgb(var(--card)); border-color: rgb(var(--fg) / 0.10); color: rgb(var(--fg)); box-shadow: 0 24px 60px -20px rgb(var(--fg) / 0.28); }
-html[data-theme="light"] .crimson-divider { background: linear-gradient(90deg, transparent, rgb(var(--accent) / 0.45), transparent); box-shadow: none; }
-
-/* — Dark "islands" — surfaces that stay dark in BOTH themes (the philosophy.py
-   terminal, the Digital-Poetry "grimoire" book). Re-declaring the dark palette
-   tokens for their subtree means the light-mode text shim — which colours via
-   rgb(var(--fg)) / rgb(var(--muted)) — now resolves to LIGHT text again, so
-   every word stays legible against the dark background. — */
-html[data-theme="light"] .dark-island {
-  --space: 6 6 7;
-  --surface: 11 13 12;
-  --card: 15 21 18;
-  --card-hover: 22 31 26;
-  --forest: 30 120 84;
-  --forest-deep: 12 26 20;
-  --accent: 178 30 52;
-  --accent-light: 214 56 84;
-  --jade: 26 200 132;
-  --jade-light: 74 240 170;
-  --cyan: 26 200 132;
-  --coral: 200 44 64;
-  --maroon: 132 24 36;
-  --maroon-deep: 92 14 22;
-  --muted: 156 164 160;
-  --fg: 237 237 242;
-}
-
-/* — Core Competencies skill chips (light mode) — crisp pill on a subtle tinted
-   surface; the icon's dark-mode coloured glow washes out on white, so we swap it
-   for a tight neutral micro-shadow that keeps each brand colour full-opacity and
-   crisp. Dark mode is untouched (these rules only apply under data-theme=light). */
-html[data-theme="light"] .skill-chip {
-  background: rgb(var(--fg) / 0.045);
-  border-color: rgb(var(--fg) / 0.14);
-  box-shadow: 0 1px 2px rgb(var(--fg) / 0.05);
-}
-html[data-theme="light"] .skill-chip:hover {
-  background: rgb(var(--fg) / 0.06);
-  border-color: rgb(var(--accent) / 0.3);
-}
-html[data-theme="light"] .skill-chip i {
-  filter: drop-shadow(0 1px 1px rgb(15 23 42 / 0.22)) !important;  /* crisp lift, no coloured haze */
-}
-
-/* — soften the dark-cinematic decorative overlays so light mode stays calm — */
-html[data-theme="light"] .orbit-galaxy { opacity: 0.10; }
-html[data-theme="light"] .orbit-galaxy::before { opacity: 0.18; }
-html[data-theme="light"] .hud { opacity: 0.22; }
-html[data-theme="light"] .hero-grid {
-  background-image:
-    linear-gradient(rgb(var(--fg) / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--fg) / 0.05) 1px, transparent 1px);
-}
-
-/* — boot loader — theme-aware, on the red·white·green light palette.
-   Light page, dark terminal text, green "OK"s, a red→green progress bar. — */
-html[data-theme="light"] .boot-screen {
-  background:
-    radial-gradient(58% 50% at 50% -5%, rgb(var(--accent) / 0.07), transparent 70%),
-    radial-gradient(52% 50% at 82% 105%, rgb(var(--jade) / 0.08), transparent 70%),
-    #f7f8f6;
-}
-html[data-theme="light"] .boot-log {
-  color: #20302a;
-  text-shadow: none;
-}
-html[data-theme="light"] .boot-log .ok { color: rgb(var(--jade)); }
-html[data-theme="light"] .boot-title {
-  color: rgb(var(--accent));
-  text-shadow: 0 0 18px rgb(var(--accent) / 0.18);
-}
-html[data-theme="light"] .boot-bar { background: rgba(17, 20, 32, 0.08); }
-html[data-theme="light"] .boot-bar > i {
-  background: linear-gradient(90deg, rgb(var(--accent)), rgb(var(--jade)));
-  box-shadow: none;
-}
-html[data-theme="light"] .boot-skip {
-  color: #6b7280;
-  border-color: rgba(17, 20, 32, 0.14);
-}
-html[data-theme="light"] .boot-skip:hover {
-  color: #18181b;
-  border-color: rgb(var(--accent));
-}
-html[data-theme="light"] .term-cursor { box-shadow: 0 0 6px rgb(var(--accent) / 0.5); }

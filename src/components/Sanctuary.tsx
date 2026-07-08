@@ -254,7 +254,7 @@ function TagPlaque({ tag, index, paused, mine, onOpen }: { tag: Tag; index: numb
       className="sanctuary-tag group cursor-pointer focus:outline-none"
       style={{ animationDelay: `${-(index * 0.8)}s`, animationPlayState: paused ? 'paused' : 'running' }}>
       <span className="mx-auto block h-6 w-px bg-gradient-to-b from-amber-100/80 to-amber-700/30" />
-      <span className={`relative -mt-px block whitespace-nowrap rounded-md border bg-gradient-to-b from-amber-200 to-amber-400 px-3 py-1.5 font-serif text-xs font-semibold text-amber-950 shadow-[0_5px_12px_rgba(0,0,0,0.4)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_0_24px_rgba(253,224,140,0.95)] group-hover:brightness-110 ${mine ? 'border-rose-500/70 ring-2 ring-rose-400/60' : 'border-amber-900/40'}`}>
+      <span className={`relative -mt-px block whitespace-nowrap rounded-md border bg-gradient-to-b from-amber-200 to-amber-400 px-3 py-1.5 font-serif text-xs font-semibold text-amber-950 shadow-[0_5px_12px_rgba(0,0,0,0.4)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_0_24px_rgba(253,224,140,0.95)] group-hover:brightness-110 ${mine ? 'border-fuchsia-400/80 ring-2 ring-fuchsia-400/50' : 'border-amber-900/40'}`}>
         <span className="absolute -top-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-amber-900/70" />
         {tag.author}
       </span>
@@ -529,7 +529,7 @@ function ReadModal({ tag, t, canRead, canEdit, onEdit, onClose }: { tag: Tag | n
             )}
             <div className="mt-6 flex items-center justify-between">
               {canEdit ? (
-                <button type="button" onClick={() => onEdit(tag)} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-300 to-rose-300 px-4 py-2 font-serif text-sm font-semibold text-amber-950 transition hover:brightness-105"><Pencil size={14} /> {t.edit}</button>
+                <button type="button" onClick={() => onEdit(tag)} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-lime-300 to-emerald-400 px-4 py-2 font-serif text-sm font-semibold text-amber-950 transition hover:brightness-105"><Pencil size={14} /> {t.edit}</button>
               ) : <span />}
               <p className="font-mono text-xs text-white/55">{tag.date}</p>
             </div>
@@ -600,7 +600,7 @@ function WriteModal({ open, editing, presetPlace, t, onClose, onSubmit }: { open
               <textarea value={message} onChange={(e) => setMessage(e.target.value)} maxLength={240} required rows={4} placeholder={t.msgPh} className="mt-1.5 w-full resize-none rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base sm:py-2.5 sm:text-sm text-white placeholder-white/40 outline-none transition focus:border-amber-200/60 focus:bg-white/15" />
               <span className="mt-1 block text-right font-mono text-[10px] text-white/40">{message.length}/240</span>
             </label>
-            <button type="submit" className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-300 to-rose-300 px-5 py-3 font-serif text-sm font-semibold text-amber-950 shadow-lg transition hover:brightness-105 active:scale-[0.99]">{editing ? t.save : t.hang} <Send size={15} /></button>
+            <button type="submit" className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-lime-300 to-emerald-400 px-5 py-3 font-serif text-sm font-semibold text-amber-950 shadow-lg transition hover:brightness-105 active:scale-[0.99]">{editing ? t.save : t.hang} <Send size={15} /></button>
             <p className="mt-3 text-center font-mono text-[10px] text-white/45">{t.demo}</p>
           </motion.form>
         </motion.div>
@@ -626,7 +626,7 @@ function WelcomeModal({ open, onClose }: { open: boolean; onClose: () => void })
           <motion.div initial={{ scale: 0.9, opacity: 0, y: 24 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.92, opacity: 0, y: 12 }} transition={{ type: 'spring', stiffness: 220, damping: 22 }}
             className="relative max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-[28px] border border-white/25 bg-white/15 p-6 text-center text-white shadow-2xl backdrop-blur-2xl sm:p-9"
             style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-rose-300 text-amber-950 shadow-[0_0_24px_rgba(253,224,140,0.6)]">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-lime-300 to-emerald-400 text-amber-950 shadow-[0_0_24px_rgba(253,224,140,0.6)]">
               <Sparkles size={22} />
             </div>
             <h2 className="font-serif text-2xl font-bold tracking-wide">Welcome to the Memory World</h2>
@@ -636,7 +636,7 @@ function WelcomeModal({ open, onClose }: { open: boolean; onClose: () => void })
               <p className="border-t border-white/15 pt-4 font-serif text-[14px] leading-relaxed text-white/80">{WELCOME.mm}</p>
             </div>
             <button type="button" onClick={onClose}
-              className="mx-auto mt-7 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-300 to-rose-300 px-7 py-3 font-serif text-sm font-semibold text-amber-950 shadow-[0_8px_28px_rgba(0,0,0,0.4)] transition hover:brightness-105 active:scale-[0.98]">
+              className="mx-auto mt-7 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-lime-300 to-emerald-400 px-7 py-3 font-serif text-sm font-semibold text-amber-950 shadow-[0_8px_28px_rgba(0,0,0,0.4)] transition hover:brightness-105 active:scale-[0.98]">
               Enter Sanctuary <ArrowRight size={16} />
             </button>
           </motion.div>
@@ -824,7 +824,7 @@ export default function Sanctuary() {
             {hasAdminSession && (
               <Link to="/sanctuary-admin" aria-label="Admin dashboard" title="Admin dashboard" className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-full border border-white/25 bg-black/40 px-3 py-2 font-mono text-xs text-white/90 backdrop-blur-md transition hover:bg-black/60 sm:min-w-0"><Shield size={14} /><span className="hidden sm:inline">Admin</span></Link>
             )}
-            <button type="button" onClick={openWrite} aria-label={myTag ? t.editMine : t.leave} className="sanctuary-pulse group inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-full border border-amber-100/70 bg-gradient-to-r from-amber-300 to-rose-300 px-4 py-2.5 font-serif text-sm font-bold text-amber-950 ring-1 ring-white/40 backdrop-blur-sm transition hover:brightness-110 active:scale-[0.97] sm:min-w-0">
+            <button type="button" onClick={openWrite} aria-label={myTag ? t.editMine : t.leave} className="sanctuary-pulse group inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-full border border-amber-100/70 bg-gradient-to-r from-lime-300 to-emerald-400 px-4 py-2.5 font-serif text-sm font-bold text-amber-950 ring-1 ring-white/40 backdrop-blur-sm transition hover:brightness-110 active:scale-[0.97] sm:min-w-0">
               {myTag ? <Pencil size={16} /> : <Mail size={17} className="transition-transform group-hover:-translate-y-0.5" />}<span className="hidden sm:inline">{myTag ? t.editMine : t.leave}</span>
             </button>
           </div>

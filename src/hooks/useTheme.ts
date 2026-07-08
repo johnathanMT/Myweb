@@ -1,37 +1,20 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
-// ── Light / Dark theme ────────────────────────────────────────────────────────
-// Single source of truth: a `data-theme` attribute on <html>. The whole palette
-// is driven by CSS variables (see index.css), so flipping this attribute reskins
-// the site instantly. Default = the visitor's OS preference; their explicit
-// choice (via the toggle) is pinned in localStorage and then wins from then on.
-export type Theme = 'light' | 'dark'
+// ── Single theme: HIPPIE ──────────────────────────────────────────────────────
+// The site now ships ONE cohesive vibe (smoky forest + lime + psychedelic), so
+// there's no light/dark toggle. The whole palette is driven by CSS variables
+// under `:root, .theme-batman` (see index.css); we simply pin `data-theme="dark"`
+// so that base palette always applies (the old light override never triggers).
+export type Theme = 'dark'
 
-const STORAGE_KEY = 'mtn_theme'
+export function getInitialTheme(): Theme { return 'dark' }
 
-function readPinned(): Theme | null {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === 'light' || saved === 'dark') return saved
-  } catch { /* private mode / blocked storage */ }
-  return null
-}
-
-export function getInitialTheme(): Theme {
-  const pinned = readPinned()
-  if (pinned) return pinned
-  try {
-    if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'light'
-  } catch { /* no matchMedia */ }
-  return 'dark'
-}
-
-// Apply a theme to the document (attribute + browser UI chrome colour).
-export function applyTheme(theme: Theme): void {
+// Pin the document to the hippie palette + matching browser UI chrome colour.
+export function applyTheme(_theme: Theme = 'dark'): void {
   const root = document.documentElement
-  root.setAttribute('data-theme', theme)
+  root.setAttribute('data-theme', 'dark')
   const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) meta.setAttribute('content', theme === 'light' ? '#fafafb' : '#060607')
+  if (meta) meta.setAttribute('content', '#0E1411')   // smoky forest charcoal
 }
 
 export interface UseThemeResult {
@@ -40,34 +23,9 @@ export interface UseThemeResult {
   toggle: () => void
 }
 
+// Kept for API compatibility with any caller; the theme is fixed, so setTheme /
+// toggle are intentional no-ops.
 export default function useTheme(): UseThemeResult {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
-
-  // Reflect the active theme to the DOM (does NOT persist — auto-following the OS
-  // should stay un-pinned until the user makes an explicit choice).
-  useEffect(() => { applyTheme(theme) }, [theme])
-
-  // Persist only on an explicit choice, so the OS-follow logic below can tell
-  // "user picked this" apart from "we're just mirroring the system".
-  const pin = (t: Theme): void => { try { localStorage.setItem(STORAGE_KEY, t) } catch { /* ignore */ } }
-
-  const setTheme = useCallback((t: Theme): void => {
-    const next: Theme = t === 'light' ? 'light' : 'dark'
-    pin(next); setThemeState(next)
-  }, [])
-
-  const toggle = useCallback((): void => {
-    setThemeState((t) => { const next: Theme = t === 'light' ? 'dark' : 'light'; pin(next); return next })
-  }, [])
-
-  // Live-follow the OS preference — but only while the user hasn't pinned a choice.
-  useEffect(() => {
-    let mq: MediaQueryList
-    try { mq = window.matchMedia('(prefers-color-scheme: light)') } catch { return }
-    const onChange = (e: MediaQueryListEvent): void => { if (!readPinned()) setThemeState(e.matches ? 'light' : 'dark') }
-    mq.addEventListener?.('change', onChange)
-    return () => mq.removeEventListener?.('change', onChange)
-  }, [])
-
-  return { theme, setTheme, toggle }
+  useEffect(() => { applyTheme('dark') }, [])
+  return { theme: 'dark', setTheme: () => {}, toggle: () => {} }
 }

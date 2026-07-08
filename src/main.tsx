@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
-import { getInitialTheme, applyTheme } from './hooks/useTheme'
+import { applyTheme } from './hooks/useTheme'
 import App from './App'
 import PageShell from './components/PageShell'
 import Seo from './components/Seo'
@@ -18,9 +18,9 @@ const Sanctuary = lazy(() => import('./components/Sanctuary'))
 const SanctuaryAdmin = lazy(() => import('./components/SanctuaryAdmin'))
 const FarewellRSVP = lazy(() => import('./components/FarewellRSVP'))
 
-// Set the theme attribute BEFORE React paints, so there's no light/dark flash.
+// Pin the hippie palette BEFORE React paints (single theme, no toggle).
 // (CSP blocks inline <script> in index.html, so we do it here in a module.)
-applyTheme(getInitialTheme())
+applyTheme('dark')
 
 // BrowserRouter → clean, indexable URLs (myothant.dev/python, /sanctuary, …).
 // basename = the deploy base (Vite's BASE_URL): '/' on the apex domain, '/Myweb/'
