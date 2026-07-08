@@ -9,7 +9,7 @@ type CSSVars = CSSProperties & Record<`--${string}`, string | number>
 interface AboutText { title: string; bio: string; slogan: string; skills: string }
 const T: Record<string, AboutText> = {
   mm: { title: 'ကျတော့် အကြောင်း', bio: 'ဂျပန်တွင် နေထိုင်သည်။ တိုးတက်ပြောင်းလဲနေသော Ai ခေတ်သစ်ဆီသို့', slogan: 'ဘယ်တော့မှ မစတင်ဖြစ်ခဲ့တာထက်စာရင် နောက်ကျတာက ပိုကောင်းပါတယ်။', skills: 'အဓိက ကျွမ်းကျင်မှုများ' },
-  en: { title: 'About Me', bio: 'Living in Japan. Advancing towards the evolving new era of AI.', slogan: 'Better late than never.', skills: 'Core Competencies' },
+  en: { title: 'My Journey', bio: 'Living in Japan. Advancing towards the evolving new era of AI.', slogan: 'Better late than never.', skills: 'Cosmic Tools' },
   jp: { title: '私について', bio: '日本在住。進化し続ける新しいAI時代へ。', slogan: '遅れても、全くやらないよりはまし。', skills: 'コアスキル' },
   vn: { title: 'Về Tôi', bio: 'Sống ở Nhật Bản. Hướng tới kỷ nguyên AI mới đang không ngừng phát triển.', slogan: 'Thà muộn còn hơn không.', skills: 'Năng lực cốt lõi' },
   ne: { title: 'मेरो बारेमा', bio: 'जापानमा बसोबास। विकासशील नयाँ एआई (AI) युगको तर्फ।', slogan: 'कहिल्यै सुरु नगर्नुभन्दा ढिलो सुरु गर्नु राम्रो हो।', skills: 'मुख्य दक्षताहरू' },
@@ -82,7 +82,7 @@ export default function About({ lang = 'en' }: AboutProps) {
                 <span className="absolute right-2 bottom-2 w-5 h-5 border-r-2 border-b-2 border-cyan/70 rounded-br" />
               </div>
               {/* Floating status badge (glass) */}
-              <div className="absolute -bottom-4 -right-4 backdrop-blur-xl bg-white/5 border border-white/15 rounded-2xl px-4 py-2 shadow-xl">
+              <div className="absolute -bottom-4 -right-4 backdrop-blur-xl bg-white/5 border border-white/15 rounded-2xl px-4 py-2 shadow-xl animate-float motion-reduce:animate-none">
                 <p className="text-[10px] uppercase tracking-wider text-muted">Based in</p>
                 <p className="text-sm font-semibold text-white flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Japan 🇯🇵

@@ -89,7 +89,7 @@ const EN: StackText = {
     'Everything here runs on a decoupled, security-hardened architecture: a Vercel-hosted frontend talking to a .NET API on Render, backed by Aiven MySQL and Cloudinary media.',
   ],
   chips: ['C# / .NET 8', 'React', 'Distributed Systems', 'Security', 'AI'],
-  stackHead: 'The Stack',
+  stackHead: 'Cosmic Stack',
 }
 
 const T: Record<string, Partial<StackText>> = {

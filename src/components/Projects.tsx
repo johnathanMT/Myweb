@@ -4,7 +4,7 @@ import { PROJECTS } from '../data/content'
 
 interface SectionText { title: string; sub: string }
 const T: Record<string, SectionText> = {
-  en: { title: 'My Projects', sub: 'Things I\'ve built and continue to build.' },
+  en: { title: 'Trippy Builds', sub: 'Things I\'ve built and continue to build.' },
   mm: { title: 'ကျွန်တော်၏ ပရောဂျက်များ', sub: 'တည်ဆောက်ထားသောနှင့် တည်ဆောက်ဆဲ ပရောဂျက်များ' },
   jp: { title: '私のプロジェクト',              sub: '作ったものと作り続けているもの。' },
   vn: { title: 'Dự án của tôi',             sub: 'Những gì tôi đã và đang xây dựng.' },

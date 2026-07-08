@@ -32,11 +32,14 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['"Fira Code"', 'monospace'],
+        // Groovy 70s display face — headings, logo, nav (see index.css / components).
+        groovy: ['Shrikhand', 'cursive'],
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.6s ease forwards',
         'blink': 'blink 1s step-end infinite',
         'float': 'float 6s ease-in-out infinite',
+        'breathe': 'breathe 8s ease-in-out infinite',
         'gradient-x': 'gradientX 8s ease infinite',
         'pulse-slow': 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite',
       },
@@ -52,6 +55,11 @@ export default {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-12px)' },
+        },
+        // Very subtle "breathing" — gentle scale + opacity, for ambient orbs/glows.
+        breathe: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '0.7' },
+          '50%': { transform: 'scale(1.08)', opacity: '1' },
         },
         gradientX: {
           '0%, 100%': { backgroundPosition: '0% 50%' },
