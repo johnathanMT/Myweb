@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, type LucideIcon } from 'lucide-react'
 import { SITE } from '../config/site'
 import AdminPoetryManager from './AdminPoetryManager'
 import type { Memory, EntityId } from '../types/api'
@@ -16,9 +16,10 @@ import type { Memory, EntityId } from '../types/api'
 const AUTH_URL = `${SITE.apiUrl}/api/auth/login`
 const MEMORIES_URL = `${SITE.apiUrl}/api/sanctuary/admin/memories`
 const FAREWELL_URL = `${SITE.apiUrl}/api/farewell/admin/rsvps`
+const CHANGE_PW_URL = `${SITE.apiUrl}/api/auth/change-password`
 const TOKEN_KEY = 'mtn_admin_jwt'
 
-type Tab = 'memories' | 'farewell' | 'poetry'
+type Tab = 'memories' | 'farewell' | 'poetry' | 'account'
 
 // Admin view of a farewell RSVP — includes the logistics fields the public
 // FarewellView omits (datesAvailable, foodPreference, plantType).
@@ -46,6 +47,10 @@ export default function SanctuaryAdmin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [q, setQ] = useState('')
+  const [curPw, setCurPw] = useState('')
+  const [newPw, setNewPw] = useState('')
+  const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const [pwBusy, setPwBusy] = useState(false)
 
   const persist = (tk: string) => { try { tk ? localStorage.setItem(TOKEN_KEY, tk) : localStorage.removeItem(TOKEN_KEY) } catch { /* ignore */ } }
 
@@ -72,6 +77,7 @@ export default function SanctuaryAdmin() {
 
   const load = async (which: Tab = tab) => {
     if (!token) return
+    if (which !== 'memories' && which !== 'farewell') return   // account/poetry fetch nothing here
     setError(''); setLoading(true)
     try {
       const url = which === 'farewell' ? FAREWELL_URL : MEMORIES_URL
@@ -84,6 +90,28 @@ export default function SanctuaryAdmin() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load data.')
     } finally { setLoading(false) }
+  }
+
+  // Change the signed-in admin's password via the authenticated endpoint. A 401
+  // here means "current password wrong" OR an expired session — we surface the
+  // server message rather than auto-logging-out, so a typo doesn't kick you out.
+  const changePassword = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setPwMsg(null); setPwBusy(true)
+    try {
+      const res = await fetch(CHANGE_PW_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword: curPw, newPassword: newPw }),
+      })
+      const data = (await res.json().catch(() => null)) as { success?: boolean; message?: string; errors?: string[] } | null
+      if (!res.ok || !data?.success)
+        throw new Error(data?.message || data?.errors?.[0] || `Failed (${res.status})`)
+      setPwMsg({ ok: true, text: 'Password updated. Use it next time you sign in.' })
+      setCurPw(''); setNewPw('')
+    } catch (err) {
+      setPwMsg({ ok: false, text: err instanceof Error ? err.message : 'Could not change password.' })
+    } finally { setPwBusy(false) }
   }
 
   // Load on login + whenever the tab changes (re-fetches fresh each switch).
@@ -156,10 +184,11 @@ export default function SanctuaryAdmin() {
               <TabBtn id="memories" icon={MessageSquare} label="Memories" />
               <TabBtn id="farewell" icon={Sprout} label="Farewell RSVPs" />
               <TabBtn id="poetry" icon={BookOpen} label="Poetry" />
+              <TabBtn id="account" icon={KeyRound} label="Account" />
             </div>
 
-            {/* search/refresh bar — only for the list tabs (not the poetry editor) */}
-            {tab !== 'poetry' && (
+            {/* search/refresh bar — only for the list tabs (not poetry/account) */}
+            {(tab === 'memories' || tab === 'farewell') && (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
@@ -179,6 +208,33 @@ export default function SanctuaryAdmin() {
 
             {/* ── POETRY MANAGER ── */}
             {tab === 'poetry' && <div className="mt-4"><AdminPoetryManager token={token} /></div>}
+
+            {/* ── ACCOUNT: change password ── */}
+            {tab === 'account' && (
+              <div className="mt-4 max-w-md">
+                <form onSubmit={changePassword} className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                  <div className="mb-4 flex items-center gap-2">
+                    <KeyRound size={18} className="text-jade-light" />
+                    <h2 className="font-serif text-lg font-bold">Change password</h2>
+                  </div>
+                  {pwMsg && (
+                    <p className={`mb-4 rounded-xl border px-4 py-2.5 font-mono text-sm ${pwMsg.ok ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200' : 'border-rose-400/40 bg-rose-500/10 text-rose-200'}`}>{pwMsg.text}</p>
+                  )}
+                  <label className="block">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">Current password</span>
+                    <input type="password" required autoComplete="current-password" value={curPw} onChange={(e) => setCurPw(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base outline-none focus:border-jade/50 sm:py-2.5 sm:text-sm" />
+                  </label>
+                  <label className="mt-4 block">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">New password</span>
+                    <input type="password" required autoComplete="new-password" value={newPw} onChange={(e) => setNewPw(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base outline-none focus:border-jade/50 sm:py-2.5 sm:text-sm" />
+                    <span className="mt-1.5 block font-mono text-[11px] text-white/40">8+ chars with upper, lower, digit &amp; symbol; different from current.</span>
+                  </label>
+                  <button type="submit" disabled={pwBusy} className="mt-5 w-full rounded-xl bg-gradient-to-r from-lime-300 to-emerald-400 px-5 py-3 font-serif text-sm font-bold text-[#0E1411] transition hover:brightness-105 disabled:opacity-60">
+                    {pwBusy ? 'Updating…' : 'Update password'}
+                  </button>
+                </form>
+              </div>
+            )}
 
             {/* ── MEMORIES TABLE ── */}
             {tab === 'memories' && (

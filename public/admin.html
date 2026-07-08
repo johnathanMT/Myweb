@@ -125,6 +125,19 @@
       <h3 id="manageTitle" style="margin:0 0 12px;font-family:var(--mono)">Articles</h3>
       <div id="manageList"></div>
     </section>
+
+    <!-- ACCOUNT: change password (any signed-in user) -->
+    <section class="panel hidden" id="accountBox">
+      <h3 style="margin:0 0 12px;font-family:var(--mono)">Change password</h3>
+      <label>Current password</label>
+      <input id="accCurPw" type="password" placeholder="••••••••" autocomplete="current-password" />
+      <label>New password</label>
+      <input id="accNewPw" type="password" placeholder="••••••••" autocomplete="new-password" />
+      <small style="display:block;margin-top:4px;color:var(--muted);font-family:var(--mono);font-size:12px">8+ chars · upper, lower, digit &amp; symbol · different from current</small>
+      <div class="admin-row">
+        <button class="btn" data-action="change-password">Update password</button>
+      </div>
+    </section>
   </div>
 
   <div id="toast"></div>

@@ -58,7 +58,7 @@ const PortfolioAPI = (() => {
   const isAuthor = () => ["Admin", "Author"].includes(getCurrentUser()?.role);
  
   // ---- Core request helper ------------------------------------------------
-  async function request(path, { method = "GET", body, auth = false, isForm = false } = {}) {
+  async function request(path, { method = "GET", body, auth = false, isForm = false, keepSessionOn401 = false } = {}) {
     const headers = { "X-Visitor-Id": visitorId() };
     // For FormData, DO NOT set Content-Type — the browser adds the multipart boundary.
     if (!isForm && body !== undefined) headers["Content-Type"] = "application/json";
@@ -70,7 +70,9 @@ const PortfolioAPI = (() => {
       body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
     });
  
-    if (res.status === 401) {
+    // keepSessionOn401 → don't wipe the session; fall through so the backend
+    // message (e.g. "Current password is incorrect.") surfaces as an error.
+    if (res.status === 401 && !keepSessionOn401) {
       clearToken();
       setUser(null);                       // clear stale session fully
       throw new Error("Unauthorized — please log in again.");
@@ -116,6 +118,16 @@ const PortfolioAPI = (() => {
   }
  
   const logout = () => { clearToken(); setUser(null); };
+
+  // Change the signed-in user's password. auth:true attaches the Bearer token;
+  // keepSessionOn401 lets a wrong CURRENT password surface as an error toast
+  // instead of silently logging the user out.
+  async function changePassword(currentPassword, newPassword) {
+    return request("/api/Auth/change-password", {
+      method: "POST", auth: true, keepSessionOn401: true,
+      body: { currentPassword, newPassword },
+    });
+  }
 
   // ---- Articles -----------------------------------------------------------
   // published: true (published only), false (drafts only), or "all" (admins).
@@ -182,7 +194,7 @@ const PortfolioAPI = (() => {
  
   return {
     BASE_URL, isLoggedIn, getCurrentUser, isAdmin, isAuthor,
-    login, register, logout,
+    login, register, logout, changePassword,
     getArticles, getArticle, createArticle, updateArticle, deleteArticle,
     deleteArticleImage, reorderArticleImages,
     likeArticle, unlikeArticle, reactArticle,

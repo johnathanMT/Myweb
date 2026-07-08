@@ -26,6 +26,7 @@
 
     $('loginBox').classList.toggle('hidden', on);
     $('manageBox').classList.toggle('hidden', !on);
+    $('accountBox').classList.toggle('hidden', !on);   // change-password: any signed-in user
 
     if (!on) {
       $('editorBox').classList.add('hidden');
@@ -57,6 +58,16 @@
     } catch (e) { toast(e.message, 'err'); }
   }
   function doLogout() { PortfolioAPI.logout(); resetEditor(); renderState(); toast('Logged out.'); }
+
+  async function doChangePassword() {
+    const cur = $('accCurPw').value, next = $('accNewPw').value;
+    if (!cur || !next) return toast('Enter your current and new password.', 'err');
+    try {
+      await PortfolioAPI.changePassword(cur, next);
+      $('accCurPw').value = ''; $('accNewPw').value = '';
+      toast('Password updated.', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  }
 
   /* ---------------- EDITOR ---------------- */
   function resetEditor() {
@@ -191,6 +202,7 @@
     switch (el.dataset.action) {
       case 'login':    doLogin(); break;
       case 'logout':   doLogout(); break;
+      case 'change-password': doChangePassword(); break;
       case 'save':     doSave(); break;
       case 'clear':    resetEditor(); break;
       case 'edit':     startEdit(id); break;
