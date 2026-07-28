@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, type LucideIcon } from 'lucide-react'
 import { SITE } from '../config/site'
 import AdminPoetryManager from './AdminPoetryManager'
 import type { Memory, EntityId } from '../types/api'
@@ -17,9 +17,11 @@ const AUTH_URL = `${SITE.apiUrl}/api/auth/login`
 const MEMORIES_URL = `${SITE.apiUrl}/api/sanctuary/admin/memories`
 const FAREWELL_URL = `${SITE.apiUrl}/api/farewell/admin/rsvps`
 const CHANGE_PW_URL = `${SITE.apiUrl}/api/auth/change-password`
+const REMEDIES_URL = `${SITE.apiUrl}/api/astrology/admin/remedies`
+const CHARTS_URL = `${SITE.apiUrl}/api/astrology/admin/charts`
 const TOKEN_KEY = 'mtn_admin_jwt'
 
-type Tab = 'memories' | 'farewell' | 'poetry' | 'account'
+type Tab = 'memories' | 'farewell' | 'poetry' | 'account' | 'remedy' | 'charts'
 
 // Admin view of a farewell RSVP — includes the logistics fields the public
 // FarewellView omits (datesAvailable, foodPreference, plantType).
@@ -34,6 +36,9 @@ interface AdminRsvp {
   createdAt?: string
 }
 
+interface AdminRemedy { id: number; name: string; contact: string; area: string; message: string; birthInfo: string; handled: boolean; createdAt: string }
+interface AdminChart { id: number; name: string; gender: string; birthDate: string; birthTime: string; timeZone: string; location: string; nayNan: number; createdAt: string }
+
 interface LoginResponse { data?: { token?: string; role?: string }; message?: string }
 interface AdminListResponse { memories?: Memory[]; rsvps?: AdminRsvp[] }
 
@@ -44,6 +49,8 @@ export default function SanctuaryAdmin() {
   const [tab, setTab] = useState<Tab>('memories')
   const [memories, setMemories] = useState<Memory[]>([])
   const [rsvps, setRsvps] = useState<AdminRsvp[]>([])
+  const [remedies, setRemedies] = useState<AdminRemedy[]>([])
+  const [charts, setCharts] = useState<AdminChart[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [q, setQ] = useState('')
@@ -77,19 +84,29 @@ export default function SanctuaryAdmin() {
 
   const load = async (which: Tab = tab) => {
     if (!token) return
-    if (which !== 'memories' && which !== 'farewell') return   // account/poetry fetch nothing here
+    if (which === 'poetry' || which === 'account') return   // these fetch nothing here
     setError(''); setLoading(true)
     try {
-      const url = which === 'farewell' ? FAREWELL_URL : MEMORIES_URL
+      const url = which === 'farewell' ? FAREWELL_URL : which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : MEMORIES_URL
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired or not an Admin. Please log in again.') }
       if (!res.ok) throw new Error(`Failed to load (${res.status})`)
-      const data = (await res.json()) as AdminListResponse
+      const data = (await res.json()) as AdminListResponse & { data?: AdminRemedy[] | AdminChart[] }
       if (which === 'farewell') setRsvps(Array.isArray(data?.rsvps) ? data.rsvps : [])
+      else if (which === 'remedy') setRemedies(Array.isArray(data?.data) ? (data.data as AdminRemedy[]) : [])
+      else if (which === 'charts') setCharts(Array.isArray(data?.data) ? (data.data as AdminChart[]) : [])
       else setMemories(Array.isArray(data?.memories) ? data.memories : [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load data.')
     } finally { setLoading(false) }
+  }
+
+  const toggleHandled = async (id: number) => {
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/remedies/${id}/handled`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) throw new Error()
+      setRemedies((rs) => rs.map((r) => (r.id === id ? { ...r, handled: !r.handled } : r)))
+    } catch { setError('Could not update status.') }
   }
 
   // Change the signed-in admin's password via the authenticated endpoint. A 401
@@ -124,8 +141,13 @@ export default function SanctuaryAdmin() {
     (r.name || '').toLowerCase().includes(s) || (r.message || '').toLowerCase().includes(s) ||
     (r.datesAvailable || '').toLowerCase().includes(s) || (r.foodPreference || '').toLowerCase().includes(s) || (r.plantType || '').toLowerCase().includes(s))
 
-  const total = tab === 'farewell' ? rsvps.length : memories.length
-  const shown = tab === 'farewell' ? filteredRsvps.length : filteredMemories.length
+  const filteredRemedies = remedies.filter((r) => !s ||
+    (r.name || '').toLowerCase().includes(s) || (r.contact || '').toLowerCase().includes(s) || (r.area || '').toLowerCase().includes(s) || (r.message || '').toLowerCase().includes(s))
+  const filteredCharts = charts.filter((c) => !s ||
+    (c.name || '').toLowerCase().includes(s) || (c.gender || '').toLowerCase().includes(s) || (c.timeZone || '').toLowerCase().includes(s))
+
+  const total = tab === 'farewell' ? rsvps.length : tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : memories.length
+  const shown = tab === 'farewell' ? filteredRsvps.length : tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : filteredMemories.length
 
   // Export the RSVP logistics as CSV for planning the real send-off.
   const exportCsv = () => {
@@ -183,16 +205,18 @@ export default function SanctuaryAdmin() {
             <div className="mt-6 flex flex-wrap items-center gap-2">
               <TabBtn id="memories" icon={MessageSquare} label="Memories" />
               <TabBtn id="farewell" icon={Sprout} label="Farewell RSVPs" />
+              <TabBtn id="remedy" icon={Sparkles} label="Remedy" />
+              <TabBtn id="charts" icon={Star} label="Saved Charts" />
               <TabBtn id="poetry" icon={BookOpen} label="Poetry" />
               <TabBtn id="account" icon={KeyRound} label="Account" />
             </div>
 
             {/* search/refresh bar — only for the list tabs (not poetry/account) */}
-            {(tab === 'memories' || tab === 'farewell') && (
+            {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts') && (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tab === 'farewell' ? 'Search name, dates, food, message…' : 'Search author, message, place…'} className="w-full rounded-xl border border-white/15 bg-white/5 py-3 pl-9 pr-4 text-base outline-none focus:border-amber-300/50 sm:py-2.5 sm:text-sm" />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="w-full rounded-xl border border-white/15 bg-white/5 py-3 pl-9 pr-4 text-base outline-none focus:border-amber-300/50 sm:py-2.5 sm:text-sm" />
               </div>
               {tab === 'farewell' && (
                 <button onClick={exportCsv} disabled={filteredRsvps.length === 0} className="inline-flex items-center gap-2 rounded-xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-2.5 font-mono text-xs text-emerald-100 transition hover:bg-emerald-300/20 disabled:opacity-50">
@@ -295,6 +319,72 @@ export default function SanctuaryAdmin() {
                         <td className="px-4 py-3 font-mono text-xs capitalize text-white/60">{r.plantType}</td>
                         <td className="px-4 py-3 text-white/90">{r.message}</td>
                         <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(r.createdAt || '').slice(0, 10)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ── REMEDY / CONTACT REQUESTS ── */}
+            {tab === 'remedy' && (
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
+                <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+                  <thead className="bg-white/5 font-mono text-[11px] uppercase tracking-wider text-white/50">
+                    <tr>
+                      <th className="px-4 py-3">Name</th><th className="px-4 py-3">Contact</th><th className="px-4 py-3">Area</th>
+                      <th className="px-4 py-3">Message</th><th className="px-4 py-3 whitespace-nowrap">Birth</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Submitted</th><th className="px-4 py-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRemedies.length === 0 ? (
+                      <tr><td colSpan={7} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No requests.'}</td></tr>
+                    ) : filteredRemedies.map((r) => (
+                      <tr key={r.id} className="border-t border-white/5 align-top hover:bg-white/[0.03]">
+                        <td className="px-4 py-3 font-medium text-amber-200">{r.name || '—'}</td>
+                        <td className="px-4 py-3 text-white/90">{r.contact}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-white/60">{r.area || '—'}</td>
+                        <td className="px-4 py-3 text-white/90">{r.message}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/60">{r.birthInfo}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(r.createdAt || '').slice(0, 16)}</td>
+                        <td className="px-4 py-3">
+                          <button onClick={() => toggleHandled(r.id)} className={`rounded-full px-2 py-0.5 font-mono text-[11px] transition ${r.handled ? 'bg-emerald-400/15 text-emerald-200 hover:bg-emerald-400/25' : 'bg-amber-400/15 text-amber-200 hover:bg-amber-400/25'}`}>
+                            {r.handled ? 'Handled' : 'Pending'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ── SAVED QUERENT CHARTS (opt-in, decrypted) ── */}
+            {tab === 'charts' && (
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
+                <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+                  <thead className="bg-white/5 font-mono text-[11px] uppercase tracking-wider text-white/50">
+                    <tr>
+                      <th className="px-4 py-3">Name</th><th className="px-4 py-3">Gender</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Birth date</th><th className="px-4 py-3 whitespace-nowrap">Time</th>
+                      <th className="px-4 py-3">Time zone</th><th className="px-4 py-3 whitespace-nowrap">Lat,Lon</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Nay-Nan</th><th className="px-4 py-3 whitespace-nowrap">Saved</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredCharts.length === 0 ? (
+                      <tr><td colSpan={8} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No saved charts.'}</td></tr>
+                    ) : filteredCharts.map((c) => (
+                      <tr key={c.id} className="border-t border-white/5 align-top hover:bg-white/[0.03]">
+                        <td className="px-4 py-3 font-medium text-amber-200">{c.name || '—'}</td>
+                        <td className="px-4 py-3 font-mono text-xs capitalize text-white/70">{c.gender}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-white/90">{c.birthDate}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/70">{c.birthTime}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-white/60">{c.timeZone}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/60">{c.location}</td>
+                        <td className="px-4 py-3 text-white/80">{c.nayNan}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(c.createdAt || '').slice(0, 16)}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -7,7 +7,7 @@ import DiamondChart from './DiamondChart'
 import AreaRadar from './AreaRadar'
 import TimelineChart from './TimelineChart'
 import type { BirthChartData, BirthChartRequest, PlanetPosition, TransitPos } from '../types/astrology'
-import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel } from '../lib/jyotish'
+import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel, currentAreaEffect } from '../lib/jyotish'
 
 const CHART_URL = `${SITE.apiUrl}/api/astrology/chart`
 const GEO_URL = 'https://nominatim.openstreetmap.org/search'
@@ -86,6 +86,14 @@ export default function Jyotish() {
   const [error, setError] = useState('')
   const [tab, setTab] = useState<Tab>('reading')
   const [chartStyle, setChartStyle] = useState<ChartStyle>('diamond')
+  const [consent, setConsent] = useState(false)
+
+  // Remedy / contact-the-Sayar form.
+  const remedyRef = useRef<HTMLDivElement>(null)
+  const [remedyArea, setRemedyArea] = useState('')
+  const [remedyContact, setRemedyContact] = useState('')
+  const [remedyMsg, setRemedyMsg] = useState('')
+  const [remedyState, setRemedyState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
 
   const onPlaceChange = (v: string) => {
     setPlace(v)
@@ -121,9 +129,39 @@ export default function Jyotish() {
       const json = (await res.json().catch(() => null)) as { success?: boolean; data?: BirthChartData; message?: string } | null
       if (!res.ok || !json?.success || !json.data) throw new Error(json?.message || `Failed (${res.status})`)
       setData(json.data); setQuerent({ name: name.trim(), gender, nn: naynan(date, time) }); setTab('reading')
+      // Persist the querent's chart ONLY with explicit consent (opt-in).
+      if (consent) {
+        fetch(`${SITE.apiUrl}/api/astrology/save-chart`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name.trim(), gender, birthDate: date, birthTime: time, timeZone: tz,
+            latitude: Number(lat), longitude: Number(lon), nayNan: naynan(date, time)?.num ?? 0, consent: true,
+          }),
+        }).catch(() => {})
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not compute the chart.')
     } finally { setLoading(false) }
+  }
+
+  const openRemedy = (areaLabel: string) => {
+    setRemedyArea(areaLabel); setRemedyState('idle')
+    setTimeout(() => remedyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 40)
+  }
+  const submitRemedy = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setRemedyState('sending')
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/remedy-request`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: (querent?.name || name).trim(), contact: remedyContact.trim(),
+          area: remedyArea.trim(), message: remedyMsg.trim(), birthDate: date, birthTime: time,
+        }),
+      })
+      if (!res.ok) throw new Error()
+      setRemedyState('sent'); setRemedyMsg('')
+    } catch { setRemedyState('error') }
   }
 
   const savePdf = () => {
@@ -245,8 +283,13 @@ export default function Jyotish() {
             </div>
           </div>
 
+          <label className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-muted">
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 accent-accent" />
+            <span>{lang === 'mm' ? 'ဆရာ ဟောကိန်း အထောက်အကူအတွက် ကျွန်ုပ်၏ မွေးဇာတာ အချက်အလက်ကို လုံခြုံစွာ သိမ်းဆည်းရန် သဘောတူပါသည်။' : "I consent to securely storing my birth details to assist the astrologer's readings."}</span>
+          </label>
+
           <button type="submit" disabled={loading}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/20 transition hover:brightness-110 disabled:opacity-60">
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/20 transition hover:brightness-110 disabled:opacity-60">
             {loading ? <><Loader2 size={16} className="animate-spin" /> Calculating…</> : <><Sparkles size={16} /> Generate Chart</>}
           </button>
           {error && <p className="mt-3 rounded-xl border border-coral/40 bg-coral/10 px-3 py-2 font-mono text-xs text-coral">{error}</p>}
@@ -346,57 +389,74 @@ export default function Jyotish() {
                     </div>
                   </div>
 
-                  {/* Per-area deep-dive: lord across D1/D9/D10, karakas, findings */}
-                  <div className="space-y-4">
+                  {/* Per-area deep-dive — side by side (natal + current transits) */}
+                  <div className="space-y-3">
                     <h3 className="font-groovy text-lg text-fg">{t.lifeAreas}</h3>
-                    {reading.areas.map((a) => {
-                      const lp = a.lord ? findPlanet(data, a.lord) : undefined
-                      return (
-                        <div key={a.key} className={`glass-card border-l-4 p-5 ${a.tone === 'favorable' ? 'border-l-jade' : a.tone === 'testing' ? 'border-l-coral' : 'border-l-white/20'}`}>
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <h4 className="font-groovy text-base text-fg">{a.label}</h4>
-                            <span className="font-mono text-xs"><span className="text-accent-light">{'★'.repeat(a.stars)}</span><span className="text-muted">{'☆'.repeat(5 - a.stars)}</span> <span className="text-muted">{a.score}/100</span></span>
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      {reading.areas.map((a) => {
+                        const lp = a.lord ? findPlanet(data, a.lord) : undefined
+                        const cur = currentAreaEffect(data, a.key, lang)
+                        const needsRemedy = a.tone === 'testing' || cur?.tone === 'warn'
+                        return (
+                          <div key={a.key} className={`glass-card flex flex-col border-l-4 p-5 ${a.tone === 'favorable' ? 'border-l-jade' : a.tone === 'testing' ? 'border-l-coral' : 'border-l-white/20'}`}>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <h4 className="font-groovy text-base text-fg">{a.label}</h4>
+                              <span className="font-mono text-xs"><span className="text-accent-light">{'★'.repeat(a.stars)}</span><span className="text-muted">{'☆'.repeat(5 - a.stars)}</span> <span className="text-muted">{a.score}/100</span></span>
+                            </div>
+                            <span className="mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full" style={{ width: `${Math.max(a.score, 4)}%`, background: barColor(a.tone) }} /></span>
+
+                            {lp && (
+                              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                                <div className="rounded-lg bg-white/[0.03] px-3 py-2">
+                                  <p className={labelCls}>{lang === 'mm' ? 'အိမ်ရှင်သခင်' : 'House lord'}</p>
+                                  <p className="mt-0.5 text-sm text-fg/90">{planetName(lp.name, lang)} · {signLabel(lp.sign, lang)} <span className="text-muted">({lang === 'mm' ? `${lp.house} တန့်` : `H${lp.house}`})</span></p>
+                                  {lp.dignity !== '-' && <p className="text-[11px] text-accent-light">{dignityLabel(lp.dignity, lang)}</p>}
+                                </div>
+                                <div className="rounded-lg bg-white/[0.03] px-3 py-2">
+                                  <p className={labelCls}>{lang === 'mm' ? 'D9 နဝင်း' : 'D9 Navamsa'}</p>
+                                  <p className="mt-0.5 text-sm text-fg/90">{signLabel(lp.navamsaSign, lang)}</p>
+                                </div>
+                                <div className="rounded-lg bg-white/[0.03] px-3 py-2">
+                                  <p className={labelCls}>{lang === 'mm' ? 'D10 ဒသံသ' : 'D10 Dasamsa'}</p>
+                                  <p className="mt-0.5 text-sm text-fg/90">{signLabel(lp.vargas.D10, lang)}</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {a.karakas.length > 0 && (
+                              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                                <span className={labelCls}>{lang === 'mm' ? 'ကာရက' : 'Karakas'}:</span>
+                                {a.karakas.map((k) => {
+                                  const kp = findPlanet(data, k)
+                                  return kp ? (
+                                    <span key={k} className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-fg/80">
+                                      {planetName(kp.name, lang)} · {signLabel(kp.sign, lang)}{kp.dignity !== '-' && <span className="text-accent-light"> · {dignityLabel(kp.dignity, lang)}</span>}
+                                    </span>
+                                  ) : null
+                                })}
+                              </div>
+                            )}
+
+                            {cur && (
+                              <div className={`mt-3 rounded-lg border px-3 py-2 text-xs leading-relaxed ${cur.tone === 'good' ? 'border-jade/40 bg-jade/10 text-jade' : cur.tone === 'warn' ? 'border-coral/40 bg-coral/10 text-coral' : 'border-white/10 bg-white/[0.03] text-muted'}`}>
+                                <span className="font-semibold">{lang === 'mm' ? 'လက်ရှိကာလ သက်ရောက်မှု' : 'Current period'}: </span>{cur.text}
+                              </div>
+                            )}
+
+                            <ul className="mt-3 space-y-1">
+                              {a.points.map((pt, i) => <li key={i} className="text-xs leading-relaxed text-muted">• {pt}</li>)}
+                            </ul>
+
+                            {needsRemedy && (
+                              <button type="button" onClick={() => openRemedy(a.label)}
+                                className="no-print mt-3 inline-flex items-center gap-1.5 self-start rounded-full border border-coral/40 bg-coral/10 px-3 py-1.5 text-xs text-coral transition hover:bg-coral/20">
+                                <Sparkles size={12} /> {lang === 'mm' ? 'ဤကဏ္ဍအတွက် ယတြာ တောင်းရန်' : 'Request a remedy for this area'}
+                              </button>
+                            )}
                           </div>
-                          <span className="mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full" style={{ width: `${Math.max(a.score, 4)}%`, background: barColor(a.tone) }} /></span>
-
-                          {lp && (
-                            <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                              <div className="rounded-lg bg-white/[0.03] px-3 py-2">
-                                <p className={labelCls}>{lang === 'mm' ? 'အိမ်ရှင်သခင်' : 'House lord'}</p>
-                                <p className="mt-0.5 text-sm text-fg/90">{planetName(lp.name, lang)} · {signLabel(lp.sign, lang)} <span className="text-muted">({lang === 'mm' ? `${lp.house} တန့်` : `H${lp.house}`})</span></p>
-                                {lp.dignity !== '-' && <p className="text-[11px] text-accent-light">{dignityLabel(lp.dignity, lang)}</p>}
-                              </div>
-                              <div className="rounded-lg bg-white/[0.03] px-3 py-2">
-                                <p className={labelCls}>{lang === 'mm' ? 'D9 နဝင်း' : 'D9 Navamsa'}</p>
-                                <p className="mt-0.5 text-sm text-fg/90">{signLabel(lp.navamsaSign, lang)}</p>
-                              </div>
-                              <div className="rounded-lg bg-white/[0.03] px-3 py-2">
-                                <p className={labelCls}>{lang === 'mm' ? 'D10 ဒသံသ' : 'D10 Dasamsa'}</p>
-                                <p className="mt-0.5 text-sm text-fg/90">{signLabel(lp.vargas.D10, lang)}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {a.karakas.length > 0 && (
-                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                              <span className={labelCls}>{lang === 'mm' ? 'ကာရက' : 'Karakas'}:</span>
-                              {a.karakas.map((k) => {
-                                const kp = findPlanet(data, k)
-                                return kp ? (
-                                  <span key={k} className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-fg/80">
-                                    {planetName(kp.name, lang)} · {signLabel(kp.sign, lang)}{kp.dignity !== '-' && <span className="text-accent-light"> · {dignityLabel(kp.dignity, lang)}</span>}
-                                  </span>
-                                ) : null
-                              })}
-                            </div>
-                          )}
-
-                          <ul className="mt-3 space-y-1">
-                            {a.points.map((pt, i) => <li key={i} className="text-xs leading-relaxed text-muted">• {pt}</li>)}
-                          </ul>
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
+                    </div>
                   </div>
 
                   {data.yogas.length > 0 && (
@@ -468,8 +528,8 @@ export default function Jyotish() {
                   <div className="glass-card p-5">
                     <TimelineChart timeline={data.timeline} currentAge={data.timeline.find((yy) => yy.year === thisYear)?.age ?? -1} lang={lang} />
                   </div>
-                  <div className="glass-card overflow-x-auto p-1">
-                    <table className="w-full border-collapse text-left text-xs">
+                  <div className="glass-card overflow-x-auto p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <table className="w-full min-w-[760px] border-collapse text-left text-xs">
                       <thead className="font-mono text-[10px] uppercase tracking-wider text-muted">
                         <tr>
                           {[t.colYear, t.colAge, t.colPeriod, t.colStars, t.colTheme, t.colJup, t.colSat, t.colRahu, t.colNotes].map((h) => (
@@ -520,8 +580,8 @@ export default function Jyotish() {
                     {moon && <div className="glass-card p-5"><ChartView style={chartStyle} data={data} lagnaSign={moon.sign} title="Chandra · D1" subtitle={`Moon: ${moon.signName}`} /></div>}
                   </div>
                   <div className="glass-card p-5"><p className="text-sm leading-relaxed text-muted">{t.d1Desc}</p></div>
-                  <div className="glass-card overflow-x-auto p-1">
-                    <table className="w-full border-collapse text-left text-sm">
+                  <div className="glass-card overflow-x-auto p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <table className="w-full min-w-[560px] border-collapse text-left text-sm">
                       <thead className="font-mono text-[11px] uppercase tracking-wider text-muted">
                         <tr>{['Planet', 'Sign', 'Degree', 'Nakshatra (pada)', 'House', 'Dignity'].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}</tr>
                       </thead>
@@ -554,6 +614,36 @@ export default function Jyotish() {
                 <VargaPanel data={data} lang={lang} signOf={(p) => p.vargas.D7} lagnaSign={vargaSign(data.ascendant.longitude, 7)}
                   title="Saptamsa · D7" subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, 7), lang)}`} desc={t.d7Desc} chartStyle={chartStyle} />
               )}
+
+              {/* Remedy (yatra) — contact the Sayar */}
+              <div ref={remedyRef} className="no-print glass-card border border-accent/25 p-6">
+                <h3 className="font-groovy text-lg text-fg">{lang === 'mm' ? 'ယတြာ အစီအရင် — ဆရာ့ကို ဆက်သွယ်ရန်' : 'Remedy (Yatra) — Contact the Sayar'}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-muted">
+                  {lang === 'mm'
+                    ? 'ကံညံ့/ဖိစီးနေသော ကဏ္ဍများအတွက် သင့်လျော်သည့် ယတြာ အစီအရင်ကို ဆရာ ဘုန်းမင်းသိုက်ဒင် ထံ တောင်းခံနိုင်ပါသည်။ အောက်တွင် ဖြည့်စွက်ပါ။'
+                    : 'For areas under strain, you may request a suitable remedy (yatra) from Sayar Bhone Min Thike Din. Fill in your details below.'}
+                </p>
+                {remedyState === 'sent' ? (
+                  <div className="mt-4 rounded-xl border border-jade/40 bg-jade/10 px-4 py-3 text-sm text-jade">
+                    {lang === 'mm' ? 'ကျေးဇူးတင်ပါသည်။ သင့်တောင်းဆိုမှုကို ဆရာ့ထံ ပေးပို့ပြီးပါပြီ — မကြာမီ ဆက်သွယ်ပါမည်။' : 'Thank you — your request has been sent to the Sayar. You will be contacted soon.'}
+                  </div>
+                ) : (
+                  <form onSubmit={submitRemedy} className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <label><span className={labelCls}>{lang === 'mm' ? 'ကဏ္ဍ' : 'Area'}</span>
+                      <input value={remedyArea} onChange={(e) => setRemedyArea(e.target.value)} className={field} placeholder={lang === 'mm' ? 'ဥပမာ — အလုပ်အကိုင်' : 'e.g. Career'} /></label>
+                    <label><span className={labelCls}>{lang === 'mm' ? 'ဆက်သွယ်ရန် (ဖုန်း/အီးမေးလ်)' : 'Contact (phone / email)'}</span>
+                      <input value={remedyContact} onChange={(e) => setRemedyContact(e.target.value)} required className={field} /></label>
+                    <label className="sm:col-span-2"><span className={labelCls}>{lang === 'mm' ? 'အသေးစိတ် မက်ဆေ့ချ်' : 'Message'}</span>
+                      <textarea value={remedyMsg} onChange={(e) => setRemedyMsg(e.target.value)} rows={3} className={`${field} resize-y`} placeholder={lang === 'mm' ? 'သင့် အခြေအနေ / မေးလိုသည့်အရာ' : 'Your situation / what you would like to ask'} /></label>
+                    <div className="flex items-center gap-3 sm:col-span-2">
+                      <button type="submit" disabled={remedyState === 'sending'} className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-space transition hover:brightness-110 disabled:opacity-60">
+                        {remedyState === 'sending' ? <><Loader2 size={15} className="animate-spin" /> {lang === 'mm' ? 'ပို့နေသည်…' : 'Sending…'}</> : (lang === 'mm' ? 'ဆရာ့ထံ ပေးပို့ရန်' : 'Send to the Sayar')}
+                      </button>
+                      {remedyState === 'error' && <span className="text-xs text-coral">{lang === 'mm' ? 'ပို့၍မရပါ — ပြန်ကြိုးစားပါ။' : 'Could not send — please try again.'}</span>}
+                    </div>
+                  </form>
+                )}
+              </div>
             </div>
           )}
         </div>

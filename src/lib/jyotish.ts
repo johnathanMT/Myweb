@@ -322,3 +322,27 @@ export function transitNoteText(n: TransitNote, lang: Lang): string {
   }
   return (map[n.code] ?? { en: n.code, mm: n.code })[lang]
 }
+
+/** How the CURRENT-year transits (gochara) touch a given life area right now. */
+export function currentAreaEffect(data: BirthChartData, areaKey: string, lang: Lang): { tone: 'good' | 'warn' | 'neutral'; text: string } | null {
+  const meta = AREA_META[areaKey]
+  if (!meta || !data.timeline?.length) return null
+  const yr = new Date().getFullYear()
+  const row = data.timeline.find((y) => y.year === yr) ?? data.timeline.find((y) => y.year >= yr)
+  if (!row) return null
+  const H = meta.house
+  const trines = new Set([H, ((H - 1 + 4) % 12) + 1, ((H - 1 + 8) % 12) + 1])
+  const jup = row.transits.find((t) => t.planet === 'Jupiter')
+  const sat = row.transits.find((t) => t.planet === 'Saturn')
+  const rah = row.transits.find((t) => t.planet === 'Rahu')
+
+  if (jup && (jup.houseFromLagna === H || trines.has(jup.houseFromLagna)))
+    return { tone: 'good', text: lang === 'mm' ? 'လက်ရှိ ကြာသပတေး ဂြိုဟ်သွားက ဤကဏ္ဍကို ပံ့ပိုးထောက်ကူ ပေးနေသည် — အခွင့်အလမ်းကောင်း။' : "Jupiter's current transit is supporting this area — a good window." }
+  if (sat && sat.houseFromLagna === H)
+    return { tone: 'warn', text: lang === 'mm' ? 'လက်ရှိ စနေ ဂြိုဟ်သွားက ဤကဏ္ဍကို ဖိစီးစမ်းသပ်နေသည် — ဇွဲနှင့် သည်းခံမှု လိုအပ်သည်။' : "Saturn's current transit is testing this area — patience and steady effort help." }
+  if (row.sadeSati && (areaKey === 'health' || areaKey === 'social'))
+    return { tone: 'warn', text: lang === 'mm' ? 'သာဓေသတီ ကာလဖြစ်၍ စိတ်ဓာတ်နှင့် ကျန်းမာရေးကို အထူးဂရုစိုက်ပါ။' : 'Sade Sati is active — mind your mood and health with extra care.' }
+  if (rah && rah.houseFromLagna === H)
+    return { tone: 'warn', text: lang === 'mm' ? 'ရာဟု ဂြိုဟ်သွားက ဤကဏ္ဍတွင် မတည်ငြိမ်မှု အနည်းငယ် ဖြစ်စေနိုင်သည်။' : "Rahu's transit may bring some instability here." }
+  return { tone: 'neutral', text: lang === 'mm' ? 'လက်ရှိကာလတွင် သိသာသော ဂြိုဟ်သွား သက်ရောက်မှု မရှိပါ။' : 'No strong current transit is touching this area right now.' }
+}
