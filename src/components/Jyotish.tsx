@@ -7,6 +7,7 @@ import DiamondChart from './DiamondChart'
 import AreaRadar from './AreaRadar'
 import TimelineChart from './TimelineChart'
 import AshtakavargaView from './AshtakavargaView'
+import ShadbalaView from './ShadbalaView'
 import type { BirthChartData, BirthChartRequest, PlanetPosition, TransitPos } from '../types/astrology'
 import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, activePratyantar, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel, currentAreaEffect } from '../lib/jyotish'
 
@@ -26,7 +27,7 @@ const browserTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().
 const TZ_OPTIONS = [...new Set([browserTz, ...PRESETS.map((p) => p.tz), 'UTC'])]
 
 interface GeoResult { display_name: string; lat: string; lon: string }
-type Tab = 'reading' | 'timeline' | 'd1' | 'vargas' | 'ashtaka'
+type Tab = 'reading' | 'timeline' | 'd1' | 'vargas' | 'ashtaka' | 'shadbala'
 
 const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = [
   { n: 2, name: 'D2 · Hora', desc: { en: 'Wealth & resources.', mm: 'ဥစ္စာဓန နှင့် အရင်းအမြစ်။' } },
@@ -203,6 +204,7 @@ export default function Jyotish() {
     { id: 'reading', label: t.tabReading }, { id: 'timeline', label: t.tabTimeline }, { id: 'd1', label: t.tabD1 },
     { id: 'vargas', label: lang === 'mm' ? 'ခွဲဝေဇာတာ' : 'Vargas' },
     { id: 'ashtaka', label: lang === 'mm' ? 'အဋ္ဌကဝဂ်' : 'Ashtaka' },
+    { id: 'shadbala', label: lang === 'mm' ? 'ဆဒ္ဗလ' : 'Shadbala' },
   ]
 
   return (
@@ -623,6 +625,9 @@ export default function Jyotish() {
 
               {/* ── ASHTAKAVARGA ── */}
               {tab === 'ashtaka' && <AshtakavargaView data={data} lang={lang} />}
+
+              {/* ── SHADBALA ── */}
+              {tab === 'shadbala' && <ShadbalaView data={data} lang={lang} />}
 
               {/* ── D1 ── */}
               {tab === 'd1' && (

@@ -14,13 +14,16 @@ export interface BirthChartRequest {
 }
 
 export interface PlanetStrength {
-  ucchaBala: number
+  sthanaBala: number
   digBala: number
+  kalaBala: number
+  cheshtaBala: number
   naisargikaBala: number
-  pakshaBala: number
   drikBala: number
   totalVirupas: number
   totalRupas: number
+  requiredRupas: number
+  sufficient: boolean
 }
 
 export interface PlanetPosition {
@@ -39,6 +42,7 @@ export interface PlanetPosition {
   dignity: string
   navamsaSign: number   // D9 sign
   navamsaSignName: string
+  declination: number
   vargas: Record<string, number>   // D2,D3,D7,D9,D10,D12 → sign
   aspectsHouses: number[]
   aspectsPlanets: string[]
