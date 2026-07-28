@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, type FormEvent } from 'react'
-import { LogOut, Loader2, Download, Pencil, Check, UserRound, X } from 'lucide-react'
+import { LogOut, Loader2, Pencil, Check, UserRound, X } from 'lucide-react'
 import { SITE } from '../config/site'
 import type { Lang } from '../lib/jyotish'
 
@@ -81,15 +81,6 @@ export default function CustomerPanel({ lang, onLoadChart, onAuthChange }: {
       setMe((m) => (m ? { ...m, username: newName.trim() } : m)); setEditingName(false)
     } catch { /* ignore */ }
   }
-  const downloadPdf = async (chartId?: number) => {
-    try {
-      const r = await fetch(`${API}/api/customer/download-pdf${chartId ? `?chartId=${chartId}` : ''}`, { headers: { Authorization: `Bearer ${token}` } })
-      if (!r.ok) throw new Error()
-      const blob = await r.blob()
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vedin-reading.pdf'; a.click(); URL.revokeObjectURL(a.href)
-    } catch { /* ignore */ }
-  }
-
   const inputCls = 'mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-fg outline-none focus:border-accent/50'
 
   return (
@@ -131,10 +122,7 @@ export default function CustomerPanel({ lang, onLoadChart, onAuthChange }: {
                 {charts.map((c) => (
                   <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white/[0.03] px-3 py-2">
                     <span className="text-xs text-fg/90">{c.name || t('(unnamed)', '(အမည်မဲ့)')} <span className="font-mono text-muted">· {c.birthDate} {c.birthTime}</span></span>
-                    <span className="flex gap-2">
-                      <button type="button" onClick={() => onLoadChart(c)} className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-0.5 text-[11px] text-accent-light transition hover:bg-accent/20">{t('Load', 'ဖွင့်')}</button>
-                      <button type="button" onClick={() => downloadPdf(c.id)} className="inline-flex items-center gap-1 rounded-full border border-white/12 px-2.5 py-0.5 text-[11px] text-muted transition hover:text-fg"><Download size={11} /> PDF</button>
-                    </span>
+                    <button type="button" onClick={() => onLoadChart(c)} className="rounded-full border border-accent/30 bg-accent/10 px-3 py-0.5 text-[11px] text-accent-light transition hover:bg-accent/20">{t('Load & view', 'ဖွင့်ကြည့်')}</button>
                   </li>
                 ))}
               </ul>

@@ -63,6 +63,56 @@ const VARGA_GUIDE: { code: string; en: string; mm: string }[] = [
   { code: 'D60 · Shashtiamsha', en: 'Past-life karma and deep-rooted destiny.', mm: 'အတိတ်ဘဝ ကံနှင့် အမြစ်တွယ်နေသော ကံကြမ္မာ။' },
 ]
 
+// Yoga meanings — bilingual. Keyed by the exact backend yoga name; also used as
+// an educational guide (incl. Neecha Bhanga Raja Yoga).
+const YOGA_INFO: Record<string, { en: string; mm: string }> = {
+  'Gaja Kesari Yoga': {
+    en: 'Jupiter in a kendra (1/4/7/10) from the Moon. Grants wisdom, virtue, prosperity and a respected, well-liked nature.',
+    mm: 'ကြာသပတေးသည် စန်း (လ) မှ ကေန္ဒြ (၁/၄/၇/၁၀) တွင် တည်ရှိသောအခါ ဖြစ်သည်။ ပညာဉာဏ်၊ ဂုဏ်သိက္ခာ၊ ကြီးပွားချမ်းသာမှုနှင့် လူချစ်လူခင်ပေါများပြီး လေးစားခံရသော သဘာဝကို ပေးသည်။',
+  },
+  'Budha-Aditya Yoga': {
+    en: 'Sun and Mercury conjunct in one sign. Sharp intellect, eloquence, skill in learning and business.',
+    mm: 'နေနှင့် ဗုဒ္ဓဟူး တစ်ရာသီတည်း ပူးယှဉ်သောအခါ ဖြစ်သည်။ ဉာဏ်ရည်ထက်မြက်မှု၊ ဟောပြောဆက်သွယ်စွမ်း၊ ပညာနှင့် စီးပွားရေးကျွမ်းကျင်မှုကို ပေးသည်။',
+  },
+  'Chandra-Mangala Yoga': {
+    en: 'Moon and Mars conjunct. Wealth through drive, enterprise and bold initiative.',
+    mm: 'စန်းနှင့် အင်္ဂါ ပူးယှဉ်သောအခါ ဖြစ်သည်။ ဇွဲလုံ့လ၊ လုပ်ငန်းစွန့်ဦးတီထွင်မှုနှင့် ရဲရင့်သောဆုံးဖြတ်ချက်ဖြင့် ဥစ္စာဓန ရရှိမှုကို ပေးသည်။',
+  },
+  'Ruchaka Yoga': {
+    en: 'Mars in its own/exaltation sign in a kendra (a Pancha Mahapurusha yoga). Courage, leadership and physical strength.',
+    mm: 'အင်္ဂါသည် ကိုယ်ပိုင်/ဥစ်ရာသီ ကေန္ဒြတွင် တည်ရှိသော ပဉ္စမဟာပုရုဿယောဂ။ ရဲစွမ်းသတ္တိ၊ ခေါင်းဆောင်နိုင်စွမ်းနှင့် ကာယခွန်အားကို ပေးသည်။',
+  },
+  'Bhadra Yoga': {
+    en: 'Mercury in its own/exaltation sign in a kendra. Intelligence, communication and business acumen.',
+    mm: 'ဗုဒ္ဓဟူးသည် ကိုယ်ပိုင်/ဥစ်ရာသီ ကေန္ဒြတွင် တည်ရှိသော ပဉ္စမဟာပုရုဿယောဂ။ ဉာဏ်ရည်၊ ဟောပြောရေးသားစွမ်းနှင့် စီးပွားရေးဉာဏ်ကို ပေးသည်။',
+  },
+  'Hamsa Yoga': {
+    en: 'Jupiter in its own/exaltation sign in a kendra. Virtue, wisdom, spirituality and honour.',
+    mm: 'ကြာသပတေးသည် ကိုယ်ပိုင်/ဥစ်ရာသီ ကေန္ဒြတွင် တည်ရှိသော ပဉ္စမဟာပုရုဿယောဂ။ ကုသိုလ်တရား၊ ပညာ၊ ဝိညာဉ်ရေးနှင့် ဂုဏ်သိက္ခာကို ပေးသည်။',
+  },
+  'Malavya Yoga': {
+    en: 'Venus in its own/exaltation sign in a kendra. Beauty, comfort, art and refined luxury.',
+    mm: 'သောကြာသည် ကိုယ်ပိုင်/ဥစ်ရာသီ ကေန္ဒြတွင် တည်ရှိသော ပဉ္စမဟာပုရုဿယောဂ။ အလှ၊ သက်သာချမ်းသာမှု၊ အနုပညာနှင့် ဇိမ်ခံမှုကို ပေးသည်။',
+  },
+  'Sasa Yoga': {
+    en: 'Saturn in its own/exaltation sign in a kendra. Discipline, authority, endurance and lasting success.',
+    mm: 'စနေသည် ကိုယ်ပိုင်/ဥစ်ရာသီ ကေန္ဒြတွင် တည်ရှိသော ပဉ္စမဟာပုရုဿယောဂ။ စည်းကမ်း၊ အာဏာ၊ ခံနိုင်ရည်နှင့် ရေရှည်တည်တံ့သော အောင်မြင်မှုကို ပေးသည်။',
+  },
+  'Neecha Bhanga Raja Yoga': {
+    en: 'A "debilitation-cancellation" raja yoga: a planet is debilitated (neecha), but its weakness is cancelled — e.g. the lord of its sign, or the planet that would be exalted there, sits in a kendra. Early struggles turn into great, hard-won success.',
+    mm: 'ဂြိုဟ်တစ်လုံးသည် နိစ် (ကျဆင်း) ဖြစ်နေသော်လည်း ထိုနိစ်ဖြစ်မှုကို ပယ်ဖျက်ပေးသည့် အခြေအနေ (ဥပမာ — နိစ်ရာသီ၏ သခင် သို့မဟုတ် ထိုနေရာတွင် ဥစ်ဖြစ်မည့်ဂြိုဟ်သည် ကေန္ဒြတွင် တည်ရှိ) ရှိသောအခါ ဖြစ်သည်။ အစပိုင်း အခက်အခဲများမှတစ်ဆင့် နောက်ပိုင်း ကြီးကျယ်သော အောင်မြင်မှု (ရာဇယောဂ) ကို ပေးသည် — "ကျရှုံးရာမှ ကြီးပွား" ဆိုသည့်သဘော။',
+  },
+  'Raja Yoga': {
+    en: 'A link (conjunction/aspect/exchange) between a kendra lord (1/4/7/10) and a trikona lord (1/5/9). Power, status and success.',
+    mm: 'ကေန္ဒြသခင် (၁/၄/၇/၁၀) နှင့် တြိကုဏသခင် (၁/၅/၉) တို့ ဆက်စပ် (ပူးယှဉ်/အမြင်/ဖလှယ်) သောအခါ ဖြစ်သည်။ အာဏာ၊ ဂုဏ်အဆင့်နှင့် အောင်မြင်မှုကို ပေးသည်။',
+  },
+  'Dhana Yoga': {
+    en: 'A link between the lords of wealth houses (2/11) and other benefic-house lords. Accumulation of wealth.',
+    mm: 'ဓနအိမ် (၂/၁၁) သခင်များနှင့် အခြားအကျိုးပေးအိမ်သခင်များ ဆက်စပ်သောအခါ ဖြစ်သည်။ ဥစ္စာဓန စုဆောင်းနိုင်မှုကို ပေးသည်။',
+  },
+}
+const yogaText = (name: string, lang: Lang) => (YOGA_INFO[name] ? YOGA_INFO[name][lang] : '')
+
 const deg = (d: number) => `${Math.floor(d)}°${String(Math.floor((d % 1) * 60)).padStart(2, '0')}'`
 const field = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-fg outline-none transition focus:border-accent/50'
 const labelCls = 'block font-mono text-[11px] uppercase tracking-wider text-muted'
@@ -134,10 +184,8 @@ export default function Jyotish() {
   const [remedyMsg, setRemedyMsg] = useState('')
   const [remedyState, setRemedyState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
 
-  // Secure PDF request (admin-approval + email flow).
-  const [pdfOpen, setPdfOpen] = useState(false)
-  const [pdfEmail, setPdfEmail] = useState('')
-  const [pdfState, setPdfState] = useState<'idle' | 'sending' | 'pending' | 'error'>('idle')
+  // Full-reading PDF via the browser's print engine (captures every tab's charts & tables).
+  const [printAll, setPrintAll] = useState(false)
 
   // Customer account (email-only sign-up); token drives per-account chart saving.
   const [customerToken, setCustomerToken] = useState<string | null>(null)
@@ -232,17 +280,17 @@ export default function Jyotish() {
     } catch { setRemedyState('error') }
   }
 
-  const submitPdf = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setPdfState('sending')
-    try {
-      const res = await fetch(`${SITE.apiUrl}/api/astrology/request-pdf`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: pdfEmail.trim(), name: (querent?.name || name).trim(), birthDate: date, birthTime: time }),
-      })
-      if (!res.ok) throw new Error()
-      setPdfState('pending')
-    } catch { setPdfState('error') }
+  // Render every tab, switch to the light (print-friendly) theme, then open the
+  // browser's Save-as-PDF dialog. The full reading — charts, tables, timeline —
+  // is captured because printAll forces all sections into the DOM.
+  const downloadPdf = () => {
+    const html = document.documentElement
+    const prevTheme = html.getAttribute('data-theme') || 'dark'
+    setPrintAll(true)
+    html.setAttribute('data-theme', 'light')
+    const restore = () => { html.setAttribute('data-theme', prevTheme); setPrintAll(false); window.removeEventListener('afterprint', restore) }
+    window.addEventListener('afterprint', restore)
+    setTimeout(() => window.print(), 180)
   }
 
   const moon = data?.planets.find((p) => p.name === 'Moon')
@@ -417,31 +465,13 @@ export default function Jyotish() {
 
           {data && reading && (
             <div className="space-y-5">
-              {/* header + secure PDF request */}
+              {/* header + full-reading PDF download */}
               <div className="flex flex-col gap-3 no-print sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="font-groovy text-lg text-fg">{place || t.portalTitle}</h2>
-                <div className="flex flex-col items-stretch gap-2 sm:items-end">
-                  {pdfState === 'pending' ? (
-                    <span className="inline-flex items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-xs text-amber-300">
-                      <Loader2 size={14} className="animate-spin" /> {lang === 'mm' ? 'လုံခြုံရေးအရ Admin ၏ ခွင့်ပြုချက် စောင့်ဆိုင်းနေပါသည်…' : 'Pending Admin approval…'}
-                    </span>
-                  ) : pdfOpen ? (
-                    <form onSubmit={submitPdf} className="flex flex-wrap items-center gap-2">
-                      <input type="email" required value={pdfEmail} onChange={(e) => setPdfEmail(e.target.value)} placeholder={lang === 'mm' ? 'သင့် အီးမေးလ်' : 'Your email'}
-                        className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-fg outline-none focus:border-accent/50" />
-                      <button type="submit" disabled={pdfState === 'sending'} className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-space transition hover:brightness-110 disabled:opacity-60">
-                        {pdfState === 'sending' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} {lang === 'mm' ? 'တောင်းဆိုမည်' : 'Request'}
-                      </button>
-                    </form>
-                  ) : (
-                    <button type="button" onClick={() => { setPdfOpen(true); setPdfState('idle') }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-4 py-2 text-xs text-accent-light transition hover:bg-accent/20">
-                      <Download size={14} /> {lang === 'mm' ? 'PDF စာတမ်း တောင်းဆိုရန်' : 'Request PDF Document'}
-                    </button>
-                  )}
-                  {pdfState === 'error' && <span className="font-mono text-[11px] text-coral">{lang === 'mm' ? 'တောင်းဆို၍မရပါ — ပြန်ကြိုးစားပါ။' : 'Request failed — try again.'}</span>}
-                  {pdfState === 'pending' && <span className="max-w-xs text-right font-mono text-[10px] leading-relaxed text-muted">{lang === 'mm' ? 'Admin အတည်ပြုပြီးလျှင် လုံခြုံသော တစ်ကြိမ်သုံး download link ကို သင့်အီးမေးလ်သို့ ပေးပို့ပါမည်။' : 'Once approved, a secure one-time link is emailed to you.'}</span>}
-                </div>
+                <button type="button" onClick={downloadPdf}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-4 py-2 text-xs font-semibold text-space shadow-lg shadow-accent/25 transition hover:brightness-110">
+                  <Download size={14} /> {lang === 'mm' ? 'PDF အပြည့်အစုံ ရယူရန်' : 'Download full PDF'}
+                </button>
               </div>
               <div className="no-print flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap gap-2">
@@ -465,7 +495,7 @@ export default function Jyotish() {
               </div>
 
               {/* ── READING ── */}
-              {tab === 'reading' && (
+              {(tab === 'reading' || printAll) && (
                 <div className="space-y-5">
                   {querent && (querent.name || querent.nn) && (
                     <div className="glass-card p-5">
@@ -590,18 +620,35 @@ export default function Jyotish() {
 
                   {data.yogas.length > 0 && (
                     <div className="glass-card p-5">
-                      <h3 className="mb-3 font-groovy text-lg text-fg">Yogas</h3>
+                      <h3 className="mb-3 font-groovy text-lg text-fg">{lang === 'mm' ? 'ဇာတာတွင် တွေ့ရသော ယောဂများ' : 'Yogas in your chart'}</h3>
                       <ul className="space-y-2.5">
                         {data.yogas.map((y) => (
                           <li key={y.name} className="rounded-xl border border-white/8 bg-white/[0.03] p-3">
                             <div className="flex items-center gap-2"><span className="font-semibold text-accent-light">{y.name}</span>
                               <span className="font-mono text-[10px] text-muted">{y.planets.map((n) => planetName(n, lang)).join(' · ')}</span></div>
-                            <p className="mt-0.5 text-xs leading-relaxed text-muted">{y.description}</p>
+                            <p className="mt-1 text-xs leading-relaxed text-muted">{yogaText(y.name, lang) || y.description}</p>
                           </li>
                         ))}
                       </ul>
                     </div>
                   )}
+
+                  {/* Educational: what the yogas mean (incl. Neecha Bhanga Raja Yoga) */}
+                  <div className="glass-card p-5">
+                    <h3 className="mb-1 font-groovy text-base text-fg">{lang === 'mm' ? 'ယောဂများ အကြောင်း အသေးစိတ်' : 'About Yogas'}</h3>
+                    <p className="mb-3 text-xs leading-relaxed text-muted">{lang === 'mm' ? 'ယောဂဆိုသည်မှာ ဂြိုဟ်များ၏ တည်နေရာ/ဆက်စပ်မှုကြောင့် ဖြစ်ပေါ်လာသော အထူးအကျိုးသက်ရောက်မှုများဖြစ်သည်။ အဓိကယောဂများကို အောက်တွင် ရှင်းပြထားသည်။' : 'A yoga is a special result formed by particular planetary placements or links. The main yogas are explained below.'}</p>
+                    <div className="space-y-1.5">
+                      {Object.entries(YOGA_INFO).map(([name, info]) => (
+                        <details key={name} className="group rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 transition hover:border-accent/30 open:border-accent/30 open:bg-accent/[0.04]">
+                          <summary className="flex cursor-pointer list-none items-center justify-between text-sm text-fg/90">
+                            <span className="font-semibold">{name}</span>
+                            <span className="text-muted transition group-open:rotate-180">▾</span>
+                          </summary>
+                          <p className="mt-2 text-xs leading-relaxed text-muted">{lang === 'mm' ? info.mm : info.en}</p>
+                        </details>
+                      ))}
+                    </div>
+                  </div>
 
                   {/* Dasha timeline */}
                   <div className="glass-card p-5">
@@ -664,7 +711,7 @@ export default function Jyotish() {
               )}
 
               {/* ── TIMELINE (age → effects) ── */}
-              {tab === 'timeline' && (
+              {(tab === 'timeline' || printAll) && (
                 <div className="space-y-5">
                   <div className="glass-card p-5">
                     <h3 className="mb-1 font-groovy text-lg text-fg">{t.timelineTitle}</h3>
@@ -723,13 +770,13 @@ export default function Jyotish() {
               )}
 
               {/* ── ASHTAKAVARGA ── */}
-              {tab === 'ashtaka' && <AshtakavargaView data={data} lang={lang} />}
+              {(tab === 'ashtaka' || printAll) && <AshtakavargaView data={data} lang={lang} />}
 
               {/* ── SHADBALA ── */}
-              {tab === 'shadbala' && <ShadbalaView data={data} lang={lang} />}
+              {(tab === 'shadbala' || printAll) && <ShadbalaView data={data} lang={lang} />}
 
               {/* ── D1 ── */}
-              {tab === 'd1' && (
+              {(tab === 'd1' || printAll) && (
                 <div className="space-y-5">
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="glass-card p-5"><ChartView style={chartStyle} data={data} /></div>
@@ -758,7 +805,7 @@ export default function Jyotish() {
                 </div>
               )}
 
-              {tab === 'vargas' && (
+              {(tab === 'vargas' || printAll) && (
                 <div className="space-y-4">
                   <div className="no-print flex flex-wrap items-center gap-2">
                     <span className={labelCls}>{lang === 'mm' ? 'ခွဲဝေဇာတာ ရွေးရန်' : 'Divisional chart'}</span>

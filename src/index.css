@@ -79,6 +79,14 @@ html[data-theme="dark"] .neon-glow {
   --accent-light: 196 181 253;  /* violet-300 */
   --jade: 52 211 153;           /* emerald/jade — benefic (good) */
   --jade-light: 110 231 183;
+  /* Latin uses Inter; Myanmar glyphs fall through to the elegant Padauk. */
+  font-family: 'Inter', 'Padauk', 'Noto Sans Myanmar', system-ui, sans-serif;
+}
+/* Roomier line-height for readable Burmese paragraphs & list items. */
+.vedin-page p,
+.vedin-page li,
+.vedin-page summary {
+  line-height: 1.9;
 }
 html[data-theme="dark"] .vedin-page .glass-card {
   border-color: rgb(var(--accent) / 0.20);
