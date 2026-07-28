@@ -273,7 +273,7 @@ export default function Jyotish() {
             style={{ background: 'conic-gradient(from 200deg, #eab308, #a855f7, #22d3ee, #eab308)', boxShadow: '0 0 30px -4px rgba(168,85,247,0.6), 0 0 22px -6px rgba(234,179,8,0.55)' }}>
             <div className="relative h-full w-full overflow-hidden rounded-full bg-card">
               <span className="absolute inset-0 flex items-center justify-center font-groovy text-3xl text-accent">ဘ</span>
-              <img src="../public/sayar.jpg" alt="Sayar Bhone Min Thike Din" className="relative h-full w-full object-cover" loading="lazy"
+              <img src="/sayar.jpg" alt="Sayar Bhone Min Thike Din" className="relative h-full w-full object-cover" loading="lazy"
                 onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
             </div>
           </div>
