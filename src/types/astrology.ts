@@ -125,6 +125,7 @@ export interface BirthChartData {
   planets: PlanetPosition[]
   dashas: DashaPeriod[]
   antardashas: DashaPeriod[]
+  pratyantardashas: DashaPeriod[]
   yogas: Yoga[]
   predictions: AreaPrediction[]
   timeline: YearForecast[]

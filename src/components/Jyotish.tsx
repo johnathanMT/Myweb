@@ -7,7 +7,7 @@ import DiamondChart from './DiamondChart'
 import AreaRadar from './AreaRadar'
 import TimelineChart from './TimelineChart'
 import type { BirthChartData, BirthChartRequest, PlanetPosition, TransitPos } from '../types/astrology'
-import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel, currentAreaEffect } from '../lib/jyotish'
+import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, activePratyantar, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel, currentAreaEffect } from '../lib/jyotish'
 
 const CHART_URL = `${SITE.apiUrl}/api/astrology/chart`
 const GEO_URL = 'https://nominatim.openstreetmap.org/search'
@@ -195,6 +195,7 @@ export default function Jyotish() {
   const barColor = (tone: string) => tone === 'favorable' ? 'rgb(var(--jade))' : tone === 'testing' ? 'rgb(var(--coral))' : 'rgb(var(--accent))'
   const reading = data ? readingFor(data, lang) : null
   const bhukti = data ? activeBhukti(data) : undefined
+  const prat = data ? activePratyantar(data) : undefined
 
   const curVarga = VARGAS.find((v) => v.n === vargaN) ?? VARGAS[4]
   const TABS: { id: Tab; label: string }[] = [
@@ -528,6 +529,27 @@ export default function Jyotish() {
                           return (
                             <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
                               <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(reading.lord, lang)} – {planetName(d.lord, lang)}</span>
+                              <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
+                            </li>
+                          )
+                        })}
+                      </ol>
+                    </div>
+                  )}
+
+                  {/* Pratyantar dasha (3rd level) of the current bhukti */}
+                  {data.pratyantardashas && data.pratyantardashas.length > 0 && (
+                    <div className="glass-card p-5">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-groovy text-lg text-fg">{lang === 'mm' ? 'လက်ရှိ ပစ္စန္တရဒသာ' : 'Current Pratyantar'}</h3>
+                        {prat && <span className="rounded-full bg-accent/15 px-3 py-1 text-sm font-semibold text-accent-light">{planetName(bhukti?.lord ?? reading.lord, lang)} – {planetName(prat.lord, lang)}</span>}
+                      </div>
+                      <ol className="mt-3 space-y-1.5">
+                        {data.pratyantardashas.map((d) => {
+                          const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
+                          return (
+                            <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                              <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(bhukti?.lord ?? reading.lord, lang)} – {planetName(d.lord, lang)}</span>
                               <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
                             </li>
                           )

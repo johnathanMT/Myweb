@@ -225,6 +225,18 @@ function renderFinding(f: Finding, lang: Lang): string {
       return lang === 'mm'
         ? `လက်ရှိ ${P} အန္တရ်ဒသာ (ဘုတ္တိ) ကလည်း ဤကဏ္ဍကို ထပ်ဆင့် ပံ့ပိုးထောက်ကူ ပေးနေသည်။`
         : `The current ${P} antardasha (bhukti) lends this area a further push right now.`
+    case 'pratyantarActive':
+      return lang === 'mm'
+        ? `${P} ပစ္စန္တရဒသာ (အသေးစိတ်ကာလ) ကလည်း ဤကဏ္ဍကို ယခုအချိန်တွင် နှိုးဆွပေးနေသည်။`
+        : `The ${P} pratyantar (sub-sub-period) is also stirring this area at this moment.`
+    case 'combust':
+      return lang === 'mm'
+        ? `${f.house} တန့်သခင် ${P} သည် နေနှင့်ပူး (အသ္တ) ဖြစ်နေသဖြင့် အားနည်းကာ အကျိုးပေး တိမ်မြုပ်တတ်သည်။`
+        : `The ${ordEn(f.house)}-house lord ${P} is combust (too close to the Sun), so its results are dimmed and need effort to surface.`
+    case 'retro':
+      return lang === 'mm'
+        ? `${f.house} တန့်သခင် ${P} သည် ဂြိုဟ်ပြန် (ဝက္ရ) ဖြစ်နေသဖြင့် အကျိုးများ နှောင့်နှေး၍ ပြန်လည်ကြိုးစားမှ ရတတ်သည်။`
+        : `The ${ordEn(f.house)}-house lord ${P} is retrograde — its gains come with delay and often a second attempt.`
     default:
       return ''
   }
@@ -299,6 +311,12 @@ export const toMmDigits = (n: number) => String(n).replace(/\d/g, (c) => MM_DIGI
 export function activeBhukti(data: BirthChartData): DashaPeriod | undefined {
   const now = Date.now()
   return data.antardashas?.find((d) => new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime())
+}
+
+/** The currently-running Pratyantar dasha (3rd level) within the active bhukti, if any. */
+export function activePratyantar(data: BirthChartData): DashaPeriod | undefined {
+  const now = Date.now()
+  return data.pratyantardashas?.find((d) => new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime())
 }
 
 // ── Life-timeline helpers (gochara / transits) ────────────────────────────────
