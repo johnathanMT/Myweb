@@ -35,6 +35,7 @@ export interface PlanetPosition {
   pada: number          // 1–4
   house: number         // 1–12
   retrograde: boolean
+  combust: boolean
   dignity: string
   navamsaSign: number   // D9 sign
   navamsaSignName: string

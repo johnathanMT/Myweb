@@ -25,7 +25,21 @@ const browserTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().
 const TZ_OPTIONS = [...new Set([browserTz, ...PRESETS.map((p) => p.tz), 'UTC'])]
 
 interface GeoResult { display_name: string; lat: string; lon: string }
-type Tab = 'reading' | 'timeline' | 'd1' | 'd9' | 'd10' | 'd7'
+type Tab = 'reading' | 'timeline' | 'd1' | 'vargas'
+
+const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = [
+  { n: 2, name: 'D2 · Hora', desc: { en: 'Wealth & resources.', mm: 'ဥစ္စာဓန နှင့် အရင်းအမြစ်။' } },
+  { n: 3, name: 'D3 · Drekkana', desc: { en: 'Siblings, courage, initiative.', mm: 'မောင်နှမ၊ ရဲစွမ်းသတ္တိ။' } },
+  { n: 4, name: 'D4 · Chaturthamsa', desc: { en: 'Property, home, fixed assets & fortune.', mm: 'အိုးအိမ်၊ အခြေပစ္စည်း၊ ကံ။' } },
+  { n: 7, name: 'D7 · Saptamsa', desc: { en: 'Children, progeny & legacy.', mm: 'သားသမီး၊ အမွေဆက်ခံမှု။' } },
+  { n: 9, name: 'D9 · Navamsa', desc: { en: 'Spouse, dharma — the fruit of the chart.', mm: 'အိမ်ထောင်ဖက်၊ ဓမ္မ — ဇာတာ၏ အသီးအပွင့်။' } },
+  { n: 10, name: 'D10 · Dasamsa', desc: { en: 'Career, profession & status.', mm: 'အသက်မွေးဝမ်းကျောင်း၊ ဂုဏ်အဆင့်။' } },
+  { n: 12, name: 'D12 · Dwadasamsa', desc: { en: 'Parents & ancestry.', mm: 'မိဘ နှင့် ဘိုးဘွား။' } },
+  { n: 16, name: 'D16 · Shodasamsa', desc: { en: 'Vehicles, comforts & luxuries.', mm: 'ယာဉ်၊ အိမ်သုံး အဆင်ပြေမှု။' } },
+  { n: 20, name: 'D20 · Vimsamsa', desc: { en: 'Spiritual practice & devotion.', mm: 'ဝိညာဉ်ရေး၊ ဘာသာရေး လေ့ကျင့်မှု။' } },
+  { n: 24, name: 'D24 · Chaturvimsamsa', desc: { en: 'Education & learning.', mm: 'ပညာရေး နှင့် သင်ယူမှု။' } },
+  { n: 60, name: 'D60 · Shashtiamsa', desc: { en: 'Overall karma — the most refined chart.', mm: 'အလုံးစုံ ကံ — အသိမ်မွေ့ဆုံး ဇာတာ။' } },
+]
 
 const deg = (d: number) => `${Math.floor(d)}°${String(Math.floor((d % 1) * 60)).padStart(2, '0')}'`
 const field = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-fg outline-none transition focus:border-accent/50'
@@ -86,6 +100,8 @@ export default function Jyotish() {
   const [error, setError] = useState('')
   const [tab, setTab] = useState<Tab>('reading')
   const [chartStyle, setChartStyle] = useState<ChartStyle>('diamond')
+  const [vargaN, setVargaN] = useState(9)
+  const [ayanamsa, setAyanamsa] = useState('lahiri')
   const [consent, setConsent] = useState(false)
 
   // Remedy / contact-the-Sayar form.
@@ -123,7 +139,7 @@ export default function Jyotish() {
       const [h, mi] = time.split(':').map(Number)
       const body: BirthChartRequest = {
         year: y, month: mo, day: d, hour: h || 0, minute: mi || 0, second: 0,
-        timeZone: tz, latitude: Number(lat), longitude: Number(lon), ayanamsa: 'lahiri',
+        timeZone: tz, latitude: Number(lat), longitude: Number(lon), ayanamsa,
       }
       const res = await fetch(CHART_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       const json = (await res.json().catch(() => null)) as { success?: boolean; data?: BirthChartData; message?: string } | null
@@ -180,9 +196,10 @@ export default function Jyotish() {
   const reading = data ? readingFor(data, lang) : null
   const bhukti = data ? activeBhukti(data) : undefined
 
+  const curVarga = VARGAS.find((v) => v.n === vargaN) ?? VARGAS[4]
   const TABS: { id: Tab; label: string }[] = [
     { id: 'reading', label: t.tabReading }, { id: 'timeline', label: t.tabTimeline }, { id: 'd1', label: t.tabD1 },
-    { id: 'd9', label: t.tabD9 }, { id: 'd10', label: t.tabD10 }, { id: 'd7', label: t.tabD7 },
+    { id: 'vargas', label: lang === 'mm' ? 'ခွဲဝေဇာတာ' : 'Vargas' },
   ]
 
   return (
@@ -270,6 +287,14 @@ export default function Jyotish() {
               {[...new Set([tz, ...TZ_OPTIONS])].map((z) => <option key={z} value={z} className="text-black">{z}</option>)}
             </select>
           </label>
+          <label className="mt-3 block"><span className={labelCls}>{lang === 'mm' ? 'အယနံသ (Ayanamsa)' : 'Ayanamsa'}</span>
+            <select value={ayanamsa} onChange={(e) => setAyanamsa(e.target.value)} className={field}>
+              <option value="lahiri" className="text-black">Lahiri (default)</option>
+              <option value="raman" className="text-black">Raman</option>
+              <option value="kp" className="text-black">KP (Krishnamurti)</option>
+              <option value="truechitra" className="text-black">True Chitra</option>
+            </select>
+          </label>
 
           <div className="mt-4">
             <span className={labelCls}>Quick locations</span>
@@ -323,7 +348,7 @@ export default function Jyotish() {
                     </button>
                   ))}
                 </div>
-                {(tab === 'd1' || tab === 'd9' || tab === 'd10' || tab === 'd7') && (
+                {(tab === 'd1' || tab === 'vargas') && (
                   <div className="flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
                     {(['diamond', 'grid'] as ChartStyle[]).map((s) => (
                       <button key={s} type="button" onClick={() => setChartStyle(s)}
@@ -588,7 +613,7 @@ export default function Jyotish() {
                       <tbody>
                         {data.planets.map((p) => (
                           <tr key={p.name} className="border-t border-white/5 hover:bg-white/[0.03]">
-                            <td className="px-4 py-2.5 font-medium text-fg">{planetName(p.name, lang)}{p.retrograde && <span className="ml-1 text-jade">℞</span>}</td>
+                            <td className="px-4 py-2.5 font-medium text-fg">{planetName(p.name, lang)}{p.retrograde && <span className="ml-1 text-jade" title="Retrograde">℞</span>}{p.combust && <span className="ml-1 text-coral" title="Combust (asta)">☀</span>}</td>
                             <td className="px-4 py-2.5 text-fg/90">{signLabel(p.sign, lang)}</td>
                             <td className="px-4 py-2.5 font-mono text-xs text-muted">{deg(p.degreeInSign)}</td>
                             <td className="px-4 py-2.5 text-fg/90">{p.nakshatraName} <span className="text-muted">({p.pada})</span></td>
@@ -602,17 +627,19 @@ export default function Jyotish() {
                 </div>
               )}
 
-              {tab === 'd9' && (
-                <VargaPanel data={data} lang={lang} signOf={(p) => p.navamsaSign} lagnaSign={data.ascendant.navamsaSign}
-                  title="Navamsa · D9" subtitle={`Lagna: ${signLabel(data.ascendant.navamsaSign, lang)}`} desc={t.d9Desc} chartStyle={chartStyle} />
-              )}
-              {tab === 'd10' && (
-                <VargaPanel data={data} lang={lang} signOf={(p) => p.vargas.D10} lagnaSign={vargaSign(data.ascendant.longitude, 10)}
-                  title="Dasamsa · D10" subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, 10), lang)}`} desc={t.d10Desc} chartStyle={chartStyle} />
-              )}
-              {tab === 'd7' && (
-                <VargaPanel data={data} lang={lang} signOf={(p) => p.vargas.D7} lagnaSign={vargaSign(data.ascendant.longitude, 7)}
-                  title="Saptamsa · D7" subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, 7), lang)}`} desc={t.d7Desc} chartStyle={chartStyle} />
+              {tab === 'vargas' && (
+                <div className="space-y-4">
+                  <div className="no-print flex flex-wrap items-center gap-2">
+                    <span className={labelCls}>{lang === 'mm' ? 'ခွဲဝေဇာတာ ရွေးရန်' : 'Divisional chart'}</span>
+                    <select value={vargaN} onChange={(e) => setVargaN(Number(e.target.value))}
+                      className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-fg outline-none focus:border-accent/50">
+                      {VARGAS.map((v) => <option key={v.n} value={v.n} className="text-black">{v.name}</option>)}
+                    </select>
+                  </div>
+                  <VargaPanel data={data} lang={lang} signOf={(p) => p.vargas['D' + vargaN] ?? p.sign} lagnaSign={vargaSign(data.ascendant.longitude, vargaN)}
+                    title={curVarga.name} subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, vargaN), lang)}`}
+                    desc={lang === 'mm' ? curVarga.desc.mm : curVarga.desc.en} chartStyle={chartStyle} />
+                </div>
               )}
 
               {/* Remedy (yatra) — contact the Sayar */}

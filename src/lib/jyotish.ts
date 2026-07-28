@@ -20,6 +20,11 @@ export function vargaSign(lon: number, varga: number): number {
     case 9: return Math.floor(lon / (30 / 9)) % 12
     case 10: return ((odd ? rasi : (rasi + 8) % 12) + Math.floor(deg / 3)) % 12
     case 12: return (rasi + Math.floor(deg / 2.5)) % 12
+    case 4: return (rasi + Math.floor(deg / 7.5) * 3) % 12
+    case 16: { const s = rasi % 3 === 0 ? 0 : rasi % 3 === 1 ? 4 : 8; return (s + Math.floor(deg / 1.875)) % 12 }
+    case 20: { const s = rasi % 3 === 0 ? 0 : rasi % 3 === 1 ? 8 : 4; return (s + Math.floor(deg / 1.5)) % 12 }
+    case 24: { const s = odd ? 4 : 3; return (s + Math.floor(deg / 1.25)) % 12 }
+    case 60: return (rasi + Math.floor(deg * 2)) % 12
     default: return rasi
   }
 }
