@@ -1354,3 +1354,13 @@ html[data-theme="light"] .glass-card:hover { border-color: color-mix(in srgb, va
 /* headings dark + no neon glow in light */
 html[data-theme="light"] .section-title { color: rgb(var(--fg)); text-shadow: none; }
 html[data-theme="light"] .section-subtitle { color: rgb(var(--muted)); }
+
+/* ── Print / PDF export — hide chrome, force a clean light page. The Jyotish
+   page also switches to the light theme before printing so token colours stay
+   readable on paper. ── */
+@media print {
+  header, footer, .no-print, [aria-hidden="true"] { display: none !important; }
+  body, #root { background: #fff !important; }
+  .glass-card { box-shadow: none !important; border: 1px solid #ccc !important; background: #fff !important; backdrop-filter: none !important; }
+  .section-container { padding-top: 0 !important; }
+}

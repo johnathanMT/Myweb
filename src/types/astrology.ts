@@ -17,6 +17,8 @@ export interface PlanetStrength {
   ucchaBala: number
   digBala: number
   naisargikaBala: number
+  pakshaBala: number
+  drikBala: number
   totalVirupas: number
   totalRupas: number
 }
@@ -71,9 +73,16 @@ export interface DashaPeriod {
   years: number
 }
 
+export interface Yoga {
+  name: string
+  description: string
+  planets: string[]
+}
+
 export interface BirthChartData {
   ascendant: AscendantInfo
   planets: PlanetPosition[]
   dashas: DashaPeriod[]
+  yogas: Yoga[]
   meta: ChartMeta
 }

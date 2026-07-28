@@ -1,41 +1,95 @@
-import { useState, type FormEvent } from 'react'
-import { Sparkles, MapPin, Loader2 } from 'lucide-react'
+import { useRef, useState, type FormEvent } from 'react'
+import { Sparkles, MapPin, Loader2, Search, Download, Star, Info } from 'lucide-react'
+import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
-import type { BirthChartData, BirthChartRequest } from '../types/astrology'
+import type { BirthChartData, BirthChartRequest, PlanetPosition } from '../types/astrology'
+import { JT, type Lang, vargaSign, signLabel, planetName, readingFor } from '../lib/jyotish'
 
 const CHART_URL = `${SITE.apiUrl}/api/astrology/chart`
+const GEO_URL = 'https://nominatim.openstreetmap.org/search'
 
-// Preset cities so the MVP works without a geocoder (autocomplete = later phase).
 interface Preset { label: string; lat: number; lon: number; tz: string }
 const PRESETS: Preset[] = [
   { label: 'Yangon', lat: 16.8409, lon: 96.1735, tz: 'Asia/Yangon' },
+  { label: 'Mandalay', lat: 21.9588, lon: 96.0891, tz: 'Asia/Yangon' },
   { label: 'Tokyo', lat: 35.6762, lon: 139.6503, tz: 'Asia/Tokyo' },
   { label: 'Bangkok', lat: 13.7563, lon: 100.5018, tz: 'Asia/Bangkok' },
   { label: 'New Delhi', lat: 28.6139, lon: 77.209, tz: 'Asia/Kolkata' },
   { label: 'Singapore', lat: 1.3521, lon: 103.8198, tz: 'Asia/Singapore' },
-  { label: 'London', lat: 51.5074, lon: -0.1278, tz: 'Europe/London' },
-  { label: 'New York', lat: 40.7128, lon: -74.006, tz: 'America/New_York' },
 ]
 const browserTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { return 'UTC' } })()
 const TZ_OPTIONS = [...new Set([browserTz, ...PRESETS.map((p) => p.tz), 'UTC'])]
 
+interface GeoResult { display_name: string; lat: string; lon: string }
+type Tab = 'reading' | 'd1' | 'd9' | 'd10' | 'd7'
+
 const deg = (d: number) => `${Math.floor(d)}°${String(Math.floor((d % 1) * 60)).padStart(2, '0')}'`
 const field = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-fg outline-none transition focus:border-accent/50'
 const labelCls = 'block font-mono text-[11px] uppercase tracking-wider text-muted'
-const SIGN_ABBR = ['Ar', 'Ta', 'Ge', 'Cn', 'Le', 'Vi', 'Li', 'Sc', 'Sg', 'Cp', 'Aq', 'Pi']
+
+// Small varga panel: chart + description + planets-in-this-varga table.
+function VargaPanel({ data, lang, signOf, lagnaSign, title, subtitle, desc }: {
+  data: BirthChartData; lang: Lang; signOf: (p: PlanetPosition) => number; lagnaSign: number
+  title: string; subtitle: string; desc: string
+}) {
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <div className="glass-card p-5"><KundliChart data={data} signFor={signOf} lagnaSign={lagnaSign} title={title} subtitle={subtitle} /></div>
+      <div className="glass-card p-5">
+        <p className="mb-3 text-sm leading-relaxed text-muted">{desc}</p>
+        <p className={labelCls}>{JT[lang].planetsIn}</p>
+        <ul className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+          {data.planets.map((p) => (
+            <li key={p.name} className="flex justify-between gap-2">
+              <span className="text-fg/90">{planetName(p.name, lang)}</span>
+              <span className="text-accent-light">{signLabel(signOf(p), lang)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
 
 export default function Jyotish() {
+  const [lang, setLang] = useState<Lang>('en')
+  const t = JT[lang]
+
   const [date, setDate] = useState('1998-01-01')
   const [time, setTime] = useState('12:00')
   const [lat, setLat] = useState('16.8409')
   const [lon, setLon] = useState('96.1735')
   const [tz, setTz] = useState(browserTz)
+  const [place, setPlace] = useState('')
+  const [results, setResults] = useState<GeoResult[]>([])
+  const [searching, setSearching] = useState(false)
+  const debTimer = useRef<number | undefined>(undefined)
+
   const [data, setData] = useState<BirthChartData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [tab, setTab] = useState<Tab>('reading')
 
-  const applyPreset = (p: Preset) => { setLat(String(p.lat)); setLon(String(p.lon)); setTz(p.tz) }
+  const onPlaceChange = (v: string) => {
+    setPlace(v)
+    window.clearTimeout(debTimer.current)
+    if (v.trim().length < 3) { setResults([]); return }
+    debTimer.current = window.setTimeout(async () => {
+      setSearching(true)
+      try {
+        const r = await fetch(`${GEO_URL}?format=json&limit=5&q=${encodeURIComponent(v)}`, { headers: { Accept: 'application/json' } })
+        const j = (await r.json()) as GeoResult[]
+        setResults(Array.isArray(j) ? j : [])
+      } catch { setResults([]) } finally { setSearching(false) }
+    }, 450)
+  }
+  const selectPlace = (g: GeoResult) => {
+    const la = Number(g.lat), lo = Number(g.lon)
+    setLat(String(la)); setLon(String(lo)); setPlace(g.display_name.split(',').slice(0, 2).join(',').trim()); setResults([])
+    try { setTz(tzlookup(la, lo)) } catch { /* keep */ }
+  }
+  const applyPreset = (p: Preset) => { setLat(String(p.lat)); setLon(String(p.lon)); setTz(p.tz); setPlace(p.label); setResults([]) }
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -47,52 +101,108 @@ export default function Jyotish() {
         year: y, month: mo, day: d, hour: h || 0, minute: mi || 0, second: 0,
         timeZone: tz, latitude: Number(lat), longitude: Number(lon), ayanamsa: 'lahiri',
       }
-      const res = await fetch(CHART_URL, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-      })
+      const res = await fetch(CHART_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       const json = (await res.json().catch(() => null)) as { success?: boolean; data?: BirthChartData; message?: string } | null
       if (!res.ok || !json?.success || !json.data) throw new Error(json?.message || `Failed (${res.status})`)
-      setData(json.data)
+      setData(json.data); setTab('reading')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not compute the chart.')
     } finally { setLoading(false) }
   }
 
+  const savePdf = () => {
+    const html = document.documentElement
+    const prev = html.getAttribute('data-theme') || 'dark'
+    html.setAttribute('data-theme', 'light')
+    const restore = () => { html.setAttribute('data-theme', prev); window.removeEventListener('afterprint', restore) }
+    window.addEventListener('afterprint', restore)
+    setTimeout(() => window.print(), 60)
+  }
+
   const moon = data?.planets.find((p) => p.name === 'Moon')
   const now = Date.now()
+  const reading = data ? readingFor(data, lang) : null
+
+  const TABS: { id: Tab; label: string }[] = [
+    { id: 'reading', label: t.tabReading }, { id: 'd1', label: t.tabD1 },
+    { id: 'd9', label: t.tabD9 }, { id: 'd10', label: t.tabD10 }, { id: 'd7', label: t.tabD7 },
+  ]
+  const toneCls = (tone: string) => tone === 'favorable' ? 'border-jade/40 bg-jade/10' : tone === 'testing' ? 'border-coral/40 bg-coral/10' : 'border-white/10 bg-white/[0.03]'
 
   return (
     <section className="section-container">
-      <div className="mb-8">
-        <span className="section-badge">Vedic Astrology · Jyotish</span>
-        <h1 className="section-title flex items-center gap-3"><Sparkles className="text-accent" size={26} /> Rasi Chart Calculator</h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-muted">
-          Enter birth details to compute a sidereal (Lahiri) Rasi (D1) chart with Whole-Sign houses —
-          planetary signs, houses, nakshatra &amp; pada, the Moon (Chandra) chart, and the Vimshottari
-          dasha timeline. Powered by the Swiss Ephemeris.
-        </p>
+      {/* ── Sayar profile header ── */}
+      <div className="glass-card mb-6 flex flex-col items-center gap-5 p-6 text-center sm:flex-row sm:text-left">
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full ring-2 ring-accent/40" style={{ boxShadow: '0 0 30px -6px rgb(var(--accent) / 0.5)' }}>
+          <span className="absolute inset-0 flex items-center justify-center bg-card font-groovy text-2xl text-accent">ဘ</span>
+          <img src="/sayar.jpg" alt={t.sayar} className="relative h-full w-full object-cover" loading="lazy"
+            onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
+        </div>
+        <div className="flex-1">
+          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-accent-light">{t.sayarRole}</p>
+          <h1 className="font-groovy text-2xl text-fg sm:text-3xl">{t.sayar}</h1>
+          <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">{t.sayarTagline}</p>
+        </div>
+        <div className="no-print flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
+          {(['en', 'mm'] as Lang[]).map((l) => (
+            <button key={l} type="button" onClick={() => setLang(l)}
+              className={`rounded-full px-3 py-1 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
+              {l === 'en' ? 'EN' : 'မြန်မာ'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Intro: Chandra Lagna + Instructions ── */}
+      <div className="mb-6 grid gap-4 md:grid-cols-2 no-print">
+        <div className="glass-card p-5">
+          <h2 className="mb-2 flex items-center gap-2 font-groovy text-base text-fg"><Star size={16} className="text-accent" /> {t.chandraTitle}</h2>
+          <p className="text-sm leading-relaxed text-muted">{t.chandra}</p>
+        </div>
+        <div className="glass-card p-5">
+          <h2 className="mb-2 flex items-center gap-2 font-groovy text-base text-fg"><Info size={16} className="text-accent" /> {t.instrTitle}</h2>
+          <ul className="space-y-1.5 text-sm text-muted">
+            {[t.instr1, t.instr2, t.instr3].map((s, i) => (
+              <li key={i} className="flex gap-2"><span className="mt-0.5 text-accent-light">•</span><span className="leading-relaxed">{s}</span></li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
         {/* ── Form ── */}
-        <form onSubmit={submit} className="glass-card h-fit p-6">
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={submit} className="glass-card h-fit p-6 no-print">
+          <label className="relative block">
+            <span className={labelCls}>Birth place</span>
+            <span className="relative mt-1.5 block">
+              <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+              <input value={place} onChange={(e) => onPlaceChange(e.target.value)} placeholder="Search a city…"
+                className="w-full rounded-xl border border-white/15 bg-white/5 py-2.5 pl-9 pr-3 text-sm text-fg outline-none transition focus:border-accent/50" />
+              {searching && <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted" />}
+            </span>
+            {results.length > 0 && (
+              <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-white/15 bg-surface/95 backdrop-blur-md">
+                {results.map((g, i) => (
+                  <li key={i}><button type="button" onClick={() => selectPlace(g)}
+                    className="block w-full px-3 py-2 text-left text-xs text-fg/90 transition hover:bg-accent/15">{g.display_name}</button></li>
+                ))}
+              </ul>
+            )}
+          </label>
+
+          <div className="mt-3 grid grid-cols-2 gap-3">
             <label><span className={labelCls}>Date of birth</span>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={field} />
-            </label>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={field} /></label>
             <label><span className={labelCls}>Time (24h)</span>
-              <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required className={field} />
-            </label>
+              <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required className={field} /></label>
             <label><span className={labelCls}>Latitude</span>
-              <input type="number" step="any" value={lat} onChange={(e) => setLat(e.target.value)} required className={field} />
-            </label>
+              <input type="number" step="any" value={lat} onChange={(e) => setLat(e.target.value)} required className={field} /></label>
             <label><span className={labelCls}>Longitude</span>
-              <input type="number" step="any" value={lon} onChange={(e) => setLon(e.target.value)} required className={field} />
-            </label>
+              <input type="number" step="any" value={lon} onChange={(e) => setLon(e.target.value)} required className={field} /></label>
           </div>
           <label className="mt-3 block"><span className={labelCls}>Time zone</span>
             <select value={tz} onChange={(e) => setTz(e.target.value)} className={field}>
-              {TZ_OPTIONS.map((z) => <option key={z} value={z} className="text-black">{z}</option>)}
+              {[...new Set([tz, ...TZ_OPTIONS])].map((z) => <option key={z} value={z} className="text-black">{z}</option>)}
             </select>
           </label>
 
@@ -110,176 +220,137 @@ export default function Jyotish() {
 
           <button type="submit" disabled={loading}
             className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/20 transition hover:brightness-110 disabled:opacity-60">
-            {loading ? <><Loader2 size={16} className="animate-spin" /> Calculating…</> : 'Generate Chart'}
+            {loading ? <><Loader2 size={16} className="animate-spin" /> Calculating…</> : <><Sparkles size={16} /> Generate Chart</>}
           </button>
           {error && <p className="mt-3 rounded-xl border border-coral/40 bg-coral/10 px-3 py-2 font-mono text-xs text-coral">{error}</p>}
-          <p className="mt-4 font-mono text-[10px] leading-relaxed text-muted">
-            Traditional Jyotish knowledge, for interest &amp; study. Sidereal · Lahiri ayanamsa · Whole-Sign houses.
-          </p>
+          <p className="mt-4 font-mono text-[10px] leading-relaxed text-muted">{t.disclaimer}</p>
         </form>
 
         {/* ── Result ── */}
         <div>
           {!data && !loading && (
-            <div className="glass-card flex min-h-[300px] items-center justify-center p-8 text-center text-sm text-muted">
-              Enter birth details and generate the chart to see the Rasi &amp; Chandra diagrams, planetary table, and dasha timeline.
+            <div className="glass-card flex min-h-[300px] items-center justify-center p-8 text-center text-sm text-muted no-print">
+              {lang === 'mm' ? 'မွေးဖွားအချက်အလက်ထည့်၍ ဟောစာတမ်း၊ ဇာတာခွင်များ (D1/D9/D10/D7) ကြည့်ရှုပါ။' : 'Enter birth details to see the reading and the D1 / D9 / D10 / D7 charts.'}
             </div>
           )}
 
-          {data && (
-            <div className="space-y-6">
-              {/* Rasi + Chandra + Navamsa charts */}
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                <div className="glass-card p-5"><KundliChart data={data} /></div>
-                {moon && (
+          {data && reading && (
+            <div className="space-y-5">
+              {/* header + PDF + tabs */}
+              <div className="flex items-center justify-between gap-3 no-print">
+                <h2 className="font-groovy text-lg text-fg">{place || t.portalTitle}</h2>
+                <button type="button" onClick={savePdf}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs text-muted transition hover:border-accent/40 hover:text-fg">
+                  <Download size={14} /> Save PDF
+                </button>
+              </div>
+              <div className="no-print flex flex-wrap gap-2">
+                {TABS.map((tb) => (
+                  <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
+                    className={`rounded-full border px-4 py-1.5 font-mono text-xs transition ${tab === tb.id ? 'border-accent/60 bg-accent/15 text-accent-light' : 'border-white/12 bg-white/5 text-muted hover:text-fg'}`}>
+                    {tb.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* ── READING ── */}
+              {tab === 'reading' && (
+                <div className="space-y-5">
                   <div className="glass-card p-5">
-                    <KundliChart data={data} lagnaSign={moon.sign} title="Chandra · D1" subtitle={`Moon: ${moon.signName}`} />
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-groovy text-lg text-fg">{t.currentDasha}</h3>
+                      <span className="rounded-full bg-accent/15 px-3 py-1 text-sm font-semibold text-accent-light">{planetName(reading.lord, lang)}</span>
+                    </div>
+                    <p className="mt-2 text-xs text-muted">{t.readingNote}</p>
                   </div>
-                )}
-                <div className="glass-card p-5">
-                  <KundliChart data={data} signFor={(p) => p.navamsaSign} lagnaSign={data.ascendant.navamsaSign}
-                    title="Navamsa · D9" subtitle={`Lagna: ${data.ascendant.navamsaSignName}`} />
-                </div>
-              </div>
 
-              {/* Summary */}
-              <div className="glass-card p-5">
-                <h3 className="font-groovy mb-3 text-lg text-fg">Summary</h3>
-                <dl className="grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
-                  <div className="flex justify-between gap-3"><dt className="text-muted">Lagna (Ascendant)</dt>
-                    <dd className="font-medium text-fg">{data.ascendant.signName} · {deg(data.ascendant.degreeInSign)}</dd></div>
-                  {moon && (
-                    <div className="flex justify-between gap-3"><dt className="text-muted">Moon sign (Rashi)</dt>
-                      <dd className="font-medium text-fg">{moon.signName}</dd></div>
-                  )}
-                  {moon && (
-                    <div className="flex justify-between gap-3"><dt className="text-muted">Nakshatra</dt>
-                      <dd className="font-medium text-accent-light">{moon.nakshatraName} · pada {moon.pada}</dd></div>
-                  )}
-                  <div className="flex justify-between gap-3"><dt className="text-muted">Ayanamsa</dt>
-                    <dd className="text-fg">{data.meta.ayanamsa}</dd></div>
-                  <div className="flex justify-between gap-3"><dt className="text-muted">Houses</dt>
-                    <dd className="text-fg">{data.meta.houseSystem}</dd></div>
-                </dl>
-              </div>
-
-              {/* Planet table */}
-              <div className="glass-card overflow-x-auto p-1">
-                <table className="w-full border-collapse text-left text-sm">
-                  <thead className="font-mono text-[11px] uppercase tracking-wider text-muted">
-                    <tr>
-                      {['Planet', 'Sign', 'Degree', 'Nakshatra (pada)', 'House', 'Dignity'].map((h) => (
-                        <th key={h} className="px-4 py-3">{h}</th>
+                  <div className="glass-card p-5">
+                    <h3 className="mb-3 font-groovy text-lg text-fg">{t.lifeAreas}</h3>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {reading.areas.map((a) => (
+                        <div key={a.key} className={`rounded-xl border p-3 ${toneCls(a.tone)}`}>
+                          <p className="font-semibold text-fg">{a.label}</p>
+                          <p className="mt-1 text-xs leading-relaxed text-muted">{a.text}</p>
+                        </div>
                       ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.planets.map((p) => (
-                      <tr key={p.name} className="border-t border-white/5 hover:bg-white/[0.03]">
-                        <td className="px-4 py-2.5 font-medium text-fg">{p.name}{p.retrograde && <span className="ml-1 text-jade">℞</span>}</td>
-                        <td className="px-4 py-2.5 text-fg/90">{p.signName}</td>
-                        <td className="px-4 py-2.5 font-mono text-xs text-muted">{deg(p.degreeInSign)}</td>
-                        <td className="px-4 py-2.5 text-fg/90">{p.nakshatraName} <span className="text-muted">({p.pada})</span></td>
-                        <td className="px-4 py-2.5 font-mono text-xs text-muted">{p.house}</td>
-                        <td className="px-4 py-2.5">
-                          {p.dignity !== '-'
-                            ? <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] text-accent-light">{p.dignity}</span>
-                            : <span className="text-muted">—</span>}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </div>
+                  </div>
 
-              {/* Vimshottari Dasha timeline */}
-              {data.dashas.length > 0 && (
-                <div className="glass-card p-5">
-                  <h3 className="font-groovy mb-1 text-lg text-fg">Vimshottari Dasha</h3>
-                  <p className="mb-4 text-xs text-muted">Mahadasha periods from the Moon&apos;s nakshatra at birth · 120-year cycle.</p>
-                  <ol className="space-y-1.5">
-                    {data.dashas.map((d) => {
-                      const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
-                      return (
-                        <li key={d.startUtc + d.lord}
-                          className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
-                          <span className="flex items-center gap-2">
-                            <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{d.lord}</span>
-                            {active && <span className="rounded-full bg-accent/20 px-2 py-0.5 font-mono text-[10px] text-accent-light">current</span>}
-                          </span>
-                          <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc} · {d.years}y</span>
-                        </li>
-                      )
-                    })}
-                  </ol>
+                  {data.yogas.length > 0 && (
+                    <div className="glass-card p-5">
+                      <h3 className="mb-3 font-groovy text-lg text-fg">Yogas</h3>
+                      <ul className="space-y-2.5">
+                        {data.yogas.map((y) => (
+                          <li key={y.name} className="rounded-xl border border-white/8 bg-white/[0.03] p-3">
+                            <div className="flex items-center gap-2"><span className="font-semibold text-accent-light">{y.name}</span>
+                              <span className="font-mono text-[10px] text-muted">{y.planets.map((n) => planetName(n, lang)).join(' · ')}</span></div>
+                            <p className="mt-0.5 text-xs leading-relaxed text-muted">{y.description}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Dasha timeline */}
+                  <div className="glass-card p-5">
+                    <h3 className="mb-3 font-groovy text-lg text-fg">Vimshottari Dasha</h3>
+                    <ol className="space-y-1.5">
+                      {data.dashas.map((d) => {
+                        const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
+                        return (
+                          <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                            <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(d.lord, lang)}</span>
+                            <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
+                          </li>
+                        )
+                      })}
+                    </ol>
+                  </div>
                 </div>
               )}
 
-              {/* Divisional charts (Saptavarga) */}
-              <div className="glass-card overflow-x-auto p-1">
-                <div className="px-4 pt-3 font-groovy text-lg text-fg">Divisional Charts (Vargas)</div>
-                <table className="mt-2 w-full border-collapse text-left text-sm">
-                  <thead className="font-mono text-[11px] uppercase tracking-wider text-muted">
-                    <tr>
-                      <th className="px-4 py-2">Planet</th>
-                      {['D1', 'D2', 'D3', 'D7', 'D9', 'D10', 'D12'].map((v) => <th key={v} className="px-3 py-2">{v}</th>)}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.planets.map((p) => (
-                      <tr key={p.name} className="border-t border-white/5">
-                        <td className="px-4 py-2 font-medium text-fg">{p.name}</td>
-                        <td className="px-3 py-2 text-fg/90">{SIGN_ABBR[p.sign]}</td>
-                        <td className="px-3 py-2 text-fg/80">{SIGN_ABBR[p.vargas.D2]}</td>
-                        <td className="px-3 py-2 text-fg/80">{SIGN_ABBR[p.vargas.D3]}</td>
-                        <td className="px-3 py-2 text-fg/80">{SIGN_ABBR[p.vargas.D7]}</td>
-                        <td className="px-3 py-2 font-semibold text-accent-light">{SIGN_ABBR[p.navamsaSign]}</td>
-                        <td className="px-3 py-2 text-fg/80">{SIGN_ABBR[p.vargas.D10]}</td>
-                        <td className="px-3 py-2 text-fg/80">{SIGN_ABBR[p.vargas.D12]}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Drishti (aspects) */}
-                <div className="glass-card p-5">
-                  <h3 className="font-groovy mb-3 text-lg text-fg">Drishti (Aspects)</h3>
-                  <ul className="space-y-1.5 text-sm">
-                    {data.planets.map((p) => (
-                      <li key={p.name} className="flex flex-wrap items-baseline gap-x-2">
-                        <span className="w-16 shrink-0 font-medium text-fg">{p.name}</span>
-                        <span className="text-muted">→ houses {p.aspectsHouses.join(', ')}</span>
-                        {p.aspectsPlanets.length > 0 && <span className="text-accent-light">· {p.aspectsPlanets.join(', ')}</span>}
-                      </li>
-                    ))}
-                  </ul>
+              {/* ── D1 ── */}
+              {tab === 'd1' && (
+                <div className="space-y-5">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="glass-card p-5"><KundliChart data={data} /></div>
+                    {moon && <div className="glass-card p-5"><KundliChart data={data} lagnaSign={moon.sign} title="Chandra · D1" subtitle={`Moon: ${moon.signName}`} /></div>}
+                  </div>
+                  <div className="glass-card p-5"><p className="text-sm leading-relaxed text-muted">{t.d1Desc}</p></div>
+                  <div className="glass-card overflow-x-auto p-1">
+                    <table className="w-full border-collapse text-left text-sm">
+                      <thead className="font-mono text-[11px] uppercase tracking-wider text-muted">
+                        <tr>{['Planet', 'Sign', 'Degree', 'Nakshatra (pada)', 'House', 'Dignity'].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}</tr>
+                      </thead>
+                      <tbody>
+                        {data.planets.map((p) => (
+                          <tr key={p.name} className="border-t border-white/5 hover:bg-white/[0.03]">
+                            <td className="px-4 py-2.5 font-medium text-fg">{planetName(p.name, lang)}{p.retrograde && <span className="ml-1 text-jade">℞</span>}</td>
+                            <td className="px-4 py-2.5 text-fg/90">{signLabel(p.sign, lang)}</td>
+                            <td className="px-4 py-2.5 font-mono text-xs text-muted">{deg(p.degreeInSign)}</td>
+                            <td className="px-4 py-2.5 text-fg/90">{p.nakshatraName} <span className="text-muted">({p.pada})</span></td>
+                            <td className="px-4 py-2.5 font-mono text-xs text-muted">{p.house}</td>
+                            <td className="px-4 py-2.5">{p.dignity !== '-' ? <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] text-accent-light">{p.dignity}</span> : <span className="text-muted">—</span>}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
+              )}
 
-                {/* Strength (partial Shadbala) */}
-                <div className="glass-card p-5">
-                  <h3 className="font-groovy mb-1 text-lg text-fg">Strength</h3>
-                  <p className="mb-3 text-xs text-muted">Partial Shadbala · Uccha + Dig + Naisargika bala (rupas).</p>
-                  <ul className="space-y-2">
-                    {data.planets.filter((p) => p.strength).map((p) => {
-                      const rupas = p.strength!.totalRupas
-                      const pct = Math.max(4, Math.min(100, (rupas / 3) * 100))
-                      return (
-                        <li key={p.name}>
-                          <div className="mb-0.5 flex justify-between text-xs">
-                            <span className="font-medium text-fg">{p.name}</span>
-                            <span className="font-mono text-muted">{rupas.toFixed(2)} R</span>
-                          </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                            <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
-                          </div>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
-              </div>
+              {tab === 'd9' && (
+                <VargaPanel data={data} lang={lang} signOf={(p) => p.navamsaSign} lagnaSign={data.ascendant.navamsaSign}
+                  title="Navamsa · D9" subtitle={`Lagna: ${signLabel(data.ascendant.navamsaSign, lang)}`} desc={t.d9Desc} />
+              )}
+              {tab === 'd10' && (
+                <VargaPanel data={data} lang={lang} signOf={(p) => p.vargas.D10} lagnaSign={vargaSign(data.ascendant.longitude, 10)}
+                  title="Dasamsa · D10" subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, 10), lang)}`} desc={t.d10Desc} />
+              )}
+              {tab === 'd7' && (
+                <VargaPanel data={data} lang={lang} signOf={(p) => p.vargas.D7} lagnaSign={vargaSign(data.ascendant.longitude, 7)}
+                  title="Saptamsa · D7" subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, 7), lang)}`} desc={t.d7Desc} />
+              )}
             </div>
           )}
         </div>
