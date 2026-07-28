@@ -93,14 +93,16 @@ html[data-theme="dark"] .neon-glow {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
+/* Laptop & up: keep the smallest reading labels readable (≥ 11px). */
+.vedin-page .text-\[10px\] { font-size: 11px; }
+
 /* Larger, more readable reading text on phones (Burmese-friendly). */
 @media (max-width: 640px) {
-  .vedin-page .text-xs { font-size: 0.82rem; line-height: 1.8; }
-  .vedin-page .text-sm { font-size: 0.95rem; line-height: 1.85; }
-  .vedin-page .text-\[11px\] { font-size: 0.72rem; }
+  .vedin-page .text-xs { font-size: 0.9rem; line-height: 1.85; }
+  .vedin-page .text-sm { font-size: 1rem; line-height: 1.9; }
+  .vedin-page .text-\[11px\] { font-size: 0.82rem; }
+  .vedin-page .text-\[10px\] { font-size: 0.8rem; }
 }
-/* SVG charts always fit their card on any screen. */
-.vedin-page svg.chart-fit { width: 100%; height: auto; max-width: 100%; display: block; }
 html[data-theme="dark"] .vedin-page .glass-card {
   border-color: rgb(var(--accent) / 0.20);
   background: linear-gradient(180deg, rgb(var(--card) / 0.92), rgb(var(--surface) / 0.82));

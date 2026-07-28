@@ -554,10 +554,10 @@ export default function Jyotish() {
                     </div>
                   </div>
 
-                  {/* Per-area deep-dive — side by side (natal + current transits) */}
+                  {/* Per-area deep-dive — three across (natal + current transits) */}
                   <div className="space-y-3">
                     <h3 className="font-groovy text-lg text-fg">{t.lifeAreas}</h3>
-                    <div className="grid gap-4 lg:grid-cols-2">
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                       {reading.areas.map((a) => {
                         const lp = a.lord ? findPlanet(data, a.lord) : undefined
                         const cur = currentAreaEffect(data, a.key, lang)
@@ -656,14 +656,15 @@ export default function Jyotish() {
                     </div>
                   </div>
 
-                  {/* Dasha timeline */}
+                  {/* Dasha periods — side by side (Maha · Antardasha · Pratyantar) */}
+                  <div className="grid gap-4 lg:grid-cols-3">
                   <div className="glass-card p-5">
                     <h3 className="mb-3 font-groovy text-lg text-fg">Vimshottari Dasha</h3>
                     <ol className="space-y-1.5">
                       {data.dashas.map((d) => {
                         const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
                         return (
-                          <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                          <li key={d.startUtc + d.lord} className={`flex flex-col gap-0.5 rounded-xl px-3 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
                             <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(d.lord, lang)}</span>
                             <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
                           </li>
@@ -683,7 +684,7 @@ export default function Jyotish() {
                         {data.antardashas.map((d) => {
                           const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
                           return (
-                            <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                            <li key={d.startUtc + d.lord} className={`flex flex-col gap-0.5 rounded-xl px-3 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
                               <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(reading.lord, lang)} – {planetName(d.lord, lang)}</span>
                               <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
                             </li>
@@ -704,7 +705,7 @@ export default function Jyotish() {
                         {data.pratyantardashas.map((d) => {
                           const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
                           return (
-                            <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                            <li key={d.startUtc + d.lord} className={`flex flex-col gap-0.5 rounded-xl px-3 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
                               <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(bhukti?.lord ?? reading.lord, lang)} – {planetName(d.lord, lang)}</span>
                               <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
                             </li>
@@ -713,6 +714,7 @@ export default function Jyotish() {
                       </ol>
                     </div>
                   )}
+                  </div>
                 </div>
               )}
 
