@@ -69,6 +69,12 @@ export const PROJECTS = [
     icon: 'fab fa-github', color: '#e2e2f0',
     url: '/github', ext: false,
   },
+  {
+    id: 'jyotish', title: 'Vedin — Vedic Astrology',
+    desc: 'A sidereal Jyotish portal — Rasi & Navamsa charts, Vimshottari dasha, a whole-life timeline and Shadbala strengths.',
+    icon: 'fas fa-star-and-crescent', color: '#eab308',
+    url: '/jyotish', ext: false,             // in-app React route
+  },
 ]
 
 // The 12 BURMESE LUNAR MONTHS and their signature festivals (calendar order,

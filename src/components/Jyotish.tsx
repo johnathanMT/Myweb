@@ -4,6 +4,8 @@ import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
 import DiamondChart from './DiamondChart'
+import AreaRadar from './AreaRadar'
+import TimelineChart from './TimelineChart'
 import type { BirthChartData, BirthChartRequest, PlanetPosition, TransitPos } from '../types/astrology'
 import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel } from '../lib/jyotish'
 
@@ -136,6 +138,7 @@ export default function Jyotish() {
   const moon = data?.planets.find((p) => p.name === 'Moon')
   const now = Date.now()
   const thisYear = new Date().getFullYear()
+  const barColor = (tone: string) => tone === 'favorable' ? 'rgb(var(--jade))' : tone === 'testing' ? 'rgb(var(--coral))' : 'rgb(var(--accent))'
   const reading = data ? readingFor(data, lang) : null
   const bhukti = data ? activeBhukti(data) : undefined
 
@@ -323,16 +326,23 @@ export default function Jyotish() {
                     <p className="mt-2 text-xs text-muted">{t.readingNote}</p>
                   </div>
 
-                  {/* Seven-area summary grid */}
+                  {/* Seven-area overview: radar chart + score bars */}
                   <div className="glass-card p-5">
                     <h3 className="mb-3 font-groovy text-lg text-fg">{lang === 'mm' ? 'ဘဝကဏ္ဍ ၇ ခု' : 'Seven Life Areas'}</h3>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
-                      {reading.areas.map((a) => (
-                        <div key={a.key} className="flex items-center justify-between gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-3 py-2">
-                          <span className="text-xs text-fg/90">{a.label}</span>
-                          <span className="whitespace-nowrap font-mono text-[11px]"><span className="text-accent-light">{'★'.repeat(a.stars)}</span><span className="text-muted">{'☆'.repeat(5 - a.stars)}</span></span>
-                        </div>
-                      ))}
+                    <div className="grid gap-5 md:grid-cols-2 md:items-center">
+                      <AreaRadar areas={reading.areas} />
+                      <ul className="space-y-2.5">
+                        {reading.areas.map((a, i) => (
+                          <li key={a.key} className="flex items-center gap-2.5">
+                            <span className="w-4 shrink-0 font-mono text-[10px] text-muted">{i + 1}</span>
+                            <span className="w-24 shrink-0 truncate text-xs text-fg/90 sm:w-32" title={a.label}>{a.label}</span>
+                            <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                              <span className="block h-full rounded-full" style={{ width: `${Math.max(a.score, 4)}%`, background: barColor(a.tone) }} />
+                            </span>
+                            <span className="w-6 shrink-0 text-right font-mono text-[10px] text-muted">{a.score}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
 
@@ -347,6 +357,7 @@ export default function Jyotish() {
                             <h4 className="font-groovy text-base text-fg">{a.label}</h4>
                             <span className="font-mono text-xs"><span className="text-accent-light">{'★'.repeat(a.stars)}</span><span className="text-muted">{'☆'.repeat(5 - a.stars)}</span> <span className="text-muted">{a.score}/100</span></span>
                           </div>
+                          <span className="mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full" style={{ width: `${Math.max(a.score, 4)}%`, background: barColor(a.tone) }} /></span>
 
                           {lp && (
                             <div className="mt-3 grid gap-2 sm:grid-cols-3">
@@ -453,6 +464,9 @@ export default function Jyotish() {
                       <span className="rounded bg-coral/15 px-1.5 py-0.5 text-coral">{lang === 'mm' ? 'သတိ / သာဓေသတီ' : 'caution / Sade Sati'}</span>
                       <span className="text-muted">{lang === 'mm' ? '· ဂြိုဟ်သွားအိမ်ကို စန်းမှ ရေတွက်' : '· transit house counted from the Moon'}</span>
                     </div>
+                  </div>
+                  <div className="glass-card p-5">
+                    <TimelineChart timeline={data.timeline} currentAge={data.timeline.find((yy) => yy.year === thisYear)?.age ?? -1} lang={lang} />
                   </div>
                   <div className="glass-card overflow-x-auto p-1">
                     <table className="w-full border-collapse text-left text-xs">
