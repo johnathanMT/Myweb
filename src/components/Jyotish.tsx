@@ -8,6 +8,7 @@ import AreaRadar from './AreaRadar'
 import TimelineChart from './TimelineChart'
 import AshtakavargaView from './AshtakavargaView'
 import ShadbalaView from './ShadbalaView'
+import CustomerPanel, { type SavedChart } from './CustomerPanel'
 import type { BirthChartData, BirthChartRequest, PlanetPosition, TransitPos } from '../types/astrology'
 import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, activePratyantar, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel, currentAreaEffect } from '../lib/jyotish'
 
@@ -138,6 +139,16 @@ export default function Jyotish() {
   const [pdfEmail, setPdfEmail] = useState('')
   const [pdfState, setPdfState] = useState<'idle' | 'sending' | 'pending' | 'error'>('idle')
 
+  // Customer account (email-only sign-up); token drives per-account chart saving.
+  const [customerToken, setCustomerToken] = useState<string | null>(null)
+  const loadSavedChart = (c: SavedChart) => {
+    setName(c.name || ''); setGender(c.gender === 'female' ? 'female' : 'male')
+    setDate(c.birthDate || date); setTime(c.birthTime || time)
+    setLat(String(c.latitude)); setLon(String(c.longitude))
+    if (c.timeZone) setTz(c.timeZone)
+    setPlace(c.name ? `${c.name} · saved` : 'Saved location'); setPlaceConfirmed(true)
+  }
+
   const onPlaceChange = (v: string) => {
     setPlace(v)
     setPlaceConfirmed(false)   // typing invalidates until a result is chosen
@@ -180,6 +191,16 @@ export default function Jyotish() {
       if (consent) {
         fetch(`${SITE.apiUrl}/api/astrology/save-chart`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name.trim(), gender, birthDate: date, birthTime: time, timeZone: tz,
+            latitude: Number(lat), longitude: Number(lon), nayNan: naynan(date, time)?.num ?? 0, consent: true,
+          }),
+        }).catch(() => { })
+      }
+      // Logged-in customers: also save under their account (history + autofill).
+      if (customerToken) {
+        fetch(`${SITE.apiUrl}/api/customer/save-chart`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${customerToken}` },
           body: JSON.stringify({
             name: name.trim(), gender, birthDate: date, birthTime: time, timeZone: tz,
             latitude: Number(lat), longitude: Number(lon), nayNan: naynan(date, time)?.num ?? 0, consent: true,
@@ -252,7 +273,7 @@ export default function Jyotish() {
             style={{ background: 'conic-gradient(from 200deg, #eab308, #a855f7, #22d3ee, #eab308)', boxShadow: '0 0 30px -4px rgba(168,85,247,0.6), 0 0 22px -6px rgba(234,179,8,0.55)' }}>
             <div className="relative h-full w-full overflow-hidden rounded-full bg-card">
               <span className="absolute inset-0 flex items-center justify-center font-groovy text-3xl text-accent">ဘ</span>
-              <img src="./public/profile-grand.jpg" alt="Sayar Bhone Min Thike Din" className="relative h-full w-full object-cover" loading="lazy"
+              <img src="../public/sayar.jpg" alt="Sayar Bhone Min Thike Din" className="relative h-full w-full object-cover" loading="lazy"
                 onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
             </div>
           </div>
@@ -271,6 +292,11 @@ export default function Jyotish() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* ── Customer account (sign in / saved charts) ── */}
+      <div className="mb-6">
+        <CustomerPanel lang={lang} onAuthChange={setCustomerToken} onLoadChart={loadSavedChart} />
       </div>
 
       {/* ── Intro: Chandra Lagna + Instructions ── */}
