@@ -366,9 +366,9 @@ export default function Jyotish() {
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[380px_minmax(0,1fr)]">
-        {/* ── Form ── */}
-        <form onSubmit={submit} className="glass-card h-fit p-6 no-print">
+      <div className="space-y-8">
+        {/* ── Form (centered on top; results span the full page below) ── */}
+        <form onSubmit={submit} className="glass-card mx-auto w-full max-w-3xl p-6 no-print">
           <div className="mb-3 grid grid-cols-2 gap-3">
             <label><span className={labelCls}>{t.fldName} <span className="text-coral">*</span></span>
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder={lang === 'mm' ? 'အမည်' : 'Full name'}
@@ -557,7 +557,7 @@ export default function Jyotish() {
                   {/* Per-area deep-dive — three across (natal + current transits) */}
                   <div className="space-y-3">
                     <h3 className="font-groovy text-lg text-fg">{t.lifeAreas}</h3>
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {reading.areas.map((a) => {
                         const lp = a.lord ? findPlanet(data, a.lord) : undefined
                         const cur = currentAreaEffect(data, a.key, lang)
@@ -656,15 +656,15 @@ export default function Jyotish() {
                     </div>
                   </div>
 
-                  {/* Dasha periods — side by side (Maha · Antardasha · Pratyantar) */}
-                  <div className="grid gap-4 lg:grid-cols-3">
+                  {/* Dasha periods — two across, full page width */}
+                  <div className="grid gap-4 lg:grid-cols-2">
                   <div className="glass-card p-5">
                     <h3 className="mb-3 font-groovy text-lg text-fg">Vimshottari Dasha</h3>
                     <ol className="space-y-1.5">
                       {data.dashas.map((d) => {
                         const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
                         return (
-                          <li key={d.startUtc + d.lord} className={`flex flex-col gap-0.5 rounded-xl px-3 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                          <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
                             <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(d.lord, lang)}</span>
                             <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
                           </li>
@@ -684,7 +684,7 @@ export default function Jyotish() {
                         {data.antardashas.map((d) => {
                           const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
                           return (
-                            <li key={d.startUtc + d.lord} className={`flex flex-col gap-0.5 rounded-xl px-3 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                            <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
                               <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(reading.lord, lang)} – {planetName(d.lord, lang)}</span>
                               <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
                             </li>
@@ -705,7 +705,7 @@ export default function Jyotish() {
                         {data.pratyantardashas.map((d) => {
                           const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
                           return (
-                            <li key={d.startUtc + d.lord} className={`flex flex-col gap-0.5 rounded-xl px-3 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                            <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
                               <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(bhukti?.lord ?? reading.lord, lang)} – {planetName(d.lord, lang)}</span>
                               <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
                             </li>
