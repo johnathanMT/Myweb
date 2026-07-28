@@ -88,6 +88,10 @@ html[data-theme="dark"] .neon-glow {
 .vedin-page summary {
   line-height: 1.9;
 }
+
+/* Hide scrollbars on horizontally-scrolling strips (tab bars, tables). */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
 html[data-theme="dark"] .vedin-page .glass-card {
   border-color: rgb(var(--accent) / 0.20);
   background: linear-gradient(180deg, rgb(var(--card) / 0.92), rgb(var(--surface) / 0.82));

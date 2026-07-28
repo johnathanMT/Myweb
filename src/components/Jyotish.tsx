@@ -473,25 +473,28 @@ export default function Jyotish() {
                   <Download size={14} /> {lang === 'mm' ? 'PDF အပြည့်အစုံ ရယူရန်' : 'Download full PDF'}
                 </button>
               </div>
-              <div className="no-print flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap gap-2">
-                  {TABS.map((tb) => (
-                    <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
-                      className={`rounded-full border px-4 py-1.5 font-mono text-xs transition ${tab === tb.id ? 'border-accent/60 bg-accent/15 text-accent-light' : 'border-white/12 bg-white/5 text-muted hover:text-fg'}`}>
-                      {tb.label}
-                    </button>
-                  ))}
-                </div>
-                {(tab === 'd1' || tab === 'vargas') && (
-                  <div className="flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
-                    {(['diamond', 'grid'] as ChartStyle[]).map((s) => (
-                      <button key={s} type="button" onClick={() => setChartStyle(s)}
-                        className={`rounded-full px-3 py-1 font-mono text-[11px] transition ${chartStyle === s ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
-                        {s === 'diamond' ? (lang === 'mm' ? 'စိန်ပုံ' : 'Diamond') : (lang === 'mm' ? 'ဇယားကွက်' : 'Grid')}
+              <div className="no-print sticky top-14 z-30 -mx-1 border-b border-accent/20 px-1 py-2.5 backdrop-blur-md sm:top-16"
+                style={{ background: 'rgb(var(--space) / 0.85)' }}>
+                <div className="flex items-center gap-2">
+                  <div className="no-scrollbar flex flex-1 gap-1.5 overflow-x-auto whitespace-nowrap">
+                    {TABS.map((tb) => (
+                      <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
+                        className={`shrink-0 rounded-full border px-4 py-1.5 font-mono text-xs transition ${tab === tb.id ? 'border-accent/60 bg-accent/15 text-accent-light' : 'border-white/12 bg-white/5 text-muted hover:text-fg'}`}>
+                        {tb.label}
                       </button>
                     ))}
                   </div>
-                )}
+                  {(tab === 'd1' || tab === 'vargas') && (
+                    <div className="flex shrink-0 items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
+                      {(['diamond', 'grid'] as ChartStyle[]).map((s) => (
+                        <button key={s} type="button" onClick={() => setChartStyle(s)}
+                          className={`rounded-full px-2.5 py-1 font-mono text-[11px] transition ${chartStyle === s ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
+                          {s === 'diamond' ? (lang === 'mm' ? 'စိန်ပုံ' : 'Diamond') : (lang === 'mm' ? 'ဇယားကွက်' : 'Grid')}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* ── READING ── */}
@@ -783,8 +786,8 @@ export default function Jyotish() {
                     {moon && <div className="glass-card p-5"><ChartView style={chartStyle} data={data} lagnaSign={moon.sign} title="Chandra · D1" subtitle={`Moon: ${moon.signName}`} /></div>}
                   </div>
                   <div className="glass-card p-5"><p className="text-sm leading-relaxed text-muted">{t.d1Desc}</p></div>
-                  <div className="glass-card overflow-x-auto p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-                    <table className="w-full min-w-[560px] border-collapse text-left text-sm">
+                  <div className="glass-card my-2 overflow-x-auto rounded-lg border border-accent/20 p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <table className="w-full min-w-[650px] border-collapse text-left text-sm">
                       <thead className="font-mono text-[11px] uppercase tracking-wider text-muted">
                         <tr>{['Planet', 'Sign', 'Degree', 'Nakshatra (pada)', 'House', 'Dignity'].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}</tr>
                       </thead>

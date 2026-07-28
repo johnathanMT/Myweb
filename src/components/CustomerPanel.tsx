@@ -30,6 +30,21 @@ export default function CustomerPanel({ lang, onLoadChart, onAuthChange }: {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [charts, setCharts] = useState<SavedChart[]>([])
   const [editingName, setEditingName] = useState(false); const [newName, setNewName] = useState('')
+  const [needsVerify, setNeedsVerify] = useState(false); const [cooldown, setCooldown] = useState(0)
+
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const id = window.setInterval(() => setCooldown((c) => (c <= 1 ? 0 : c - 1)), 1000)
+    return () => window.clearInterval(id)
+  }, [cooldown])
+  const resendConfirm = async () => {
+    if (cooldown > 0) return
+    try {
+      await fetch(`${API}/api/customer/resend-confirmation`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim() }) })
+      setMsg({ ok: true, text: t('Confirmation email sent — check your inbox (and spam).', 'အတည်ပြု email ပို့ပြီးပါပြီ — inbox (နှင့် spam) ကို စစ်ပါ။') })
+      setCooldown(60)
+    } catch { setMsg({ ok: false, text: t('Could not send — try again.', 'ပို့၍မရပါ — ပြန်ကြိုးစားပါ။') }) }
+  }
 
   const t = (en: string, mm: string) => (lang === 'mm' ? mm : en)
   const persist = (tk: string) => { try { tk ? localStorage.setItem(CUST_TOKEN, tk) : localStorage.removeItem(CUST_TOKEN) } catch { /* ignore */ } }
@@ -57,8 +72,12 @@ export default function CustomerPanel({ lang, onLoadChart, onAuthChange }: {
       const r = await fetch(`${API}/api/customer/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim(), password: pw }) })
       const j = await r.json()
       if (!r.ok || !j?.data?.token) throw new Error(j?.message || 'Login failed')
-      setToken(j.data.token); persist(j.data.token); setModal(null); setPw(''); setPw2('')
-    } catch (err) { setMsg({ ok: false, text: err instanceof Error ? err.message : 'Login failed' }) } finally { setBusy(false) }
+      setToken(j.data.token); persist(j.data.token); setModal(null); setPw(''); setPw2(''); setNeedsVerify(false)
+    } catch (err) {
+      const text = err instanceof Error ? err.message : 'Login failed'
+      setMsg({ ok: false, text })
+      if (/confirm/i.test(text)) setNeedsVerify(true)   // unverified email → offer resend
+    } finally { setBusy(false) }
   }
   const signup = async (e: FormEvent) => {
     e.preventDefault()
@@ -157,7 +176,13 @@ export default function CustomerPanel({ lang, onLoadChart, onAuthChange }: {
                 {busy ? <Loader2 size={15} className="mx-auto animate-spin" /> : modal === 'login' ? t('Sign in', 'ဝင်မည်') : t('Create account', 'အကောင့်ဖွင့်မည်')}
               </button>
             </form>
-            <button type="button" onClick={() => { setModal(modal === 'login' ? 'signup' : 'login'); setMsg(null) }} className="mt-3 w-full text-center font-mono text-[11px] text-muted hover:text-fg">
+            {modal === 'login' && needsVerify && (
+              <button type="button" onClick={resendConfirm} disabled={cooldown > 0}
+                className="mt-3 w-full rounded-xl border border-accent/30 bg-accent/10 px-4 py-2 text-xs text-accent-light transition hover:bg-accent/20 disabled:opacity-50">
+                {cooldown > 0 ? t(`Resend in ${cooldown}s`, `${cooldown} စက္ကန့်အကြာ ပြန်ပို့`) : t('Resend confirmation email', 'အတည်ပြု email ပြန်ပို့ရန်')}
+              </button>
+            )}
+            <button type="button" onClick={() => { setModal(modal === 'login' ? 'signup' : 'login'); setMsg(null); setNeedsVerify(false) }} className="mt-3 w-full text-center font-mono text-[11px] text-muted hover:text-fg">
               {modal === 'login' ? t("No account? Sign up", 'အကောင့်မရှိသေးဘူးလား? ဖွင့်မည်') : t('Have an account? Sign in', 'အကောင့်ရှိပြီးသားလား? ဝင်မည်')}
             </button>
           </div>

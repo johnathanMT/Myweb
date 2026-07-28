@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, FileText, Mail, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, FileText, Mail, Trash2, X, Send, type LucideIcon } from 'lucide-react'
 import { SITE } from '../config/site'
 import AdminPoetryManager from './AdminPoetryManager'
 import type { Memory, EntityId } from '../types/api'
@@ -37,7 +37,9 @@ interface AdminRsvp {
   createdAt?: string
 }
 
-interface AdminRemedy { id: number; name: string; contact: string; area: string; message: string; birthInfo: string; handled: boolean; createdAt: string }
+interface AdminRemedy { id: number; name: string; contact: string; area: string; message: string; birthInfo: string; handled: boolean; status: string; notes: string; createdAt: string }
+const STATUSES = ['Pending', 'InProgress', 'Completed', 'Cancelled'] as const
+const statusColor = (s: string) => s === 'Completed' ? 'text-emerald-300' : s === 'Cancelled' ? 'text-rose-300' : s === 'InProgress' ? 'text-amber-300' : 'text-fg/80'
 interface AdminChart { id: number; name: string; gender: string; birthDate: string; birthTime: string; timeZone: string; location: string; nayNan: number; createdAt: string }
 interface AdminPdf { id: number; email: string; name: string; birthInfo: string; approvalStatus: string; createdAt: string }
 
@@ -105,12 +107,56 @@ export default function SanctuaryAdmin() {
     } finally { setLoading(false) }
   }
 
-  const toggleHandled = async (id: number) => {
+  const authJson = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+
+  const setStatus = async (id: number, status: string) => {
     try {
-      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/remedies/${id}/handled`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` } })
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/remedies/${id}/status`, { method: 'PATCH', headers: authJson, body: JSON.stringify({ status }) })
       if (!res.ok) throw new Error()
-      setRemedies((rs) => rs.map((r) => (r.id === id ? { ...r, handled: !r.handled } : r)))
+      setRemedies((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)))
     } catch { setError('Could not update status.') }
+  }
+  const saveNotes = async (id: number, notes: string) => {
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/remedies/${id}/notes`, { method: 'PATCH', headers: authJson, body: JSON.stringify({ notes }) })
+      if (!res.ok) throw new Error()
+      setRemedies((rs) => rs.map((r) => (r.id === id ? { ...r, notes } : r)))
+    } catch { setError('Could not save notes.') }
+  }
+  const deleteRemedy = async (id: number) => {
+    if (!window.confirm('Delete this request permanently?')) return
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/remedies/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) throw new Error()
+      setRemedies((rs) => rs.filter((r) => r.id !== id))
+    } catch { setError('Could not delete.') }
+  }
+  const deleteChart = async (id: number) => {
+    if (!window.confirm('Delete this saved chart permanently?')) return
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/charts/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) throw new Error()
+      setCharts((cs) => cs.filter((c) => c.id !== id))
+    } catch { setError('Could not delete.') }
+  }
+
+  // Reply / send-reading modal
+  const [reply, setReply] = useState<{ id: number; name: string; contact: string } | null>(null)
+  const [replySubject, setReplySubject] = useState('')
+  const [replyBody, setReplyBody] = useState('')
+  const [replyBusy, setReplyBusy] = useState(false)
+  const [replyMsg, setReplyMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const sendReply = async () => {
+    if (!reply || !replyBody.trim()) return
+    setReplyBusy(true); setReplyMsg(null)
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/remedies/${reply.id}/reply`, { method: 'POST', headers: authJson, body: JSON.stringify({ subject: replySubject.trim(), body: replyBody }) })
+      const data = (await res.json().catch(() => null)) as { success?: boolean; message?: string } | null
+      if (!res.ok || !data?.success) throw new Error(data?.message || 'Send failed')
+      setReplyMsg({ ok: true, text: 'Reading emailed to the client.' })
+      setRemedies((rs) => rs.map((r) => (r.id === reply.id ? { ...r, status: 'Completed' } : r)))
+      setReplyBody('')
+    } catch (err) { setReplyMsg({ ok: false, text: err instanceof Error ? err.message : 'Send failed' }) } finally { setReplyBusy(false) }
   }
 
   const [approving, setApproving] = useState<number | null>(null)
@@ -180,19 +226,19 @@ export default function SanctuaryAdmin() {
 
   const TabBtn = ({ id, icon: Icon, label }: { id: Tab; icon: LucideIcon; label: string }) => (
     <button type="button" onClick={() => setTab(id)}
-      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-xs transition ${tab === id ? 'border-amber-300/60 bg-amber-300/15 text-amber-100' : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10'}`}>
+      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-xs transition ${tab === id ? 'border-amber-300/60 bg-amber-300/15 text-amber-100' : 'border-fg/15 bg-fg/5 text-fg/70 hover:bg-fg/10'}`}>
       <Icon size={14} /> {label}
     </button>
   )
 
   return (
-    <div className="min-h-screen bg-[#0b0e1a] px-4 py-6 text-white sm:px-8">
+    <div className="min-h-screen bg-space px-4 py-6 text-fg sm:px-8">
       <div className="mx-auto max-w-5xl">
         <div className="flex items-center justify-between">
-          <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 font-mono text-xs text-white/80 transition hover:bg-white/10"><ArrowLeft size={15} /> Home</Link>
+          <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-fg/15 bg-fg/5 px-4 py-2 font-mono text-xs text-fg/80 transition hover:bg-fg/10"><ArrowLeft size={15} /> Home</Link>
           <h1 className="font-serif text-xl font-bold sm:text-2xl">Sanctuary · Admin</h1>
           {token ? (
-            <button onClick={logout} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 font-mono text-xs text-white/80 transition hover:bg-white/10"><LogOut size={14} /> Log out</button>
+            <button onClick={logout} className="inline-flex items-center gap-2 rounded-full border border-fg/15 bg-fg/5 px-4 py-2 font-mono text-xs text-fg/80 transition hover:bg-fg/10"><LogOut size={14} /> Log out</button>
           ) : <span className="w-[88px]" />}
         </div>
 
@@ -200,16 +246,16 @@ export default function SanctuaryAdmin() {
 
         {!token ? (
           /* ── LOGIN ── */
-          <form onSubmit={login} className="mx-auto mt-16 w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-7">
-            <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10"><Lock size={20} /></div>
+          <form onSubmit={login} className="mx-auto mt-16 w-full max-w-sm rounded-2xl border border-fg/10 bg-fg/5 p-7">
+            <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-fg/10"><Lock size={20} /></div>
             <h2 className="text-center font-serif text-lg font-bold">Admin sign in</h2>
             <label className="mt-5 block">
-              <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">Email</span>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base outline-none focus:border-amber-300/50 sm:py-2.5 sm:text-sm" />
+              <span className="font-mono text-[11px] uppercase tracking-wider text-fg/50">Email</span>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5 w-full rounded-xl border border-fg/15 bg-fg/5 px-4 py-3 text-base outline-none focus:border-amber-300/50 sm:py-2.5 sm:text-sm" />
             </label>
             <label className="mt-4 block">
-              <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">Password</span>
-              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base outline-none focus:border-amber-300/50 sm:py-2.5 sm:text-sm" />
+              <span className="font-mono text-[11px] uppercase tracking-wider text-fg/50">Password</span>
+              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5 w-full rounded-xl border border-fg/15 bg-fg/5 px-4 py-3 text-base outline-none focus:border-amber-300/50 sm:py-2.5 sm:text-sm" />
             </label>
             <button type="submit" disabled={loading} className="mt-5 w-full rounded-xl bg-gradient-to-r from-amber-300 to-rose-300 px-5 py-3 font-serif text-sm font-bold text-amber-950 transition hover:brightness-105 disabled:opacity-60">
               {loading ? 'Signing in…' : 'Sign in'}
@@ -232,18 +278,18 @@ export default function SanctuaryAdmin() {
             {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts' || tab === 'pdf') && (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
-                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="w-full rounded-xl border border-white/15 bg-white/5 py-3 pl-9 pr-4 text-base outline-none focus:border-amber-300/50 sm:py-2.5 sm:text-sm" />
+                <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg/40" />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="w-full rounded-xl border border-fg/15 bg-fg/5 py-3 pl-9 pr-4 text-base outline-none focus:border-amber-300/50 sm:py-2.5 sm:text-sm" />
               </div>
               {tab === 'farewell' && (
                 <button onClick={exportCsv} disabled={filteredRsvps.length === 0} className="inline-flex items-center gap-2 rounded-xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-2.5 font-mono text-xs text-emerald-100 transition hover:bg-emerald-300/20 disabled:opacity-50">
                   <Download size={14} /> CSV
                 </button>
               )}
-              <button onClick={() => load()} disabled={loading} className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 font-mono text-xs text-white/80 transition hover:bg-white/10 disabled:opacity-60">
+              <button onClick={() => load()} disabled={loading} className="inline-flex items-center gap-2 rounded-xl border border-fg/15 bg-fg/5 px-4 py-2.5 font-mono text-xs text-fg/80 transition hover:bg-fg/10 disabled:opacity-60">
                 <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
               </button>
-              <span className="font-mono text-xs text-white/50">{shown} / {total}</span>
+              <span className="font-mono text-xs text-fg/50">{shown} / {total}</span>
             </div>
             )}
 
@@ -253,7 +299,7 @@ export default function SanctuaryAdmin() {
             {/* ── ACCOUNT: change password ── */}
             {tab === 'account' && (
               <div className="mt-4 max-w-md">
-                <form onSubmit={changePassword} className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <form onSubmit={changePassword} className="rounded-2xl border border-fg/10 bg-fg/5 p-6">
                   <div className="mb-4 flex items-center gap-2">
                     <KeyRound size={18} className="text-jade-light" />
                     <h2 className="font-serif text-lg font-bold">Change password</h2>
@@ -262,13 +308,13 @@ export default function SanctuaryAdmin() {
                     <p className={`mb-4 rounded-xl border px-4 py-2.5 font-mono text-sm ${pwMsg.ok ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200' : 'border-rose-400/40 bg-rose-500/10 text-rose-200'}`}>{pwMsg.text}</p>
                   )}
                   <label className="block">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">Current password</span>
-                    <input type="password" required autoComplete="current-password" value={curPw} onChange={(e) => setCurPw(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base outline-none focus:border-jade/50 sm:py-2.5 sm:text-sm" />
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-fg/50">Current password</span>
+                    <input type="password" required autoComplete="current-password" value={curPw} onChange={(e) => setCurPw(e.target.value)} className="mt-1.5 w-full rounded-xl border border-fg/15 bg-fg/5 px-4 py-3 text-base outline-none focus:border-jade/50 sm:py-2.5 sm:text-sm" />
                   </label>
                   <label className="mt-4 block">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">New password</span>
-                    <input type="password" required autoComplete="new-password" value={newPw} onChange={(e) => setNewPw(e.target.value)} className="mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base outline-none focus:border-jade/50 sm:py-2.5 sm:text-sm" />
-                    <span className="mt-1.5 block font-mono text-[11px] text-white/40">8+ chars with upper, lower, digit &amp; symbol; different from current.</span>
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-fg/50">New password</span>
+                    <input type="password" required autoComplete="new-password" value={newPw} onChange={(e) => setNewPw(e.target.value)} className="mt-1.5 w-full rounded-xl border border-fg/15 bg-fg/5 px-4 py-3 text-base outline-none focus:border-jade/50 sm:py-2.5 sm:text-sm" />
+                    <span className="mt-1.5 block font-mono text-[11px] text-fg/40">8+ chars with upper, lower, digit &amp; symbol; different from current.</span>
                   </label>
                   <button type="submit" disabled={pwBusy} className="mt-5 w-full rounded-xl bg-gradient-to-r from-lime-300 to-emerald-400 px-5 py-3 font-serif text-sm font-bold text-[#0E1411] transition hover:brightness-105 disabled:opacity-60">
                     {pwBusy ? 'Updating…' : 'Update password'}
@@ -279,9 +325,9 @@ export default function SanctuaryAdmin() {
 
             {/* ── MEMORIES TABLE ── */}
             {tab === 'memories' && (
-              <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
                 <table className="w-full border-collapse text-left text-sm">
-                  <thead className="bg-white/5 font-mono text-[11px] uppercase tracking-wider text-white/50">
+                  <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
                     <tr>
                       <th className="px-4 py-3">Author</th>
                       <th className="px-4 py-3">Place</th>
@@ -291,13 +337,13 @@ export default function SanctuaryAdmin() {
                   </thead>
                   <tbody>
                     {filteredMemories.length === 0 ? (
-                      <tr><td colSpan={4} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No memories.'}</td></tr>
+                      <tr><td colSpan={4} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No memories.'}</td></tr>
                     ) : filteredMemories.map((m) => (
-                      <tr key={m.id} className="border-t border-white/5 align-top hover:bg-white/[0.03]">
+                      <tr key={m.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
                         <td className="px-4 py-3 font-medium text-amber-200">{m.author}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-white/60">{m.landmark}</td>
-                        <td className="px-4 py-3 text-white/90">{m.message}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(m.createdAt || '').slice(0, 10)}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-fg/60">{m.landmark}</td>
+                        <td className="px-4 py-3 text-fg/90">{m.message}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(m.createdAt || '').slice(0, 10)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -307,9 +353,9 @@ export default function SanctuaryAdmin() {
 
             {/* ── FAREWELL RSVP TABLE ── */}
             {tab === 'farewell' && (
-              <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
                 <table className="w-full border-collapse text-left text-sm">
-                  <thead className="bg-white/5 font-mono text-[11px] uppercase tracking-wider text-white/50">
+                  <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
                     <tr>
                       <th className="px-4 py-3">Name</th>
                       <th className="px-4 py-3 whitespace-nowrap">Joining?</th>
@@ -322,20 +368,20 @@ export default function SanctuaryAdmin() {
                   </thead>
                   <tbody>
                     {filteredRsvps.length === 0 ? (
-                      <tr><td colSpan={7} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No RSVPs yet.'}</td></tr>
+                      <tr><td colSpan={7} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No RSVPs yet.'}</td></tr>
                     ) : filteredRsvps.map((r) => (
-                      <tr key={r.id} className="border-t border-white/5 align-top hover:bg-white/[0.03]">
+                      <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
                         <td className="px-4 py-3 font-medium text-emerald-200">{r.name}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           {r.attending
                             ? <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 font-mono text-[11px] text-emerald-200">Yes</span>
                             : <span className="rounded-full bg-rose-400/15 px-2 py-0.5 font-mono text-[11px] text-rose-200">No</span>}
                         </td>
-                        <td className="px-4 py-3 text-white/80">{r.datesAvailable || <span className="text-white/30">—</span>}</td>
-                        <td className="px-4 py-3 text-white/80">{r.foodPreference || <span className="text-white/30">—</span>}</td>
-                        <td className="px-4 py-3 font-mono text-xs capitalize text-white/60">{r.plantType}</td>
-                        <td className="px-4 py-3 text-white/90">{r.message}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(r.createdAt || '').slice(0, 10)}</td>
+                        <td className="px-4 py-3 text-fg/80">{r.datesAvailable || <span className="text-fg/30">—</span>}</td>
+                        <td className="px-4 py-3 text-fg/80">{r.foodPreference || <span className="text-fg/30">—</span>}</td>
+                        <td className="px-4 py-3 font-mono text-xs capitalize text-fg/60">{r.plantType}</td>
+                        <td className="px-4 py-3 text-fg/90">{r.message}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 10)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -345,30 +391,44 @@ export default function SanctuaryAdmin() {
 
             {/* ── REMEDY / CONTACT REQUESTS ── */}
             {tab === 'remedy' && (
-              <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
-                <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-                  <thead className="bg-white/5 font-mono text-[11px] uppercase tracking-wider text-white/50">
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
+                <table className="w-full min-w-[1000px] border-collapse text-left text-sm">
+                  <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
                     <tr>
-                      <th className="px-4 py-3">Name</th><th className="px-4 py-3">Contact</th><th className="px-4 py-3">Area</th>
-                      <th className="px-4 py-3">Message</th><th className="px-4 py-3 whitespace-nowrap">Birth</th>
-                      <th className="px-4 py-3 whitespace-nowrap">Submitted</th><th className="px-4 py-3">Status</th>
+                      <th className="px-3 py-3">Name</th><th className="px-3 py-3">Contact</th><th className="px-3 py-3">Area</th>
+                      <th className="px-3 py-3">Message / Question</th><th className="px-3 py-3 whitespace-nowrap">Birth</th>
+                      <th className="px-3 py-3">Status</th><th className="px-3 py-3">Notes</th>
+                      <th className="px-3 py-3 whitespace-nowrap">Submitted</th><th className="px-3 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredRemedies.length === 0 ? (
-                      <tr><td colSpan={7} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No requests.'}</td></tr>
+                      <tr><td colSpan={9} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No requests.'}</td></tr>
                     ) : filteredRemedies.map((r) => (
-                      <tr key={r.id} className="border-t border-white/5 align-top hover:bg-white/[0.03]">
-                        <td className="px-4 py-3 font-medium text-amber-200">{r.name || '—'}</td>
-                        <td className="px-4 py-3 text-white/90">{r.contact}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-white/60">{r.area || '—'}</td>
-                        <td className="px-4 py-3 text-white/90">{r.message}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/60">{r.birthInfo}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(r.createdAt || '').slice(0, 16)}</td>
-                        <td className="px-4 py-3">
-                          <button onClick={() => toggleHandled(r.id)} className={`rounded-full px-2 py-0.5 font-mono text-[11px] transition ${r.handled ? 'bg-emerald-400/15 text-emerald-200 hover:bg-emerald-400/25' : 'bg-amber-400/15 text-amber-200 hover:bg-amber-400/25'}`}>
-                            {r.handled ? 'Handled' : 'Pending'}
-                          </button>
+                      <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
+                        <td className="px-3 py-3 font-medium text-amber-300">{r.name || '—'}</td>
+                        <td className="px-3 py-3 text-fg/90">{r.contact}</td>
+                        <td className="px-3 py-3 font-mono text-xs text-fg/60">{r.area || '—'}</td>
+                        <td className="max-w-[240px] px-3 py-3 text-fg/90">{r.message}</td>
+                        <td className="px-3 py-3 whitespace-nowrap font-mono text-xs text-fg/60">{r.birthInfo}</td>
+                        <td className="px-3 py-3">
+                          <select value={r.status || 'Pending'} onChange={(e) => setStatus(r.id, e.target.value)}
+                            className={`rounded-lg border border-fg/15 bg-space px-2 py-1 font-mono text-[11px] ${statusColor(r.status)}`}>
+                            {STATUSES.map((s) => <option key={s} value={s} className="text-black">{s}</option>)}
+                          </select>
+                        </td>
+                        <td className="px-3 py-3">
+                          <input defaultValue={r.notes} placeholder="—" onBlur={(e) => { if (e.target.value !== r.notes) saveNotes(r.id, e.target.value) }}
+                            className="w-32 rounded-lg border border-fg/12 bg-fg/5 px-2 py-1 text-xs text-fg/90 outline-none focus:border-accent/40" />
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 16)}</td>
+                        <td className="px-3 py-3">
+                          <div className="flex gap-1.5">
+                            <button onClick={() => { setReply({ id: r.id, name: r.name, contact: r.contact }); setReplySubject(''); setReplyBody(''); setReplyMsg(null) }}
+                              className="inline-flex items-center gap-1 rounded-lg border border-accent/30 bg-accent/10 px-2 py-1 font-mono text-[11px] text-accent-light transition hover:bg-accent/20"><Mail size={12} /> Reply</button>
+                            <button onClick={() => deleteRemedy(r.id)} title="Delete"
+                              className="inline-flex items-center rounded-lg border border-rose-400/30 bg-rose-400/10 px-2 py-1 text-rose-300 transition hover:bg-rose-400/20"><Trash2 size={12} /></button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -379,29 +439,30 @@ export default function SanctuaryAdmin() {
 
             {/* ── SAVED QUERENT CHARTS (opt-in, decrypted) ── */}
             {tab === 'charts' && (
-              <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
                 <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-                  <thead className="bg-white/5 font-mono text-[11px] uppercase tracking-wider text-white/50">
+                  <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
                     <tr>
                       <th className="px-4 py-3">Name</th><th className="px-4 py-3">Gender</th>
                       <th className="px-4 py-3 whitespace-nowrap">Birth date</th><th className="px-4 py-3 whitespace-nowrap">Time</th>
                       <th className="px-4 py-3">Time zone</th><th className="px-4 py-3 whitespace-nowrap">Lat,Lon</th>
-                      <th className="px-4 py-3 whitespace-nowrap">Nay-Nan</th><th className="px-4 py-3 whitespace-nowrap">Saved</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Nay-Nan</th><th className="px-4 py-3 whitespace-nowrap">Saved</th><th className="px-4 py-3">Del</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredCharts.length === 0 ? (
-                      <tr><td colSpan={8} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No saved charts.'}</td></tr>
+                      <tr><td colSpan={9} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No saved charts.'}</td></tr>
                     ) : filteredCharts.map((c) => (
-                      <tr key={c.id} className="border-t border-white/5 align-top hover:bg-white/[0.03]">
-                        <td className="px-4 py-3 font-medium text-amber-200">{c.name || '—'}</td>
-                        <td className="px-4 py-3 font-mono text-xs capitalize text-white/70">{c.gender}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-white/90">{c.birthDate}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/70">{c.birthTime}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-white/60">{c.timeZone}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/60">{c.location}</td>
-                        <td className="px-4 py-3 text-white/80">{c.nayNan}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(c.createdAt || '').slice(0, 16)}</td>
+                      <tr key={c.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
+                        <td className="px-4 py-3 font-medium text-amber-300">{c.name || '—'}</td>
+                        <td className="px-4 py-3 font-mono text-xs capitalize text-fg/70">{c.gender}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-fg/90">{c.birthDate}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/70">{c.birthTime}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-fg/60">{c.timeZone}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/60">{c.location}</td>
+                        <td className="px-4 py-3 text-fg/80">{c.nayNan}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(c.createdAt || '').slice(0, 16)}</td>
+                        <td className="px-4 py-3"><button onClick={() => deleteChart(c.id)} title="Delete" className="inline-flex items-center rounded-lg border border-rose-400/30 bg-rose-400/10 px-2 py-1 text-rose-300 transition hover:bg-rose-400/20"><Trash2 size={12} /></button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -411,9 +472,9 @@ export default function SanctuaryAdmin() {
 
             {/* ── PDF REQUESTS (approve → email one-time link) ── */}
             {tab === 'pdf' && (
-              <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
                 <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-                  <thead className="bg-white/5 font-mono text-[11px] uppercase tracking-wider text-white/50">
+                  <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
                     <tr>
                       <th className="px-4 py-3">Email</th><th className="px-4 py-3">Name</th>
                       <th className="px-4 py-3 whitespace-nowrap">Birth</th><th className="px-4 py-3">Status</th>
@@ -422,16 +483,16 @@ export default function SanctuaryAdmin() {
                   </thead>
                   <tbody>
                     {filteredPdfs.length === 0 ? (
-                      <tr><td colSpan={6} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No PDF requests.'}</td></tr>
+                      <tr><td colSpan={6} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No PDF requests.'}</td></tr>
                     ) : filteredPdfs.map((r) => (
-                      <tr key={r.id} className="border-t border-white/5 align-top hover:bg-white/[0.03]">
+                      <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
                         <td className="px-4 py-3 font-medium text-amber-200">{r.email}</td>
-                        <td className="px-4 py-3 text-white/90">{r.name || '—'}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/60">{r.birthInfo}</td>
+                        <td className="px-4 py-3 text-fg/90">{r.name || '—'}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/60">{r.birthInfo}</td>
                         <td className="px-4 py-3">
-                          <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${r.approvalStatus === 'Downloaded' ? 'bg-white/10 text-white/60' : r.approvalStatus === 'Approved' ? 'bg-emerald-400/15 text-emerald-200' : 'bg-amber-400/15 text-amber-200'}`}>{r.approvalStatus}</span>
+                          <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${r.approvalStatus === 'Downloaded' ? 'bg-fg/10 text-fg/60' : r.approvalStatus === 'Approved' ? 'bg-emerald-400/15 text-emerald-200' : 'bg-amber-400/15 text-amber-200'}`}>{r.approvalStatus}</span>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(r.createdAt || '').slice(0, 16)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 16)}</td>
                         <td className="px-4 py-3">
                           {r.approvalStatus === 'Pending' ? (
                             <button onClick={() => approvePdf(r.id)} disabled={approving === r.id}
@@ -451,6 +512,31 @@ export default function SanctuaryAdmin() {
           </>
         )}
       </div>
+
+      {/* ── Reply / Send-reading modal ── */}
+      {reply && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setReply(null)}>
+          <div className="w-full max-w-lg rounded-2xl border border-fg/10 bg-space p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-serif text-lg font-bold text-fg">Send reading to {reply.name || 'client'}</h3>
+              <button onClick={() => setReply(null)} className="text-fg/50 hover:text-fg"><X size={18} /></button>
+            </div>
+            <p className="mb-3 font-mono text-[11px] text-fg/50">To: {reply.contact}</p>
+            {replyMsg && <p className={`mb-3 rounded-xl border px-3 py-2 text-xs ${replyMsg.ok ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200' : 'border-rose-400/40 bg-rose-400/10 text-rose-200'}`}>{replyMsg.text}</p>}
+            <input value={replySubject} onChange={(e) => setReplySubject(e.target.value)} placeholder="Subject (optional)"
+              className="mb-2 w-full rounded-xl border border-fg/15 bg-fg/5 px-3 py-2 text-sm text-fg outline-none focus:border-accent/50" />
+            <textarea value={replyBody} onChange={(e) => setReplyBody(e.target.value)} rows={9} placeholder="Type or paste the horoscope reading / remedy response here…"
+              className="w-full resize-y rounded-xl border border-fg/15 bg-fg/5 px-3 py-2 text-sm text-fg outline-none focus:border-accent/50" />
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button onClick={() => setReply(null)} className="rounded-xl border border-fg/15 px-4 py-2 text-xs text-fg/70 transition hover:text-fg">Cancel</button>
+              <button onClick={sendReply} disabled={replyBusy || !replyBody.trim()}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-5 py-2 text-xs font-semibold text-space transition hover:brightness-110 disabled:opacity-50">
+                {replyBusy ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />} Send Reading to Client Email
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
