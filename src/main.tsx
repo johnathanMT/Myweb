@@ -11,6 +11,7 @@ import StudyingLibrary from './components/StudyingLibrary'
 import Bibliography from './components/Bibliography'
 import GalleryPage from './components/GalleryPage'
 import GitHubProjects from './components/GitHubProjects'
+import Jyotish from './components/Jyotish'
 import './index.css'
 
 // Lazy: pulls in tsparticles — code-split out of the main bundle.
@@ -53,6 +54,7 @@ ReactDOM.createRoot(rootEl).render(
           <Route path="/bibliography" element={<><Seo title="Bibliography" path="/bibliography" description="Books, papers, and references that shaped my path from caregiving to coding and AI engineering." /><PageShell journeyHub="bibliography"><Bibliography /></PageShell></>} />
           <Route path="/github" element={<><Seo title="GitHub Projects" path="/github" description="Open-source projects by Myo Thant Naing — AI bots, IoT hardware, full-stack web apps, and Python automation scripts." /><PageShell><GitHubProjects /></PageShell></>} />
           <Route path="/gallery" element={<><Seo title="Gallery" path="/gallery" description="A visual gallery of moments, projects, and life in Japan — from the lab to the everyday." /><PageShell><GalleryPage /></PageShell></>} />
+          <Route path="/jyotish" element={<><Seo title="Vedic Astrology — Rasi Chart Calculator" path="/jyotish" description="Free Vedic (sidereal, Lahiri) Rasi birth-chart calculator — planetary signs, houses, nakshatra & pada, powered by the Swiss Ephemeris." /><PageShell><Jyotish /></PageShell></>} />
           {/* Sanctuary is full-screen immersive → no PageShell. */}
           <Route path="/sanctuary" element={<><Seo title="Memory Sanctuary" path="/sanctuary" description="An interactive 3D Studio-Ghibli-inspired world where colleagues leave farewell memories." /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#070b1c' }} />}><Sanctuary /></Suspense></>} />
           {/* private / admin → not indexed */}

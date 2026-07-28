@@ -1,0 +1,79 @@
+// Shapes mirror the .NET AstrologyController DTOs (POST /api/astrology/chart).
+
+export interface BirthChartRequest {
+  year: number
+  month: number
+  day: number
+  hour: number
+  minute: number
+  second: number
+  timeZone: string   // IANA id, e.g. "Asia/Yangon"
+  latitude: number
+  longitude: number
+  ayanamsa?: string
+}
+
+export interface PlanetStrength {
+  ucchaBala: number
+  digBala: number
+  naisargikaBala: number
+  totalVirupas: number
+  totalRupas: number
+}
+
+export interface PlanetPosition {
+  name: string
+  longitude: number
+  sign: number          // 0 = Aries … 11 = Pisces
+  signName: string
+  signNameSa: string
+  degreeInSign: number
+  nakshatra: number     // 0–26
+  nakshatraName: string
+  pada: number          // 1–4
+  house: number         // 1–12
+  retrograde: boolean
+  dignity: string
+  navamsaSign: number   // D9 sign
+  navamsaSignName: string
+  vargas: Record<string, number>   // D2,D3,D7,D9,D10,D12 → sign
+  aspectsHouses: number[]
+  aspectsPlanets: string[]
+  strength: PlanetStrength | null
+}
+
+export interface AscendantInfo {
+  longitude: number
+  sign: number
+  signName: string
+  signNameSa: string
+  degreeInSign: number
+  nakshatra: number
+  nakshatraName: string
+  pada: number
+  navamsaSign: number
+  navamsaSignName: string
+}
+
+export interface ChartMeta {
+  ayanamsa: string
+  houseSystem: string
+  julianDayUt: number
+  utcIso: string
+  latitude: number
+  longitude: number
+}
+
+export interface DashaPeriod {
+  lord: string
+  startUtc: string   // yyyy-MM-dd
+  endUtc: string
+  years: number
+}
+
+export interface BirthChartData {
+  ascendant: AscendantInfo
+  planets: PlanetPosition[]
+  dashas: DashaPeriod[]
+  meta: ChartMeta
+}
