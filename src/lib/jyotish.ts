@@ -3,7 +3,7 @@
 //  The heavy astronomy lives in the .NET backend; this file holds the varga
 //  helper (mirror of the backend rule) plus the professional reading text.
 // ============================================================================
-import type { BirthChartData, DashaPeriod, Finding } from '../types/astrology'
+import type { BirthChartData, DashaPeriod, Finding, TransitNote } from '../types/astrology'
 
 export type Lang = 'en' | 'mm'
 
@@ -60,6 +60,10 @@ export const JT: Record<Lang, Record<string, string>> = {
     planetsIn: 'Planets in this chart',
     fldName: 'Name', fldGender: 'Gender', male: 'Male', female: 'Female',
     naynanLabel: 'Birth day-number (Nay Nan)', querentFor: 'Reading for', currentBhukti: 'Current Antardasha (bhukti)',
+    tabTimeline: 'Timeline', timelineTitle: 'Life Timeline (age → effects)',
+    timelineDesc: 'Each year of life: the running Mahadasha–Antardasha, the transits of Jupiter, Saturn & Rahu (house counted from your Moon), Sade Sati, and an overall favourability rating.',
+    colYear: 'Year', colAge: 'Age', colPeriod: 'Dasha–Bhukti', colStars: 'Rating', colTheme: 'Theme',
+    colJup: 'Jupiter', colSat: 'Saturn', colRahu: 'Rahu', colNotes: 'Transit notes', fromMoon: 'from Moon', nowRow: 'now',
   },
   mm: {
     sayar: 'ဆရာ ဘုန်းမင်းသိုက်ဒင်',
@@ -84,6 +88,10 @@ export const JT: Record<Lang, Record<string, string>> = {
     planetsIn: 'ဤဇာတာတွင် ဂြိုဟ်များ',
     fldName: 'အမည်', fldGender: 'ကျား/မ', male: 'ယောကျ်ား', female: 'မိန်းမ',
     naynanLabel: 'နေ့နံ', querentFor: 'ဟောကိန်းအတွက်', currentBhukti: 'လက်ရှိ အန္တရ်ဒသာ (ဘုတ္တိ)',
+    tabTimeline: 'ကာလဇယား', timelineTitle: 'ဘဝ ကာလဇယား (အသက် → သက်ရောက်မှု)',
+    timelineDesc: 'အသက်တစ်နှစ်စီ — လက်ရှိ မဟာဒသာ–အန္တရ်ဒသာ၊ ကြာသပတေး/စနေ/ရာဟု ဂြိုဟ်သွား (စန်းမှရေတွက်သော အိမ်)၊ သာဓေသတီနှင့် အလုံးစုံ ကောင်းဆိုးအဆင့်။',
+    colYear: 'ခုနှစ်', colAge: 'အသက်', colPeriod: 'ဒသာ–ဘုတ္တိ', colStars: 'အဆင့်', colTheme: 'အနှစ်သာရ',
+    colJup: 'ကြာသပတေး', colSat: 'စနေ', colRahu: 'ရာဟု', colNotes: 'ဂြိုဟ်သွား မှတ်ချက်', fromMoon: 'စန်းမှ', nowRow: 'ယခု',
   },
 }
 
@@ -108,9 +116,21 @@ export const AREAS: AreaDef[] = [
   { key: 'social', en: 'Social & Relationships', mm: 'လူမှုရေး နှင့် ဆက်ဆံရေး', favLords: ['Venus', 'Mercury', 'Moon'] },
   { key: 'health', en: 'Health & Wellbeing', mm: 'ကျန်းမာရေး', favLords: ['Sun', 'Moon', 'Jupiter'] },
   { key: 'wealth', en: 'Wealth & Finances', mm: 'ဥစ္စာဓန နှင့် ငွေကြေး', favLords: ['Jupiter', 'Venus', 'Mercury'] },
+  { key: 'property', en: 'Home & Property', mm: 'အိုးအိမ် နှင့် နေရာထိုင်ခင်း', favLords: ['Moon', 'Mars', 'Venus'] },
 ]
 
-export interface AreaReading { key: string; label: string; tone: string; score: number; points: string[] }
+// House + significators (karakas) per area — mirror of the backend AreaConfig.
+export const AREA_META: Record<string, { house: number; karakas: string[] }> = {
+  love: { house: 7, karakas: ['Venus'] },
+  career: { house: 10, karakas: ['Sun', 'Saturn', 'Mercury'] },
+  education: { house: 5, karakas: ['Mercury', 'Jupiter'] },
+  social: { house: 11, karakas: ['Mercury', 'Venus'] },
+  health: { house: 1, karakas: ['Sun', 'Moon'] },
+  wealth: { house: 2, karakas: ['Jupiter'] },
+  property: { house: 4, karakas: ['Moon', 'Mars'] },
+}
+
+export interface AreaReading { key: string; label: string; tone: string; score: number; stars: number; lord: string; karakas: string[]; points: string[] }
 
 const AREA_LABEL: Record<string, { en: string; mm: string }> = {
   love: { en: 'Love & Marriage', mm: 'အချစ်ရေး နှင့် အိမ်ထောင်ရေး' },
@@ -119,6 +139,7 @@ const AREA_LABEL: Record<string, { en: string; mm: string }> = {
   social: { en: 'Social & Relationships', mm: 'လူမှုရေး နှင့် ဆက်ဆံရေး' },
   health: { en: 'Health & Wellbeing', mm: 'ကျန်းမာရေး' },
   wealth: { en: 'Wealth & Finances', mm: 'ဥစ္စာဓန နှင့် ငွေကြေး' },
+  property: { en: 'Home & Property', mm: 'အိုးအိမ် နှင့် နေရာထိုင်ခင်း' },
 }
 const DIGNITY_LABEL: Record<string, { en: string; mm: string }> = {
   Exalted: { en: 'exalted (uccha)', mm: 'ဥစ် (မြင့်မြတ်)' },
@@ -128,6 +149,12 @@ const DIGNITY_LABEL: Record<string, { en: string; mm: string }> = {
 }
 const ordEn = (h: number) => { const s = ['th', 'st', 'nd', 'rd'], v = h % 100; return `${h}${s[(v - 20) % 10] ?? s[v] ?? s[0]}` }
 const houseLabel = (h: number, lang: Lang) => (lang === 'mm' ? `${h} တန့်` : `${ordEn(h)} house`)
+
+// Deep-dive helpers (used by the life-area cards).
+export const dignityLabel = (v: string, lang: Lang) => (DIGNITY_LABEL[v] ?? DIGNITY_LABEL.Neutral)[lang]
+export const houseLabelOf = (h: number, lang: Lang) => houseLabel(h, lang)
+export const starsFromScore = (score: number) => Math.max(1, Math.min(5, Math.round(score / 20)))
+export const findPlanet = (data: BirthChartData, name: string) => data.planets.find((p) => p.name === name)
 
 const natureOf = (planet: string, lang: Lang): string => {
   const n = LORD_NATURE[planet]
@@ -211,6 +238,9 @@ export function readingFor(data: BirthChartData, lang: Lang): { lord: string; ar
       label: (AREA_LABEL[pr.area] ?? { en: pr.area, mm: pr.area })[lang],
       tone: pr.tone,
       score: pr.score,
+      stars: starsFromScore(pr.score),
+      lord: pr.findings.find((f) => f.code === 'lordDignity')?.planet ?? '',
+      karakas: AREA_META[pr.area]?.karakas ?? [],
       points: pr.findings.map((f) => renderFinding(f, lang)).filter(Boolean),
     }))
     return { lord, areas }
@@ -221,10 +251,11 @@ export function readingFor(data: BirthChartData, lang: Lang): { lord: string; ar
   const areas = AREAS.map((a): AreaReading => {
     const favored = a.favLords.includes(lord)
     const tone = favored ? 'favorable' : nat.benefic ? 'mixed' : 'testing'
+    const score = favored ? 65 : nat.benefic ? 50 : 40
     const text = lang === 'mm'
       ? `${planetName(lord, 'mm')} ဒသာကာလတွင် ${nat.mm} တို့ ရှေ့တန်းရောက်လာသည်။`
       : `During the ${lord} dasha, ${nat.en} come to the fore.`
-    return { key: a.key, label: lang === 'mm' ? a.mm : a.en, tone, score: favored ? 65 : nat.benefic ? 50 : 40, points: [text] }
+    return { key: a.key, label: lang === 'mm' ? a.mm : a.en, tone, score, stars: starsFromScore(score), lord, karakas: AREA_META[a.key]?.karakas ?? a.favLords, points: [text] }
   })
   return { lord, areas }
 }
@@ -263,4 +294,31 @@ export const toMmDigits = (n: number) => String(n).replace(/\d/g, (c) => MM_DIGI
 export function activeBhukti(data: BirthChartData): DashaPeriod | undefined {
   const now = Date.now()
   return data.antardashas?.find((d) => new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime())
+}
+
+// ── Life-timeline helpers (gochara / transits) ────────────────────────────────
+const THEME_WORD: Record<string, { en: string; mm: string }> = {
+  Sun: { en: 'Authority', mm: 'ဩဇာ' },
+  Moon: { en: 'Emotion', mm: 'စိတ်ခံစား' },
+  Mars: { en: 'Drive', mm: 'ဇွဲလုံ့လ' },
+  Mercury: { en: 'Intellect', mm: 'ဉာဏ်ရည်' },
+  Jupiter: { en: 'Wisdom', mm: 'ပညာ' },
+  Venus: { en: 'Comfort', mm: 'သာယာ' },
+  Saturn: { en: 'Endurance', mm: 'ခံနိုင်ရည်' },
+  Rahu: { en: 'Ambition', mm: 'ရည်မှန်းချက်' },
+  Ketu: { en: 'Release', mm: 'စွန့်လွှတ်' },
+}
+export const themeWord = (lord: string, lang: Lang): string => (THEME_WORD[lord] ?? { en: lord, mm: lord })[lang]
+
+/** Localize a structured transit note. */
+export function transitNoteText(n: TransitNote, lang: Lang): string {
+  const map: Record<string, { en: string; mm: string }> = {
+    sadeSati: { en: 'Sade Sati (Saturn over the Moon)', mm: 'သာဓေသတီ (စနေ စန်းပေါ်)' },
+    ashtamaSani: { en: 'Ashtama Sani (Saturn 8th from Moon)', mm: 'အဋ္ဌမစနေ (စန်းမှ ၈)' },
+    kantakaSani: { en: 'Kantaka Sani (Saturn 4th from Moon)', mm: 'ကဏ္ဋကစနေ (စန်းမှ ၄)' },
+    jupLagna: { en: 'Jupiter transits your Lagna', mm: 'ကြာသပတေး လဂ်နာပေါ်ဖြတ်' },
+    jupTrineMoon: { en: `Jupiter ${n.house}th from the Moon`, mm: `ကြာသပတေး စန်းမှ ${toMmDigits(n.house)}` },
+    rahuTransit: { en: 'Rahu over Lagna / Moon', mm: 'ရာဟု လဂ်/စန်းပေါ်' },
+  }
+  return (map[n.code] ?? { en: n.code, mm: n.code })[lang]
 }

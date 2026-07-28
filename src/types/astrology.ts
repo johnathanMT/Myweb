@@ -93,6 +93,32 @@ export interface AreaPrediction {
   findings: Finding[]
 }
 
+export interface TransitPos {
+  planet: string
+  sign: number
+  signName: string
+  houseFromLagna: number
+  houseFromMoon: number
+}
+
+export interface TransitNote {
+  tone: string
+  code: string
+  planet: string
+  house: number
+}
+
+export interface YearForecast {
+  year: number
+  age: number
+  maha: string
+  bhukti: string
+  stars: number
+  sadeSati: boolean
+  transits: TransitPos[]
+  notes: TransitNote[]
+}
+
 export interface BirthChartData {
   ascendant: AscendantInfo
   planets: PlanetPosition[]
@@ -100,5 +126,6 @@ export interface BirthChartData {
   antardashas: DashaPeriod[]
   yogas: Yoga[]
   predictions: AreaPrediction[]
+  timeline: YearForecast[]
   meta: ChartMeta
 }

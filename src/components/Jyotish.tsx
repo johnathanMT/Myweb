@@ -3,8 +3,9 @@ import { Sparkles, MapPin, Loader2, Search, Download, Star, Info } from 'lucide-
 import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
-import type { BirthChartData, BirthChartRequest, PlanetPosition } from '../types/astrology'
-import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, toMmDigits } from '../lib/jyotish'
+import DiamondChart from './DiamondChart'
+import type { BirthChartData, BirthChartRequest, PlanetPosition, TransitPos } from '../types/astrology'
+import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel } from '../lib/jyotish'
 
 const CHART_URL = `${SITE.apiUrl}/api/astrology/chart`
 const GEO_URL = 'https://nominatim.openstreetmap.org/search'
@@ -22,20 +23,29 @@ const browserTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().
 const TZ_OPTIONS = [...new Set([browserTz, ...PRESETS.map((p) => p.tz), 'UTC'])]
 
 interface GeoResult { display_name: string; lat: string; lon: string }
-type Tab = 'reading' | 'd1' | 'd9' | 'd10' | 'd7'
+type Tab = 'reading' | 'timeline' | 'd1' | 'd9' | 'd10' | 'd7'
 
 const deg = (d: number) => `${Math.floor(d)}°${String(Math.floor((d % 1) * 60)).padStart(2, '0')}'`
 const field = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-fg outline-none transition focus:border-accent/50'
 const labelCls = 'block font-mono text-[11px] uppercase tracking-wider text-muted'
 
+type ChartStyle = 'diamond' | 'grid'
+// Switch between North-Indian diamond (encyclopedia) and South-Indian grid.
+function ChartView({ style, ...rest }: {
+  style: ChartStyle; data: BirthChartData; lagnaSign?: number
+  signFor?: (p: PlanetPosition) => number; title?: string; subtitle?: string
+}) {
+  return style === 'diamond' ? <DiamondChart {...rest} /> : <KundliChart {...rest} />
+}
+
 // Small varga panel: chart + description + planets-in-this-varga table.
-function VargaPanel({ data, lang, signOf, lagnaSign, title, subtitle, desc }: {
+function VargaPanel({ data, lang, signOf, lagnaSign, title, subtitle, desc, chartStyle }: {
   data: BirthChartData; lang: Lang; signOf: (p: PlanetPosition) => number; lagnaSign: number
-  title: string; subtitle: string; desc: string
+  title: string; subtitle: string; desc: string; chartStyle: ChartStyle
 }) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <div className="glass-card p-5"><KundliChart data={data} signFor={signOf} lagnaSign={lagnaSign} title={title} subtitle={subtitle} /></div>
+      <div className="glass-card p-5"><ChartView style={chartStyle} data={data} signFor={signOf} lagnaSign={lagnaSign} title={title} subtitle={subtitle} /></div>
       <div className="glass-card p-5">
         <p className="mb-3 text-sm leading-relaxed text-muted">{desc}</p>
         <p className={labelCls}>{JT[lang].planetsIn}</p>
@@ -73,6 +83,7 @@ export default function Jyotish() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [tab, setTab] = useState<Tab>('reading')
+  const [chartStyle, setChartStyle] = useState<ChartStyle>('diamond')
 
   const onPlaceChange = (v: string) => {
     setPlace(v)
@@ -124,14 +135,14 @@ export default function Jyotish() {
 
   const moon = data?.planets.find((p) => p.name === 'Moon')
   const now = Date.now()
+  const thisYear = new Date().getFullYear()
   const reading = data ? readingFor(data, lang) : null
   const bhukti = data ? activeBhukti(data) : undefined
 
   const TABS: { id: Tab; label: string }[] = [
-    { id: 'reading', label: t.tabReading }, { id: 'd1', label: t.tabD1 },
+    { id: 'reading', label: t.tabReading }, { id: 'timeline', label: t.tabTimeline }, { id: 'd1', label: t.tabD1 },
     { id: 'd9', label: t.tabD9 }, { id: 'd10', label: t.tabD10 }, { id: 'd7', label: t.tabD7 },
   ]
-  const toneCls = (tone: string) => tone === 'favorable' ? 'border-jade/40 bg-jade/10' : tone === 'testing' ? 'border-coral/40 bg-coral/10' : 'border-white/10 bg-white/[0.03]'
 
   return (
     <section className="section-container">
@@ -257,13 +268,25 @@ export default function Jyotish() {
                   <Download size={14} /> Save PDF
                 </button>
               </div>
-              <div className="no-print flex flex-wrap gap-2">
-                {TABS.map((tb) => (
-                  <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
-                    className={`rounded-full border px-4 py-1.5 font-mono text-xs transition ${tab === tb.id ? 'border-accent/60 bg-accent/15 text-accent-light' : 'border-white/12 bg-white/5 text-muted hover:text-fg'}`}>
-                    {tb.label}
-                  </button>
-                ))}
+              <div className="no-print flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {TABS.map((tb) => (
+                    <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
+                      className={`rounded-full border px-4 py-1.5 font-mono text-xs transition ${tab === tb.id ? 'border-accent/60 bg-accent/15 text-accent-light' : 'border-white/12 bg-white/5 text-muted hover:text-fg'}`}>
+                      {tb.label}
+                    </button>
+                  ))}
+                </div>
+                {(tab === 'd1' || tab === 'd9' || tab === 'd10' || tab === 'd7') && (
+                  <div className="flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
+                    {(['diamond', 'grid'] as ChartStyle[]).map((s) => (
+                      <button key={s} type="button" onClick={() => setChartStyle(s)}
+                        className={`rounded-full px-3 py-1 font-mono text-[11px] transition ${chartStyle === s ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
+                        {s === 'diamond' ? (lang === 'mm' ? 'စိန်ပုံ' : 'Diamond') : (lang === 'mm' ? 'ဇယားကွက်' : 'Grid')}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* ── READING ── */}
@@ -300,21 +323,69 @@ export default function Jyotish() {
                     <p className="mt-2 text-xs text-muted">{t.readingNote}</p>
                   </div>
 
+                  {/* Seven-area summary grid */}
                   <div className="glass-card p-5">
-                    <h3 className="mb-3 font-groovy text-lg text-fg">{t.lifeAreas}</h3>
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <h3 className="mb-3 font-groovy text-lg text-fg">{lang === 'mm' ? 'ဘဝကဏ္ဍ ၇ ခု' : 'Seven Life Areas'}</h3>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
                       {reading.areas.map((a) => (
-                        <div key={a.key} className={`rounded-xl border p-3 ${toneCls(a.tone)}`}>
-                          <div className="flex items-center justify-between">
-                            <p className="font-semibold text-fg">{a.label}</p>
-                            <span className="font-mono text-[10px] text-muted">{a.score}/100</span>
-                          </div>
-                          <ul className="mt-1.5 space-y-1">
-                            {a.points.map((pt, i) => <li key={i} className="text-xs leading-relaxed text-muted">• {pt}</li>)}
-                          </ul>
+                        <div key={a.key} className="flex items-center justify-between gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-3 py-2">
+                          <span className="text-xs text-fg/90">{a.label}</span>
+                          <span className="whitespace-nowrap font-mono text-[11px]"><span className="text-accent-light">{'★'.repeat(a.stars)}</span><span className="text-muted">{'☆'.repeat(5 - a.stars)}</span></span>
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Per-area deep-dive: lord across D1/D9/D10, karakas, findings */}
+                  <div className="space-y-4">
+                    <h3 className="font-groovy text-lg text-fg">{t.lifeAreas}</h3>
+                    {reading.areas.map((a) => {
+                      const lp = a.lord ? findPlanet(data, a.lord) : undefined
+                      return (
+                        <div key={a.key} className={`glass-card border-l-4 p-5 ${a.tone === 'favorable' ? 'border-l-jade' : a.tone === 'testing' ? 'border-l-coral' : 'border-l-white/20'}`}>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <h4 className="font-groovy text-base text-fg">{a.label}</h4>
+                            <span className="font-mono text-xs"><span className="text-accent-light">{'★'.repeat(a.stars)}</span><span className="text-muted">{'☆'.repeat(5 - a.stars)}</span> <span className="text-muted">{a.score}/100</span></span>
+                          </div>
+
+                          {lp && (
+                            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                              <div className="rounded-lg bg-white/[0.03] px-3 py-2">
+                                <p className={labelCls}>{lang === 'mm' ? 'အိမ်ရှင်သခင်' : 'House lord'}</p>
+                                <p className="mt-0.5 text-sm text-fg/90">{planetName(lp.name, lang)} · {signLabel(lp.sign, lang)} <span className="text-muted">({lang === 'mm' ? `${lp.house} တန့်` : `H${lp.house}`})</span></p>
+                                {lp.dignity !== '-' && <p className="text-[11px] text-accent-light">{dignityLabel(lp.dignity, lang)}</p>}
+                              </div>
+                              <div className="rounded-lg bg-white/[0.03] px-3 py-2">
+                                <p className={labelCls}>{lang === 'mm' ? 'D9 နဝင်း' : 'D9 Navamsa'}</p>
+                                <p className="mt-0.5 text-sm text-fg/90">{signLabel(lp.navamsaSign, lang)}</p>
+                              </div>
+                              <div className="rounded-lg bg-white/[0.03] px-3 py-2">
+                                <p className={labelCls}>{lang === 'mm' ? 'D10 ဒသံသ' : 'D10 Dasamsa'}</p>
+                                <p className="mt-0.5 text-sm text-fg/90">{signLabel(lp.vargas.D10, lang)}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {a.karakas.length > 0 && (
+                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                              <span className={labelCls}>{lang === 'mm' ? 'ကာရက' : 'Karakas'}:</span>
+                              {a.karakas.map((k) => {
+                                const kp = findPlanet(data, k)
+                                return kp ? (
+                                  <span key={k} className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-fg/80">
+                                    {planetName(kp.name, lang)} · {signLabel(kp.sign, lang)}{kp.dignity !== '-' && <span className="text-accent-light"> · {dignityLabel(kp.dignity, lang)}</span>}
+                                  </span>
+                                ) : null
+                              })}
+                            </div>
+                          )}
+
+                          <ul className="mt-3 space-y-1">
+                            {a.points.map((pt, i) => <li key={i} className="text-xs leading-relaxed text-muted">• {pt}</li>)}
+                          </ul>
+                        </div>
+                      )
+                    })}
                   </div>
 
                   {data.yogas.length > 0 && (
@@ -371,12 +442,68 @@ export default function Jyotish() {
                 </div>
               )}
 
+              {/* ── TIMELINE (age → effects) ── */}
+              {tab === 'timeline' && (
+                <div className="space-y-5">
+                  <div className="glass-card p-5">
+                    <h3 className="mb-1 font-groovy text-lg text-fg">{t.timelineTitle}</h3>
+                    <p className="text-sm leading-relaxed text-muted">{t.timelineDesc}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 font-mono text-[10px]">
+                      <span className="rounded bg-jade/15 px-1.5 py-0.5 text-jade">{lang === 'mm' ? 'ကောင်း' : 'benefic'}</span>
+                      <span className="rounded bg-coral/15 px-1.5 py-0.5 text-coral">{lang === 'mm' ? 'သတိ / သာဓေသတီ' : 'caution / Sade Sati'}</span>
+                      <span className="text-muted">{lang === 'mm' ? '· ဂြိုဟ်သွားအိမ်ကို စန်းမှ ရေတွက်' : '· transit house counted from the Moon'}</span>
+                    </div>
+                  </div>
+                  <div className="glass-card overflow-x-auto p-1">
+                    <table className="w-full border-collapse text-left text-xs">
+                      <thead className="font-mono text-[10px] uppercase tracking-wider text-muted">
+                        <tr>
+                          {[t.colYear, t.colAge, t.colPeriod, t.colStars, t.colTheme, t.colJup, t.colSat, t.colRahu, t.colNotes].map((h) => (
+                            <th key={h} className="px-2.5 py-2.5 whitespace-nowrap">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.timeline.map((y) => {
+                          const cur = y.year === thisYear
+                          const cell = (tp?: TransitPos) => tp
+                            ? <>{signLabel(tp.sign, lang)} <span className="text-muted">·{lang === 'mm' ? toMmDigits(tp.houseFromMoon) : tp.houseFromMoon}</span></>
+                            : <span className="text-muted">—</span>
+                          const jup = y.transits.find((x) => x.planet === 'Jupiter')
+                          const sat = y.transits.find((x) => x.planet === 'Saturn')
+                          const rah = y.transits.find((x) => x.planet === 'Rahu')
+                          return (
+                            <tr key={y.age} className={`border-t border-white/5 ${cur ? 'bg-accent/10' : y.sadeSati ? 'bg-coral/[0.06]' : 'hover:bg-white/[0.03]'}`}>
+                              <td className="px-2.5 py-2 font-mono text-muted whitespace-nowrap">{y.year}{cur && <span className="ml-1 rounded bg-accent/20 px-1 text-[9px] text-accent-light">{t.nowRow}</span>}</td>
+                              <td className="px-2.5 py-2 font-mono text-fg/90">{lang === 'mm' ? toMmDigits(y.age) : y.age}</td>
+                              <td className="px-2.5 py-2 whitespace-nowrap text-fg/90">{planetName(y.maha, lang)}<span className="text-muted"> – {planetName(y.bhukti, lang)}</span></td>
+                              <td className="px-2.5 py-2 whitespace-nowrap" title={`${y.stars}/5`}><span className="text-accent-light">{'★'.repeat(y.stars)}</span><span className="text-muted">{'☆'.repeat(5 - y.stars)}</span></td>
+                              <td className="px-2.5 py-2 text-fg/80 whitespace-nowrap">{themeWord(y.bhukti || y.maha, lang)}</td>
+                              <td className="px-2.5 py-2 font-mono text-fg/80 whitespace-nowrap">{cell(jup)}</td>
+                              <td className={`px-2.5 py-2 font-mono whitespace-nowrap ${y.sadeSati ? 'text-coral' : 'text-fg/80'}`}>{cell(sat)}</td>
+                              <td className="px-2.5 py-2 font-mono text-fg/80 whitespace-nowrap">{cell(rah)}</td>
+                              <td className="px-2.5 py-2">
+                                <div className="flex flex-wrap gap-1">
+                                  {y.notes.map((n, i) => (
+                                    <span key={i} className={`rounded px-1.5 py-0.5 text-[10px] whitespace-nowrap ${n.tone === 'good' ? 'bg-jade/15 text-jade' : n.tone === 'warn' ? 'bg-coral/15 text-coral' : 'bg-white/10 text-muted'}`}>{transitNoteText(n, lang)}</span>
+                                  ))}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               {/* ── D1 ── */}
               {tab === 'd1' && (
                 <div className="space-y-5">
                   <div className="grid gap-6 md:grid-cols-2">
-                    <div className="glass-card p-5"><KundliChart data={data} /></div>
-                    {moon && <div className="glass-card p-5"><KundliChart data={data} lagnaSign={moon.sign} title="Chandra · D1" subtitle={`Moon: ${moon.signName}`} /></div>}
+                    <div className="glass-card p-5"><ChartView style={chartStyle} data={data} /></div>
+                    {moon && <div className="glass-card p-5"><ChartView style={chartStyle} data={data} lagnaSign={moon.sign} title="Chandra · D1" subtitle={`Moon: ${moon.signName}`} /></div>}
                   </div>
                   <div className="glass-card p-5"><p className="text-sm leading-relaxed text-muted">{t.d1Desc}</p></div>
                   <div className="glass-card overflow-x-auto p-1">
@@ -403,15 +530,15 @@ export default function Jyotish() {
 
               {tab === 'd9' && (
                 <VargaPanel data={data} lang={lang} signOf={(p) => p.navamsaSign} lagnaSign={data.ascendant.navamsaSign}
-                  title="Navamsa · D9" subtitle={`Lagna: ${signLabel(data.ascendant.navamsaSign, lang)}`} desc={t.d9Desc} />
+                  title="Navamsa · D9" subtitle={`Lagna: ${signLabel(data.ascendant.navamsaSign, lang)}`} desc={t.d9Desc} chartStyle={chartStyle} />
               )}
               {tab === 'd10' && (
                 <VargaPanel data={data} lang={lang} signOf={(p) => p.vargas.D10} lagnaSign={vargaSign(data.ascendant.longitude, 10)}
-                  title="Dasamsa · D10" subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, 10), lang)}`} desc={t.d10Desc} />
+                  title="Dasamsa · D10" subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, 10), lang)}`} desc={t.d10Desc} chartStyle={chartStyle} />
               )}
               {tab === 'd7' && (
                 <VargaPanel data={data} lang={lang} signOf={(p) => p.vargas.D7} lagnaSign={vargaSign(data.ascendant.longitude, 7)}
-                  title="Saptamsa · D7" subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, 7), lang)}`} desc={t.d7Desc} />
+                  title="Saptamsa · D7" subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, 7), lang)}`} desc={t.d7Desc} chartStyle={chartStyle} />
               )}
             </div>
           )}
