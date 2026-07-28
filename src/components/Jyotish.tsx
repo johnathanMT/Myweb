@@ -43,6 +43,25 @@ const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = 
   { n: 60, name: 'D60 · Shashtiamsa', desc: { en: 'Overall karma — the most refined chart.', mm: 'အလုံးစုံ ကံ — အသိမ်မွေ့ဆုံး ဇာတာ။' } },
 ]
 
+const BIO_EN = 'Myo Thant Naing is a tech-savvy professional based in Japan, bridging ancient Vedic astrological wisdom with cutting-edge Artificial Intelligence to deliver mathematically precise and profoundly accurate life readings.'
+const BIO_MM = 'မြသန့်နိုင် သည် ဂျပန်နိုင်ငံအခြေစိုက် နည်းပညာကျွမ်းကျင် ပညာရှင်တစ်ဦးဖြစ်ပြီး၊ ရှေးဟောင်း ဗေဒင်ပညာ၏ ဉာဏ်အလင်းကို ခေတ်မီ ဉာဏ်ရည်တု (AI) နည်းပညာနှင့် ပေါင်းစပ်ကာ သင်္ချာနည်းကျ တိကျမှန်ကန်ပြီး နက်နဲသော ဘဝဟောကိန်းများကို ပေးဆောင်ပါသည်။'
+
+// D1–D60 educational meanings (simple, bilingual).
+const VARGA_GUIDE: { code: string; en: string; mm: string }[] = [
+  { code: 'D1 · Rasi', en: 'Physical body, general life path, and baseline karma.', mm: 'ခန္ဓာကိုယ်၊ ဘဝလမ်းကြောင်း အထွေထွေနှင့် အခြေခံကံ။' },
+  { code: 'D2 · Hora', en: 'Wealth, assets, and financial prosperity.', mm: 'ဥစ္စာဓန၊ ပိုင်ဆိုင်မှုနှင့် ငွေကြေး ကြွယ်ဝမှု။' },
+  { code: 'D3 · Drekkana', en: 'Siblings, courage, and inner strength.', mm: 'မောင်နှမ၊ ရဲစွမ်းသတ္တိနှင့် စိတ်ဓာတ်ခွန်အား။' },
+  { code: 'D4 · Chaturthamsha', en: 'Real estate, properties, and overall fortune.', mm: 'အိမ်ခြံမြေ၊ ပိုင်ဆိုင်မှုနှင့် အထွေထွေကံကြမ္မာ။' },
+  { code: 'D7 · Saptamsha', en: 'Children, progeny, and legacy.', mm: 'သားသမီး၊ သားစဉ်မြေးဆက်နှင့် အမွေအနှစ်။' },
+  { code: 'D9 · Navamsa', en: "Marriage, the soul's true purpose, and hidden strengths — the most important sub-chart.", mm: 'အိမ်ထောင်ရေး၊ ဝိညာဉ်၏ စစ်မှန်သော ရည်ရွယ်ချက်နှင့် ကွယ်ဝှက်နေသော အင်အား — အရေးအကြီးဆုံး ဇာတာခွဲ။' },
+  { code: 'D10 · Dasamsha', en: 'Career, professional success, and public status.', mm: 'အသက်မွေးဝမ်းကျောင်း၊ အလုပ်အောင်မြင်မှုနှင့် လူသိဂုဏ်အဆင့်။' },
+  { code: 'D12 · Dwadasamsha', en: 'Parents, ancestral karma, and heritage.', mm: 'မိဘ၊ ဘိုးဘွား ကံနှင့် အမွေအနှစ်။' },
+  { code: 'D16 · Shodashamsha', en: 'Vehicles, inner happiness, and comforts.', mm: 'ယာဉ်၊ စိတ်တွင်း ပျော်ရွှင်မှုနှင့် သက်သာချမ်းသာမှု။' },
+  { code: 'D20 · Vimsamsha', en: 'Spiritual progress and religious dedication.', mm: 'ဝိညာဉ်ရေး တိုးတက်မှုနှင့် ဘာသာရေး ဆက်ကပ်မှု။' },
+  { code: 'D24 · Chaturvimsamsha', en: 'Education, learning, and intellect.', mm: 'ပညာရေး၊ သင်ယူမှုနှင့် ဉာဏ်ရည်။' },
+  { code: 'D60 · Shashtiamsha', en: 'Past-life karma and deep-rooted destiny.', mm: 'အတိတ်ဘဝ ကံနှင့် အမြစ်တွယ်နေသော ကံကြမ္မာ။' },
+]
+
 const deg = (d: number) => `${Math.floor(d)}°${String(Math.floor((d % 1) * 60)).padStart(2, '0')}'`
 const field = 'mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-fg outline-none transition focus:border-accent/50'
 const labelCls = 'block font-mono text-[11px] uppercase tracking-wider text-muted'
@@ -113,6 +132,11 @@ export default function Jyotish() {
   const [remedyMsg, setRemedyMsg] = useState('')
   const [remedyState, setRemedyState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
 
+  // Secure PDF request (admin-approval + email flow).
+  const [pdfOpen, setPdfOpen] = useState(false)
+  const [pdfEmail, setPdfEmail] = useState('')
+  const [pdfState, setPdfState] = useState<'idle' | 'sending' | 'pending' | 'error'>('idle')
+
   const onPlaceChange = (v: string) => {
     setPlace(v)
     window.clearTimeout(debTimer.current)
@@ -135,6 +159,7 @@ export default function Jyotish() {
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (!consent) return   // consent is mandatory
     setError(''); setLoading(true); setData(null)
     try {
       const [y, mo, d] = date.split('-').map(Number)
@@ -182,13 +207,17 @@ export default function Jyotish() {
     } catch { setRemedyState('error') }
   }
 
-  const savePdf = () => {
-    const html = document.documentElement
-    const prev = html.getAttribute('data-theme') || 'dark'
-    html.setAttribute('data-theme', 'light')
-    const restore = () => { html.setAttribute('data-theme', prev); window.removeEventListener('afterprint', restore) }
-    window.addEventListener('afterprint', restore)
-    setTimeout(() => window.print(), 60)
+  const submitPdf = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setPdfState('sending')
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/request-pdf`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: pdfEmail.trim(), name: (querent?.name || name).trim(), birthDate: date, birthTime: time }),
+      })
+      if (!res.ok) throw new Error()
+      setPdfState('pending')
+    } catch { setPdfState('error') }
   }
 
   const moon = data?.planets.find((p) => p.name === 'Moon')
@@ -209,25 +238,34 @@ export default function Jyotish() {
 
   return (
     <section className="section-container">
-      {/* ── Sayar profile header ── */}
-      <div className="glass-card mb-6 flex flex-col items-center gap-5 p-6 text-center sm:flex-row sm:text-left">
-        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full ring-2 ring-accent/40" style={{ boxShadow: '0 0 30px -6px rgb(var(--accent) / 0.5)' }}>
-          <span className="absolute inset-0 flex items-center justify-center bg-card font-groovy text-2xl text-accent">ဘ</span>
-          <img src="/sayar.jpg" alt={t.sayar} className="relative h-full w-full object-cover" loading="lazy"
-            onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
-        </div>
-        <div className="flex-1">
-          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-accent-light">{t.sayarRole}</p>
-          <h1 className="font-groovy text-2xl text-fg sm:text-3xl">{t.sayar}</h1>
-          <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">{t.sayarTagline}</p>
-        </div>
-        <div className="no-print flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
-          {(['en', 'mm'] as Lang[]).map((l) => (
-            <button key={l} type="button" onClick={() => setLang(l)}
-              className={`rounded-full px-3 py-1 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
-              {l === 'en' ? 'EN' : 'မြန်မာ'}
-            </button>
-          ))}
+      {/* ── Grand Astrologer Profile ── */}
+      <div className="relative mb-8 overflow-hidden rounded-3xl border border-accent/25 p-6 sm:p-8"
+        style={{ background: 'linear-gradient(135deg, rgb(var(--card)) 0%, rgb(var(--surface)) 100%)', boxShadow: '0 0 60px -20px rgb(var(--accent) / 0.45)' }}>
+        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
+        <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, #a855f7 0%, transparent 70%)' }} />
+        <div className="relative flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
+          <div className="relative h-28 w-28 shrink-0 rounded-full p-[3px]"
+            style={{ background: 'conic-gradient(from 200deg, #eab308, #a855f7, #22d3ee, #eab308)', boxShadow: '0 0 30px -4px rgba(168,85,247,0.6), 0 0 22px -6px rgba(234,179,8,0.55)' }}>
+            <div className="relative h-full w-full overflow-hidden rounded-full bg-card">
+              <span className="absolute inset-0 flex items-center justify-center font-groovy text-3xl text-accent">M</span>
+              <img src="/profile-grand.jpg" alt="Myo Thant Naing" className="relative h-full w-full object-cover" loading="lazy"
+                onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
+            </div>
+          </div>
+          <div className="flex-1">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light">{lang === 'mm' ? 'ဗေဒင်ပညာရှင် · AI အင်ဂျင်နီယာ' : 'Vedic Astrologer · AI Engineer'}</p>
+            <h1 className="mt-1 font-groovy text-2xl text-fg sm:text-3xl">{lang === 'mm' ? 'ဆရာ မြသန့်နိုင်' : 'Sayar Myo Thant Naing'}</h1>
+            <p className="font-mono text-xs text-muted">(Software Engineer &amp; AI Developer)</p>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">{lang === 'mm' ? BIO_MM : BIO_EN}</p>
+          </div>
+          <div className="no-print flex items-center gap-1 self-start rounded-full border border-white/15 bg-white/5 p-1 backdrop-blur">
+            {(['en', 'mm'] as Lang[]).map((l) => (
+              <button key={l} type="button" onClick={() => setLang(l)}
+                className={`rounded-full px-3 py-1 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
+                {l === 'en' ? 'EN' : 'မြန်မာ'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -313,15 +351,16 @@ export default function Jyotish() {
             </div>
           </div>
 
-          <label className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-muted">
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 accent-accent" />
-            <span>{lang === 'mm' ? 'ဆရာ ဟောကိန်း အထောက်အကူအတွက် ကျွန်ုပ်၏ မွေးဇာတာ အချက်အလက်ကို လုံခြုံစွာ သိမ်းဆည်းရန် သဘောတူပါသည်။' : "I consent to securely storing my birth details to assist the astrologer's readings."}</span>
+          <label className={`mt-4 flex items-start gap-2 rounded-xl border p-3 text-xs leading-relaxed transition ${consent ? 'border-jade/40 bg-jade/5 text-muted' : 'border-coral/40 bg-coral/5 text-fg/80'}`}>
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-accent" />
+            <span><span className="text-coral">*</span> {lang === 'mm' ? 'ဆရာ ဟောကိန်း အထောက်အကူအတွက် ကျွန်ုပ်၏ မွေးဇာတာ အချက်အလက်ကို လုံခြုံစွာ သိမ်းဆည်းရန် သဘောတူပါသည်။' : "I consent to securely storing my birth details to assist the astrologer's readings."}</span>
           </label>
 
-          <button type="submit" disabled={loading}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/20 transition hover:brightness-110 disabled:opacity-60">
-            {loading ? <><Loader2 size={16} className="animate-spin" /> Calculating…</> : <><Sparkles size={16} /> Generate Chart</>}
+          <button type="submit" disabled={loading || !consent}
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+            {loading ? <><Loader2 size={16} className="animate-spin" /> {lang === 'mm' ? 'တွက်ချက်နေသည်…' : 'Calculating…'}</> : <><Sparkles size={16} /> {lang === 'mm' ? 'ဇာတာ တွက်မည်' : 'Generate Chart'}</>}
           </button>
+          {!consent && <p className="mt-2 font-mono text-[11px] leading-relaxed text-coral">{lang === 'mm' ? 'ကျေးဇူးပြု၍ အချက်အလက်သိမ်းဆည်းခွင့်ကို သဘောတူညီပေးပါ။' : 'Please agree to the data-storage consent to continue.'}</p>}
           {error && <p className="mt-3 rounded-xl border border-coral/40 bg-coral/10 px-3 py-2 font-mono text-xs text-coral">{error}</p>}
           <p className="mt-4 font-mono text-[10px] leading-relaxed text-muted">{t.disclaimer}</p>
         </form>
@@ -336,13 +375,31 @@ export default function Jyotish() {
 
           {data && reading && (
             <div className="space-y-5">
-              {/* header + PDF + tabs */}
-              <div className="flex items-center justify-between gap-3 no-print">
+              {/* header + secure PDF request */}
+              <div className="flex flex-col gap-3 no-print sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="font-groovy text-lg text-fg">{place || t.portalTitle}</h2>
-                <button type="button" onClick={savePdf}
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs text-muted transition hover:border-accent/40 hover:text-fg">
-                  <Download size={14} /> Save PDF
-                </button>
+                <div className="flex flex-col items-stretch gap-2 sm:items-end">
+                  {pdfState === 'pending' ? (
+                    <span className="inline-flex items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-xs text-amber-300">
+                      <Loader2 size={14} className="animate-spin" /> {lang === 'mm' ? 'လုံခြုံရေးအရ Admin ၏ ခွင့်ပြုချက် စောင့်ဆိုင်းနေပါသည်…' : 'Pending Admin approval…'}
+                    </span>
+                  ) : pdfOpen ? (
+                    <form onSubmit={submitPdf} className="flex flex-wrap items-center gap-2">
+                      <input type="email" required value={pdfEmail} onChange={(e) => setPdfEmail(e.target.value)} placeholder={lang === 'mm' ? 'သင့် အီးမေးလ်' : 'Your email'}
+                        className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-fg outline-none focus:border-accent/50" />
+                      <button type="submit" disabled={pdfState === 'sending'} className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-space transition hover:brightness-110 disabled:opacity-60">
+                        {pdfState === 'sending' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} {lang === 'mm' ? 'တောင်းဆိုမည်' : 'Request'}
+                      </button>
+                    </form>
+                  ) : (
+                    <button type="button" onClick={() => { setPdfOpen(true); setPdfState('idle') }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-4 py-2 text-xs text-accent-light transition hover:bg-accent/20">
+                      <Download size={14} /> {lang === 'mm' ? 'PDF စာတမ်း တောင်းဆိုရန်' : 'Request PDF Document'}
+                    </button>
+                  )}
+                  {pdfState === 'error' && <span className="font-mono text-[11px] text-coral">{lang === 'mm' ? 'တောင်းဆို၍မရပါ — ပြန်ကြိုးစားပါ။' : 'Request failed — try again.'}</span>}
+                  {pdfState === 'pending' && <span className="max-w-xs text-right font-mono text-[10px] leading-relaxed text-muted">{lang === 'mm' ? 'Admin အတည်ပြုပြီးလျှင် လုံခြုံသော တစ်ကြိမ်သုံး download link ကို သင့်အီးမေးလ်သို့ ပေးပို့ပါမည်။' : 'Once approved, a secure one-time link is emailed to you.'}</span>}
+                </div>
               </div>
               <div className="no-print flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap gap-2">
@@ -671,6 +728,22 @@ export default function Jyotish() {
                   <VargaPanel data={data} lang={lang} signOf={(p) => p.vargas['D' + vargaN] ?? p.sign} lagnaSign={vargaSign(data.ascendant.longitude, vargaN)}
                     title={curVarga.name} subtitle={`Lagna: ${signLabel(vargaSign(data.ascendant.longitude, vargaN), lang)}`}
                     desc={lang === 'mm' ? curVarga.desc.mm : curVarga.desc.en} chartStyle={chartStyle} />
+
+                  {/* D1–D60 educational accordion */}
+                  <div className="glass-card p-5">
+                    <h3 className="mb-3 font-groovy text-base text-fg">{lang === 'mm' ? 'ခွဲဝေဇာတာများ၏ အဓိပ္ပာယ် (D1–D60)' : 'What each Divisional Chart means (D1–D60)'}</h3>
+                    <div className="space-y-1.5">
+                      {VARGA_GUIDE.map((v) => (
+                        <details key={v.code} className="group rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 transition hover:border-accent/30 open:border-accent/30 open:bg-accent/[0.04]">
+                          <summary className="flex cursor-pointer list-none items-center justify-between font-mono text-sm text-fg/90">
+                            <span>{v.code}</span>
+                            <span className="text-muted transition group-open:rotate-180">▾</span>
+                          </summary>
+                          <p className="mt-2 text-xs leading-relaxed text-muted">{lang === 'mm' ? v.mm : v.en}</p>
+                        </details>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 

@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, FileText, Mail, type LucideIcon } from 'lucide-react'
 import { SITE } from '../config/site'
 import AdminPoetryManager from './AdminPoetryManager'
 import type { Memory, EntityId } from '../types/api'
@@ -19,9 +19,10 @@ const FAREWELL_URL = `${SITE.apiUrl}/api/farewell/admin/rsvps`
 const CHANGE_PW_URL = `${SITE.apiUrl}/api/auth/change-password`
 const REMEDIES_URL = `${SITE.apiUrl}/api/astrology/admin/remedies`
 const CHARTS_URL = `${SITE.apiUrl}/api/astrology/admin/charts`
+const PDF_URL = `${SITE.apiUrl}/api/astrology/admin/pdf-requests`
 const TOKEN_KEY = 'mtn_admin_jwt'
 
-type Tab = 'memories' | 'farewell' | 'poetry' | 'account' | 'remedy' | 'charts'
+type Tab = 'memories' | 'farewell' | 'poetry' | 'account' | 'remedy' | 'charts' | 'pdf'
 
 // Admin view of a farewell RSVP — includes the logistics fields the public
 // FarewellView omits (datesAvailable, foodPreference, plantType).
@@ -38,6 +39,7 @@ interface AdminRsvp {
 
 interface AdminRemedy { id: number; name: string; contact: string; area: string; message: string; birthInfo: string; handled: boolean; createdAt: string }
 interface AdminChart { id: number; name: string; gender: string; birthDate: string; birthTime: string; timeZone: string; location: string; nayNan: number; createdAt: string }
+interface AdminPdf { id: number; email: string; name: string; birthInfo: string; approvalStatus: string; createdAt: string }
 
 interface LoginResponse { data?: { token?: string; role?: string }; message?: string }
 interface AdminListResponse { memories?: Memory[]; rsvps?: AdminRsvp[] }
@@ -51,6 +53,7 @@ export default function SanctuaryAdmin() {
   const [rsvps, setRsvps] = useState<AdminRsvp[]>([])
   const [remedies, setRemedies] = useState<AdminRemedy[]>([])
   const [charts, setCharts] = useState<AdminChart[]>([])
+  const [pdfs, setPdfs] = useState<AdminPdf[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [q, setQ] = useState('')
@@ -87,14 +90,15 @@ export default function SanctuaryAdmin() {
     if (which === 'poetry' || which === 'account') return   // these fetch nothing here
     setError(''); setLoading(true)
     try {
-      const url = which === 'farewell' ? FAREWELL_URL : which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : MEMORIES_URL
+      const url = which === 'farewell' ? FAREWELL_URL : which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : which === 'pdf' ? PDF_URL : MEMORIES_URL
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired or not an Admin. Please log in again.') }
       if (!res.ok) throw new Error(`Failed to load (${res.status})`)
-      const data = (await res.json()) as AdminListResponse & { data?: AdminRemedy[] | AdminChart[] }
+      const data = (await res.json()) as AdminListResponse & { data?: AdminRemedy[] | AdminChart[] | AdminPdf[] }
       if (which === 'farewell') setRsvps(Array.isArray(data?.rsvps) ? data.rsvps : [])
       else if (which === 'remedy') setRemedies(Array.isArray(data?.data) ? (data.data as AdminRemedy[]) : [])
       else if (which === 'charts') setCharts(Array.isArray(data?.data) ? (data.data as AdminChart[]) : [])
+      else if (which === 'pdf') setPdfs(Array.isArray(data?.data) ? (data.data as AdminPdf[]) : [])
       else setMemories(Array.isArray(data?.memories) ? data.memories : [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load data.')
@@ -107,6 +111,16 @@ export default function SanctuaryAdmin() {
       if (!res.ok) throw new Error()
       setRemedies((rs) => rs.map((r) => (r.id === id ? { ...r, handled: !r.handled } : r)))
     } catch { setError('Could not update status.') }
+  }
+
+  const [approving, setApproving] = useState<number | null>(null)
+  const approvePdf = async (id: number) => {
+    setApproving(id)
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/approve-pdf/${id}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) throw new Error()
+      setPdfs((ps) => ps.map((r) => (r.id === id ? { ...r, approvalStatus: 'Approved' } : r)))
+    } catch { setError('Could not approve / send email.') } finally { setApproving(null) }
   }
 
   // Change the signed-in admin's password via the authenticated endpoint. A 401
@@ -146,8 +160,10 @@ export default function SanctuaryAdmin() {
   const filteredCharts = charts.filter((c) => !s ||
     (c.name || '').toLowerCase().includes(s) || (c.gender || '').toLowerCase().includes(s) || (c.timeZone || '').toLowerCase().includes(s))
 
-  const total = tab === 'farewell' ? rsvps.length : tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : memories.length
-  const shown = tab === 'farewell' ? filteredRsvps.length : tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : filteredMemories.length
+  const filteredPdfs = pdfs.filter((r) => !s || (r.email || '').toLowerCase().includes(s) || (r.name || '').toLowerCase().includes(s))
+
+  const total = tab === 'farewell' ? rsvps.length : tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : tab === 'pdf' ? pdfs.length : memories.length
+  const shown = tab === 'farewell' ? filteredRsvps.length : tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : tab === 'pdf' ? filteredPdfs.length : filteredMemories.length
 
   // Export the RSVP logistics as CSV for planning the real send-off.
   const exportCsv = () => {
@@ -207,12 +223,13 @@ export default function SanctuaryAdmin() {
               <TabBtn id="farewell" icon={Sprout} label="Farewell RSVPs" />
               <TabBtn id="remedy" icon={Sparkles} label="Remedy" />
               <TabBtn id="charts" icon={Star} label="Saved Charts" />
+              <TabBtn id="pdf" icon={FileText} label="PDF Requests" />
               <TabBtn id="poetry" icon={BookOpen} label="Poetry" />
               <TabBtn id="account" icon={KeyRound} label="Account" />
             </div>
 
             {/* search/refresh bar — only for the list tabs (not poetry/account) */}
-            {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts') && (
+            {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts' || tab === 'pdf') && (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
@@ -385,6 +402,46 @@ export default function SanctuaryAdmin() {
                         <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/60">{c.location}</td>
                         <td className="px-4 py-3 text-white/80">{c.nayNan}</td>
                         <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(c.createdAt || '').slice(0, 16)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ── PDF REQUESTS (approve → email one-time link) ── */}
+            {tab === 'pdf' && (
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
+                <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+                  <thead className="bg-white/5 font-mono text-[11px] uppercase tracking-wider text-white/50">
+                    <tr>
+                      <th className="px-4 py-3">Email</th><th className="px-4 py-3">Name</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Birth</th><th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Requested</th><th className="px-4 py-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPdfs.length === 0 ? (
+                      <tr><td colSpan={6} className="px-4 py-10 text-center font-mono text-sm text-white/40">{loading ? 'Loading…' : 'No PDF requests.'}</td></tr>
+                    ) : filteredPdfs.map((r) => (
+                      <tr key={r.id} className="border-t border-white/5 align-top hover:bg-white/[0.03]">
+                        <td className="px-4 py-3 font-medium text-amber-200">{r.email}</td>
+                        <td className="px-4 py-3 text-white/90">{r.name || '—'}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/60">{r.birthInfo}</td>
+                        <td className="px-4 py-3">
+                          <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${r.approvalStatus === 'Downloaded' ? 'bg-white/10 text-white/60' : r.approvalStatus === 'Approved' ? 'bg-emerald-400/15 text-emerald-200' : 'bg-amber-400/15 text-amber-200'}`}>{r.approvalStatus}</span>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-white/50">{(r.createdAt || '').slice(0, 16)}</td>
+                        <td className="px-4 py-3">
+                          {r.approvalStatus === 'Pending' ? (
+                            <button onClick={() => approvePdf(r.id)} disabled={approving === r.id}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300/30 bg-emerald-300/10 px-3 py-1.5 font-mono text-[11px] text-emerald-100 transition hover:bg-emerald-300/20 disabled:opacity-50">
+                              {approving === r.id ? <RefreshCw size={12} className="animate-spin" /> : <Mail size={12} />} Approve &amp; Send Email
+                            </button>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-emerald-200">✓ {r.approvalStatus === 'Downloaded' ? 'Downloaded' : 'Email Sent'}</span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
