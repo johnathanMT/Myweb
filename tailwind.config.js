@@ -32,8 +32,8 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['"Fira Code"', 'monospace'],
-        // Groovy 70s display face — headings, logo, nav (see index.css / components).
-        groovy: ['Shrikhand', 'cursive'],
+        // Futuristic display face — headings, logo, nav (see index.css / components).
+        groovy: ['Orbitron', 'sans-serif'],
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.6s ease forwards',

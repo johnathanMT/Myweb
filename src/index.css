@@ -4,51 +4,51 @@
 
 /* ══════════════════════════════════════════════════════════════════
    THEME PALETTE — colours via CSS vars (channels for Tailwind alpha).
-   Single "hippie" theme, pinned via <html data-theme="dark"> (see useTheme).
+   "Tokyo Urban / Neon Night" — dark + light via <html data-theme> (see useTheme).
    Every component consumes these tokens, so the whole site skins from here.
    ══════════════════════════════════════════════════════════════════ */
 :root, .theme-batman {
-  /* ════════ HIPPIE / 420 — smoky forest base · LIME accent · PURPLE+ORANGE trip ════════
-     60% BASE  → smoky forest-charcoal (backgrounds) — deep, earthy, late-night
-     30% SECONDARY → olive / emerald charcoal (cards, sections, borders)
-     10% ACCENT → vibrant lime / sage green (buttons, active states, hovers)
-     Psychedelic touches → deep purple + sunset orange (glowing orbs, gradients).
-     Text is soft beige (never pure white) for a relaxed, low-strain feel. */
+  /* ════════ TOKYO URBAN · NEON NIGHT ════════
+     60% BASE  → asphalt / midnight-navy backgrounds
+     30% SECONDARY → dark glass panels with thin glowing borders
+     10% ACCENT → electric cyan (primary) + neon magenta, glowing red, bright yellow */
 
-  /* Smoky, earthy bases — deep forest charcoal so lime glows against them */
-  --space: 14 20 17;           /* #0E1411 — smoky forest charcoal */
-  --surface: 20 28 23;         /* #141C17 — muted olive panel */
+  /* Deep asphalt / midnight-navy bases */
+  --space: 8 10 16;            /* #08090F — near-black asphalt (navy tint) */
+  --surface: 13 16 24;         /* #0D1018 — dark navy panel */
 
-  /* card / section surfaces (emerald-tinted charcoal, glassy) */
-  --card: 22 32 26;            /* #16201A */
-  --card-hover: 30 42 34;      /* #1E2A22 */
-  --forest: 34 150 96;         /* sage/emerald secondary border */
-  --forest-deep: 14 28 21;
+  /* dark glass card surfaces */
+  --card: 17 21 31;            /* #11151F */
+  --card-hover: 24 30 44;      /* #181E2C */
+  --forest: 40 110 130;        /* dim cyan-teal border tint */
+  --forest-deep: 10 18 26;
 
-  /* PRIMARY accent — vibrant LIME / neon green (buttons, active, hovers) */
-  --accent: 132 204 22;        /* #84cc16 — lime-500 */
-  --accent-light: 163 230 53;  /* #a3e635 — lime-400 glow */
+  /* PRIMARY accent — ELECTRIC CYAN (buttons, active states, hovers) */
+  --accent: 34 211 238;        /* #22D3EE — cyan-400 */
+  --accent-light: 103 232 249; /* #67E8F9 — cyan glow */
 
-  /* JADE secondary — luminous emerald (links / success / glows) */
-  --jade: 52 211 153;          /* #34d399 — emerald-400 */
-  --jade-light: 110 231 183;   /* #6ee7b7 — emerald glow */
-  --cyan: 52 211 153;          /* legacy "cyan" usages → emerald green */
+  /* SECONDARY neon — NEON MAGENTA (links / highlights / glows) */
+  --jade: 232 74 213;          /* #E84AD5 — neon magenta */
+  --jade-light: 244 114 227;   /* #F472E3 — magenta glow */
+  --cyan: 34 211 238;          /* legacy "cyan" usages → electric cyan */
 
-  /* PSYCHEDELIC — sunset orange + deep purple (60s/70s freedom orbs & gradients) */
-  --coral: 251 146 60;         /* #fb923c — sunset orange */
-  --maroon: 147 51 234;        /* #9333ea — deep psychedelic purple */
-  --maroon-deep: 88 28 135;    /* #581c87 — deepest purple */
+  /* GLOWING RED + NEON PURPLE-MAGENTA (ambient orbs, gradients, alerts) */
+  --coral: 251 65 88;          /* #FB4158 — glowing red */
+  --maroon: 192 60 220;        /* #C03CDC — neon purple-magenta */
+  --maroon-deep: 110 28 150;   /* deep neon purple */
 
-  --muted: 168 170 158;        /* warm sage-gray body text */
-  --fg: 231 229 228;           /* #e7e5e4 — soft beige (stone-200), never pure white */
+  --muted: 148 158 178;        /* cool blue-gray body text */
+  --fg: 233 237 245;           /* #E9EDF5 — cool near-white (not pure) */
 }
 
-/* On the hippie palette the accent (lime) and jade are LIGHT colours, so SOLID
-   fills need DARK text for contrast (the mirror of the light-mode rule below).
+/* Electric-cyan/accent SOLID fills are light → use dark text for contrast.
    Opacity fills like bg-accent/20 sit over the dark base and keep light text. */
 html[data-theme="dark"] [class*="bg-accent"]:not([class*="bg-accent/"]),
-html[data-theme="dark"] [class*="bg-jade"]:not([class*="bg-jade/"]),
-html[data-theme="dark"] [class*="bg-lime"]:not([class*="bg-lime/"]) { color: #0E1411; }
+html[data-theme="dark"] [class*="bg-cyan"]:not([class*="bg-cyan/"]) { color: #06080F; }
+
+/* Neon glow — DARK mode only (glows look muddy on a light background). */
+html[data-theme="dark"] .section-title { text-shadow: 0 0 22px rgb(var(--accent) / 0.35), 0 0 6px rgb(var(--accent) / 0.22); }
+html[data-theme="dark"] .neon-glow { text-shadow: 0 0 10px rgb(var(--accent) / 0.6), 0 0 2px rgb(var(--accent) / 0.4); }
 
 @layer base {
   * {
@@ -144,7 +144,7 @@ html[data-theme="dark"] [class*="bg-lime"]:not([class*="bg-lime/"]) { color: #0E
   }
 
   .section-title {
-    @apply font-groovy text-3xl md:text-4xl font-bold text-white mb-4 tracking-wide;
+    @apply font-groovy text-3xl md:text-4xl font-bold text-white mb-4;
   }
 
   .section-subtitle {
@@ -166,13 +166,14 @@ html[data-theme="dark"] [class*="bg-lime"]:not([class*="bg-lime/"]) { color: #0E
   }
 
   .glass-card {
-    @apply bg-white/[0.04] border border-white/[0.08] rounded-3xl backdrop-blur-md;
+    @apply bg-white/[0.03] border border-white/[0.10] rounded-2xl backdrop-blur-xl;
     transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   }
 
   .glass-card:hover {
-    border-color: color-mix(in srgb, var(--c, rgb(var(--accent))) 40%, transparent);
-    box-shadow: 0 0 40px color-mix(in srgb, var(--c, rgb(var(--accent))) 8%, transparent);
+    border-color: color-mix(in srgb, var(--c, rgb(var(--accent))) 55%, transparent);
+    box-shadow: 0 0 32px color-mix(in srgb, var(--c, rgb(var(--accent))) 18%, transparent),
+                inset 0 0 18px color-mix(in srgb, var(--c, rgb(var(--accent))) 6%, transparent);
     transform: translateY(-6px);
   }
 
@@ -1300,3 +1301,56 @@ body::before {
   -webkit-mask-image: radial-gradient(70% 60% at 50% 38%, #000 0%, transparent 78%);
   mask-image: radial-gradient(70% 60% at 50% 38%, #000 0%, transparent 78%);
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT — "Tokyo Day": clean bright surfaces, neon accents darkened for
+   AA contrast, and NO neon glow. Enabled by <html data-theme="light">.
+   ══════════════════════════════════════════════════════════════════ */
+html[data-theme="light"],
+html[data-theme="light"] .theme-batman {
+  --space: 244 246 250;        /* #F4F6FA — cool light base */
+  --surface: 235 239 245;      /* inset panels */
+  --card: 255 255 255;         /* crisp white cards */
+  --card-hover: 247 250 253;
+  --forest: 8 145 178;         /* cyan-600 border tint */
+  --forest-deep: 224 242 248;
+  --accent: 8 145 178;         /* #0891B2 cyan-600 — readable on white */
+  --accent-light: 6 182 212;   /* #06B6D4 cyan-500 */
+  --jade: 192 38 176;          /* readable magenta */
+  --jade-light: 219 39 199;
+  --cyan: 8 145 178;
+  --coral: 225 29 72;          /* #E11D48 red */
+  --maroon: 147 51 234;        /* purple */
+  --maroon-deep: 107 33 168;
+  --muted: 71 85 105;          /* slate-600 body text */
+  --fg: 15 23 36;              /* near-black slate — AA on white */
+  color-scheme: light;
+}
+html[data-theme="light"] body { color: rgb(var(--fg)); }
+html[data-theme="light"] body::before { opacity: 0.03; }
+html[data-theme="light"] ::selection { background: rgb(var(--accent) / 0.18); color: rgb(var(--fg)); }
+
+/* text flip: near-white utilities → dark fg; mid grays → muted */
+html[data-theme="light"] [class*="text-white"],
+html[data-theme="light"] .text-gray-100, html[data-theme="light"] .text-gray-200,
+html[data-theme="light"] .text-zinc-100, html[data-theme="light"] .text-zinc-200, html[data-theme="light"] .text-zinc-300 { color: rgb(var(--fg)); }
+html[data-theme="light"] .text-gray-300, html[data-theme="light"] .text-gray-400, html[data-theme="light"] .text-gray-500, html[data-theme="light"] .text-gray-600,
+html[data-theme="light"] .text-zinc-400, html[data-theme="light"] .text-zinc-500 { color: rgb(var(--muted)); }
+
+/* surface flip: white/black translucent utilities */
+html[data-theme="light"] [class*="bg-white/"] { background-color: rgb(var(--fg) / 0.04); }
+html[data-theme="light"] [class*="border-white/"] { border-color: rgb(var(--fg) / 0.12); }
+html[data-theme="light"] [class*="bg-black/"] { background-color: rgb(255 255 255 / 0.72); }
+
+/* solid accent/cyan/magenta fills → white text in light mode */
+html[data-theme="light"] [class*="bg-accent"]:not([class*="bg-accent/"]),
+html[data-theme="light"] [class*="bg-cyan"]:not([class*="bg-cyan/"]),
+html[data-theme="light"] [class*="bg-jade"]:not([class*="bg-jade/"]) { color: #fff; }
+
+/* light glass cards — crisp white with a soft shadow, no glow */
+html[data-theme="light"] .glass-card { background: rgb(var(--card)); border-color: rgb(var(--fg) / 0.08); box-shadow: 0 1px 2px rgb(var(--fg) / 0.04), 0 8px 20px -6px rgb(var(--fg) / 0.10); }
+html[data-theme="light"] .glass-card:hover { border-color: color-mix(in srgb, var(--c, rgb(var(--accent))) 45%, transparent); box-shadow: 0 10px 28px -8px rgb(var(--fg) / 0.16); }
+
+/* headings dark + no neon glow in light */
+html[data-theme="light"] .section-title { color: rgb(var(--fg)); text-shadow: none; }
+html[data-theme="light"] .section-subtitle { color: rgb(var(--muted)); }

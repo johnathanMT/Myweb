@@ -45,7 +45,7 @@ export default function Gateway() {
 
         {/* name */}
         <motion.h1 {...fade(0.1)}
-          className="font-groovy text-[clamp(2.25rem,7vw,5.25rem)] leading-[1.02] tracking-wide text-fg">
+          className="font-groovy neon-glow text-[clamp(2rem,6.5vw,5rem)] uppercase leading-[1.05] tracking-wide text-fg">
           Myo Thant Naing
         </motion.h1>
 
@@ -70,7 +70,7 @@ export default function Gateway() {
             onClick={() => scrollTo('#projects')}
             className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition hover:brightness-110 sm:w-auto"
           >
-            See the Builds
+            View Projects
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
           </button>
           <a
@@ -78,7 +78,7 @@ export default function Gateway() {
             className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-fg/15 px-7 py-3 text-sm font-semibold text-fg transition hover:border-fg/35 hover:bg-fg/5 sm:w-auto"
           >
             <Mail size={15} className="text-jade" />
-            Drop a Vibe
+            Get in touch
           </a>
         </motion.div>
 

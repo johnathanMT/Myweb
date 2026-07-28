@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState, Component, type ReactNode, type FormEvent } from 'react'
 import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, Grid, Html, OrbitControls, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import Particles, { ParticlesProvider, useParticlesProvider } from '@tsparticles/react'
@@ -69,8 +69,6 @@ const showOnDevice = (cfg: SceneConfig): boolean => !(IS_MOBILE && cfg.heavy)
 const ALL_URLS = Object.values(SCENE_LAYOUT).filter(showOnDevice).map((m) => u(m.url))
 ALL_URLS.forEach((url) => useGLTF.preload(url))
 
-// Reverse lookup: a cfg object → its SCENE_LAYOUT key.
-const KEY_OF = new Map<SceneConfig, string>(Object.entries(SCENE_LAYOUT).map(([k, v]) => [v, k]))
 const BUILDING_LABEL: Record<string, string> = {
   sakura: 'Sakura Tree', torii: 'Torii Gate', ship: "Ship's Deck", village: 'Village',
   bagan: 'Bagan Temple', ferris_wheel: 'Ferris Wheel', jp_castle: 'Japanese Castle',
@@ -98,15 +96,15 @@ const LANDMARKS: Record<string, { anchor: Vec3 }> = {
 const T: Record<string, TLang> = {
   en: { title: 'The Memory World', sub: 'Drag to look · scroll to fly out · tap a tag', day: 'Day', night: 'Night', leave: 'Leave a Memory', editMine: 'Edit your memory', from: 'A memory from', at: 'at the', place: 'Place it at', name: 'Your name', msg: 'Message', hang: 'Hang it', save: 'Save changes', demo: 'One memory per visitor · editable, never deleted.', edit: 'Edit', namePh: 'Please input your name', msgPh: 'A few words to remember…', home: 'Home',
     placeHint: 'Step 1 — Click anywhere in the 3D world to choose a spot',
-    steps: ['Click anywhere in the 3D world to choose a location.', 'Write your name and memory.', "Click 'Leave a Memory' to plant it."],
+    steps: ['Choose a spot from the "Place it at" list.', 'Write your name and your memory.', 'Press the button below to plant it.'],
     lm: { tree: 'Sakura Tree', ship: "Ship's Deck", village: 'Village Gate', castle: 'Castle Gates', plaza: 'Night Plaza' } },
   jp: { title: '思い出の世界', sub: 'ドラッグで視点 · スクロールで俯瞰 · タグをタップ', day: '昼', night: '夜', leave: '思い出を残す', editMine: '思い出を編集', from: '思い出をくれた人', at: '場所：', place: '場所を選ぶ', name: 'お名前', msg: 'メッセージ', hang: '木に掛ける', save: '変更を保存', demo: '一人につき一つ · 編集可・削除不可。', edit: '編集', namePh: 'お名前を入力してください', msgPh: 'ひとことどうぞ…', home: 'ホーム',
     placeHint: 'ステップ1 — 3Dの世界をクリックして場所を選んでください',
-    steps: ['3Dの世界をクリックして場所を選びます。', 'お名前と思い出を書きます。', '「思い出を残す」を押して残します。'],
+    steps: ['「場所を選ぶ」リストから場所を選びます。', 'お名前と思い出を書きます。', '下のボタンを押して残します。'],
     lm: { tree: '桜の木', ship: '船の甲板', village: '村の入口', castle: '城門', plaza: '夜の広場' } },
   mm: { title: 'အမှတ်တရ ကမ္ဘာ', sub: 'ကြည့်ရန် ဖိဆွဲ · အပြင်ထွက်ရန် scroll · tag ကိုနှိပ်', day: 'နေ့', night: 'ည', leave: 'အမှတ်တရ ချန်ထားရန်', editMine: 'သင့်စာ ပြင်ရန်', from: 'အမှတ်တရ ပေးသူ', at: 'နေရာ —', place: 'နေရာ ရွေးပါ', name: 'သင့်အမည်', msg: 'စာ', hang: 'ချိတ်ဆွဲရန်', save: 'သိမ်းရန်', demo: 'တစ်ဦးလျှင် တစ်ခု · ပြင်နိုင်၊ ဖျက်၍မရ။', edit: 'ပြင်ရန်', namePh: 'သင့်အမည် ထည့်ပါ', msgPh: 'မှတ်မိစရာ စကားအနည်းငယ်…', home: 'ပင်မ',
     placeHint: 'အဆင့် ၁ — နေရာရွေးရန် 3D ကမ္ဘာတွင် နှိပ်ပါ',
-    steps: ['နေရာရွေးရန် 3D ကမ္ဘာတွင် နှိပ်ပါ။', 'သင့်အမည်နှင့် အမှတ်တရစာ ရေးပါ။', '“အမှတ်တရ ချန်ထားရန်” ကိုနှိပ်ပါ။'],
+    steps: ['“နေရာ ရွေးပါ” စာရင်းမှ နေရာတစ်ခု ရွေးပါ။', 'သင့်အမည်နှင့် အမှတ်တရစာ ရေးပါ။', 'အောက်ကခလုတ်ကိုနှိပ်၍ ချန်ထားပါ။'],
     lm: { tree: 'ဆာကူရာပင်', ship: 'သင်္ဘောကုန်း', village: 'ရွာဝင်ပေါက်', castle: 'ရဲတိုက်တံခါး', plaza: 'ညဈေး' } },
 }
 const LANGS = [{ code: 'en', label: 'EN' }, { code: 'jp', label: '日本語' }, { code: 'mm', label: 'မြန်မာ' }]
@@ -185,11 +183,8 @@ function Floating({ amp = 0.15, speed = 1, children }: { amp?: number; speed?: n
   return <group ref={ref}>{children}</group>
 }
 
-function Asset({ cfg, night, onPick }: { cfg: SceneConfig; night: boolean; onPick?: (id: string, position: Vec3) => void }) {
+function Asset({ cfg, night }: { cfg: SceneConfig; night: boolean }) {
   const fit = useFitted(cfg)
-  const [hovered, setHovered] = useState(false)
-  const id = KEY_OF.get(cfg)
-  const pickable = !!onPick && !!id && !cfg.sky
 
   useEffect(() => {
     if (cfg.celestial === 'sun') applyEmissive(fit.obj, '#ffd27a', night ? 0.12 : 2.6)
@@ -197,22 +192,12 @@ function Asset({ cfg, night, onPick }: { cfg: SceneConfig; night: boolean; onPic
     else if (cfg.city) applyEmissive(fit.obj, '#ffc04d', night ? 1.1 : 0.0)
   }, [fit.obj, night, cfg])
 
-  useEffect(() => {
-    if (!pickable || !hovered) return
-    document.body.style.cursor = 'pointer'
-    return () => { document.body.style.cursor = 'auto' }
-  }, [pickable, hovered])
-
   const inner = <primitive object={fit.obj} scale={fit.scale} position={fit.offset} />
-  const liftY = cfg.fit === 'footprint' ? 4 : (cfg.size ?? 4)
-  const events = pickable ? {
-    onPointerOver: (e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHovered(true) },
-    onPointerOut: () => setHovered(false),
-    onClick: (e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); if (onPick && id) onPick(id, [cfg.position[0], liftY, cfg.position[2]]) },
-  } : {}
 
+  // Purely decorative — NO pointer/click events, so dragging the canvas only
+  // rotates the camera (OrbitControls) and never opens the memory modal.
   return (
-    <group position={cfg.position} scale={pickable && hovered ? 1.03 : 1} {...events}>
+    <group position={cfg.position}>
       {cfg.float ? <Floating {...cfg.float}>{inner}</Floating> : inner}
     </group>
   )
@@ -373,11 +358,10 @@ function PlantingDirector({ target, onDone }: { target: Vec3; onDone?: () => voi
 interface PlacedTag { tag: Tag; index: number; position: Vec3 }
 interface WorldProps {
   night: boolean; tags: Tag[]; paused: boolean; operatorId: string
-  onOpen: (tag: Tag) => void; placing: boolean; onPlace: (point: Vec3) => void
-  onPick: (id: string, position: Vec3) => void; plants?: Plant[]; pendingId?: number | string | null; onPlanted: () => void
+  onOpen: (tag: Tag) => void; plants?: Plant[]; pendingId?: number | string | null; onPlanted: () => void
 }
 
-function World({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPick, plants = [], pendingId = null, onPlanted }: WorldProps) {
+function World({ night, tags, paused, operatorId, onOpen, plants = [], pendingId = null, onPlanted }: WorldProps) {
   const placedTags = useMemo<PlacedTag[]>(() => {
     const out: PlacedTag[] = []
     const byLm: Record<string, Tag[]> = {}
@@ -403,30 +387,23 @@ function World({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPi
     <>
       <Safe><OrbitingSatellite /></Safe>
 
-      {placing && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, G + 0.02, 0]} onClick={(e) => { e.stopPropagation(); onPlace([e.point.x, e.point.y, e.point.z]) }}>
-          <planeGeometry args={[400, 400]} />
-          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-        </mesh>
-      )}
+      <Safe><Asset cfg={SCENE_LAYOUT.sun} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.moon} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.glider} night={night} /></Safe>
 
-      <Safe><Asset cfg={SCENE_LAYOUT.sun} night={night} onPick={onPick} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.moon} night={night} onPick={onPick} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.glider} night={night} onPick={onPick} /></Safe>
-
-      <Safe><Asset cfg={SCENE_LAYOUT.ship} night={night} onPick={onPick} /></Safe>
-      {showOnDevice(SCENE_LAYOUT.plaza_night) && <Safe><Asset cfg={SCENE_LAYOUT.plaza_night} night={night} onPick={onPick} /></Safe>}
-      <Safe><Asset cfg={SCENE_LAYOUT.bagan} night={night} onPick={onPick} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.ferris_wheel} night={night} onPick={onPick} /></Safe>
-      {showOnDevice(SCENE_LAYOUT.hospital) && <Safe><Asset cfg={SCENE_LAYOUT.hospital} night={night} onPick={onPick} /></Safe>}
-      {showOnDevice(SCENE_LAYOUT.london_university) && <Safe><Asset cfg={SCENE_LAYOUT.london_university} night={night} onPick={onPick} /></Safe>}
-      <Safe><Asset cfg={SCENE_LAYOUT.village} night={night} onPick={onPick} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.jp_castle} night={night} onPick={onPick} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.castle_sakura} night={night} onPick={onPick} /></Safe>
-      <Safe><Asset cfg={SCENE_LAYOUT.torii} night={night} onPick={onPick} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.ship} night={night} /></Safe>
+      {showOnDevice(SCENE_LAYOUT.plaza_night) && <Safe><Asset cfg={SCENE_LAYOUT.plaza_night} night={night} /></Safe>}
+      <Safe><Asset cfg={SCENE_LAYOUT.bagan} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.ferris_wheel} night={night} /></Safe>
+      {showOnDevice(SCENE_LAYOUT.hospital) && <Safe><Asset cfg={SCENE_LAYOUT.hospital} night={night} /></Safe>}
+      {showOnDevice(SCENE_LAYOUT.london_university) && <Safe><Asset cfg={SCENE_LAYOUT.london_university} night={night} /></Safe>}
+      <Safe><Asset cfg={SCENE_LAYOUT.village} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.jp_castle} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.castle_sakura} night={night} /></Safe>
+      <Safe><Asset cfg={SCENE_LAYOUT.torii} night={night} /></Safe>
 
       <SwayGroup>
-        <Safe><Asset cfg={SCENE_LAYOUT.sakura} night={night} onPick={onPick} /></Safe>
+        <Safe><Asset cfg={SCENE_LAYOUT.sakura} night={night} /></Safe>
         {night && ([[-1.0, 2.3, 0.4], [1.0, 2.6, 0.2], [0.0, 1.9, 0.8]] as Vec3[]).map((o, i) => (
           <mesh key={`lantern-${i}`} position={o}>
             <sphereGeometry args={[0.09, 12, 12]} />
@@ -448,7 +425,7 @@ function World({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPi
 
 interface SceneProps extends WorldProps { plantingTarget: Vec3 | null }
 
-function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPick, plants, pendingId, plantingTarget, onPlanted }: SceneProps) {
+function Scene({ night, tags, paused, operatorId, onOpen, plants, pendingId, plantingTarget, onPlanted }: SceneProps) {
   return (
     <Canvas
       camera={{ position: [0, 16, 56], fov: 50, near: 0.1, far: 2000 }}
@@ -473,7 +450,7 @@ function Scene({ night, tags, paused, operatorId, onOpen, placing, onPlace, onPi
         sectionSize={5} sectionThickness={1.1} sectionColor={night ? '#7c5cff' : '#b8860b'}
         fadeDistance={120} fadeStrength={1.4} followCamera={false}
       />
-      <World night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={onOpen} placing={placing} onPlace={onPlace} onPick={onPick} plants={plants} pendingId={pendingId} onPlanted={onPlanted} />
+      <World night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={onOpen} plants={plants} pendingId={pendingId} onPlanted={onPlanted} />
 
       {plantingTarget && <PlantingDirector target={plantingTarget} onDone={onPlanted} />}
 
@@ -665,7 +642,6 @@ export default function Sanctuary() {
   const [editing, setEditing] = useState<Tag | null>(null)
   const [welcome, setWelcome] = useState<boolean>(() => { try { return !localStorage.getItem(PENDING_PLANT_KEY) } catch { return true } })
   const [apiError, setApiError] = useState<'offline' | 'save' | null>(null)
-  const [placing, setPlacing] = useState(false)
   const [placedPoint, setPlacedPoint] = useState<Vec3 | null>(null)
   const [pickedPlace, setPickedPlace] = useState<string | null>(null)
 
@@ -747,21 +723,15 @@ export default function Sanctuary() {
   const myTag = tags.find((x) => x.ownerId === operatorId) || null
 
   const openWrite = () => {
+    // Leave-a-memory is ONLY triggered by this 2D button — never by clicking a
+    // 3D mesh. Open the form directly; the location comes from the modal's
+    // "Place it at" dropdown (no clicking the 3D world required).
     setPickedPlace(null)
-    if (myTag) { setEditing(myTag); setPlacedPoint(null); setWriteOpen(true) }
-    else { setEditing(null); setPlacedPoint(null); setPlacing(true) }
-  }
-  const editFromRead = (tag: Tag) => { setActiveTag(null); setPickedPlace(null); setEditing(tag); setPlacedPoint(null); setWriteOpen(true) }
-
-  const onPlace = (point: Vec3) => { setPickedPlace(null); setPlacedPoint(point); setPlacing(false); setWriteOpen(true) }
-
-  const onPickBuilding = (id: string, position: Vec3) => {
-    setPlacing(false)
-    setPlacedPoint(position)
-    setPickedPlace(id)
+    setPlacedPoint(null)
     setEditing(myTag || null)
     setWriteOpen(true)
   }
+  const editFromRead = (tag: Tag) => { setActiveTag(null); setPickedPlace(null); setEditing(tag); setPlacedPoint(null); setWriteOpen(true) }
 
   const submitMemory = async ({ author, message, landmark }: { author: string; message: string; landmark: string }) => {
     const a = clean(author), m = clean(message)
@@ -803,7 +773,7 @@ export default function Sanctuary() {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#070b1c] via-[#141a38] to-[#2a1a3a] transition-opacity duration-[1200ms]" style={{ opacity: night ? 1 : 0, backgroundImage: 'radial-gradient(1px 1px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 28% 32%, #fff, transparent), radial-gradient(1.5px 1.5px at 45% 12%, #fff, transparent), radial-gradient(1px 1px at 63% 26%, #fff, transparent), radial-gradient(1px 1px at 78% 14%, #fff, transparent), radial-gradient(1.5px 1.5px at 88% 30%, #fff, transparent), linear-gradient(to bottom, #070b1c, #141a38, #2a1a3a)' }} aria-label="Starry night sky" />
 
         <div className="absolute inset-0 z-[15]">
-          <Scene night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={setActiveTag} placing={placing} onPlace={onPlace} onPick={onPickBuilding}
+          <Scene night={night} tags={tags} paused={paused} operatorId={operatorId} onOpen={setActiveTag}
             plants={allPlants} pendingId={pendingId} plantingTarget={planting && pending ? pending.position : null} onPlanted={onPlanted} />
         </div>
 
@@ -839,14 +809,6 @@ export default function Sanctuary() {
             </p>
           )}
         </div>
-
-        {placing && (
-          <div className="absolute left-1/2 z-[46] flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-amber-300/50 bg-black/70 px-5 py-2.5 backdrop-blur-md"
-            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 5.5rem)' }}>
-            <span className="font-serif text-sm text-amber-100">{t.placeHint}</span>
-            <button type="button" onClick={() => setPlacing(false)} aria-label="Cancel placement" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 font-mono text-[13px] text-white/70 transition hover:text-white">✕</button>
-          </div>
-        )}
 
         <ReadModal tag={activeTag} t={t} canRead={!!activeTag && (activeTag.ownerId === operatorId || isAdmin)} canEdit={!!activeTag && activeTag.ownerId === operatorId} onEdit={editFromRead} onClose={() => setActiveTag(null)} />
         <WriteModal open={writeOpen} editing={editing} presetPlace={pickedPlace} t={t} onClose={() => { setWriteOpen(false); setEditing(null); setPickedPlace(null) }} onSubmit={submitMemory} />

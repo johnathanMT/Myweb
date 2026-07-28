@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import useTheme from '../hooks/useTheme'
 import type { JourneyPage } from '../data/journeyHub'
 import AmbientBackground from './AmbientBackground'
 import JourneyHubNav from './JourneyHubNav'
@@ -33,6 +34,7 @@ export default function PageShell({
   const [lang, setLang] = useState<string>(() => {
     try { return localStorage.getItem('mtn_lang') || 'en' } catch { return 'en' }
   })
+  const { theme, toggle: toggleTheme } = useTheme()
   useEffect(() => {
     try { localStorage.setItem('mtn_lang', lang) } catch { /* sandboxed context */ }
   }, [lang])
@@ -48,7 +50,7 @@ export default function PageShell({
     >
       <AmbientBackground />
 
-      <Navbar lang={lang} setLang={setLang} />
+      <Navbar lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} />
 
       <main
         className="relative z-10"
