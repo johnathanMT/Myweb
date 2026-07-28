@@ -43,8 +43,8 @@ const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = 
   { n: 60, name: 'D60 · Shashtiamsa', desc: { en: 'Overall karma — the most refined chart.', mm: 'အလုံးစုံ ကံ — အသိမ်မွေ့ဆုံး ဇာတာ။' } },
 ]
 
-const BIO_EN = 'Myo Thant Naing is a tech-savvy professional based in Japan, bridging ancient Vedic astrological wisdom with cutting-edge Artificial Intelligence to deliver mathematically precise and profoundly accurate life readings.'
-const BIO_MM = 'မြသန့်နိုင် သည် ဂျပန်နိုင်ငံအခြေစိုက် နည်းပညာကျွမ်းကျင် ပညာရှင်တစ်ဦးဖြစ်ပြီး၊ ရှေးဟောင်း ဗေဒင်ပညာ၏ ဉာဏ်အလင်းကို ခေတ်မီ ဉာဏ်ရည်တု (AI) နည်းပညာနှင့် ပေါင်းစပ်ကာ သင်္ချာနည်းကျ တိကျမှန်ကန်ပြီး နက်နဲသော ဘဝဟောကိန်းများကို ပေးဆောင်ပါသည်။'
+const BIO_EN = 'Sayar Bhone Min Thike Din prepares every reading with authentic Vedic (Jyotish) methods — the sidereal zodiac with the Lahiri ayanamsa, whole-sign houses, the Chandra Lagna (Moon ascendant), the sixteen divisional charts (D1–D60), the Vimshottari dasha & antardasha system, planetary aspects (drishti), the six-fold Shadbala strengths and Ashtakavarga — combined for a precise and faithful reading of your life.'
+const BIO_MM = 'ဆရာ ဘုန်းမင်းသိုက်ဒင် သည် ဟောကိန်းတိုင်းကို စစ်မှန်သော နက္ခတ်ဗေဒင် (Jyotish) နည်းစနစ်များဖြင့် ပြင်ဆင်ပါသည် — နက္ခတ်ရာသီစက်နှင့် Lahiri အယနံသ၊ Whole-Sign အိမ်စနစ်၊ စန်းလဂ် (Chandra Lagna)၊ ဇာတာခွဲ ၁၆ မျိုး (D1–D60)၊ ဝိမ်ရှောတ္တရီ ဒသာ/အန္တရ်ဒသာစနစ်၊ ဂြိုဟ်အမြင် (ဒြိဋ္ဌိ)၊ ဆဒ္ဗလ ဂြိုဟ်အား ၆ မျိုးနှင့် အဋ္ဌကဝဂ် — တို့ကို ပေါင်းစပ်၍ သင့်ဘဝကို တိကျမှန်ကန်စွာ ဟောကြားပေးပါသည်။'
 
 // D1–D60 educational meanings (simple, bilingual).
 const VARGA_GUIDE: { code: string; en: string; mm: string }[] = [
@@ -247,15 +247,15 @@ export default function Jyotish() {
           <div className="relative h-28 w-28 shrink-0 rounded-full p-[3px]"
             style={{ background: 'conic-gradient(from 200deg, #eab308, #a855f7, #22d3ee, #eab308)', boxShadow: '0 0 30px -4px rgba(168,85,247,0.6), 0 0 22px -6px rgba(234,179,8,0.55)' }}>
             <div className="relative h-full w-full overflow-hidden rounded-full bg-card">
-              <span className="absolute inset-0 flex items-center justify-center font-groovy text-3xl text-accent">M</span>
-              <img src="/profile-grand.jpg" alt="Myo Thant Naing" className="relative h-full w-full object-cover" loading="lazy"
+              <span className="absolute inset-0 flex items-center justify-center font-groovy text-3xl text-accent">ဘ</span>
+              <img src="/profile-grand.jpg" alt="Sayar Bhone Min Thike Din" className="relative h-full w-full object-cover" loading="lazy"
                 onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
             </div>
           </div>
           <div className="flex-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light">{lang === 'mm' ? 'ဗေဒင်ပညာရှင် · AI အင်ဂျင်နီယာ' : 'Vedic Astrologer · AI Engineer'}</p>
-            <h1 className="mt-1 font-groovy text-2xl text-fg sm:text-3xl">{lang === 'mm' ? 'ဆရာ မြသန့်နိုင်' : 'Sayar Myo Thant Naing'}</h1>
-            <p className="font-mono text-xs text-muted">(Software Engineer &amp; AI Developer)</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light">{lang === 'mm' ? 'ပရော်ဖက်ရှင်နယ် ဗေဒင်ပညာရှင်' : 'Professional Vedic Astrologer'}</p>
+            <h1 className="mt-1 font-groovy text-2xl text-fg sm:text-3xl">{lang === 'mm' ? 'ဆရာ ဘုန်းမင်းသိုက်ဒင်' : 'Sayar Bhone Min Thike Din'}</h1>
+            <p className="font-mono text-xs text-muted">{lang === 'mm' ? 'နက္ခတ်ဗေဒင် · ဝိမ်ရှောတ္တရီ ဒသာ · ဆဒ္ဗလ' : 'Sidereal Jyotish · Vimshottari Dasha · Shadbala'}</p>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">{lang === 'mm' ? BIO_MM : BIO_EN}</p>
           </div>
           <div className="no-print flex items-center gap-1 self-start rounded-full border border-white/15 bg-white/5 p-1 backdrop-blur">
