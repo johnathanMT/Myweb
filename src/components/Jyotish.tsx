@@ -111,6 +111,7 @@ export default function Jyotish() {
   const [lon, setLon] = useState('96.1735')
   const [tz, setTz] = useState(browserTz)
   const [place, setPlace] = useState('')
+  const [placeConfirmed, setPlaceConfirmed] = useState(false)   // true only after a city is picked/preset
   const [results, setResults] = useState<GeoResult[]>([])
   const [searching, setSearching] = useState(false)
   const debTimer = useRef<number | undefined>(undefined)
@@ -139,6 +140,7 @@ export default function Jyotish() {
 
   const onPlaceChange = (v: string) => {
     setPlace(v)
+    setPlaceConfirmed(false)   // typing invalidates until a result is chosen
     window.clearTimeout(debTimer.current)
     if (v.trim().length < 3) { setResults([]); return }
     debTimer.current = window.setTimeout(async () => {
@@ -152,14 +154,16 @@ export default function Jyotish() {
   }
   const selectPlace = (g: GeoResult) => {
     const la = Number(g.lat), lo = Number(g.lon)
-    setLat(String(la)); setLon(String(lo)); setPlace(g.display_name.split(',').slice(0, 2).join(',').trim()); setResults([])
+    setLat(String(la)); setLon(String(lo)); setPlace(g.display_name.split(',').slice(0, 2).join(',').trim()); setResults([]); setPlaceConfirmed(true)
     try { setTz(tzlookup(la, lo)) } catch { /* keep */ }
   }
-  const applyPreset = (p: Preset) => { setLat(String(p.lat)); setLon(String(p.lon)); setTz(p.tz); setPlace(p.label); setResults([]) }
+  const applyPreset = (p: Preset) => { setLat(String(p.lat)); setLon(String(p.lon)); setTz(p.tz); setPlace(p.label); setResults([]); setPlaceConfirmed(true) }
+
+  const canSubmit = !!name.trim() && placeConfirmed && consent
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!consent) return   // consent is mandatory
+    if (!canSubmit) return   // name + confirmed city + consent are all mandatory
     setError(''); setLoading(true); setData(null)
     try {
       const [y, mo, d] = date.split('-').map(Number)
@@ -180,7 +184,7 @@ export default function Jyotish() {
             name: name.trim(), gender, birthDate: date, birthTime: time, timeZone: tz,
             latitude: Number(lat), longitude: Number(lon), nayNan: naynan(date, time)?.num ?? 0, consent: true,
           }),
-        }).catch(() => {})
+        }).catch(() => { })
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not compute the chart.')
@@ -237,7 +241,7 @@ export default function Jyotish() {
   ]
 
   return (
-    <section className="section-container">
+    <section className="section-container vedin-page">
       {/* ── Grand Astrologer Profile ── */}
       <div className="relative mb-8 overflow-hidden rounded-3xl border border-accent/25 p-6 sm:p-8"
         style={{ background: 'linear-gradient(135deg, rgb(var(--card)) 0%, rgb(var(--surface)) 100%)', boxShadow: '0 0 60px -20px rgb(var(--accent) / 0.45)' }}>
@@ -289,8 +293,9 @@ export default function Jyotish() {
         {/* ── Form ── */}
         <form onSubmit={submit} className="glass-card h-fit p-6 no-print">
           <div className="mb-3 grid grid-cols-2 gap-3">
-            <label><span className={labelCls}>{t.fldName}</span>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={lang === 'mm' ? 'အမည်' : 'Full name'} className={field} /></label>
+            <label><span className={labelCls}>{t.fldName} <span className="text-coral">*</span></span>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={lang === 'mm' ? 'အမည်' : 'Full name'}
+                className={`${field} ${!name.trim() ? 'border-coral/40' : ''}`} /></label>
             <label><span className={labelCls}>{t.fldGender}</span>
               <select value={gender} onChange={(e) => setGender(e.target.value as 'male' | 'female')} className={field}>
                 <option value="male" className="text-black">{t.male}</option>
@@ -298,13 +303,18 @@ export default function Jyotish() {
               </select></label>
           </div>
           <label className="relative block">
-            <span className={labelCls}>Birth place</span>
+            <span className={labelCls}>{lang === 'mm' ? 'မွေးဖွားရာ မြို့/ဇာတိ' : 'Birth place'} <span className="text-coral">*</span></span>
             <span className="relative mt-1.5 block">
               <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-              <input value={place} onChange={(e) => onPlaceChange(e.target.value)} placeholder="Search a city…"
-                className="w-full rounded-xl border border-white/15 bg-white/5 py-2.5 pl-9 pr-3 text-sm text-fg outline-none transition focus:border-accent/50" />
-              {searching && <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted" />}
+              <input value={place} onChange={(e) => onPlaceChange(e.target.value)} placeholder={lang === 'mm' ? 'မြို့ ရှာရန်…' : 'Search a city…'}
+                className={`w-full rounded-xl border bg-white/5 py-2.5 pl-9 pr-8 text-sm text-fg outline-none transition focus:border-accent/50 ${placeConfirmed ? 'border-jade/50' : 'border-coral/40'}`} />
+              {searching
+                ? <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted" />
+                : placeConfirmed && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-jade">✓</span>}
             </span>
+            {!placeConfirmed && place.trim().length > 0 && !searching && (
+              <span className="mt-1 block font-mono text-[10px] text-coral">{lang === 'mm' ? 'စာရင်းထဲမှ မြို့တစ်ခုကို ရွေးချယ်ပါ။' : 'Pick a city from the list.'}</span>
+            )}
             {results.length > 0 && (
               <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-white/15 bg-surface/95 backdrop-blur-md">
                 {results.map((g, i) => (
@@ -356,11 +366,17 @@ export default function Jyotish() {
             <span><span className="text-coral">*</span> {lang === 'mm' ? 'ဆရာ ဟောကိန်း အထောက်အကူအတွက် ကျွန်ုပ်၏ မွေးဇာတာ အချက်အလက်ကို လုံခြုံစွာ သိမ်းဆည်းရန် သဘောတူပါသည်။' : "I consent to securely storing my birth details to assist the astrologer's readings."}</span>
           </label>
 
-          <button type="submit" disabled={loading || !consent}
+          <button type="submit" disabled={loading || !canSubmit}
             className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
             {loading ? <><Loader2 size={16} className="animate-spin" /> {lang === 'mm' ? 'တွက်ချက်နေသည်…' : 'Calculating…'}</> : <><Sparkles size={16} /> {lang === 'mm' ? 'ဇာတာ တွက်မည်' : 'Generate Chart'}</>}
           </button>
-          {!consent && <p className="mt-2 font-mono text-[11px] leading-relaxed text-coral">{lang === 'mm' ? 'ကျေးဇူးပြု၍ အချက်အလက်သိမ်းဆည်းခွင့်ကို သဘောတူညီပေးပါ။' : 'Please agree to the data-storage consent to continue.'}</p>}
+          {!canSubmit && (
+            <ul className="mt-2 space-y-1">
+              {!name.trim() && <li className="flex items-start gap-1.5 font-mono text-[11px] leading-relaxed text-coral"><span>•</span>{lang === 'mm' ? 'အမည် ဖြည့်သွင်းပါ။' : 'Please enter a name.'}</li>}
+              {!placeConfirmed && <li className="flex items-start gap-1.5 font-mono text-[11px] leading-relaxed text-coral"><span>•</span>{lang === 'mm' ? 'မွေးဖွားရာ မြို့/ဇာတိကို ရှာဖွေ၍ စာရင်းထဲမှ ရွေးချယ်ပါ။' : 'Search and select your birth city from the list.'}</li>}
+              {!consent && <li className="flex items-start gap-1.5 font-mono text-[11px] leading-relaxed text-coral"><span>•</span>{lang === 'mm' ? 'အချက်အလက်သိမ်းဆည်းခွင့်ကို သဘောတူညီပေးပါ။' : 'Please agree to the data-storage consent.'}</li>}
+            </ul>
+          )}
           {error && <p className="mt-3 rounded-xl border border-coral/40 bg-coral/10 px-3 py-2 font-mono text-xs text-coral">{error}</p>}
           <p className="mt-4 font-mono text-[10px] leading-relaxed text-muted">{t.disclaimer}</p>
         </form>
