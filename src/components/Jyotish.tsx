@@ -4,7 +4,7 @@ import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
 import type { BirthChartData, BirthChartRequest, PlanetPosition } from '../types/astrology'
-import { JT, type Lang, vargaSign, signLabel, planetName, readingFor } from '../lib/jyotish'
+import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, toMmDigits } from '../lib/jyotish'
 
 const CHART_URL = `${SITE.apiUrl}/api/astrology/chart`
 const GEO_URL = 'https://nominatim.openstreetmap.org/search'
@@ -56,6 +56,8 @@ export default function Jyotish() {
   const [lang, setLang] = useState<Lang>('en')
   const t = JT[lang]
 
+  const [name, setName] = useState('')
+  const [gender, setGender] = useState<'male' | 'female'>('male')
   const [date, setDate] = useState('1998-01-01')
   const [time, setTime] = useState('12:00')
   const [lat, setLat] = useState('16.8409')
@@ -67,6 +69,7 @@ export default function Jyotish() {
   const debTimer = useRef<number | undefined>(undefined)
 
   const [data, setData] = useState<BirthChartData | null>(null)
+  const [querent, setQuerent] = useState<{ name: string; gender: 'male' | 'female'; nn: Naynan | null } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [tab, setTab] = useState<Tab>('reading')
@@ -104,7 +107,7 @@ export default function Jyotish() {
       const res = await fetch(CHART_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       const json = (await res.json().catch(() => null)) as { success?: boolean; data?: BirthChartData; message?: string } | null
       if (!res.ok || !json?.success || !json.data) throw new Error(json?.message || `Failed (${res.status})`)
-      setData(json.data); setTab('reading')
+      setData(json.data); setQuerent({ name: name.trim(), gender, nn: naynan(date, time) }); setTab('reading')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not compute the chart.')
     } finally { setLoading(false) }
@@ -122,6 +125,7 @@ export default function Jyotish() {
   const moon = data?.planets.find((p) => p.name === 'Moon')
   const now = Date.now()
   const reading = data ? readingFor(data, lang) : null
+  const bhukti = data ? activeBhukti(data) : undefined
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'reading', label: t.tabReading }, { id: 'd1', label: t.tabD1 },
@@ -172,6 +176,15 @@ export default function Jyotish() {
       <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
         {/* ── Form ── */}
         <form onSubmit={submit} className="glass-card h-fit p-6 no-print">
+          <div className="mb-3 grid grid-cols-2 gap-3">
+            <label><span className={labelCls}>{t.fldName}</span>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={lang === 'mm' ? 'အမည်' : 'Full name'} className={field} /></label>
+            <label><span className={labelCls}>{t.fldGender}</span>
+              <select value={gender} onChange={(e) => setGender(e.target.value as 'male' | 'female')} className={field}>
+                <option value="male" className="text-black">{t.male}</option>
+                <option value="female" className="text-black">{t.female}</option>
+              </select></label>
+          </div>
           <label className="relative block">
             <span className={labelCls}>Birth place</span>
             <span className="relative mt-1.5 block">
@@ -256,6 +269,29 @@ export default function Jyotish() {
               {/* ── READING ── */}
               {tab === 'reading' && (
                 <div className="space-y-5">
+                  {querent && (querent.name || querent.nn) && (
+                    <div className="glass-card p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className={labelCls}>{t.querentFor}</p>
+                          <h3 className="font-groovy text-lg text-fg">
+                            {querent.name || '—'}
+                            {querent.name && <span className="ml-2 font-mono text-xs text-accent-light">{t[querent.gender]}</span>}
+                          </h3>
+                        </div>
+                        {querent.nn && (
+                          <div className="text-right">
+                            <p className={labelCls}>{t.naynanLabel}</p>
+                            <p className="text-lg font-semibold text-accent-light">
+                              {lang === 'mm' ? `${querent.nn.mmDay} · နံ ${toMmDigits(querent.nn.num)}` : `${querent.nn.enDay} · No. ${querent.nn.num}`}
+                              <span className="ml-2 font-mono text-xs text-muted">{planetName(querent.nn.planet, lang)}</span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="glass-card p-5">
                     <div className="flex items-center justify-between">
                       <h3 className="font-groovy text-lg text-fg">{t.currentDasha}</h3>
@@ -269,8 +305,13 @@ export default function Jyotish() {
                     <div className="grid gap-3 sm:grid-cols-2">
                       {reading.areas.map((a) => (
                         <div key={a.key} className={`rounded-xl border p-3 ${toneCls(a.tone)}`}>
-                          <p className="font-semibold text-fg">{a.label}</p>
-                          <p className="mt-1 text-xs leading-relaxed text-muted">{a.text}</p>
+                          <div className="flex items-center justify-between">
+                            <p className="font-semibold text-fg">{a.label}</p>
+                            <span className="font-mono text-[10px] text-muted">{a.score}/100</span>
+                          </div>
+                          <ul className="mt-1.5 space-y-1">
+                            {a.points.map((pt, i) => <li key={i} className="text-xs leading-relaxed text-muted">• {pt}</li>)}
+                          </ul>
                         </div>
                       ))}
                     </div>
@@ -306,6 +347,27 @@ export default function Jyotish() {
                       })}
                     </ol>
                   </div>
+
+                  {/* Antardasha (bhukti) sub-periods of the current mahadasha */}
+                  {data.antardashas && data.antardashas.length > 0 && (
+                    <div className="glass-card p-5">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-groovy text-lg text-fg">{t.currentBhukti}</h3>
+                        {bhukti && <span className="rounded-full bg-accent/15 px-3 py-1 text-sm font-semibold text-accent-light">{planetName(reading.lord, lang)} – {planetName(bhukti.lord, lang)}</span>}
+                      </div>
+                      <ol className="mt-3 space-y-1.5">
+                        {data.antardashas.map((d) => {
+                          const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
+                          return (
+                            <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                              <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(reading.lord, lang)} – {planetName(d.lord, lang)}</span>
+                              <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
+                            </li>
+                          )
+                        })}
+                      </ol>
+                    </div>
+                  )}
                 </div>
               )}
 

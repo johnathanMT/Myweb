@@ -3,7 +3,7 @@
 //  The heavy astronomy lives in the .NET backend; this file holds the varga
 //  helper (mirror of the backend rule) plus the professional reading text.
 // ============================================================================
-import type { BirthChartData } from '../types/astrology'
+import type { BirthChartData, DashaPeriod, Finding } from '../types/astrology'
 
 export type Lang = 'en' | 'mm'
 
@@ -56,8 +56,10 @@ export const JT: Record<Lang, Record<string, string>> = {
     d10Desc: 'The Dasamsa (D10) is the chart of career, profession, status and worldly achievement — how one acts in society and rises.',
     d7Desc: 'The Saptamsa (D7) concerns children, progeny and lineage — creativity and what one passes on.',
     disclaimer: 'Traditional Jyotish knowledge, offered for interest, reflection and study. Sidereal · Lahiri ayanamsa · Whole-Sign houses.',
-    readingNote: 'A preliminary reading generated from your current Mahadasha. A fuller rule-based reading (7th-lord, dignities, yogas) is on the way.',
+    readingNote: 'A rule-based reading drawn from the house lords, their dignity & placement, planetary aspects (drishti) and your running Mahadasha / Antardasha.',
     planetsIn: 'Planets in this chart',
+    fldName: 'Name', fldGender: 'Gender', male: 'Male', female: 'Female',
+    naynanLabel: 'Birth day-number (Nay Nan)', querentFor: 'Reading for', currentBhukti: 'Current Antardasha (bhukti)',
   },
   mm: {
     sayar: 'ဆရာ ဘုန်းမင်းသိုက်ဒင်',
@@ -78,8 +80,10 @@ export const JT: Record<Lang, Record<string, string>> = {
     d10Desc: 'ဒသံသ (D10) သည် အသက်မွေးဝမ်းကျောင်း၊ အလုပ်အကိုင်၊ ဂုဏ်အဆင့်နှင့် လောကီအောင်မြင်မှု ဇာတာဖြစ်သည် — လူ့အဖွဲ့အစည်းတွင် မည်သို့ ရပ်တည်တက်လမ်းရသည်ကို ပြသည်။',
     d7Desc: 'သတ္တံသ (D7) သည် သားသမီး၊ သားစဉ်မြေးဆက်နှင့် အမွေဆက်ခံမှုကို သက်ဆိုင်သည် — ဖန်တီးမှုနှင့် လက်ဆက်ကမ်းပေးသမျှ။',
     disclaimer: 'ရိုးရာ ဗေဒင်ဗဟုသုတကို စိတ်ဝင်စားမှု၊ ဆင်ခြင်သုံးသပ်မှုနှင့် လေ့လာမှုအတွက် တင်ဆက်ပါသည်။ နက္ခတ် · Lahiri ayanamsa · Whole-Sign houses.',
-    readingNote: 'သင့်လက်ရှိ မဟာဒသာအပေါ် အခြေခံ၍ ကနဦး ဟောကိန်းဖြစ်ပါသည်။ ပိုမိုပြည့်စုံသော rule-based ဟောစာတမ်း (၇တန့်သခင်၊ ဥစ်/နိစ်၊ ယောဂ) မကြာမီ ထည့်သွင်းပါမည်။',
+    readingNote: 'အိမ်ရှင်သခင်တို့၏ ဥစ်/နိစ်၊ ကျရောက်ရာအိမ်၊ ဒြိဋ္ဌိအမြင်နှင့် လက်ရှိ မဟာဒသာ/အန္တရ်ဒသာတို့ကို ပေါင်းစပ်တွက်ချက်ထားသော rule-based ဟောကိန်းဖြစ်ပါသည်။',
     planetsIn: 'ဤဇာတာတွင် ဂြိုဟ်များ',
+    fldName: 'အမည်', fldGender: 'ကျား/မ', male: 'ယောကျ်ား', female: 'မိန်းမ',
+    naynanLabel: 'နေ့နံ', querentFor: 'ဟောကိန်းအတွက်', currentBhukti: 'လက်ရှိ အန္တရ်ဒသာ (ဘုတ္တိ)',
   },
 }
 
@@ -106,24 +110,157 @@ export const AREAS: AreaDef[] = [
   { key: 'wealth', en: 'Wealth & Finances', mm: 'ဥစ္စာဓန နှင့် ငွေကြေး', favLords: ['Jupiter', 'Venus', 'Mercury'] },
 ]
 
-export interface AreaReading { key: string; label: string; text: string; tone: 'favorable' | 'mixed' | 'testing' }
+export interface AreaReading { key: string; label: string; tone: string; score: number; points: string[] }
 
-/** A simple, honest reading from the CURRENT mahadasha lord + the area's significators. */
+const AREA_LABEL: Record<string, { en: string; mm: string }> = {
+  love: { en: 'Love & Marriage', mm: 'အချစ်ရေး နှင့် အိမ်ထောင်ရေး' },
+  career: { en: 'Career & Business', mm: 'အလုပ်အကိုင် နှင့် စီးပွားရေး' },
+  education: { en: 'Education & Knowledge', mm: 'ပညာရေး နှင့် အသိပညာ' },
+  social: { en: 'Social & Relationships', mm: 'လူမှုရေး နှင့် ဆက်ဆံရေး' },
+  health: { en: 'Health & Wellbeing', mm: 'ကျန်းမာရေး' },
+  wealth: { en: 'Wealth & Finances', mm: 'ဥစ္စာဓန နှင့် ငွေကြေး' },
+}
+const DIGNITY_LABEL: Record<string, { en: string; mm: string }> = {
+  Exalted: { en: 'exalted (uccha)', mm: 'ဥစ် (မြင့်မြတ်)' },
+  Debilitated: { en: 'debilitated (neecha)', mm: 'နိစ် (ကျဆင်း)' },
+  Own: { en: 'in its own sign', mm: 'ကိုယ်ပိုင်ရာသီ' },
+  Neutral: { en: 'in a neutral sign', mm: 'သာမန်ရာသီ' },
+}
+const ordEn = (h: number) => { const s = ['th', 'st', 'nd', 'rd'], v = h % 100; return `${h}${s[(v - 20) % 10] ?? s[v] ?? s[0]}` }
+const houseLabel = (h: number, lang: Lang) => (lang === 'mm' ? `${h} တန့်` : `${ordEn(h)} house`)
+
+const natureOf = (planet: string, lang: Lang): string => {
+  const n = LORD_NATURE[planet]
+  return n ? (lang === 'mm' ? n.mm : n.en) : ''
+}
+
+function renderFinding(f: Finding, lang: Lang): string {
+  const P = planetName(f.planet, lang)
+  const dg = DIGNITY_LABEL[f.value] ?? DIGNITY_LABEL.Neutral
+  const nat = natureOf(f.planet, lang)
+  switch (f.code) {
+    case 'lordDignity': {
+      if (f.value === 'Exalted' || f.value === 'Own')
+        return lang === 'mm'
+          ? `${f.house} တန့်သခင် ${P} သည် ${dg.mm}၌ တည်ရှိသဖြင့် ဤကဏ္ဍ၏ အခြေခံသည် ခိုင်မာအားကောင်းသည်။ ${nat} ဆိုင်ရာ ကိစ္စများ အဆင်ပြေတတ်သည်။`
+          : `The ${ordEn(f.house)}-house lord ${P} is ${dg.en} — a strong, well-supported foundation, so matters of ${nat} tend to flow with grace.`
+      if (f.value === 'Debilitated')
+        return lang === 'mm'
+          ? `${f.house} တန့်သခင် ${P} သည် ${dg.mm} ဖြစ်နေသဖြင့် ဤကဏ္ဍတွင် ကြိုးစားအားထုတ်မှု ပိုမိုလိုအပ်ပြီး အချိန်ယူ ရင့်ကျက်လာတတ်သည်။`
+          : `The ${ordEn(f.house)}-house lord ${P} is ${dg.en}, so this area asks for extra effort and ripens more slowly before it rewards you.`
+      return lang === 'mm'
+        ? `${f.house} တန့်သခင် ${P} သည် ${dg.mm} ဖြစ်သည်။`
+        : `The ${ordEn(f.house)}-house lord ${P} is ${dg.en}.`
+    }
+    case 'lordPlacement': {
+      if (f.value === 'strong')
+        return lang === 'mm'
+          ? `ထိုသခင် ${P} သည် ${houseLabel(f.house, 'mm')} (ကေန္ဒြ/တြိကုဏ) ကောင်းသောနေရာတွင် ကျရောက်နေသဖြင့် အကျိုးပေးအား ပိုမိုခိုင်မာသည်။`
+          : `That lord ${P} occupies the ${houseLabel(f.house, 'en')} — a strong kendra/trikona — reinforcing the promise of this area.`
+      if (f.value === 'dusthana')
+        return lang === 'mm'
+          ? `ထိုသခင် ${P} သည် ${houseLabel(f.house, 'mm')} (ဒုဿဌာန ၆/၈/၁၂) တွင် ကျရောက်နေသဖြင့် အကျိုးမပေးမီ အခက်အခဲ အနည်းငယ် ဖြတ်သန်းရတတ်သည်။`
+          : `That lord ${P} falls in the ${houseLabel(f.house, 'en')} — a dusthana (6/8/12) — so expect some hurdles before results settle.`
+      return lang === 'mm'
+        ? `ထိုသခင် ${P} သည် ${houseLabel(f.house, 'mm')} တွင် တည်ရှိသည်။`
+        : `That lord ${P} is placed in the ${houseLabel(f.house, 'en')}.`
+    }
+    case 'karakaDignity': {
+      const good = f.value !== 'Debilitated'
+      return lang === 'mm'
+        ? `ကဏ္ဍအိမ်ရှင် (ကာရက) ${P} သည် ${dg.mm} ဖြစ်ခြင်းက ${nat} တို့ကို ${good ? 'အားဖြည့်' : 'စိန်ခေါ်'}ပေးသည်။`
+        : `The significator (karaka) ${P} is ${dg.en}, which ${good ? 'strengthens' : 'challenges'} matters of ${nat}.`
+    }
+    case 'occupant': {
+      const ben = f.value === 'benefic'
+      const kind = ben ? (lang === 'mm' ? 'မင်္ဂလာဂြိုဟ်' : 'a benefic') : (lang === 'mm' ? 'ပါပဂြိုဟ်' : 'a malefic')
+      return lang === 'mm'
+        ? `${P} (${kind}) သည် ${houseLabel(f.house, 'mm')}တွင် ကိန်းဝပ်လျက် ${ben ? 'ကောင်းမြတ်သောအရှိန်' : 'စမ်းသပ်မှုအရှိန်'} ပေးသည်။`
+        : `${P} (${kind}) sits in the ${houseLabel(f.house, 'en')}, ${ben ? 'lending it grace' : 'putting it to the test'}.`
+    }
+    case 'aspectOnHouse': {
+      const ben = f.value === 'benefic'
+      const kind = ben ? (lang === 'mm' ? 'မင်္ဂလာ' : 'benefic') : (lang === 'mm' ? 'ပါပ' : 'malefic')
+      return lang === 'mm'
+        ? `${P} ၏ ${kind} အမြင် (ဒြိဋ္ဌိ) သည် ဤကဏ္ဍအိမ်ကို ${ben ? 'ထောက်ကူ' : 'ဖိစီး'}ပေးနေသည်။`
+        : `${P} casts a ${kind} aspect (drishti) on this house, ${ben ? 'protecting it' : 'pressuring it'}.`
+    }
+    case 'dashaActive':
+      return lang === 'mm'
+        ? `လက်ရှိ ${P} မဟာဒသာသည် ဤကဏ္ဍကို တိုက်ရိုက် လှုံ့ဆော်နေသဖြင့် ${nat} ကိစ္စများ ပေါ်ထွန်းရန် အချိန်ကောင်းဖြစ်သည်။`
+        : `The running ${P} mahadasha activates this area directly — a live window for matters of ${nat}.`
+    case 'bhuktiActive':
+      return lang === 'mm'
+        ? `လက်ရှိ ${P} အန္တရ်ဒသာ (ဘုတ္တိ) ကလည်း ဤကဏ္ဍကို ထပ်ဆင့် ပံ့ပိုးထောက်ကူ ပေးနေသည်။`
+        : `The current ${P} antardasha (bhukti) lends this area a further push right now.`
+    default:
+      return ''
+  }
+}
+
+/** Reading from the backend prediction engine (findings → EN/MM), with a basic
+ *  dasha-lord fallback if the backend didn't send predictions. */
 export function readingFor(data: BirthChartData, lang: Lang): { lord: string; areas: AreaReading[] } {
   const now = Date.now()
   const active = data.dashas.find((d) => new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime())
   const lord = active?.lord ?? data.dashas[0]?.lord ?? 'Sun'
-  const nat = LORD_NATURE[lord] ?? LORD_NATURE.Sun
 
-  const areas: AreaReading[] = AREAS.map((a) => {
+  if (data.predictions && data.predictions.length) {
+    const areas = data.predictions.map((pr): AreaReading => ({
+      key: pr.area,
+      label: (AREA_LABEL[pr.area] ?? { en: pr.area, mm: pr.area })[lang],
+      tone: pr.tone,
+      score: pr.score,
+      points: pr.findings.map((f) => renderFinding(f, lang)).filter(Boolean),
+    }))
+    return { lord, areas }
+  }
+
+  // Fallback — one sentence per area from the dasha lord's nature.
+  const nat = LORD_NATURE[lord] ?? LORD_NATURE.Sun
+  const areas = AREAS.map((a): AreaReading => {
     const favored = a.favLords.includes(lord)
-    const tone: AreaReading['tone'] = favored ? 'favorable' : nat.benefic ? 'mixed' : 'testing'
-    if (lang === 'mm') {
-      const toneMm = tone === 'favorable' ? 'အထူးအားသာပြီး တိုးတက်မှုများ ဖြစ်ထွန်း' : tone === 'mixed' ? 'အတက်အကျ ရှိသော်လည်း ဟန်ချက်ညီစွာ ဆောင်ရွက်နိုင်' : 'စိန်ခေါ်မှုများနှင့် သည်းခံကြိုးစားရန် လိုအပ်'
-      return { key: a.key, label: a.mm, tone, text: `${planetName(lord, 'mm')} ဒသာကာလတွင် ${nat.mm} တို့ ရှေ့တန်းရောက်လာသည်။ ${a.mm} ကဏ္ဍအတွက် ဤကာလသည် ${toneMm}တတ်ပါသည်။` }
-    }
-    const toneEn = tone === 'favorable' ? 'especially supportive and growth-bringing' : tone === 'mixed' ? 'mixed but workable with balance' : 'testing — calling for patience and effort'
-    return { key: a.key, label: a.en, tone, text: `During the ${lord} dasha, ${nat.en} come to the fore. For ${a.en.toLowerCase()}, this period tends to be ${toneEn}.` }
+    const tone = favored ? 'favorable' : nat.benefic ? 'mixed' : 'testing'
+    const text = lang === 'mm'
+      ? `${planetName(lord, 'mm')} ဒသာကာလတွင် ${nat.mm} တို့ ရှေ့တန်းရောက်လာသည်။`
+      : `During the ${lord} dasha, ${nat.en} come to the fore.`
+    return { key: a.key, label: lang === 'mm' ? a.mm : a.en, tone, score: favored ? 65 : nat.benefic ? 50 : 40, points: [text] }
   })
   return { lord, areas }
+}
+
+// ── Burmese birth day-number (နေ့နံ) ──────────────────────────────────────────
+export interface Naynan { num: number; mmDay: string; enDay: string; planet: string; planetMm: string }
+
+const WEEKDAY: Naynan[] = [
+  { num: 1, mmDay: 'တနင်္ဂနွေ', enDay: 'Sunday',    planet: 'Sun',     planetMm: 'နေ' },
+  { num: 2, mmDay: 'တနင်္လာ',   enDay: 'Monday',    planet: 'Moon',    planetMm: 'စန်း' },
+  { num: 3, mmDay: 'အင်္ဂါ',    enDay: 'Tuesday',   planet: 'Mars',    planetMm: 'အင်္ဂါ' },
+  { num: 4, mmDay: 'ဗုဒ္ဓဟူး',  enDay: 'Wednesday', planet: 'Mercury', planetMm: 'ဗုဒ္ဓဟူး' },
+  { num: 5, mmDay: 'ကြာသပတေး', enDay: 'Thursday',  planet: 'Jupiter', planetMm: 'ကြာသပတေး' },
+  { num: 6, mmDay: 'သောကြာ',   enDay: 'Friday',    planet: 'Venus',   planetMm: 'သောကြာ' },
+  { num: 7, mmDay: 'စနေ',      enDay: 'Saturday',  planet: 'Saturn',  planetMm: 'စနေ' },
+]
+// Wednesday afternoon (from 12:00 noon) counts as Rahu — နေ့နံ ၈.
+const RAHU_DAY: Naynan = { num: 8, mmDay: 'ဗုဒ္ဓဟူး (မွန်းလွဲ)', enDay: 'Wednesday (afternoon)', planet: 'Rahu', planetMm: 'ရာဟု' }
+
+/** Burmese birth-weekday (နေ့နံ) from a local date (yyyy-mm-dd) + time (HH:mm).
+ *  Wednesday after noon = Rahu (နံ ၈). */
+export function naynan(dateStr: string, timeStr: string): Naynan | null {
+  if (!dateStr) return null
+  const [y, m, d] = dateStr.split('-').map(Number)
+  if (!y || !m || !d) return null
+  const dow = new Date(y, m - 1, d).getDay() // 0 = Sun … 6 = Sat
+  const hour = Number((timeStr || '00:00').split(':')[0]) || 0
+  if (dow === 3 && hour >= 12) return { ...RAHU_DAY }
+  return { ...WEEKDAY[dow] }
+}
+
+export const MM_DIGITS = ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉']
+export const toMmDigits = (n: number) => String(n).replace(/\d/g, (c) => MM_DIGITS[+c])
+
+/** The currently-running Antardasha (bhukti) within the active mahadasha, if any. */
+export function activeBhukti(data: BirthChartData): DashaPeriod | undefined {
+  const now = Date.now()
+  return data.antardashas?.find((d) => new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime())
 }

@@ -6,7 +6,7 @@
     "dev": "vite",
     "sitemap": "node scripts/gen-sitemap.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "build": "node scripts/gen-sitemap.mjs && vite build && node scripts/inject-site.mjs",
+    "build": "node scripts/gen-sitemap.mjs && vite build && node scripts/inject-site.mjs && node scripts/prerender-og.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

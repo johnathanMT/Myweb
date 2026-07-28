@@ -79,10 +79,26 @@ export interface Yoga {
   planets: string[]
 }
 
+export interface Finding {
+  code: string
+  planet: string
+  house: number
+  value: string
+}
+
+export interface AreaPrediction {
+  area: string
+  tone: string
+  score: number
+  findings: Finding[]
+}
+
 export interface BirthChartData {
   ascendant: AscendantInfo
   planets: PlanetPosition[]
   dashas: DashaPeriod[]
+  antardashas: DashaPeriod[]
   yogas: Yoga[]
+  predictions: AreaPrediction[]
   meta: ChartMeta
 }

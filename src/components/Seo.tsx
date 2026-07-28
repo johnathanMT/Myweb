@@ -32,7 +32,7 @@ export default function Seo({ title, description, path = '', image, noindex = fa
   const fullTitle = title ? `${title} — ${SITE_NAME}` : DEFAULT_TITLE
   const desc = description || DEFAULT_DESC
   const url = `${SITE.url}${path}` // canonical (one host — see SITE.url)
-  const img = image || DEFAULT_IMAGE
+  const img = image ? (image.startsWith('http') ? image : `${SITE.url}${image}`) : DEFAULT_IMAGE
 
   return (
     <Helmet prioritizeSeoTags>
