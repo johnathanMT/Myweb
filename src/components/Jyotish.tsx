@@ -311,34 +311,37 @@ export default function Jyotish() {
 
   return (
     <section className="section-container vedin-page">
-      {/* ── Grand Astrologer Profile ── */}
-      <div className="relative mb-8 overflow-hidden rounded-3xl border border-accent/25 p-6 sm:p-8"
+      {/* ── Grand Astrologer Profile — centered, large photo, bio below ── */}
+      <div className="relative mb-8 overflow-hidden rounded-3xl border border-accent/25 p-6 text-center sm:p-10"
         style={{ background: 'linear-gradient(135deg, rgb(var(--card)) 0%, rgb(var(--surface)) 100%)', boxShadow: '0 0 60px -20px rgb(var(--accent) / 0.45)' }}>
         <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
         <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, #a855f7 0%, transparent 70%)' }} />
-        <div className="relative flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
-          <div className="relative h-28 w-28 shrink-0 rounded-full p-[3px]"
-            style={{ background: 'conic-gradient(from 200deg, #eab308, #a855f7, #22d3ee, #eab308)', boxShadow: '0 0 30px -4px rgba(168,85,247,0.6), 0 0 22px -6px rgba(234,179,8,0.55)' }}>
+
+        {/* language toggle — pinned top-right */}
+        <div className="no-print absolute right-4 top-4 z-10 flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1 backdrop-blur">
+          {(['en', 'mm'] as Lang[]).map((l) => (
+            <button key={l} type="button" onClick={() => setLang(l)}
+              className={`rounded-full px-3 py-1 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
+              {l === 'en' ? 'EN' : 'မြန်မာ'}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-5">
+          <div className="relative h-36 w-36 shrink-0 rounded-full p-[4px] sm:h-44 sm:w-44"
+            style={{ background: 'conic-gradient(from 200deg, #eab308, #a855f7, #22d3ee, #eab308)', boxShadow: '0 0 44px -6px rgba(168,85,247,0.65), 0 0 30px -8px rgba(234,179,8,0.6)' }}>
             <div className="relative h-full w-full overflow-hidden rounded-full bg-card">
-              <span className="absolute inset-0 flex items-center justify-center font-groovy text-3xl text-accent">ဘ</span>
+              <span className="absolute inset-0 flex items-center justify-center font-groovy text-5xl text-accent">ဘ</span>
               <img src="/sayar.jpg" alt="Sayar Bhone Min Thike Din" className="relative h-full w-full object-cover" loading="lazy"
                 onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
             </div>
           </div>
-          <div className="flex-1">
+          <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light">{lang === 'mm' ? 'ပရော်ဖက်ရှင်နယ် ဗေဒင်ပညာရှင်' : 'Professional Vedic Astrologer'}</p>
-            <h1 className="mt-1 font-groovy text-2xl text-fg sm:text-3xl">{lang === 'mm' ? 'ဆရာ ဘုန်းမင်းသိုက်ဒင်' : 'Sayar Bhone Min Thike Din'}</h1>
-            <p className="font-mono text-xs text-muted">{lang === 'mm' ? 'နက္ခတ်ဗေဒင် · ဝိမ်ရှောတ္တရီ ဒသာ · ဆဒ္ဗလ' : 'Sidereal Jyotish · Vimshottari Dasha · Shadbala'}</p>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">{lang === 'mm' ? BIO_MM : BIO_EN}</p>
+            <h1 className="mt-1.5 font-groovy text-3xl text-fg sm:text-4xl">{lang === 'mm' ? 'ဆရာ ဘုန်းမင်းသိုက်ဒင်' : 'Sayar Bhone Min Thike Din'}</h1>
+            <p className="mt-1 font-mono text-xs text-muted">{lang === 'mm' ? 'နက္ခတ်ဗေဒင် · ဝိမ်ရှောတ္တရီ ဒသာ · ဆဒ္ဗလ' : 'Sidereal Jyotish · Vimshottari Dasha · Shadbala'}</p>
           </div>
-          <div className="no-print flex items-center gap-1 self-start rounded-full border border-white/15 bg-white/5 p-1 backdrop-blur">
-            {(['en', 'mm'] as Lang[]).map((l) => (
-              <button key={l} type="button" onClick={() => setLang(l)}
-                className={`rounded-full px-3 py-1 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
-                {l === 'en' ? 'EN' : 'မြန်မာ'}
-              </button>
-            ))}
-          </div>
+          <p className="text-[15px] leading-relaxed text-muted">{lang === 'mm' ? BIO_MM : BIO_EN}</p>
         </div>
       </div>
 
@@ -363,7 +366,7 @@ export default function Jyotish() {
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
+      <div className="grid gap-8 lg:grid-cols-[380px_minmax(0,1fr)]">
         {/* ── Form ── */}
         <form onSubmit={submit} className="glass-card h-fit p-6 no-print">
           <div className="mb-3 grid grid-cols-2 gap-3">
@@ -456,7 +459,7 @@ export default function Jyotish() {
         </form>
 
         {/* ── Result ── */}
-        <div>
+        <div className="min-w-0">
           {!data && !loading && (
             <div className="glass-card flex min-h-[300px] items-center justify-center p-8 text-center text-sm text-muted no-print">
               {lang === 'mm' ? 'မွေးဖွားအချက်အလက်ထည့်၍ ဟောစာတမ်း၊ ဇာတာခွင်များ (D1/D9/D10/D7) ကြည့်ရှုပါ။' : 'Enter birth details to see the reading and the D1 / D9 / D10 / D7 charts.'}
@@ -464,7 +467,7 @@ export default function Jyotish() {
           )}
 
           {data && reading && (
-            <div className="space-y-5">
+            <div className="min-w-0 space-y-5">
               {/* header + full-reading PDF download */}
               <div className="flex flex-col gap-3 no-print sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="font-groovy text-lg text-fg">{place || t.portalTitle}</h2>
