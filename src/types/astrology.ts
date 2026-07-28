@@ -120,6 +120,11 @@ export interface YearForecast {
   notes: TransitNote[]
 }
 
+export interface AshtakavargaData {
+  bav: Record<string, number[]>   // planet → 12 signs
+  sav: number[]                    // 12 signs
+}
+
 export interface BirthChartData {
   ascendant: AscendantInfo
   planets: PlanetPosition[]
@@ -129,5 +134,6 @@ export interface BirthChartData {
   yogas: Yoga[]
   predictions: AreaPrediction[]
   timeline: YearForecast[]
+  ashtakavarga: AshtakavargaData
   meta: ChartMeta
 }
