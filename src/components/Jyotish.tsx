@@ -889,9 +889,14 @@ export default function Jyotish() {
             ? 'ဇာတာများကို ဂန္ထဝင် ဇျောတိသကျမ်းများ၏ နည်းစနစ်အတိုင်း တိကျစွာ တွက်ချက်ထားပါသည်။ ဗေဒင်သည် သိပ္ပံနည်းကျ အတည်ပြုထားခြင်း မရှိသဖြင့် — ဆေးဘက်၊ ဥပဒေ သို့မဟုတ် ငွေကြေးဆိုင်ရာ ဆုံးဖြတ်ချက်များအတွက် အစားထိုး မသုံးသင့်ပါ။ ကိုယ့်ကိုယ်ကို ပြန်လည်သုံးသပ်ရန်နှင့် ယဉ်ကျေးမှုစိတ်ဝင်စားမှုအတွက်သာ တင်ဆက်ပါသည်။'
             : 'Charts are computed precisely by the classical Jyotish methods. Astrology is not scientifically validated — this is offered for reflection and cultural interest, and is not a substitute for medical, legal, or financial advice.'}
         </p>
-        <Link to="/research" className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 font-mono text-[11px] text-accent-light transition hover:bg-accent/20">
-          <Star size={12} /> {lang === 'mm' ? 'တိုင်းတာနိုင်သော သုတေသန လုပ်ထုံး →' : 'Falsifiable research protocol →'}
-        </Link>
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          <Link to="/algorithms" className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 font-mono text-[11px] text-accent-light transition hover:bg-accent/20">
+            <Star size={12} /> {lang === 'mm' ? 'algorithm များ (CS) →' : 'The algorithms (CS) →'}
+          </Link>
+          <Link to="/research" className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 font-mono text-[11px] text-accent-light transition hover:bg-accent/20">
+            <Star size={12} /> {lang === 'mm' ? 'တိုင်းတာနိုင်သော သုတေသန လုပ်ထုံး →' : 'Falsifiable research protocol →'}
+          </Link>
+        </div>
       </footer>
     </section>
   )
