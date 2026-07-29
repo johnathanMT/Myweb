@@ -58,13 +58,24 @@ function MathBlock({ tex }: { tex: string }) {
       const avail = wrap.clientWidth
       const natural = inner.scrollWidth   // pre-transform layout width (unaffected by scale)
       const nh = inner.scrollHeight
-      const scale = natural > avail && avail > 0 ? avail / natural : 1
-      setDims({ scale, h: Math.ceil(nh * scale) })
+      if (!avail || !natural) return
+      const scale = natural > avail ? avail / natural : 1
+      const h = Math.ceil(nh * scale)
+      // Guard so re-measures (font load, height set) don't loop.
+      setDims((prev) => (Math.abs(prev.scale - scale) < 0.001 && prev.h === h ? prev : { scale, h }))
     }
     fit()
+    // Re-measure after the paint and again once KaTeX web-fonts finish loading —
+    // the first synchronous measure can use fallback-font metrics (too narrow),
+    // which would leave a wide formula clipped once the real glyphs arrive.
+    const raf = requestAnimationFrame(fit)
     const ro = new ResizeObserver(fit)
     if (wrapRef.current) ro.observe(wrapRef.current)
-    return () => ro.disconnect()
+    if (innerRef.current) ro.observe(innerRef.current)   // fires when fonts change glyph widths
+    let cancelled = false
+    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts
+    fonts?.ready?.then(() => { if (!cancelled) fit() }).catch(() => {})
+    return () => { cancelled = true; cancelAnimationFrame(raf); ro.disconnect() }
   }, [html])
 
   return (
@@ -246,6 +257,13 @@ export default function Algorithms() {
             <button key={l} type="button" onClick={() => setLang(l)} className={`rounded-full px-3 py-1 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>{l === 'en' ? 'EN' : 'မြန်မာ'}</button>
           ))}
         </div>
+      </div>
+
+      {/* Top cross-link to the sibling page */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Link to="/research" className="inline-flex items-center gap-1.5 rounded-full border border-jade/30 bg-jade/10 px-4 py-2 font-mono text-[11px] text-jade transition hover:bg-jade/20">
+          <FlaskConical size={13} /> {t('Falsifiable research protocol →', 'တိုင်းတာနိုင်သော သုတေသန လုပ်ထုံး →')}
+        </Link>
       </div>
 
       <div className="glass-card mb-6 p-6">

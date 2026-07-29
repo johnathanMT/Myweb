@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, Download, FlaskConical, Trash2 } from 'lucide-react'
+import { ArrowLeft, Lock, Download, FlaskConical, Trash2, Sigma } from 'lucide-react'
 import {
   getPredictions, savePredictions, getJournal, saveJournal, hashPrediction, uid, exportCsv,
   isSignedIn, fetchServerData, createPredictionServer, reviewPredictionServer, deletePredictionServer, createJournalServer,
@@ -155,6 +155,13 @@ export default function Research() {
             <button key={l} type="button" onClick={() => setLang(l)} className={`rounded-full px-3 py-1 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>{l === 'en' ? 'EN' : 'မြန်မာ'}</button>
           ))}
         </div>
+      </div>
+
+      {/* Top cross-link to the sibling page */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Link to="/algorithms" className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-2 font-mono text-[11px] text-accent-light transition hover:bg-accent/20">
+          <Sigma size={13} /> {t('The algorithms (CS) →', 'အယ်လဂိုရီသမ်များ (CS) →')}
+        </Link>
       </div>
 
       {/* Hero + hypotheses */}
