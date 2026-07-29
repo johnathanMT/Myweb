@@ -18,12 +18,16 @@ const MEMORIES_URL = `${SITE.apiUrl}/api/sanctuary/admin/memories`
 const FAREWELL_URL = `${SITE.apiUrl}/api/farewell/admin/rsvps`
 const CHANGE_PW_URL = `${SITE.apiUrl}/api/auth/change-password`
 const REMEDIES_URL = `${SITE.apiUrl}/api/astrology/admin/remedies`
-const CHARTS_URL = `${SITE.apiUrl}/api/astrology/admin/charts`
-const PDF_URL = `${SITE.apiUrl}/api/astrology/admin/pdf-requests`
-const READINGS_URL = `${SITE.apiUrl}/api/astrology/admin/reading-requests?status=Pending`
+// "Saved Charts" now manages the logged-in customers' charts (where duplicates occur).
+const CHARTS_URL = `${SITE.apiUrl}/api/customer/admin/saved-charts`
+// "PDF Requests" now lists reading requests awaiting a manual PDF email.
+const PDF_URL = `${SITE.apiUrl}/api/astrology/admin/pdf-reading-requests`
+const READINGS_BASE = `${SITE.apiUrl}/api/astrology/admin/reading-requests`
+// Anonymous opt-in charts saved from the public form (older records).
+const QUERENT_URL = `${SITE.apiUrl}/api/astrology/admin/charts`
 const TOKEN_KEY = 'mtn_admin_jwt'
 
-type Tab = 'memories' | 'farewell' | 'poetry' | 'account' | 'remedy' | 'charts' | 'pdf' | 'readings'
+type Tab = 'memories' | 'farewell' | 'poetry' | 'account' | 'remedy' | 'charts' | 'pdf' | 'readings' | 'querent'
 
 // Admin view of a farewell RSVP — includes the logistics fields the public
 // FarewellView omits (datesAvailable, foodPreference, plantType).
@@ -42,8 +46,10 @@ interface AdminRemedy { id: number; name: string; contact: string; area: string;
 const STATUSES = ['Pending', 'InProgress', 'Completed', 'Cancelled'] as const
 const statusColor = (s: string) => s === 'Completed' ? 'text-emerald-300' : s === 'Cancelled' ? 'text-rose-300' : s === 'InProgress' ? 'text-amber-300' : 'text-fg/80'
 interface AdminChart { id: number; name: string; gender: string; birthDate: string; birthTime: string; timeZone: string; location: string; nayNan: number; createdAt: string }
-interface AdminPdf { id: number; email: string; name: string; birthInfo: string; approvalStatus: string; createdAt: string }
-interface AdminReadingReq { id: number; querentName: string; status: string; hasMarkdown: boolean; pdfRequested: boolean; createdAt: string; approvedAt?: string }
+// PDF Requests tab = reading requests awaiting a manual PDF email.
+interface AdminPdf { id: number; querentName: string; clientEmail?: string; status: string; createdAt: string }
+interface AdminReadingReq { id: number; querentName: string; clientEmail?: string; status: string; hasMarkdown: boolean; pdfRequested: boolean; createdAt: string; approvedAt?: string }
+type ReadingsFilter = 'Pending' | 'Approved' | 'Rejected'
 
 interface LoginResponse { data?: { token?: string; role?: string }; message?: string }
 interface AdminListResponse { memories?: Memory[]; rsvps?: AdminRsvp[] }
@@ -57,9 +63,12 @@ export default function SanctuaryAdmin() {
   const [rsvps, setRsvps] = useState<AdminRsvp[]>([])
   const [remedies, setRemedies] = useState<AdminRemedy[]>([])
   const [charts, setCharts] = useState<AdminChart[]>([])
+  const [querentCharts, setQuerentCharts] = useState<AdminChart[]>([])
   const [pdfs, setPdfs] = useState<AdminPdf[]>([])
   const [readingReqs, setReadingReqs] = useState<AdminReadingReq[]>([])
-  const [rowBusy, setRowBusy] = useState<{ id: number; action: 'approve' | 'reject' } | null>(null)
+  const [rowBusy, setRowBusy] = useState<{ id: number; action: 'approve' | 'reject' | 'sent' } | null>(null)
+  const [readingsFilter, setReadingsFilter] = useState<ReadingsFilter>('Pending')
+  const [toast, setToast] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [q, setQ] = useState('')
@@ -69,6 +78,10 @@ export default function SanctuaryAdmin() {
   const [pwBusy, setPwBusy] = useState(false)
 
   const persist = (tk: string) => { try { tk ? localStorage.setItem(TOKEN_KEY, tk) : localStorage.removeItem(TOKEN_KEY) } catch { /* ignore */ } }
+
+  // Success toast (auto-dismiss).
+  const showToast = (text: string) => setToast(text)
+  useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(''), 2600); return () => clearTimeout(t) }, [toast])
 
   const login = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -96,7 +109,7 @@ export default function SanctuaryAdmin() {
     if (which === 'poetry' || which === 'account') return   // these fetch nothing here
     setError(''); setLoading(true)
     try {
-      const url = which === 'farewell' ? FAREWELL_URL : which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : which === 'pdf' ? PDF_URL : which === 'readings' ? READINGS_URL : MEMORIES_URL
+      const url = which === 'farewell' ? FAREWELL_URL : which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : which === 'querent' ? QUERENT_URL : which === 'pdf' ? PDF_URL : which === 'readings' ? `${READINGS_BASE}?status=${readingsFilter}` : MEMORIES_URL
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired or not an Admin. Please log in again.') }
       if (!res.ok) throw new Error(`Failed to load (${res.status})`)
@@ -104,6 +117,7 @@ export default function SanctuaryAdmin() {
       if (which === 'farewell') setRsvps(Array.isArray(data?.rsvps) ? data.rsvps : [])
       else if (which === 'remedy') setRemedies(Array.isArray(data?.data) ? (data.data as AdminRemedy[]) : [])
       else if (which === 'charts') setCharts(Array.isArray(data?.data) ? (data.data as AdminChart[]) : [])
+      else if (which === 'querent') setQuerentCharts(Array.isArray(data?.data) ? (data.data as AdminChart[]) : [])
       else if (which === 'pdf') setPdfs(Array.isArray(data?.data) ? (data.data as AdminPdf[]) : [])
       else if (which === 'readings') setReadingReqs(Array.isArray(data?.data) ? (data.data as AdminReadingReq[]) : [])
       else setMemories(Array.isArray(data?.memories) ? data.memories : [])
@@ -139,9 +153,19 @@ export default function SanctuaryAdmin() {
   const deleteChart = async (id: number) => {
     if (!window.confirm('Delete this saved chart permanently?')) return
     try {
-      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/charts/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      const res = await fetch(`${SITE.apiUrl}/api/customer/admin/saved-charts/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       if (!res.ok) throw new Error()
       setCharts((cs) => cs.filter((c) => c.id !== id))
+      showToast('Chart deleted.')
+    } catch { setError('Could not delete.') }
+  }
+  const deleteQuerentChart = async (id: number) => {
+    if (!window.confirm('Delete this anonymous chart permanently?')) return
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/charts/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) throw new Error()
+      setQuerentCharts((cs) => cs.filter((c) => c.id !== id))
+      showToast('Chart deleted.')
     } catch { setError('Could not delete.') }
   }
 
@@ -164,14 +188,16 @@ export default function SanctuaryAdmin() {
     } catch (err) { setReplyMsg({ ok: false, text: err instanceof Error ? err.message : 'Send failed' }) } finally { setReplyBusy(false) }
   }
 
-  const [approving, setApproving] = useState<number | null>(null)
-  const approvePdf = async (id: number) => {
-    setApproving(id)
+  // Mark a reading's PDF as manually sent → clears it from the PDF Requests queue.
+  const markPdfSent = async (id: number) => {
+    setRowBusy({ id, action: 'sent' }); setError('')
     try {
-      const res = await fetch(`${SITE.apiUrl}/api/astrology/approve-pdf/${id}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
-      if (!res.ok) throw new Error()
-      setPdfs((ps) => ps.map((r) => (r.id === id ? { ...r, approvalStatus: 'Approved' } : r)))
-    } catch { setError('Could not approve / send email.') } finally { setApproving(null) }
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/reading-requests/${id}/mark-pdf-sent`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+      if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired. Please log in again.') }
+      if (!res.ok) throw new Error(`Failed (${res.status})`)
+      setPdfs((ps) => ps.filter((r) => r.id !== id))
+      showToast('✅ Marked as sent — removed from the queue.')
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not mark as sent.') } finally { setRowBusy(null) }
   }
 
   // Approve a reading request → this is the ONLY path that calls Gemini, so it can
@@ -185,6 +211,7 @@ export default function SanctuaryAdmin() {
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired. Please log in again.') }
       if (!res.ok || !data?.success) throw new Error(data?.message || `Failed (${res.status})`)
       setReadingReqs((rs) => rs.filter((r) => r.id !== id))
+      showToast('✅ Reading approved & generated.')
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not approve the reading.') } finally { setRowBusy(null) }
   }
   const rejectReading = async (id: number) => {
@@ -194,6 +221,7 @@ export default function SanctuaryAdmin() {
       const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/reading-requests/${id}/reject`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
       if (!res.ok) throw new Error(`Failed (${res.status})`)
       setReadingReqs((rs) => rs.filter((r) => r.id !== id))
+      showToast('Request rejected.')
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not reject the request.') } finally { setRowBusy(null) }
   }
 
@@ -221,6 +249,8 @@ export default function SanctuaryAdmin() {
 
   // Load on login + whenever the tab changes (re-fetches fresh each switch).
   useEffect(() => { if (token) { setQ(''); load(tab) } }, [token, tab]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Re-fetch the Readings list when the Pending/Approved/Rejected sub-filter changes.
+  useEffect(() => { if (token && tab === 'readings') load('readings') }, [readingsFilter]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const s = q.trim().toLowerCase()
   const filteredMemories = memories.filter((m) => !s ||
@@ -233,12 +263,14 @@ export default function SanctuaryAdmin() {
     (r.name || '').toLowerCase().includes(s) || (r.contact || '').toLowerCase().includes(s) || (r.area || '').toLowerCase().includes(s) || (r.message || '').toLowerCase().includes(s))
   const filteredCharts = charts.filter((c) => !s ||
     (c.name || '').toLowerCase().includes(s) || (c.gender || '').toLowerCase().includes(s) || (c.timeZone || '').toLowerCase().includes(s))
+  const filteredQuerentCharts = querentCharts.filter((c) => !s ||
+    (c.name || '').toLowerCase().includes(s) || (c.gender || '').toLowerCase().includes(s) || (c.timeZone || '').toLowerCase().includes(s))
 
-  const filteredPdfs = pdfs.filter((r) => !s || (r.email || '').toLowerCase().includes(s) || (r.name || '').toLowerCase().includes(s))
+  const filteredPdfs = pdfs.filter((r) => !s || (r.querentName || '').toLowerCase().includes(s) || (r.clientEmail || '').toLowerCase().includes(s))
   const filteredReadingReqs = readingReqs.filter((r) => !s || (r.querentName || '').toLowerCase().includes(s))
 
-  const total = tab === 'farewell' ? rsvps.length : tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : tab === 'pdf' ? pdfs.length : tab === 'readings' ? readingReqs.length : memories.length
-  const shown = tab === 'farewell' ? filteredRsvps.length : tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : tab === 'pdf' ? filteredPdfs.length : tab === 'readings' ? filteredReadingReqs.length : filteredMemories.length
+  const total = tab === 'farewell' ? rsvps.length : tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : tab === 'querent' ? querentCharts.length : tab === 'pdf' ? pdfs.length : tab === 'readings' ? readingReqs.length : memories.length
+  const shown = tab === 'farewell' ? filteredRsvps.length : tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : tab === 'querent' ? filteredQuerentCharts.length : tab === 'pdf' ? filteredPdfs.length : tab === 'readings' ? filteredReadingReqs.length : filteredMemories.length
 
   // Export the RSVP logistics as CSV for planning the real send-off.
   const exportCsv = () => {
@@ -299,13 +331,14 @@ export default function SanctuaryAdmin() {
               <TabBtn id="readings" icon={ScrollText} label="Readings" />
               <TabBtn id="remedy" icon={Sparkles} label="Remedy" />
               <TabBtn id="charts" icon={Star} label="Saved Charts" />
+              <TabBtn id="querent" icon={Star} label="Querent Charts" />
               <TabBtn id="pdf" icon={FileText} label="PDF Requests" />
               <TabBtn id="poetry" icon={BookOpen} label="Poetry" />
               <TabBtn id="account" icon={KeyRound} label="Account" />
             </div>
 
             {/* search/refresh bar — only for the list tabs (not poetry/account) */}
-            {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts' || tab === 'pdf' || tab === 'readings') && (
+            {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts' || tab === 'querent' || tab === 'pdf' || tab === 'readings') && (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg/40" />
@@ -419,46 +452,62 @@ export default function SanctuaryAdmin() {
               </div>
             )}
 
-            {/* ── PENDING READING REQUESTS (approve → generates the reading) ── */}
+            {/* ── READING REQUESTS — Pending (approve/reject) + Approved/Rejected history ── */}
             {tab === 'readings' && (
-              <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
-                <table className="w-full min-w-[560px] border-collapse text-left text-sm">
-                  <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
-                    <tr>
-                      <th className="px-4 py-3">Querent</th>
-                      <th className="px-4 py-3 whitespace-nowrap">Requested</th>
-                      <th className="px-4 py-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredReadingReqs.length === 0 ? (
-                      <tr><td colSpan={3} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No pending reading requests.'}</td></tr>
-                    ) : filteredReadingReqs.map((r) => {
-                      const busy = rowBusy?.id === r.id
-                      return (
-                        <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
-                          <td className="px-4 py-3 font-medium text-amber-300">{r.querentName || '—'}</td>
-                          <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 16)}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap gap-1.5">
-                              <button onClick={() => approveReading(r.id)} disabled={busy}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300/50 bg-emerald-400/20 px-3 py-1.5 font-mono text-[11px] font-semibold text-emerald-100 transition hover:bg-emerald-400/30 disabled:opacity-60">
-                                {busy && rowBusy?.action === 'approve'
-                                  ? <><RefreshCw size={12} className="animate-spin" /> Generating Reading…</>
-                                  : <><Check size={12} /> Approve</>}
-                              </button>
-                              <button onClick={() => rejectReading(r.id)} disabled={busy}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-1.5 font-mono text-[11px] text-rose-300 transition hover:bg-rose-400/20 disabled:opacity-60">
-                                {busy && rowBusy?.action === 'reject' ? <RefreshCw size={12} className="animate-spin" /> : <X size={12} />} Reject
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {(['Pending', 'Approved', 'Rejected'] as ReadingsFilter[]).map((f) => (
+                    <button key={f} type="button" onClick={() => setReadingsFilter(f)}
+                      className={`rounded-full border px-3.5 py-1.5 font-mono text-[11px] transition ${readingsFilter === f ? 'border-amber-300/60 bg-amber-300/15 text-amber-100' : 'border-fg/15 bg-fg/5 text-fg/60 hover:bg-fg/10'}`}>
+                      {f}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3 overflow-x-auto rounded-2xl border border-fg/10">
+                  <table className="w-full min-w-[560px] border-collapse text-left text-sm">
+                    <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
+                      <tr>
+                        <th className="px-4 py-3">Querent</th>
+                        <th className="px-4 py-3 whitespace-nowrap">Requested</th>
+                        {readingsFilter !== 'Pending' && <th className="px-4 py-3 whitespace-nowrap">Approved</th>}
+                        <th className="px-4 py-3">{readingsFilter === 'Pending' ? 'Actions' : 'Status'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredReadingReqs.length === 0 ? (
+                        <tr><td colSpan={readingsFilter === 'Pending' ? 3 : 4} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : `No ${readingsFilter.toLowerCase()} requests.`}</td></tr>
+                      ) : filteredReadingReqs.map((r) => {
+                        const busy = rowBusy?.id === r.id
+                        return (
+                          <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
+                            <td className="px-4 py-3 font-medium text-amber-300">{r.querentName || '—'}</td>
+                            <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 16)}</td>
+                            {readingsFilter !== 'Pending' && <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{r.approvedAt || <span className="text-fg/30">—</span>}</td>}
+                            <td className="px-4 py-3">
+                              {readingsFilter === 'Pending' ? (
+                                <div className="flex flex-wrap gap-1.5">
+                                  <button onClick={() => approveReading(r.id)} disabled={busy}
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300/50 bg-emerald-400/20 px-3 py-1.5 font-mono text-[11px] font-semibold text-emerald-100 transition hover:bg-emerald-400/30 disabled:opacity-60">
+                                    {busy && rowBusy?.action === 'approve'
+                                      ? <><RefreshCw size={12} className="animate-spin" /> Generating Reading…</>
+                                      : <><Check size={12} /> Approve</>}
+                                  </button>
+                                  <button onClick={() => rejectReading(r.id)} disabled={busy}
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-1.5 font-mono text-[11px] text-rose-300 transition hover:bg-rose-400/20 disabled:opacity-60">
+                                    {busy && rowBusy?.action === 'reject' ? <RefreshCw size={12} className="animate-spin" /> : <X size={12} />} Reject
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className={`rounded-full px-2.5 py-0.5 font-mono text-[11px] ${r.status === 'Approved' ? 'bg-emerald-400/15 text-emerald-200' : 'bg-rose-400/15 text-rose-200'}`}>{r.status}</span>
+                              )}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
 
             {/* ── REMEDY / CONTACT REQUESTS ── */}
@@ -509,7 +558,7 @@ export default function SanctuaryAdmin() {
               </div>
             )}
 
-            {/* ── SAVED QUERENT CHARTS (opt-in, decrypted) ── */}
+            {/* ── CUSTOMER SAVED CHARTS (logged-in accounts — where duplicates occur) ── */}
             {tab === 'charts' && (
               <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
                 <table className="w-full min-w-[760px] border-collapse text-left text-sm">
@@ -542,41 +591,74 @@ export default function SanctuaryAdmin() {
               </div>
             )}
 
-            {/* ── PDF REQUESTS (approve → email one-time link) ── */}
-            {tab === 'pdf' && (
+            {/* ── ANONYMOUS QUERENT CHARTS (opt-in from the public form) ── */}
+            {tab === 'querent' && (
               <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
                 <table className="w-full min-w-[760px] border-collapse text-left text-sm">
                   <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
                     <tr>
-                      <th className="px-4 py-3">Email</th><th className="px-4 py-3">Name</th>
-                      <th className="px-4 py-3 whitespace-nowrap">Birth</th><th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3 whitespace-nowrap">Requested</th><th className="px-4 py-3">Action</th>
+                      <th className="px-4 py-3">Name</th><th className="px-4 py-3">Gender</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Birth date</th><th className="px-4 py-3 whitespace-nowrap">Time</th>
+                      <th className="px-4 py-3">Time zone</th><th className="px-4 py-3 whitespace-nowrap">Lat,Lon</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Nay-Nan</th><th className="px-4 py-3 whitespace-nowrap">Saved</th><th className="px-4 py-3">Del</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredQuerentCharts.length === 0 ? (
+                      <tr><td colSpan={9} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No anonymous charts.'}</td></tr>
+                    ) : filteredQuerentCharts.map((c) => (
+                      <tr key={c.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
+                        <td className="px-4 py-3 font-medium text-amber-300">{c.name || '—'}</td>
+                        <td className="px-4 py-3 font-mono text-xs capitalize text-fg/70">{c.gender}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-fg/90">{c.birthDate}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/70">{c.birthTime}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-fg/60">{c.timeZone}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/60">{c.location}</td>
+                        <td className="px-4 py-3 text-fg/80">{c.nayNan}</td>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(c.createdAt || '').slice(0, 16)}</td>
+                        <td className="px-4 py-3"><button onClick={() => deleteQuerentChart(c.id)} title="Delete" className="inline-flex items-center rounded-lg border border-rose-400/30 bg-rose-400/10 px-2 py-1 text-rose-300 transition hover:bg-rose-400/20"><Trash2 size={12} /></button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ── PDF REQUESTS — approved readings awaiting a manual PDF email ── */}
+            {tab === 'pdf' && (
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
+                <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+                  <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
+                    <tr>
+                      <th className="px-4 py-3">Querent</th><th className="px-4 py-3">Client email</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Requested</th><th className="px-4 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredPdfs.length === 0 ? (
-                      <tr><td colSpan={6} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No PDF requests.'}</td></tr>
-                    ) : filteredPdfs.map((r) => (
-                      <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
-                        <td className="px-4 py-3 font-medium text-amber-200">{r.email}</td>
-                        <td className="px-4 py-3 text-fg/90">{r.name || '—'}</td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/60">{r.birthInfo}</td>
-                        <td className="px-4 py-3">
-                          <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${r.approvalStatus === 'Downloaded' ? 'bg-fg/10 text-fg/60' : r.approvalStatus === 'Approved' ? 'bg-emerald-400/15 text-emerald-200' : 'bg-amber-400/15 text-amber-200'}`}>{r.approvalStatus}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 16)}</td>
-                        <td className="px-4 py-3">
-                          {r.approvalStatus === 'Pending' ? (
-                            <button onClick={() => approvePdf(r.id)} disabled={approving === r.id}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300/30 bg-emerald-300/10 px-3 py-1.5 font-mono text-[11px] text-emerald-100 transition hover:bg-emerald-300/20 disabled:opacity-50">
-                              {approving === r.id ? <RefreshCw size={12} className="animate-spin" /> : <Mail size={12} />} Approve &amp; Send Email
-                            </button>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-emerald-200">✓ {r.approvalStatus === 'Downloaded' ? 'Downloaded' : 'Email Sent'}</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                      <tr><td colSpan={4} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No PDF requests in the queue.'}</td></tr>
+                    ) : filteredPdfs.map((r) => {
+                      const busy = rowBusy?.id === r.id
+                      return (
+                        <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
+                          <td className="px-4 py-3 font-medium text-amber-300">{r.querentName || '—'}</td>
+                          <td className="px-4 py-3 text-fg/90">{r.clientEmail || <span className="text-fg/30">—</span>}</td>
+                          <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 16)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1.5">
+                              <a href={`mailto:${encodeURIComponent(r.clientEmail || '')}?subject=${encodeURIComponent('Your Vedic Reading PDF')}`}
+                                className={`inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] text-accent-light transition hover:bg-accent/20 ${r.clientEmail ? '' : 'pointer-events-none opacity-40'}`}>
+                                <Mail size={12} /> 📧 Email ပို့ရန်
+                              </a>
+                              <button onClick={() => markPdfSent(r.id)} disabled={busy}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300/50 bg-emerald-400/20 px-3 py-1.5 font-mono text-[11px] font-semibold text-emerald-100 transition hover:bg-emerald-400/30 disabled:opacity-60">
+                                {busy && rowBusy?.action === 'sent' ? <RefreshCw size={12} className="animate-spin" /> : <Check size={12} />} ✅ ပြီးစီးပြီ
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -606,6 +688,15 @@ export default function SanctuaryAdmin() {
                 {replyBusy ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />} Send Reading to Client Email
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Success toast ── */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2">
+          <div className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-5 py-2.5 font-mono text-sm text-emerald-100 shadow-2xl backdrop-blur-md">
+            <Check size={15} className="text-emerald-300" /> {toast}
           </div>
         </div>
       )}

@@ -203,6 +203,7 @@ export default function Jyotish() {
   const [reqInfo, setReqInfo] = useState('')
   const [pdfRequested, setPdfRequested] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [pdfEmail, setPdfEmail] = useState('')
   const loadSavedChart = (c: SavedChart) => {
     setName(c.name || ''); setGender(c.gender === 'female' ? 'female' : 'male')
     setDate(c.birthDate || date); setTime(c.birthTime || time)
@@ -410,11 +411,14 @@ export default function Jyotish() {
     } finally { setReqLoading(false) }
   }
 
+  const emailOk = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim())
   const requestReadingPdf = async () => {
-    if (!reqId || pdfLoading || pdfRequested) return
+    if (!reqId || pdfLoading || pdfRequested || !emailOk(pdfEmail)) return
     setPdfLoading(true)
     try {
-      const res = await fetch(`${SITE.apiUrl}/api/astrology/reading/${reqId}/request-pdf`, { method: 'POST' })
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/reading/${reqId}/request-pdf`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: pdfEmail.trim() }),
+      })
       if (res.ok) setPdfRequested(true)
     } catch { /* ignore */ } finally { setPdfLoading(false) }
   }
@@ -721,13 +725,22 @@ export default function Jyotish() {
 
                         {/* Phase 4 — request the reading as a PDF by email */}
                         <div className="mt-5 no-print">
-                          <button type="button" onClick={requestReadingPdf} disabled={pdfLoading || pdfRequested}
+                          {!pdfRequested && (
+                            <div className="mb-3 max-w-sm">
+                              <label className="block font-mono text-[11px] uppercase tracking-wider text-muted">{lang === 'mm' ? 'PDF လက်ခံမည့် Email' : 'Email for the PDF'}</label>
+                              <input type="email" inputMode="email" value={pdfEmail} onChange={(e) => setPdfEmail(e.target.value)}
+                                placeholder="you@example.com"
+                                className="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-fg outline-none focus:border-accent/50" />
+                            </div>
+                          )}
+                          <button type="button" onClick={requestReadingPdf} disabled={pdfLoading || pdfRequested || !emailOk(pdfEmail)}
                             className="inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-semibold text-accent-light transition hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-60">
                             {pdfLoading ? <Loader2 size={15} className="animate-spin" /> : pdfRequested ? <CheckCircle2 size={15} className="text-jade" /> : <Mail size={15} />}
                             {pdfRequested
                               ? (lang === 'mm' ? 'PDF တောင်းဆိုမှု ပေးပို့ပြီးပါပြီ' : 'PDF request sent')
                               : (lang === 'mm' ? '✉️ PDF ဟောစာတမ်းကို Email ဖြင့် တောင်းဆိုရန်' : '✉️ Request the reading as a PDF by email')}
                           </button>
+                          {!pdfRequested && pdfEmail.length > 0 && !emailOk(pdfEmail) && <p className="mt-2 text-[11px] text-coral">{lang === 'mm' ? 'မှန်ကန်သော Email လိပ်စာ ထည့်ပါ။' : 'Enter a valid email address.'}</p>}
                           {pdfRequested && <p className="mt-2 text-[11px] text-muted">{lang === 'mm' ? 'ဆရာမှ PDF ဟောစာတမ်းကို သင့် Email သို့ ပေးပို့ပေးပါလိမ့်မည်။' : 'The Sayar will email the PDF reading to you.'}</p>}
                         </div>
                       </div>
