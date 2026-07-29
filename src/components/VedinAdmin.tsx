@@ -26,6 +26,13 @@ type Tab = 'readings' | 'pdf' | 'charts' | 'querent' | 'users' | 'remedy'
 interface AdminRemedy { id: number; name: string; contact: string; area: string; message: string; birthInfo: string; handled: boolean; status: string; notes: string; createdAt: string }
 const STATUSES = ['Pending', 'InProgress', 'Completed', 'Cancelled'] as const
 const statusColor = (s: string) => s === 'Completed' ? 'text-emerald-300' : s === 'Cancelled' ? 'text-rose-300' : s === 'InProgress' ? 'text-amber-300' : 'text-fg/80'
+const ageOf = (dob?: string): string => {
+  if (!dob) return ''
+  const b = new Date(dob); if (isNaN(b.getTime())) return ''
+  const n = new Date(); let a = n.getFullYear() - b.getFullYear()
+  const m = n.getMonth() - b.getMonth(); if (m < 0 || (m === 0 && n.getDate() < b.getDate())) a--
+  return a >= 0 && a < 200 ? `${a} yrs` : ''
+}
 interface AdminChart { id: number; name: string; gender: string; birthDate: string; birthTime: string; timeZone: string; location: string; nayNan: number; createdAt: string }
 // Natal context attached to a reading request when it came from a registered account.
 interface RegisteredInfo {
@@ -276,7 +283,7 @@ export default function VedinAdmin() {
             <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
               {([
                 ['Name', r.accountUsername], ['Email', r.accountEmail], ['Gender', r.gender],
-                ['Date of birth', r.dob], ['Birth time', r.birthTime], ['Location', r.locationName],
+                ['Date of birth', r.dob], ['Age', ageOf(r.dob) || undefined], ['Birth time', r.birthTime], ['Location', r.locationName],
                 ['Timezone', r.timezone], ['Lat, Lon', r.latitude != null && r.longitude != null ? `${r.latitude}, ${r.longitude}` : undefined],
               ] as [string, string | undefined][]).map(([k, v]) => (
                 <div key={k}>

@@ -283,6 +283,23 @@ export default function Jyotish() {
     } finally { setLoading(false) }
   }
 
+  // Current age from a yyyy-mm-dd date of birth.
+  const ageFromDob = (dob?: string): number | null => {
+    if (!dob) return null
+    const b = new Date(dob)
+    if (isNaN(b.getTime())) return null
+    const now = new Date()
+    let age = now.getFullYear() - b.getFullYear()
+    const m = now.getMonth() - b.getMonth()
+    if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--
+    return age >= 0 && age < 200 ? age : null
+  }
+  const ageLabel = (dob?: string): string => {
+    const a = ageFromDob(dob)
+    if (a == null) return ''
+    return lang === 'mm' ? `(အသက် ${toMmDigits(a)} နှစ်)` : `(Age ${a})`
+  }
+
   // ── Registered dashboard: compute the account's own chart from its profile.
   // Also syncs the form state so the reading payload / status use this identity. ──
   const computeFromProfile = async (p: Profile) => {
@@ -645,8 +662,12 @@ export default function Jyotish() {
           <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full opacity-40 blur-3xl" style={{ background: 'radial-gradient(circle, #a855f7 0%, transparent 70%)' }} />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em]" style={{ color: '#6ee7b7' }}><Sparkles size={14} /> {lang === 'mm' ? 'သင့်ကိုယ်ပိုင် Jyotish Dashboard' : 'Your personal Jyotish dashboard'}</p>
-              <h2 className="mt-2 font-groovy text-2xl text-fg sm:text-3xl">{lang === 'mm' ? `ကြိုဆိုပါတယ်၊ ${profile.username} 🙏` : `Welcome to your personal Jyotish dashboard, ${profile.username}`}</h2>
+              <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em]" style={{ color: '#6ee7b7' }}><Sparkles size={14} /> {lang === 'mm' ? 'သင့်ကိုယ်ပိုင် ဇာတာ ဟောစာတမ်းများကို ကြည့်ရှုရန် Dashboard' : 'Your personal Jyotish dashboard'}</p>
+              <h2 className="mt-2 font-groovy text-2xl text-fg sm:text-3xl">
+                {lang === 'mm' ? `ကြိုဆိုပါတယ်၊ ${profile.username} ` : `Welcome to your personal Jyotish dashboard, ${profile.username} `}
+                {ageLabel(profile.dob) && <span className="text-xl text-jade sm:text-2xl">{ageLabel(profile.dob)}</span>}
+                {lang === 'mm' ? ' 🙏' : ''}
+              </h2>
               <div className="mt-3 flex flex-wrap gap-2 font-mono text-[11px]">
                 {profile.dob && <span className="rounded-full border border-jade/30 bg-jade/10 px-2.5 py-1 text-jade">🎂 {profile.dob}{profile.birthTime ? ` · ${profile.birthTime}` : ''}</span>}
                 {profile.locationName && <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-accent-light">📍 {profile.locationName}</span>}

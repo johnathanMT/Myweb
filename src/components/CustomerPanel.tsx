@@ -104,6 +104,7 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
     openAuth: (mode) => { setModal(mode); setMsg(null); setNeedsVerify(false) },
     openProfileEdit: () => {
       const m = meRef.current
+      setUsername(m?.username || '')
       setSGender(m?.gender === 'female' ? 'female' : 'male')
       setSDob(m?.dob || '1998-01-01')
       setSTime(m?.birthTime || '12:00')
@@ -165,6 +166,7 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
     setBusy(true); setMsg(null)
     try {
       const body = {
+        username: username.trim(),
         gender: sGender, dob: sDob, birthTime: sTime, locationName: sPlace.trim(),
         latitude: sLat ? Number(sLat) : null, longitude: sLon ? Number(sLon) : null, timezone: sTz,
       }
@@ -249,8 +251,8 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
                 <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Email', 'အီးမေးလ်')}</span>
                   <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} /></label>
               )}
-              {modal === 'signup' && (
-                <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Username', 'အသုံးပြုသူအမည်')}</span>
+              {(modal === 'signup' || modal === 'profile') && (
+                <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{modal === 'profile' ? t('Name', 'အမည်') : t('Username', 'အသုံးပြုသူအမည်')}</span>
                   <input required value={username} onChange={(e) => setUsername(e.target.value)} className={inputCls} /></label>
               )}
               {modal !== 'profile' && (
@@ -266,6 +268,9 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
               {(modal === 'signup' || modal === 'profile') && (
                 <div className="space-y-3 rounded-xl border border-jade/25 bg-jade/[0.05] p-3">
                   <p className="font-mono text-[10px] uppercase tracking-wider text-jade">{modal === 'profile' ? t('Your birth details', 'သင့်မွေးဖွားချက်') : t('Your birth details (optional — unlocks your dashboard)', 'သင့်မွေးဖွားချက် (ရွေးချယ်နိုင် — Dashboard ဖွင့်ပေးသည်)')}</p>
+                  {modal === 'profile' && (
+                    <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-2.5 py-2 text-[11px] leading-relaxed text-amber-200">⚠️ မွေးဇာတာ အချက်အလက်များကို ရက်ပေါင်း 90 မှ တစ်ကြိမ်သာ ပြောင်းလဲနိုင်ပါသည်။</p>
+                  )}
                   <div className="grid grid-cols-2 gap-2">
                     <label className="block"><span className="font-mono text-[10px] uppercase tracking-wider text-muted">{t('Gender', 'ကျား/မ')}</span>
                       <select value={sGender} onChange={(e) => setSGender(e.target.value as 'male' | 'female')} className={inputCls}>
