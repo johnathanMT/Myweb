@@ -44,8 +44,8 @@ const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = 
   { n: 60, name: 'D60 · Shashtiamsa', desc: { en: 'Overall karma — the most refined chart.', mm: 'အလုံးစုံ ကံ — အသိမ်မွေ့ဆုံး ဇာတာ။' } },
 ]
 
-const BIO_EN = 'Sayar Bhone Min Thike Din prepares every reading with authentic Vedic (Jyotish) methods — the sidereal zodiac with the Lahiri ayanamsa, whole-sign houses, the Chandra Lagna (Moon ascendant), the sixteen divisional charts (D1–D60), the Vimshottari dasha & antardasha system, planetary aspects (drishti), the six-fold Shadbala strengths and Ashtakavarga — combined for a precise and faithful reading of your life.'
-const BIO_MM = 'ဆရာ ဘုန်းမင်းသိုက်ဒင် သည် ဟောကိန်းတိုင်းကို စစ်မှန်သော နက္ခတ်ဗေဒင် (Jyotish) နည်းစနစ်များဖြင့် ပြင်ဆင်ပါသည် — နက္ခတ်ရာသီစက်နှင့် Lahiri အယနံသ၊ Whole-Sign အိမ်စနစ်၊ စန်းလဂ် (Chandra Lagna)၊ ဇာတာခွဲ ၁၆ မျိုး (D1–D60)၊ ဝိမ်ရှောတ္တရီ ဒသာ/အန္တရ်ဒသာစနစ်၊ ဂြိုဟ်အမြင် (ဒြိဋ္ဌိ)၊ ဆဒ္ဗလ ဂြိုဟ်အား ၆ မျိုးနှင့် အဋ္ဌကဝဂ် — တို့ကို ပေါင်းစပ်၍ သင့်ဘဝကို တိကျမှန်ကန်စွာ ဟောကြားပေးပါသည်။'
+const BIO_EN = 'Sayar Bhone Min Thike Din prepares every reading with authentic Vedic (Jyotish) methods — the sidereal zodiac with the Lahiri ayanamsa, whole-sign houses, the Chandra Lagna (Moon ascendant), the sixteen divisional charts (D1–D60), the Vimśottarī dasha & antardasha system, planetary aspects (drishti), the six-fold Shadbala strengths and Ashtakavarga — all computed precisely by the classical Jyotish śāstras and offered as guidance for your own reflection.'
+const BIO_MM = 'ဆရာ ဘုန်းမင်းသိုက်ဒင် သည် ဟောကိန်းတိုင်းကို စစ်မှန်သော နက္ခတ်ဗေဒင် (Jyotish) နည်းစနစ်များဖြင့် ပြင်ဆင်ပါသည် — နက္ခတ်ရာသီစက်နှင့် Lahiri အယနံသ၊ Whole-Sign အိမ်စနစ်၊ စန်းလဂ် (Chandra Lagna)၊ ဇာတာခွဲ ၁၆ မျိုး (D1–D60)၊ ဝိံရှောတ္တရီ ဒသာ/အန္တရ်ဒသာစနစ်၊ ဂြိုဟ်အမြင် (ဒြိဋ္ဌိ)၊ ဆဒ္ဗလ ဂြိုဟ်အား ၆ မျိုးနှင့် အဋ္ဌကဝဂ် — တို့ကို ဂန္ထဝင် ဇျောတိသကျမ်းများ၏ နည်းစနစ်အတိုင်း တိကျစွာ တွက်ချက်ပြီး၊ ကိုယ့်ကိုယ်ကို ပြန်လည်သုံးသပ်ရန် လမ်းညွှန်ချက်များ ပေးပါသည်။'
 
 // D1–D60 educational meanings (simple, bilingual).
 const VARGA_GUIDE: { code: string; en: string; mm: string }[] = [
@@ -339,7 +339,7 @@ export default function Jyotish() {
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light">{lang === 'mm' ? 'ပရော်ဖက်ရှင်နယ် ဗေဒင်ပညာရှင်' : 'Professional Vedic Astrologer'}</p>
             <h1 className="mt-1.5 font-groovy text-3xl text-fg sm:text-4xl">{lang === 'mm' ? 'ဆရာ ဘုန်းမင်းသိုက်ဒင်' : 'Sayar Bhone Min Thike Din'}</h1>
-            <p className="mt-1 font-mono text-xs text-muted">{lang === 'mm' ? 'နက္ခတ်ဗေဒင် · ဝိမ်ရှောတ္တရီ ဒသာ · ဆဒ္ဗလ' : 'Sidereal Jyotish · Vimshottari Dasha · Shadbala'}</p>
+            <p className="mt-1 font-mono text-xs text-muted">{lang === 'mm' ? 'နက္ခတ်ဗေဒင် · ဝိံရှောတ္တရီ ဒသာ · ဆဒ္ဗလ' : 'Sidereal Jyotish · Vimshottari Dasha · Shadbala'}</p>
           </div>
           <p className="text-[15px] leading-relaxed text-muted">{lang === 'mm' ? BIO_MM : BIO_EN}</p>
         </div>
@@ -877,6 +877,18 @@ export default function Jyotish() {
           )}
         </div>
       </div>
+
+      {/* ── Methodology (a genuine differentiator) + honest disclaimer ── */}
+      <footer className="mt-12 border-t border-accent/15 pt-6 text-center">
+        <p className="font-mono text-[11px] tracking-wide text-accent-light">
+          Sidereal · Lahiri ayanamsa (1955) · Whole-Sign houses · Mean node · Swiss Ephemeris
+        </p>
+        <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-muted">
+          {lang === 'mm'
+            ? 'ဇာတာများကို ဂန္ထဝင် ဇျောတိသကျမ်းများ၏ နည်းစနစ်အတိုင်း တိကျစွာ တွက်ချက်ထားပါသည်။ ဗေဒင်သည် သိပ္ပံနည်းကျ အတည်ပြုထားခြင်း မရှိသဖြင့် — ဆေးဘက်၊ ဥပဒေ သို့မဟုတ် ငွေကြေးဆိုင်ရာ ဆုံးဖြတ်ချက်များအတွက် အစားထိုး မသုံးသင့်ပါ။ ကိုယ့်ကိုယ်ကို ပြန်လည်သုံးသပ်ရန်နှင့် ယဉ်ကျေးမှုစိတ်ဝင်စားမှုအတွက်သာ တင်ဆက်ပါသည်။'
+            : 'Charts are computed precisely by the classical Jyotish methods. Astrology is not scientifically validated — this is offered for reflection and cultural interest, and is not a substitute for medical, legal, or financial advice.'}
+        </p>
+      </footer>
     </section>
   )
 }

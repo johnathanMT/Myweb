@@ -73,7 +73,7 @@ export const JT: Record<Lang, Record<string, string>> = {
   mm: {
     sayar: 'ဆရာ ဘုန်းမင်းသိုက်ဒင်',
     sayarRole: 'ပရော်ဖက်ရှင်နယ် ဗေဒင်ပညာရှင်',
-    sayarTagline: 'စန်းလဂ် (Moon Ascendant)၊ နက္ခတ်ဗေဒင်နှင့် ဝိမ်ရှောတ္တရီ ဒသာစနစ်ကို အခြေခံ၍ ဟောကြားပေးသည်။',
+    sayarTagline: 'စန်းလဂ် (Moon Ascendant)၊ နက္ခတ်ဗေဒင်နှင့် ဝိံရှောတ္တရီ ဒသာစနစ်ကို အခြေခံ၍ ဟောကြားပေးသည်။',
     portalTitle: 'ဗေဒင် ဟောစာတမ်း Portal',
     chandraTitle: 'စန်းလဂ် (Chandra Lagna) ဘာကြောင့် အရေးကြီးသလဲ?',
     chandra:
