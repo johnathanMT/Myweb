@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, ScrollText, Clock, Mail, CheckCircle2 } from 'lucide-react'
+import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, ScrollText, Clock, Mail, CheckCircle2, ChevronDown, Lock, UserPlus } from 'lucide-react'
 import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
@@ -9,7 +9,7 @@ import AreaRadar from './AreaRadar'
 import TimelineChart from './TimelineChart'
 import AshtakavargaView from './AshtakavargaView'
 import ShadbalaView from './ShadbalaView'
-import CustomerPanel, { type SavedChart } from './CustomerPanel'
+import CustomerPanel, { type SavedChart, type CustomerPanelHandle } from './CustomerPanel'
 import MarkdownView from './MarkdownView'
 import type { BirthChartData, BirthChartRequest, PlanetPosition, TransitPos } from '../types/astrology'
 import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, activePratyantar, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel, currentAreaEffect } from '../lib/jyotish'
@@ -204,6 +204,9 @@ export default function Jyotish() {
   const [pdfRequested, setPdfRequested] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [pdfEmail, setPdfEmail] = useState('')
+  const customerPanelRef = useRef<CustomerPanelHandle>(null)
+  const [howtoOpen, setHowtoOpen] = useState(false)
+  const [verifyToast, setVerifyToast] = useState('')
   const loadSavedChart = (c: SavedChart) => {
     setName(c.name || ''); setGender(c.gender === 'female' ? 'female' : 'male')
     setDate(c.birthDate || date); setTime(c.birthTime || time)
@@ -423,6 +426,25 @@ export default function Jyotish() {
     } catch { /* ignore */ } finally { setPdfLoading(false) }
   }
 
+  // Task 3 — after the email-confirm redirect (…/jyotish?verified=true&token=…),
+  // auto-login: hand the token to CustomerPanel, scrub the URL, and toast.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const tk = params.get('token')
+    if (tk && params.get('verified') === 'true') {
+      customerPanelRef.current?.ingestToken(tk)
+      params.delete('token'); params.delete('verified')
+      const qs = params.toString()
+      window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''))
+      setVerifyToast(lang === 'mm'
+        ? 'အကောင့် အတည်ပြုပြီးပါပြီ။ အလိုအလျောက် Login ဝင်ရောက်ပြီးပါပြီ။'
+        : 'Account confirmed — you are now automatically logged in.')
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!verifyToast) return; const id = setTimeout(() => setVerifyToast(''), 4000); return () => clearTimeout(id) }, [verifyToast])
+
+  const openAuth = (mode: 'login' | 'signup') => customerPanelRef.current?.openAuth(mode)
+
   const curVarga = VARGAS.find((v) => v.n === vargaN) ?? VARGAS[4]
   const TABS: { id: Tab; label: string }[] = [
     { id: 'ai', label: lang === 'mm' ? '📜 အသေးစိတ် ဟောစာတမ်း' : '📜 Detailed Reading' },
@@ -508,7 +530,7 @@ export default function Jyotish() {
 
       {/* ── Customer account (sign in / saved charts) ── */}
       <div className="mb-6">
-        <CustomerPanel lang={lang} onAuthChange={setCustomerToken} onLoadChart={loadSavedChart} />
+        <CustomerPanel ref={customerPanelRef} lang={lang} onAuthChange={setCustomerToken} onLoadChart={loadSavedChart} />
       </div>
 
       {/* ── Intro: Chandra Lagna + Instructions ── */}
@@ -528,6 +550,43 @@ export default function Jyotish() {
       </div>
 
       <div className="space-y-8">
+        {/* ── How to use (accordion) + form title ── */}
+        <div className="mx-auto w-full max-w-3xl no-print">
+          <div className="overflow-hidden rounded-2xl border border-accent/25 bg-accent/[0.05]">
+            <button type="button" onClick={() => setHowtoOpen((o) => !o)} aria-expanded={howtoOpen}
+              className="flex w-full items-center justify-between gap-2 px-5 py-3.5 text-left transition hover:bg-accent/[0.08]">
+              <span className="flex items-center gap-2 font-groovy text-base text-fg"><Info size={16} className="text-accent" /> {lang === 'mm' ? 'အသုံးပြုနည်း' : 'How to use'}</span>
+              <ChevronDown size={18} className={`shrink-0 text-accent-light transition-transform ${howtoOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {howtoOpen && (
+              <ol className="space-y-2.5 border-t border-accent/15 px-5 py-4 text-sm leading-relaxed text-muted">
+                {(lang === 'mm'
+                  ? [
+                    'မွေးသက္ကရာဇ် အချက်အလက်များ ဖြည့်သွင်းပါ။',
+                    'ဇာတာများ သိမ်းဆည်းရန်နှင့် ဟောစာတမ်းတောင်းရန် အကောင့် ဖွင့်/ဝင်ပါ။',
+                    '"အသေးစိတ် ဟောစာတမ်း" နေရာမှတစ်ဆင့် ဆရာ့ထံသို့ တောင်းဆိုမှု ပြုလုပ်ပါ။',
+                    'ဆရာမှ အတည်ပြု (Approve) ပြီးပါက ဟောစာတမ်းဖတ်ရှုနိုင်ပြီး PDF ရယူနိုင်ပါသည်။',
+                  ]
+                  : [
+                    'Fill in your birth details.',
+                    'Create / sign in to an account to save charts and request a reading.',
+                    'Submit a request to the Sayar from the “Detailed Reading” tab.',
+                    'Once the Sayar approves, you can read the reading and get the PDF.',
+                  ]
+                ).map((step, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accent/20 font-mono text-[11px] font-semibold text-accent-light">{i + 1}</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+          <h2 className="mt-6 text-center font-groovy text-lg text-fg sm:text-xl">
+            {lang === 'mm' ? 'မိမိရဲ့ မွေးဇာတာစစ်ဆေးရန် အချက်အလက်များကို အပြည့်အစုံဖြည့်သွင်းပါ' : 'Enter your birth details to check your chart'}
+          </h2>
+        </div>
+
         {/* ── Form (centered on top; results span the full page below) ── */}
         <form onSubmit={submit} className="glass-card mx-auto w-full max-w-3xl p-6 no-print">
           <div className="mb-3 grid grid-cols-2 gap-3">
@@ -664,8 +723,27 @@ export default function Jyotish() {
               {/* ── DETAILED READING (manual-approval workflow) ── */}
               {(tab === 'ai' || printAll) && (
                 <div className="space-y-5">
-                  {/* Request card — shown when there is no active/approved request */}
-                  {(reqStatus === 'none' || reqStatus === 'rejected') && (
+                  {/* Auth gate — a reading can only be requested by a signed-in account */}
+                  {!customerToken && (reqStatus === 'none' || reqStatus === 'rejected') && (
+                    <div className="relative overflow-hidden rounded-2xl border border-accent/35 p-6 sm:p-8 no-print text-center"
+                      style={{ background: 'linear-gradient(135deg, rgb(var(--card)), rgb(var(--surface)))', boxShadow: '0 0 50px -20px rgb(var(--accent) / 0.5)' }}>
+                      <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
+                      <div className="relative flex flex-col items-center gap-3">
+                        <span className="grid h-14 w-14 place-items-center rounded-full border border-accent/40 bg-accent/15 text-accent-light"><Lock size={24} /></span>
+                        <h3 className="font-groovy text-xl text-fg">{lang === 'mm' ? 'အကောင့် ဖွင့်ထားရန် လိုအပ်ပါသည်' : 'An account is required'}</h3>
+                        <p className="max-w-xl text-sm leading-relaxed text-muted">{lang === 'mm'
+                          ? 'ဟောစာတမ်းအပြည့်အစုံကို ရယူရန်နှင့် သင့်ဇာတာများ မှတ်သားထားရန် အကောင့် (Account) ဖွင့်ထားရန် လိုအပ်ပါသည်။'
+                          : 'To get the full reading and to save your charts, you need to have an account.'}</p>
+                        <button type="button" onClick={() => openAuth('signup')}
+                          className="mt-1 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent via-violet-500 to-jade px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/30 transition hover:brightness-110">
+                          <UserPlus size={16} /> {lang === 'mm' ? 'အကောင့်ဖွင့် / ဝင်ရန်' : 'Sign Up / Log In'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Request card — signed-in, no active/approved request */}
+                  {customerToken && (reqStatus === 'none' || reqStatus === 'rejected') && (
                     <div className="relative overflow-hidden rounded-2xl border border-accent/30 p-6 no-print"
                       style={{ background: 'linear-gradient(135deg, rgb(var(--card)), rgb(var(--surface)))', boxShadow: '0 0 50px -18px rgb(var(--accent) / 0.5)' }}>
                       <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
@@ -1155,6 +1233,15 @@ export default function Jyotish() {
           </Link>
         </div>
       </footer>
+
+      {/* Email-confirm success toast (Task 3) */}
+      {verifyToast && (
+        <div className="no-print fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 px-4">
+          <div className="flex items-center gap-2 rounded-full border border-jade/40 bg-jade/15 px-5 py-2.5 text-sm text-fg shadow-2xl backdrop-blur-md">
+            <CheckCircle2 size={16} className="text-jade" /> {verifyToast}
+          </div>
+        </div>
+      )}
     </section>
   )
 }

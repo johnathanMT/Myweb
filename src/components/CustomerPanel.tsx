@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type FormEvent } from 'react'
+import { useState, useEffect, useCallback, useImperativeHandle, forwardRef, type FormEvent } from 'react'
 import { LogOut, Loader2, Pencil, Check, UserRound, X } from 'lucide-react'
 import { SITE } from '../config/site'
 import type { Lang } from '../lib/jyotish'
@@ -16,11 +16,18 @@ export interface SavedChart {
  * sign-up with confirmation, login, editable username, and saved charts that
  * autofill the form. Reports the auth token upward via onAuthChange.
  */
-export default function CustomerPanel({ lang, onLoadChart, onAuthChange }: {
+/** Imperative handle so the parent (Jyotish) can open the auth modal from the
+ *  reading tab's gate button, and inject a token from an email-confirm redirect. */
+export interface CustomerPanelHandle {
+  openAuth: (mode: 'login' | 'signup') => void
+  ingestToken: (token: string) => void
+}
+
+const CustomerPanel = forwardRef<CustomerPanelHandle, {
   lang: Lang
   onLoadChart: (c: SavedChart) => void
   onAuthChange: (token: string | null) => void
-}) {
+}>(function CustomerPanel({ lang, onLoadChart, onAuthChange }, ref) {
   const [token, setToken] = useState<string>(() => { try { return localStorage.getItem(CUST_TOKEN) || '' } catch { return '' } })
   const [me, setMe] = useState<{ id: number; email: string; username: string } | null>(null)
   const [modal, setModal] = useState<null | 'login' | 'signup'>(null)
@@ -50,6 +57,13 @@ export default function CustomerPanel({ lang, onLoadChart, onAuthChange }: {
   const persist = (tk: string) => { try { tk ? localStorage.setItem(CUST_TOKEN, tk) : localStorage.removeItem(CUST_TOKEN) } catch { /* ignore */ } }
 
   useEffect(() => { onAuthChange(token || null) }, [token, onAuthChange])
+
+  // Parent-driven controls: open the auth modal, or ingest a token from the
+  // email-confirmation redirect (?token=…).
+  useImperativeHandle(ref, () => ({
+    openAuth: (mode) => { setModal(mode); setMsg(null); setNeedsVerify(false) },
+    ingestToken: (tk) => { if (!tk) return; setToken(tk); persist(tk); setModal(null) },
+  }), [])
 
   const loadMe = useCallback(async (tk: string) => {
     try {
@@ -190,4 +204,6 @@ export default function CustomerPanel({ lang, onLoadChart, onAuthChange }: {
       )}
     </div>
   )
-}
+})
+
+export default CustomerPanel
