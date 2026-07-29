@@ -16,6 +16,7 @@ import './index.css'
 // Lazy: pulls in tsparticles — code-split out of the main bundle.
 const Sanctuary = lazy(() => import('./components/Sanctuary'))
 const SanctuaryAdmin = lazy(() => import('./components/SanctuaryAdmin'))
+const VedinAdmin = lazy(() => import('./components/VedinAdmin'))
 const FarewellRSVP = lazy(() => import('./components/FarewellRSVP'))
 const Jyotish = lazy(() => import('./components/Jyotish'))   // pulls in tz-lookup → code-split
 const Research = lazy(() => import('./components/Research'))
@@ -64,6 +65,7 @@ ReactDOM.createRoot(rootEl).render(
           {/* private / admin → not indexed */}
           <Route path="/farewell" element={<><Seo title="Farewell RSVP" path="/farewell" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#070b1c' }} />}><FarewellRSVP /></Suspense></>} />
           <Route path="/sanctuary-admin" element={<><Seo title="Admin" path="/sanctuary-admin" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b0e1a' }} />}><SanctuaryAdmin /></Suspense></>} />
+          <Route path="/vedin-admin" element={<><Seo title="Vedin Admin" path="/vedin-admin" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b0e1a' }} />}><VedinAdmin /></Suspense></>} />
           {/* unknown paths fall back to the homepage (mode-aware), not indexed */}
           <Route path="*" element={<><Seo noindex /><App /></>} />
         </Routes>
