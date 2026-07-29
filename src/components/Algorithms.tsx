@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useRef, useMemo, useLayoutEffect, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Copy, Check, FlaskConical } from 'lucide-react'
 import katex from 'katex'
@@ -24,33 +24,60 @@ function Code({ code }: { code: string }) {
   return (
     <div className="relative mt-3">
       <button type="button" onClick={copy} aria-label="Copy code"
-        className="no-print absolute right-2 top-2 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-white/5 px-2 py-1 font-mono text-[10px] text-muted transition hover:text-fg">
+        className="no-print absolute right-2 top-2 inline-flex items-center gap-1 rounded-lg border border-white/20 bg-white/10 px-2 py-1 font-mono text-[10px] text-slate-300 transition hover:text-white">
         {copied ? <><Check size={11} className="text-jade" /> copied</> : <><Copy size={11} /> copy</>}
       </button>
+      {/* Background is always near-black, so the text colour is fixed light —
+          never theme-dependent (a themed `text-fg` turns dark → invisible in light mode). */}
       <pre className="overflow-x-auto rounded-xl border border-accent/15 bg-[rgb(10_10_18)] p-4 text-[12.5px] leading-relaxed" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <code className="font-mono text-fg/90">{code}</code>
+        <code className="font-mono text-[rgb(226_232_240)]">{code}</code>
       </pre>
     </div>
   )
 }
 
 // ── LaTeX (KaTeX) display block ──
-// KaTeX glyphs inherit `currentColor`, so the wrapper's `text-fg` makes the
-// math readable in BOTH light and dark themes (was previously light-violet on a
-// light background → invisible in light mode).
-function Math({ tex }: { tex: string }) {
-  let html: string
-  try {
-    html = katex.renderToString(tex, { displayMode: true, throwOnError: false, output: 'html' })
-  } catch {
-    html = `<span class="font-mono text-coral">${tex}</span>`
-  }
-  return <div className="katex-block overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }} dangerouslySetInnerHTML={{ __html: html }} />
+// KaTeX glyphs inherit `currentColor`, so the wrapper's `text-fg` makes the math
+// readable in BOTH light and dark themes. On narrow screens a wide formula would
+// run off the edge, so we measure it and scale-to-fit the container width — the
+// WHOLE equation is always visible (as large as will fit), never clipped.
+function MathBlock({ tex }: { tex: string }) {
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const innerRef = useRef<HTMLDivElement>(null)
+  const [dims, setDims] = useState({ scale: 1, h: 0 })
+
+  const html = useMemo(() => {
+    try { return katex.renderToString(tex, { displayMode: true, throwOnError: false, output: 'html' }) }
+    catch { return `<span class="font-mono text-coral">${tex}</span>` }
+  }, [tex])
+
+  useLayoutEffect(() => {
+    const fit = () => {
+      const wrap = wrapRef.current, inner = innerRef.current
+      if (!wrap || !inner) return
+      const avail = wrap.clientWidth
+      const natural = inner.scrollWidth   // pre-transform layout width (unaffected by scale)
+      const nh = inner.scrollHeight
+      const scale = natural > avail && avail > 0 ? avail / natural : 1
+      setDims({ scale, h: Math.ceil(nh * scale) })
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    if (wrapRef.current) ro.observe(wrapRef.current)
+    return () => ro.disconnect()
+  }, [html])
+
+  return (
+    <div ref={wrapRef} className="katex-block w-full overflow-hidden" style={{ height: dims.h || undefined }}>
+      <div ref={innerRef} style={{ transform: `scale(${dims.scale})`, transformOrigin: 'left top', display: 'inline-block' }}
+        dangerouslySetInnerHTML={{ __html: html }} />
+    </div>
+  )
 }
 
 const Formula = ({ formula }: { formula: string[] }) => (
   <div className="mt-3 space-y-3 rounded-xl border border-accent/20 bg-accent/[0.05] px-4 py-4 text-fg">
-    {formula.map((f, i) => <Math key={i} tex={f} />)}
+    {formula.map((f, i) => <MathBlock key={i} tex={f} />)}
   </div>
 )
 

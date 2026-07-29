@@ -95,14 +95,11 @@ html[data-theme="dark"] .neon-glow {
 
 /* KaTeX formula blocks (Algorithms page). Glyphs inherit `currentColor` from the
    wrapper's `text-fg`, so formulas stay readable in BOTH light and dark themes.
-   Left-align + reset margins so long formulas scroll horizontally without the
-   leading terms being clipped. */
-.katex-block .katex-display { margin: 0; text-align: left; }
-.katex-block .katex-display > .katex { text-align: left; white-space: nowrap; }
+   The display box is inline-block + nowrap so it sizes to the formula's true
+   content width — the React <Math> wrapper measures that and scales-to-fit on
+   narrow screens, so the whole equation is always visible (never clipped). */
+.katex-block .katex-display { display: inline-block; margin: 0; text-align: left; white-space: nowrap; }
 .katex-block .katex { color: inherit; }
-@media (max-width: 640px) {
-  .katex-block .katex { font-size: 1rem; }
-}
 
 /* AI reading Markdown — theme-aware (inherits text-fg), Burmese-friendly spacing. */
 .vedin-md { color: rgb(var(--fg)); line-height: 1.95; font-size: 0.98rem; }
