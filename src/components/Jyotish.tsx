@@ -422,7 +422,7 @@ export default function Jyotish() {
   const curVarga = VARGAS.find((v) => v.n === vargaN) ?? VARGAS[4]
   const TABS: { id: Tab; label: string }[] = [
     { id: 'ai', label: lang === 'mm' ? '📜 အသေးစိတ် ဟောစာတမ်း' : '📜 Detailed Reading' },
-    { id: 'reading', label: t.tabReading }, { id: 'timeline', label: t.tabTimeline }, { id: 'd1', label: t.tabD1 },
+    { id: 'reading', label: lang === 'mm' ? 'မွေးဇာတာစစ်ဆေးရန်' : t.tabReading }, { id: 'timeline', label: t.tabTimeline }, { id: 'd1', label: t.tabD1 },
     { id: 'vargas', label: lang === 'mm' ? 'ခွဲဝေဇာတာ' : 'Vargas' },
     { id: 'ashtaka', label: lang === 'mm' ? 'အဋ္ဌကဝဂ်' : 'Ashtaka' },
     { id: 'shadbala', label: lang === 'mm' ? 'ဆဒ္ဗလ' : 'Shadbala' },

@@ -44,34 +44,30 @@ function Code({ code }: { code: string }) {
 function MathBlock({ tex }: { tex: string }) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
-  const [dims, setDims] = useState({ scale: 1, h: 0 })
 
   const html = useMemo(() => {
     try { return katex.renderToString(tex, { displayMode: true, throwOnError: false, output: 'html' }) }
     catch { return `<span class="font-mono text-coral">${tex}</span>` }
   }, [tex])
 
+  // Scale the formula's FONT-SIZE (not a CSS transform) down until it fits the
+  // container. Font-size scaling shrinks the real layout box, so `overflow-x-auto`
+  // stays honest — no scrollbar when it fits, a smooth horizontal swipe if a wide
+  // equation still overflows. Re-runs after paint, on resize, and once KaTeX
+  // web-fonts finish loading (the first measure can use fallback-font metrics).
   useLayoutEffect(() => {
+    const wrap = wrapRef.current, inner = innerRef.current
+    if (!wrap || !inner) return
     const fit = () => {
-      const wrap = wrapRef.current, inner = innerRef.current
-      if (!wrap || !inner) return
+      inner.style.fontSize = '1em'                 // reset, then measure the intrinsic width
       const avail = wrap.clientWidth
-      const natural = inner.scrollWidth   // pre-transform layout width (unaffected by scale)
-      const nh = inner.scrollHeight
-      if (!avail || !natural) return
-      const scale = natural > avail ? avail / natural : 1
-      const h = Math.ceil(nh * scale)
-      // Guard so re-measures (font load, height set) don't loop.
-      setDims((prev) => (Math.abs(prev.scale - scale) < 0.001 && prev.h === h ? prev : { scale, h }))
+      const natural = inner.scrollWidth
+      if (avail > 0 && natural > avail) inner.style.fontSize = `${Math.max(0.45, avail / natural)}em`
     }
     fit()
-    // Re-measure after the paint and again once KaTeX web-fonts finish loading —
-    // the first synchronous measure can use fallback-font metrics (too narrow),
-    // which would leave a wide formula clipped once the real glyphs arrive.
     const raf = requestAnimationFrame(fit)
     const ro = new ResizeObserver(fit)
-    if (wrapRef.current) ro.observe(wrapRef.current)
-    if (innerRef.current) ro.observe(innerRef.current)   // fires when fonts change glyph widths
+    ro.observe(wrap)
     let cancelled = false
     const fonts = (document as Document & { fonts?: FontFaceSet }).fonts
     fonts?.ready?.then(() => { if (!cancelled) fit() }).catch(() => {})
@@ -79,15 +75,17 @@ function MathBlock({ tex }: { tex: string }) {
   }, [html])
 
   return (
-    <div ref={wrapRef} className="katex-block w-full overflow-hidden" style={{ height: dims.h || undefined }}>
-      <div ref={innerRef} style={{ transform: `scale(${dims.scale})`, transformOrigin: 'left top', display: 'inline-block' }}
-        dangerouslySetInnerHTML={{ __html: html }} />
+    // max-w-full → never wider than the parent grid/flex cell (with the section
+    // column's min-w-0, this stops displayMode from blowing out the layout).
+    // overflow-x-auto → swipe fallback if a formula is still too wide after shrinking.
+    <div ref={wrapRef} className="katex-block max-w-full overflow-x-auto">
+      <div ref={innerRef} dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   )
 }
 
 const Formula = ({ formula }: { formula: string[] }) => (
-  <div className="mt-3 space-y-3 rounded-xl border border-accent/20 bg-accent/[0.05] px-4 py-4 text-fg">
+  <div className="mt-3 max-w-full space-y-3 overflow-hidden rounded-xl border border-accent/20 bg-accent/[0.05] px-4 py-4 text-fg">
     {formula.map((f, i) => <MathBlock key={i} tex={f} />)}
   </div>
 )
