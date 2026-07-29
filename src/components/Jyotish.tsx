@@ -52,8 +52,18 @@ const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = 
   { n: 60, name: 'D60 · Shashtiamsa', desc: { en: 'Overall karma — the most refined chart.', mm: 'အလုံးစုံ ကံ — အသိမ်မွေ့ဆုံး ဇာတာ။' } },
 ]
 
-const BIO_EN = 'Ko Bhone Min Thike Din prepares every reading with authentic Vedic (Jyotish) methods — the sidereal zodiac with the Lahiri ayanamsa, whole-sign houses, the Chandra Lagna (Moon ascendant), the sixteen divisional charts (D1–D60), the Vimśottarī dasha & antardasha system, planetary aspects (drishti), the six-fold Shadbala strengths and Ashtakavarga — all computed precisely by the classical Jyotish śāstras and offered as guidance for your own reflection.'
-const BIO_MM = 'ကိုဘုန်းမင်းသိုက်ဒင် သည် ဟောကိန်းတိုင်းကို စစ်မှန်သော နက္ခတ်ဗေဒင် (Jyotish) နည်းစနစ်များဖြင့် အသေးစိတ် စစ်ဆေးတွက်ချက်ပါသည် — နက္ခတ်ရာသီစက်နှင့် Lahiri အယနန္သ၊ Whole-Sign အိမ်စနစ်၊ စန်းလဂ် (Chandra Lagna)၊ ဇာတာခွဲ ၁၆ မျိုး (D1–D60)၊ ဗိံရှောတ္တရီ ဒသာ/အန္တရ်ဒသာစနစ်၊ ဂြိုဟ်အမြင် (ဒြိဋ္ဌိ)၊ ဆဒ္ဗလ ဂြိုဟ်အား ၆ မျိုးနှင့် အဋ္ဌကဝဂ် — တို့ကို ဂန္ထဝင် ဇျောတိသကျမ်းများ၏ နည်းစနစ်အတိုင်း တိကျစွာ တွက်ချက်ပြီး၊ ကိုယ့်ကိုယ်ကို ပြန်လည်သုံးသပ်ရန် လမ်းညွှန်ချက်များ ပေးပါသည်။'
+const BIO_EN = 'Mingalaba. I am Bhone Min Thike Din, and it is my honour to sit with your birth chart and read it for you with patience, care and genuine respect. Every reading I give rests on the exact mathematics of the classical Jyotish śāstras — the sidereal zodiac computed with the Lahiri ayanamsa, Whole-Sign houses anchored on your Chandra Lagna (the Moon ascendant), the sixteen divisional charts from D1 to D60, the Vimśottarī dasha and antardasha periods, the planetary aspects (drishti), the six-fold Shadbala strengths and the Ashtakavarga — each figure calculated carefully, step by step. Yet the numbers and placements are only the skeleton of a chart; my real work is to see the living person behind them — your feelings, your seasons and the paths open to you — and to speak of them with understanding. I blend this deep, ancient mathematical precision with warm, practical and compassionate guidance. My wish is never to frighten you, but to help you look at your own life clearly, gently, and with quiet confidence.'
+// Astrologer credential pills — each a distinct gradient/glow colour.
+const PROFILE_PILLS: { mm: string; en: string; cls: string }[] = [
+  { mm: 'နက္ခတ်ဗေဒင်', en: 'Sidereal Jyotish', cls: 'from-emerald-400/25 to-teal-500/10 border-emerald-300/45 text-emerald-100 shadow-emerald-500/25' },
+  { mm: 'Lahiri အယနန္သ', en: 'Lahiri Ayanamsa', cls: 'from-cyan-400/25 to-sky-500/10 border-cyan-300/45 text-cyan-100 shadow-cyan-500/25' },
+  { mm: 'ဝိံရှောတ္တရီ ဒသာ', en: 'Vimśottarī Dasha', cls: 'from-violet-400/30 to-fuchsia-500/10 border-violet-300/45 text-violet-100 shadow-violet-500/30' },
+  { mm: 'ဇာတာခွဲ D1–D60', en: 'D1–D60 Vargas', cls: 'from-amber-300/30 to-orange-500/10 border-amber-300/50 text-amber-100 shadow-amber-500/30' },
+  { mm: 'ဆဒ္ဗလ', en: 'Shadbala', cls: 'from-rose-400/25 to-pink-500/10 border-rose-300/45 text-rose-100 shadow-rose-500/25' },
+  { mm: 'အဋ္ဌကဝဂ်', en: 'Ashtakavarga', cls: 'from-indigo-400/25 to-blue-500/10 border-indigo-300/45 text-indigo-100 shadow-indigo-500/25' },
+]
+
+const BIO_MM = 'မင်္ဂလာပါ။ ကျွန်တော် ဘုန်းမင်းသိုက်ဒင် ဖြစ်ပါတယ်။ သင့်မွေးဇာတာကို စိတ်ရှည်သည်းခံစွာ၊ ဂရုတစိုက်နှင့် ရိုသေလေးစားစွာ ဖတ်ရှုဟောကြားပေးရတာ ကျွန်တော့်အတွက် ဂုဏ်ယူစရာပါ။ ကျွန်တော့် ဟောကြားချက်တိုင်းဟာ ဂန္ထဝင် ဇျောတိသကျမ်းများရဲ့ တိကျသေချာတဲ့ သင်္ချာနည်းစနစ်တွေအပေါ် အခြေခံထားပါတယ် — နက္ခတ်ရာသီစက် (Sidereal) ကို Lahiri အယနန္သနဲ့ တွက်ချက်ပြီး၊ သင့်ရဲ့ စန်းလဂ် (Chandra Lagna) ကို အခြေခံတဲ့ Whole-Sign အိမ်စနစ်၊ ဇာတာခွဲ ၁၆ မျိုး (D1 မှ D60)၊ ဗိံရှောတ္တရီ ဒသာ/အန္တရ်ဒသာ ကာလများ၊ ဂြိုဟ်တို့ရဲ့ အမြင် (ဒြိဋ္ဌိ)၊ ဆဒ္ဗလ အင်အား ၆ မျိုးနဲ့ အဋ္ဌကဝဂ်အထိ — တစ်ဆင့်ချင်း ဂရုတစိုက် တွက်ချက်ပါတယ်။ ဒါပေမဲ့ နံပါတ်တွေနဲ့ ဂြိုဟ်တည်နေရာတွေဟာ ဇာတာရဲ့ အရိုးအရင်းသာဖြစ်ပြီး၊ သူတို့နောက်ကွယ်က အသက်ရှင်နေတဲ့ လူသားတစ်ဦး — သင့်ရဲ့ ခံစားချက်၊ ဘဝအခိုက်အတန့်တွေနဲ့ ရွေးချယ်နိုင်တဲ့ လမ်းကြောင်းတွေကို နားလည်စာနာစွာ မြင်အောင် ကြည့်ပေးဖို့ကသာ ကျွန်တော့်ရဲ့ တကယ့်တာဝန်ပါ။ ရှေးဟောင်း သင်္ချာ တိကျမှုနဲ့ ခေတ်သစ် ကရုဏာ၊ လက်တွေ့ကျတဲ့ ဘဝလမ်းညွှန်မှုတွေကို ပေါင်းစပ်ပြီး — သင့်ကို ကြောက်ရွံ့စေဖို့ မဟုတ်ဘဲ၊ မိမိကိုယ်ကို ကြည်လင်စွာ၊ နူးညံ့စွာ၊ ယုံကြည်စိတ်ချစွာ ပြန်လည်ဆင်ခြင်နိုင်အောင် ကူညီပေးလိုပါတယ်။'
 
 // D1–D60 educational meanings (simple, bilingual).
 const VARGA_GUIDE: { code: string; en: string; mm: string }[] = [
@@ -494,27 +504,26 @@ export default function Jyotish() {
     } finally { setReqLoading(false) }
   }
 
-  // Direct client-side PDF: render the approved reading into a clean, self-contained
-  // print document (light theme, Padauk font, selectable Burmese text) and open the
-  // browser's Save-as-PDF dialog. No server round-trip, no email.
+  // Direct client-side PDF via a HIDDEN IFRAME (not a pop-up, so no blocker and no
+  // blank-modal crash). We write a clean, self-contained light-theme document into
+  // the iframe, wait for the Padauk web-fonts to load, then print just that iframe.
+  // Everything is wrapped so a failure shows a friendly toast instead of crashing.
   const downloadReadingPdf = () => {
     if (!customerToken) { openAuth('login'); return }
-    const body = readingRef.current?.innerHTML
-    if (!body) return
-    const who = (querent?.name || '').trim()
-    const today = new Date().toISOString().slice(0, 10)
-    const title = who ? `${who} — Vedin Reading` : 'Vedin Detailed Reading'
-    const win = window.open('', '_blank', 'noopener,width=860,height=1024')
-    if (!win) { window.alert(lang === 'mm' ? 'Popup ကို ခွင့်ပြုပေးပါ။' : 'Please allow pop-ups to download the PDF.'); return }
-    win.document.write(`<!doctype html><html lang="my"><head><meta charset="utf-8">
-<title>${title}</title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    const bodyHtml = readingRef.current?.innerHTML
+    if (!bodyHtml) { setVerifyToast(lang === 'mm' ? 'ဟောစာတမ်း မတွေ့ပါ။ စာမျက်နှာကို ပြန်စစ်ပါ။' : 'Reading not found — please reload.'); return }
+
+    try {
+      const who = (querent?.name || '').trim()
+      const today = new Date().toISOString().slice(0, 10)
+      const docHtml = `<!doctype html><html lang="my"><head><meta charset="utf-8">
+<title>${who ? `${who} — Vedin Reading` : 'Vedin Detailed Reading'}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Noto+Sans+Myanmar:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root { color-scheme: light; }
   * { box-sizing: border-box; }
-  body { margin:0; background:#fff; color:#1a1730;
-    font-family:'Padauk','Noto Sans Myanmar',system-ui,Segoe UI,sans-serif; line-height:1.95; }
+  body { margin:0; background:#fff; color:#1a1730; font-family:'Padauk','Noto Sans Myanmar',system-ui,Segoe UI,sans-serif; line-height:1.95; }
   .page { max-width:720px; margin:0 auto; padding:40px 34px; }
   .head { border-bottom:2px solid #7c3aed; padding-bottom:14px; margin-bottom:22px; }
   .brand { font:700 12px 'Segoe UI'; letter-spacing:.28em; text-transform:uppercase; color:#a16207; }
@@ -522,29 +531,54 @@ export default function Jyotish() {
   .meta { font:12px 'Segoe UI'; color:#6b7280; }
   .md h1,.md h2,.md h3,.md h4 { color:#4c1d95; font-weight:700; margin:1.2em 0 .4em; line-height:1.4; }
   .md h1{font-size:1.4rem} .md h2{font-size:1.2rem} .md h3{font-size:1.08rem} .md h4{font-size:1rem}
-  .md p { margin:.6em 0; }
-  .md strong { color:#047857; font-weight:700; }
-  .md em { color:#7c3aed; font-style:normal; }
-  .md ul,.md ol { margin:.5em 0; padding-left:1.4em; }
-  .md li { margin:.3em 0; }
+  .md p { margin:.6em 0; } .md strong { color:#047857; font-weight:700; } .md em { color:#7c3aed; font-style:normal; }
+  .md ul,.md ol { margin:.5em 0; padding-left:1.4em; } .md li { margin:.3em 0; }
   .md hr { border:0; border-top:1px solid #e5e7eb; margin:1.2em 0; }
   .foot { margin-top:26px; border-top:1px solid #e5e7eb; padding-top:12px; font:11px 'Segoe UI'; color:#8b8b8b; line-height:1.7; }
   @media print { .page { padding:0; } }
 </style></head>
 <body><div class="page">
-  <div class="head">
-    <div class="brand">Vedin · Sayar Bhone Min Thike Din</div>
+  <div class="head"><div class="brand">Vedin · Sayar Bhone Min Thike Din</div>
     <div class="name">${who || (lang === 'mm' ? 'အသေးစိတ် ဟောစာတမ်း' : 'Detailed Reading')}</div>
-    <div class="meta">${today}</div>
-  </div>
-  <div class="md">${body}</div>
+    <div class="meta">${today}</div></div>
+  <div class="md">${bodyHtml}</div>
   <div class="foot">${lang === 'mm'
     ? 'ဤဟောစာတမ်းအား ဂန္ထဝင် ဇျောတိသ သင်္ချာနည်းစနစ်များဖြင့် တွက်ချက်ပြီး ဆရာ ကိုယ်တိုင် စိစစ်အတည်ပြုထားပါသည်။ ရလဒ်များမှာ ဆင်ခြင်သုံးသပ်ရန်အတွက် လမ်းညွှန်ချက်ဖြစ်ပါသည်။'
     : 'Computed with classical Jyotish formulas and personally verified by the Sayar. Guidance for reflection.'}</div>
-</div>
-<script>window.onload=function(){setTimeout(function(){window.focus();window.print();},400);};</script>
-</body></html>`)
-    win.document.close()
+</div></body></html>`
+
+      const iframe = document.createElement('iframe')
+      iframe.setAttribute('aria-hidden', 'true')
+      iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;'
+      document.body.appendChild(iframe)
+
+      const cleanup = () => { window.setTimeout(() => { try { iframe.remove() } catch { /* already gone */ } }, 800) }
+      const doc = iframe.contentWindow?.document
+      if (!doc) { iframe.remove(); throw new Error('iframe document unavailable') }
+      doc.open(); doc.write(docHtml); doc.close()
+
+      let printed = false
+      const go = () => {
+        if (printed) return
+        printed = true
+        try {
+          const w = iframe.contentWindow
+          if (!w) throw new Error('no window')
+          w.focus()
+          w.print()
+        } catch {
+          setVerifyToast(lang === 'mm' ? 'Print/PDF ဖွင့်၍မရပါ။ ထပ်စမ်းကြည့်ပါ။' : 'Could not open the print dialog — please try again.')
+        } finally { cleanup() }
+      }
+
+      const win = iframe.contentWindow as (Window & { onafterprint: (() => void) | null }) | null
+      if (win) win.onafterprint = cleanup
+      const fonts = (doc as Document & { fonts?: FontFaceSet }).fonts
+      if (fonts?.ready) fonts.ready.then(() => window.setTimeout(go, 150)).catch(() => go())
+      window.setTimeout(go, 1600)   // hard fallback if fonts.ready never settles
+    } catch {
+      setVerifyToast(lang === 'mm' ? 'PDF ဖန်တီး၍မရပါ။ ထပ်စမ်းကြည့်ပါ။' : 'Could not generate the PDF — please try again.')
+    }
   }
 
   // Task 3 — after the email-confirm redirect (…/jyotish?verified=true&token=…),
@@ -604,9 +638,20 @@ export default function Jyotish() {
             </div>
           </div>
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light">{lang === 'mm' ? 'ဗေဒင်ပညာ လေ့လာဆည်းပူးသူ' : 'Vedic Astrology Enthusiast'}</p>
-            <h1 className="mt-1.5 font-groovy text-3xl text-fg sm:text-4xl">{lang === 'mm' ? 'ဘုန်းမင်းသိုက်ဒင်' : 'Bhone Min Thike Din'}</h1>
-            <p className="mt-1 font-mono text-xs text-muted">{lang === 'mm' ? 'နက္ခတ်ဗေဒင် · ဝိံရှောတ္တရီ ဒသာ · ဆဒ္ဗလ' : 'Sidereal Jyotish · Vimshottari Dasha · Shadbala'}</p>
+            <p className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.28em] text-accent-light">
+              <Sparkles size={11} /> {lang === 'mm' ? 'ဗေဒင်ပညာ လေ့လာဆည်းပူးသူ' : 'Vedic Astrology Enthusiast'}
+            </p>
+            <h1 className="mt-2.5 font-groovy text-3xl text-fg sm:text-4xl" style={{ textShadow: '0 0 34px rgb(var(--accent) / 0.35)' }}>
+              {lang === 'mm' ? 'ဘုန်းမင်းသိုက်ဒင်' : 'Bhone Min Thike Din'}
+            </h1>
+            {/* colourful credential pills */}
+            <div className="mt-3.5 flex flex-wrap justify-center gap-2">
+              {PROFILE_PILLS.map((p) => (
+                <span key={p.en} className={`inline-flex items-center rounded-full border bg-gradient-to-r px-3 py-1 font-mono text-[11px] font-medium shadow-lg backdrop-blur-sm transition hover:brightness-110 ${p.cls}`}>
+                  {lang === 'mm' ? p.mm : p.en}
+                </span>
+              ))}
+            </div>
           </div>
           <p className="text-[15px] leading-relaxed text-muted">{lang === 'mm' ? BIO_MM : BIO_EN}</p>
         </div>
