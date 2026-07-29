@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, FileText, Mail, Trash2, X, Send, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, FileText, Mail, Trash2, X, Send, ScrollText, Check, type LucideIcon } from 'lucide-react'
 import { SITE } from '../config/site'
 import AdminPoetryManager from './AdminPoetryManager'
 import type { Memory, EntityId } from '../types/api'
@@ -20,9 +20,10 @@ const CHANGE_PW_URL = `${SITE.apiUrl}/api/auth/change-password`
 const REMEDIES_URL = `${SITE.apiUrl}/api/astrology/admin/remedies`
 const CHARTS_URL = `${SITE.apiUrl}/api/astrology/admin/charts`
 const PDF_URL = `${SITE.apiUrl}/api/astrology/admin/pdf-requests`
+const READINGS_URL = `${SITE.apiUrl}/api/astrology/admin/reading-requests?status=Pending`
 const TOKEN_KEY = 'mtn_admin_jwt'
 
-type Tab = 'memories' | 'farewell' | 'poetry' | 'account' | 'remedy' | 'charts' | 'pdf'
+type Tab = 'memories' | 'farewell' | 'poetry' | 'account' | 'remedy' | 'charts' | 'pdf' | 'readings'
 
 // Admin view of a farewell RSVP — includes the logistics fields the public
 // FarewellView omits (datesAvailable, foodPreference, plantType).
@@ -42,6 +43,7 @@ const STATUSES = ['Pending', 'InProgress', 'Completed', 'Cancelled'] as const
 const statusColor = (s: string) => s === 'Completed' ? 'text-emerald-300' : s === 'Cancelled' ? 'text-rose-300' : s === 'InProgress' ? 'text-amber-300' : 'text-fg/80'
 interface AdminChart { id: number; name: string; gender: string; birthDate: string; birthTime: string; timeZone: string; location: string; nayNan: number; createdAt: string }
 interface AdminPdf { id: number; email: string; name: string; birthInfo: string; approvalStatus: string; createdAt: string }
+interface AdminReadingReq { id: number; querentName: string; status: string; hasMarkdown: boolean; pdfRequested: boolean; createdAt: string; approvedAt?: string }
 
 interface LoginResponse { data?: { token?: string; role?: string }; message?: string }
 interface AdminListResponse { memories?: Memory[]; rsvps?: AdminRsvp[] }
@@ -56,6 +58,8 @@ export default function SanctuaryAdmin() {
   const [remedies, setRemedies] = useState<AdminRemedy[]>([])
   const [charts, setCharts] = useState<AdminChart[]>([])
   const [pdfs, setPdfs] = useState<AdminPdf[]>([])
+  const [readingReqs, setReadingReqs] = useState<AdminReadingReq[]>([])
+  const [rowBusy, setRowBusy] = useState<{ id: number; action: 'approve' | 'reject' } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [q, setQ] = useState('')
@@ -92,15 +96,16 @@ export default function SanctuaryAdmin() {
     if (which === 'poetry' || which === 'account') return   // these fetch nothing here
     setError(''); setLoading(true)
     try {
-      const url = which === 'farewell' ? FAREWELL_URL : which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : which === 'pdf' ? PDF_URL : MEMORIES_URL
+      const url = which === 'farewell' ? FAREWELL_URL : which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : which === 'pdf' ? PDF_URL : which === 'readings' ? READINGS_URL : MEMORIES_URL
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired or not an Admin. Please log in again.') }
       if (!res.ok) throw new Error(`Failed to load (${res.status})`)
-      const data = (await res.json()) as AdminListResponse & { data?: AdminRemedy[] | AdminChart[] | AdminPdf[] }
+      const data = (await res.json()) as AdminListResponse & { data?: AdminRemedy[] | AdminChart[] | AdminPdf[] | AdminReadingReq[] }
       if (which === 'farewell') setRsvps(Array.isArray(data?.rsvps) ? data.rsvps : [])
       else if (which === 'remedy') setRemedies(Array.isArray(data?.data) ? (data.data as AdminRemedy[]) : [])
       else if (which === 'charts') setCharts(Array.isArray(data?.data) ? (data.data as AdminChart[]) : [])
       else if (which === 'pdf') setPdfs(Array.isArray(data?.data) ? (data.data as AdminPdf[]) : [])
+      else if (which === 'readings') setReadingReqs(Array.isArray(data?.data) ? (data.data as AdminReadingReq[]) : [])
       else setMemories(Array.isArray(data?.memories) ? data.memories : [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load data.')
@@ -169,6 +174,29 @@ export default function SanctuaryAdmin() {
     } catch { setError('Could not approve / send email.') } finally { setApproving(null) }
   }
 
+  // Approve a reading request → this is the ONLY path that calls Gemini, so it can
+  // take several seconds. We show a per-row "Generating Reading…" state, then drop
+  // the row from the Pending list on success.
+  const approveReading = async (id: number) => {
+    setRowBusy({ id, action: 'approve' }); setError('')
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/reading-requests/${id}/approve`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+      const data = (await res.json().catch(() => null)) as { success?: boolean; message?: string } | null
+      if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired. Please log in again.') }
+      if (!res.ok || !data?.success) throw new Error(data?.message || `Failed (${res.status})`)
+      setReadingReqs((rs) => rs.filter((r) => r.id !== id))
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not approve the reading.') } finally { setRowBusy(null) }
+  }
+  const rejectReading = async (id: number) => {
+    if (!window.confirm('Reject this reading request? The querent will need to request again next month.')) return
+    setRowBusy({ id, action: 'reject' }); setError('')
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/admin/reading-requests/${id}/reject`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) throw new Error(`Failed (${res.status})`)
+      setReadingReqs((rs) => rs.filter((r) => r.id !== id))
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not reject the request.') } finally { setRowBusy(null) }
+  }
+
   // Change the signed-in admin's password via the authenticated endpoint. A 401
   // here means "current password wrong" OR an expired session — we surface the
   // server message rather than auto-logging-out, so a typo doesn't kick you out.
@@ -207,9 +235,10 @@ export default function SanctuaryAdmin() {
     (c.name || '').toLowerCase().includes(s) || (c.gender || '').toLowerCase().includes(s) || (c.timeZone || '').toLowerCase().includes(s))
 
   const filteredPdfs = pdfs.filter((r) => !s || (r.email || '').toLowerCase().includes(s) || (r.name || '').toLowerCase().includes(s))
+  const filteredReadingReqs = readingReqs.filter((r) => !s || (r.querentName || '').toLowerCase().includes(s))
 
-  const total = tab === 'farewell' ? rsvps.length : tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : tab === 'pdf' ? pdfs.length : memories.length
-  const shown = tab === 'farewell' ? filteredRsvps.length : tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : tab === 'pdf' ? filteredPdfs.length : filteredMemories.length
+  const total = tab === 'farewell' ? rsvps.length : tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : tab === 'pdf' ? pdfs.length : tab === 'readings' ? readingReqs.length : memories.length
+  const shown = tab === 'farewell' ? filteredRsvps.length : tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : tab === 'pdf' ? filteredPdfs.length : tab === 'readings' ? filteredReadingReqs.length : filteredMemories.length
 
   // Export the RSVP logistics as CSV for planning the real send-off.
   const exportCsv = () => {
@@ -267,6 +296,7 @@ export default function SanctuaryAdmin() {
             <div className="mt-6 flex flex-wrap items-center gap-2">
               <TabBtn id="memories" icon={MessageSquare} label="Memories" />
               <TabBtn id="farewell" icon={Sprout} label="Farewell RSVPs" />
+              <TabBtn id="readings" icon={ScrollText} label="Readings" />
               <TabBtn id="remedy" icon={Sparkles} label="Remedy" />
               <TabBtn id="charts" icon={Star} label="Saved Charts" />
               <TabBtn id="pdf" icon={FileText} label="PDF Requests" />
@@ -275,7 +305,7 @@ export default function SanctuaryAdmin() {
             </div>
 
             {/* search/refresh bar — only for the list tabs (not poetry/account) */}
-            {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts' || tab === 'pdf') && (
+            {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts' || tab === 'pdf' || tab === 'readings') && (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg/40" />
@@ -384,6 +414,48 @@ export default function SanctuaryAdmin() {
                         <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 10)}</td>
                       </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ── PENDING READING REQUESTS (approve → generates the reading) ── */}
+            {tab === 'readings' && (
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
+                <table className="w-full min-w-[560px] border-collapse text-left text-sm">
+                  <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
+                    <tr>
+                      <th className="px-4 py-3">Querent</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Requested</th>
+                      <th className="px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredReadingReqs.length === 0 ? (
+                      <tr><td colSpan={3} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No pending reading requests.'}</td></tr>
+                    ) : filteredReadingReqs.map((r) => {
+                      const busy = rowBusy?.id === r.id
+                      return (
+                        <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
+                          <td className="px-4 py-3 font-medium text-amber-300">{r.querentName || '—'}</td>
+                          <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 16)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1.5">
+                              <button onClick={() => approveReading(r.id)} disabled={busy}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300/50 bg-emerald-400/20 px-3 py-1.5 font-mono text-[11px] font-semibold text-emerald-100 transition hover:bg-emerald-400/30 disabled:opacity-60">
+                                {busy && rowBusy?.action === 'approve'
+                                  ? <><RefreshCw size={12} className="animate-spin" /> Generating Reading…</>
+                                  : <><Check size={12} /> Approve</>}
+                              </button>
+                              <button onClick={() => rejectReading(r.id)} disabled={busy}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-1.5 font-mono text-[11px] text-rose-300 transition hover:bg-rose-400/20 disabled:opacity-60">
+                                {busy && rowBusy?.action === 'reject' ? <RefreshCw size={12} className="animate-spin" /> : <X size={12} />} Reject
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
