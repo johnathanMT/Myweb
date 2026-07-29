@@ -379,7 +379,8 @@ export default function SanctuaryAdmin() {
               {err && <p className="mb-2 rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-xs text-rose-200">{err}</p>}
               {busy && !chart && <p className="font-mono text-xs text-fg/50">Computing chart…</p>}
               {chart && (
-                <div className="grid gap-4 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+                /* vedin-page scope → the chart uses the Vedin violet/gold/jade tokens, exactly like the main page */
+                <div className="vedin-page grid gap-4 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
                   <div className="min-w-0 rounded-xl border border-violet-400/20 bg-space/40 p-3">
                     <KundliChart data={chart} title="Rasi · D1" subtitle={r.accountUsername || undefined} />
                   </div>
