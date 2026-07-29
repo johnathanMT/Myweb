@@ -28,9 +28,10 @@ const PDF_URL = `${SITE.apiUrl}/api/astrology/admin/pdf-reading-requests`
 const READINGS_BASE = `${SITE.apiUrl}/api/astrology/admin/reading-requests`
 // Anonymous opt-in charts saved from the public form (older records).
 const QUERENT_URL = `${SITE.apiUrl}/api/astrology/admin/charts`
+const USERS_URL = `${SITE.apiUrl}/api/customer/admin/users`
 const TOKEN_KEY = 'mtn_admin_jwt'
 
-type Tab = 'memories' | 'farewell' | 'poetry' | 'account' | 'remedy' | 'charts' | 'pdf' | 'readings' | 'querent'
+type Tab = 'memories' | 'farewell' | 'poetry' | 'account' | 'remedy' | 'charts' | 'pdf' | 'readings' | 'querent' | 'users'
 
 // Admin view of a farewell RSVP — includes the logistics fields the public
 // FarewellView omits (datesAvailable, foodPreference, plantType).
@@ -58,6 +59,7 @@ interface RegisteredInfo {
 // PDF Requests tab = reading requests awaiting a manual PDF email.
 interface AdminPdf extends RegisteredInfo { id: number; querentName: string; clientEmail?: string; status: string; createdAt: string }
 interface AdminReadingReq extends RegisteredInfo { id: number; querentName: string; clientEmail?: string; status: string; hasMarkdown: boolean; pdfRequested: boolean; createdAt: string; approvedAt?: string }
+interface AdminUser { id: number; username: string; email: string; isSuspended: boolean; emailConfirmed: boolean; hasProfile: boolean; createdAt: string }
 type ReadingsFilter = 'Pending' | 'Approved' | 'Rejected'
 
 interface LoginResponse { data?: { token?: string; role?: string }; message?: string }
@@ -73,6 +75,8 @@ export default function SanctuaryAdmin() {
   const [remedies, setRemedies] = useState<AdminRemedy[]>([])
   const [charts, setCharts] = useState<AdminChart[]>([])
   const [querentCharts, setQuerentCharts] = useState<AdminChart[]>([])
+  const [users, setUsers] = useState<AdminUser[]>([])
+  const [userBusy, setUserBusy] = useState<number | null>(null)
   const [pdfs, setPdfs] = useState<AdminPdf[]>([])
   const [readingReqs, setReadingReqs] = useState<AdminReadingReq[]>([])
   const [rowBusy, setRowBusy] = useState<{ id: number; action: 'approve' | 'reject' | 'sent' } | null>(null)
@@ -119,15 +123,16 @@ export default function SanctuaryAdmin() {
     if (which === 'poetry' || which === 'account') return   // these fetch nothing here
     setError(''); setLoading(true)
     try {
-      const url = which === 'farewell' ? FAREWELL_URL : which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : which === 'querent' ? QUERENT_URL : which === 'pdf' ? PDF_URL : which === 'readings' ? `${READINGS_BASE}?status=${readingsFilter}` : MEMORIES_URL
+      const url = which === 'farewell' ? FAREWELL_URL : which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : which === 'querent' ? QUERENT_URL : which === 'users' ? USERS_URL : which === 'pdf' ? PDF_URL : which === 'readings' ? `${READINGS_BASE}?status=${readingsFilter}` : MEMORIES_URL
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired or not an Admin. Please log in again.') }
       if (!res.ok) throw new Error(`Failed to load (${res.status})`)
-      const data = (await res.json()) as AdminListResponse & { data?: AdminRemedy[] | AdminChart[] | AdminPdf[] | AdminReadingReq[] }
+      const data = (await res.json()) as AdminListResponse & { data?: AdminRemedy[] | AdminChart[] | AdminPdf[] | AdminReadingReq[] | AdminUser[] }
       if (which === 'farewell') setRsvps(Array.isArray(data?.rsvps) ? data.rsvps : [])
       else if (which === 'remedy') setRemedies(Array.isArray(data?.data) ? (data.data as AdminRemedy[]) : [])
       else if (which === 'charts') setCharts(Array.isArray(data?.data) ? (data.data as AdminChart[]) : [])
       else if (which === 'querent') setQuerentCharts(Array.isArray(data?.data) ? (data.data as AdminChart[]) : [])
+      else if (which === 'users') setUsers(Array.isArray(data?.data) ? (data.data as AdminUser[]) : [])
       else if (which === 'pdf') setPdfs(Array.isArray(data?.data) ? (data.data as AdminPdf[]) : [])
       else if (which === 'readings') setReadingReqs(Array.isArray(data?.data) ? (data.data as AdminReadingReq[]) : [])
       else setMemories(Array.isArray(data?.memories) ? data.memories : [])
@@ -177,6 +182,31 @@ export default function SanctuaryAdmin() {
       setQuerentCharts((cs) => cs.filter((c) => c.id !== id))
       showToast('Chart deleted.')
     } catch { setError('Could not delete.') }
+  }
+
+  // ── User management (suspend / activate / delete) ───────────────────────────
+  const toggleSuspend = async (u: AdminUser) => {
+    setUserBusy(u.id); setError('')
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/customer/admin/users/${u.id}/toggle-suspend`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` } })
+      const j = (await res.json().catch(() => null)) as { success?: boolean; data?: { isSuspended: boolean }; message?: string } | null
+      if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired.') }
+      if (!res.ok || !j?.success) throw new Error(j?.message || `Failed (${res.status})`)
+      const nowSuspended = !!j.data?.isSuspended
+      setUsers((us) => us.map((x) => (x.id === u.id ? { ...x, isSuspended: nowSuspended } : x)))
+      showToast(nowSuspended ? '⛔ User suspended.' : '✅ User activated.')
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not update the user.') } finally { setUserBusy(null) }
+  }
+  const deleteUser = async (u: AdminUser) => {
+    if (!window.confirm('Are you sure you want to permanently delete this user? This cannot be undone.')) return
+    setUserBusy(u.id); setError('')
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/customer/admin/users/${u.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+      if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired.') }
+      if (!res.ok) throw new Error(`Failed (${res.status})`)
+      setUsers((us) => us.filter((x) => x.id !== u.id))
+      showToast('🗑️ User permanently deleted.')
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not delete the user.') } finally { setUserBusy(null) }
   }
 
   // ── Inline natal chart (reuses the public /chart engine + <KundliChart>) ─────
@@ -301,12 +331,13 @@ export default function SanctuaryAdmin() {
     (c.name || '').toLowerCase().includes(s) || (c.gender || '').toLowerCase().includes(s) || (c.timeZone || '').toLowerCase().includes(s))
   const filteredQuerentCharts = querentCharts.filter((c) => !s ||
     (c.name || '').toLowerCase().includes(s) || (c.gender || '').toLowerCase().includes(s) || (c.timeZone || '').toLowerCase().includes(s))
+  const filteredUsers = users.filter((u) => !s || (u.username || '').toLowerCase().includes(s) || (u.email || '').toLowerCase().includes(s))
 
   const filteredPdfs = pdfs.filter((r) => !s || (r.querentName || '').toLowerCase().includes(s) || (r.clientEmail || '').toLowerCase().includes(s))
   const filteredReadingReqs = readingReqs.filter((r) => !s || (r.querentName || '').toLowerCase().includes(s))
 
-  const total = tab === 'farewell' ? rsvps.length : tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : tab === 'querent' ? querentCharts.length : tab === 'pdf' ? pdfs.length : tab === 'readings' ? readingReqs.length : memories.length
-  const shown = tab === 'farewell' ? filteredRsvps.length : tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : tab === 'querent' ? filteredQuerentCharts.length : tab === 'pdf' ? filteredPdfs.length : tab === 'readings' ? filteredReadingReqs.length : filteredMemories.length
+  const total = tab === 'farewell' ? rsvps.length : tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : tab === 'querent' ? querentCharts.length : tab === 'users' ? users.length : tab === 'pdf' ? pdfs.length : tab === 'readings' ? readingReqs.length : memories.length
+  const shown = tab === 'farewell' ? filteredRsvps.length : tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : tab === 'querent' ? filteredQuerentCharts.length : tab === 'users' ? filteredUsers.length : tab === 'pdf' ? filteredPdfs.length : tab === 'readings' ? filteredReadingReqs.length : filteredMemories.length
 
   // Export the RSVP logistics as CSV for planning the real send-off.
   const exportCsv = () => {
@@ -455,6 +486,7 @@ export default function SanctuaryAdmin() {
             <div className="mt-6 flex flex-wrap items-center gap-2">
               <TabBtn id="memories" icon={MessageSquare} label="Memories" />
               <TabBtn id="farewell" icon={Sprout} label="Farewell RSVPs" />
+              <TabBtn id="users" icon={UserRound} label="Users" />
               <TabBtn id="readings" icon={ScrollText} label="Readings" />
               <TabBtn id="remedy" icon={Sparkles} label="Remedy" />
               <TabBtn id="charts" icon={Star} label="Saved Charts" />
@@ -465,7 +497,7 @@ export default function SanctuaryAdmin() {
             </div>
 
             {/* search/refresh bar — only for the list tabs (not poetry/account) */}
-            {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts' || tab === 'querent' || tab === 'pdf' || tab === 'readings') && (
+            {(tab === 'memories' || tab === 'farewell' || tab === 'remedy' || tab === 'charts' || tab === 'querent' || tab === 'users' || tab === 'pdf' || tab === 'readings') && (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-fg/40" />
@@ -761,6 +793,60 @@ export default function SanctuaryAdmin() {
                         <td className="px-4 py-3"><button onClick={() => deleteQuerentChart(c.id)} title="Delete" className="inline-flex items-center rounded-lg border border-rose-400/30 bg-rose-400/10 px-2 py-1 text-rose-300 transition hover:bg-rose-400/20"><Trash2 size={12} /></button></td>
                       </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ── USER MANAGEMENT — registered accounts (suspend / activate / delete) ── */}
+            {tab === 'users' && (
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-fg/10">
+                <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+                  <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
+                    <tr>
+                      <th className="px-4 py-3">User</th>
+                      <th className="px-4 py-3 whitespace-nowrap">Joined</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.length === 0 ? (
+                      <tr><td colSpan={4} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No registered users.'}</td></tr>
+                    ) : filteredUsers.map((u) => {
+                      const busy = userBusy === u.id
+                      return (
+                        <tr key={u.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
+                          <td className="px-4 py-3">
+                            <div className="font-medium text-amber-300">{u.username || '—'}</div>
+                            <div className="font-mono text-[11px] text-fg/60">{u.email}</div>
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {u.hasProfile && <span className="rounded-full border border-violet-400/30 bg-violet-500/10 px-1.5 py-0.5 font-mono text-[9px] text-violet-100">natal profile</span>}
+                              {!u.emailConfirmed && <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 font-mono text-[9px] text-amber-200">unconfirmed</span>}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(u.createdAt || '').slice(0, 16)}</td>
+                          <td className="px-4 py-3">
+                            {u.isSuspended
+                              ? <span className="inline-flex items-center gap-1 rounded-full border border-rose-400/40 bg-rose-500/15 px-2.5 py-0.5 font-mono text-[11px] text-rose-200">● Suspended</span>
+                              : <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[11px] text-emerald-200">● Active</span>}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1.5">
+                              <button onClick={() => toggleSuspend(u)} disabled={busy}
+                                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-[11px] font-semibold transition disabled:opacity-60 ${u.isSuspended ? 'border-emerald-300/50 bg-emerald-400/20 text-emerald-100 hover:bg-emerald-400/30' : 'border-amber-300/50 bg-amber-400/20 text-amber-100 hover:bg-amber-400/30'}`}>
+                                {busy ? <RefreshCw size={12} className="animate-spin" /> : u.isSuspended ? <Check size={12} /> : <Lock size={12} />}
+                                {u.isSuspended ? 'Activate' : 'Suspend'}
+                              </button>
+                              <button onClick={() => deleteUser(u)} disabled={busy}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-1.5 font-mono text-[11px] text-rose-300 transition hover:bg-rose-500/20 disabled:opacity-60">
+                                <Trash2 size={12} /> Delete (အပြီးဖျက်မည်)
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
