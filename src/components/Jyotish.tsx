@@ -1,6 +1,6 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, MapPin, Loader2, Search, Download, Star, Info } from 'lucide-react'
+import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight } from 'lucide-react'
 import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
@@ -344,6 +344,43 @@ export default function Jyotish() {
           </div>
           <p className="text-[15px] leading-relaxed text-muted">{lang === 'mm' ? BIO_MM : BIO_EN}</p>
         </div>
+      </div>
+
+      {/* ── Portals: the computation behind the charts ── */}
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 no-print">
+        {/* Portal 1 — The Algorithm */}
+        <Link to="/algorithms"
+          className="group relative overflow-hidden rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.12] via-card to-jade/[0.06] p-6 transition duration-300 hover:border-accent/50 hover:shadow-[0_0_44px_-10px_rgba(168,85,247,0.55)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60">
+          <span aria-hidden className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-accent/20 blur-3xl transition duration-500 group-hover:bg-accent/30" />
+          <div className="relative flex items-start gap-4">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-accent/40 bg-accent/15 text-accent-light shadow-inner">
+              <Sigma size={22} />
+            </span>
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-accent-light">{lang === 'mm' ? 'ကွန်ပျူတာဆိုင်ရာ အခြေခံ' : 'The Computation'}</p>
+              <h3 className="mt-1 font-groovy text-xl text-fg">{lang === 'mm' ? 'အယ်လဂိုရီသမ်များ' : 'The Algorithm'}</h3>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{lang === 'mm' ? 'ဇာတာများ၏ နောက်ကွယ်မှ သင်္ချာနှင့် ကုဒ် — Julian Day မှ Ashtakavarga အထိ။' : 'The math & code behind the charts — from Julian Day to Ashtakavarga.'}</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-accent-light transition group-hover:gap-2.5">{lang === 'mm' ? 'အသေးစိတ်ကြည့်ရန်' : 'Explore'} <ArrowRight size={13} /></span>
+            </div>
+          </div>
+        </Link>
+
+        {/* Portal 2 — Falsifiable research protocol */}
+        <Link to="/research"
+          className="group relative overflow-hidden rounded-2xl border border-jade/25 bg-gradient-to-br from-jade/[0.12] via-card to-accent/[0.06] p-6 transition duration-300 hover:border-jade/50 hover:shadow-[0_0_44px_-10px_rgba(52,211,153,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-jade/60">
+          <span aria-hidden className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-jade/20 blur-3xl transition duration-500 group-hover:bg-jade/30" />
+          <div className="relative flex items-start gap-4">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-jade/40 bg-jade/15 text-jade shadow-inner">
+              <FlaskConical size={22} />
+            </span>
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-jade">{lang === 'mm' ? 'သိပ္ပံနည်းကျ ရိုးသားမှု' : 'Honest Science'}</p>
+              <h3 className="mt-1 font-groovy text-xl text-fg">{lang === 'mm' ? 'တိုင်းတာနိုင်သော သုတေသန' : 'Falsifiable Research'}</h3>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{lang === 'mm' ? 'ကြိုတင်မှတ်တမ်း၊ base rate၊ permutation test — ဟောကြားချက်ကို တိုင်းတာသည်၊ မကြွားပါ။' : 'Pre-registration, base rates, permutation tests — we measure claims, not boast them.'}</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-jade transition group-hover:gap-2.5">{lang === 'mm' ? 'လုပ်ထုံးကြည့်ရန်' : 'View protocol'} <ArrowRight size={13} /></span>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* ── Customer account (sign in / saved charts) ── */}

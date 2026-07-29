@@ -5,7 +5,7 @@ import {
   getPredictions, savePredictions, getJournal, saveJournal, hashPrediction, uid, exportCsv,
   type Prediction, type JournalEntry, type Valence, type Outcome,
 } from '../lib/research'
-import { wilsonInterval, binomialNullSamples, permutationPValue } from '../lib/stats'
+import { wilsonInterval, binomialNullSamples, permutationPValue, benjaminiHochberg } from '../lib/stats'
 
 type Lang = 'en' | 'mm'
 
@@ -61,6 +61,35 @@ export default function Research() {
     if (scored.length < 5) return null
     return permutationPValue(hits, binomialNullSamples(scored.map((p) => p.baseRate), 5000))
   }, [scored.length, hits]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Multiple-comparison correction (Benjamini–Hochberg, FDR q = 0.05) ──
+  // Each life-area is one hypothesis. Testing many areas independently inflates
+  // false positives, so we correct the family of per-area p-values. A group must
+  // have ≥ MIN scored predictions to earn a p-value; BH only "matters" once two
+  // or more areas are being tested at once.
+  const FDR_Q = 0.05
+  const FDR_MIN = 3
+  const family = useMemo(() => {
+    const done = preds.filter((p) => p.outcome)
+    const groups = new Map<string, Prediction[]>()
+    for (const p of done) {
+      const key = p.area?.trim() || ''
+      const g = groups.get(key); if (g) g.push(p); else groups.set(key, [p])
+    }
+    const tests = [...groups.entries()]
+      .map(([area, ps]) => {
+        const n = ps.length
+        const h = ps.filter((x) => x.outcome === 'hit').length
+        const rates = ps.map((x) => x.baseRate)
+        return { area, n, hits: h, rate: h / n, baseMean: rates.reduce((a, b) => a + b, 0) / n, rates }
+      })
+      .filter((g) => g.n >= FDR_MIN)
+      .sort((a, b) => b.n - a.n)
+    const pvals = tests.map((g) => permutationPValue(g.hits, binomialNullSamples(g.rates, 4000)))
+    const sig = benjaminiHochberg(pvals, FDR_Q)
+    return tests.map((g, i) => ({ ...g, p: pvals[i], sig: sig[i] }))
+  }, [preds])
+  const anyDiscovery = family.some((g) => g.sig)
 
   const download = (content: string, name: string, type: string) => {
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([content], { type })); a.download = name; a.click(); URL.revokeObjectURL(a.href)
@@ -133,6 +162,49 @@ export default function Research() {
             {pValue !== null
               ? <p>{t('Monte-Carlo p-value vs base-rate null', 'base-rate null နှင့် Monte-Carlo p-value')}: <span className={`font-semibold ${pValue < 0.05 ? 'text-jade' : 'text-fg'}`}>{pValue.toFixed(3)}</span> {pValue >= 0.05 && <span className="text-xs">— {t('not distinguishable from chance', 'ကံအလျောက်နှင့် ခွဲခြား၍မရ')}</span>}</p>
               : <p className="text-xs">{t('Score at least 5 predictions to compute a p-value.', 'p-value တွက်ရန် အနည်းဆုံး ဟောကိန်း ၅ ခု အမှတ်ပေးပါ။')}</p>}
+          </div>
+        )}
+
+        {/* Per-area FDR correction */}
+        {family.length > 0 && (
+          <div className="mt-5 rounded-xl border border-accent/20 bg-accent/[0.04] p-4">
+            <p className="flex flex-wrap items-baseline justify-between gap-2">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-accent-light">{t('Per-area correction — Benjamini–Hochberg (FDR q = 0.05)', 'ကဏ္ဍအလိုက် ပြင်ဆင်ချက် — Benjamini–Hochberg (FDR q = 0.05)')}</span>
+              {family.length === 1 && <span className="text-[11px] text-muted">{t('needs ≥ 2 areas to correct across', 'ပြင်ဆင်ရန် ကဏ္ဍ ≥ ၂ ခု လို')}</span>}
+            </p>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[420px] text-left text-sm">
+                <thead>
+                  <tr className="font-mono text-[10px] uppercase tracking-wider text-muted">
+                    <th className="pb-2 pr-3 font-normal">{t('Area', 'ကဏ္ဍ')}</th>
+                    <th className="pb-2 pr-3 text-right font-normal">n</th>
+                    <th className="pb-2 pr-3 text-right font-normal">{t('hit rate', 'မှန်နှုန်း')}</th>
+                    <th className="pb-2 pr-3 text-right font-normal">{t('expected', 'မျှော်လင့်')}</th>
+                    <th className="pb-2 pr-3 text-right font-normal">{t('raw p', 'raw p')}</th>
+                    <th className="pb-2 text-right font-normal">{t('FDR sig.', 'FDR')}</th>
+                  </tr>
+                </thead>
+                <tbody className="text-fg/90">
+                  {family.map((g) => (
+                    <tr key={g.area || '__general__'} className="border-t border-white/8">
+                      <td className="py-1.5 pr-3">{g.area || t('General', 'ယေဘုယျ')}</td>
+                      <td className="py-1.5 pr-3 text-right font-mono">{g.n}</td>
+                      <td className="py-1.5 pr-3 text-right font-mono">{pct(g.rate)}</td>
+                      <td className="py-1.5 pr-3 text-right font-mono text-muted">{pct(g.baseMean)}</td>
+                      <td className="py-1.5 pr-3 text-right font-mono">{g.p.toFixed(3)}</td>
+                      <td className="py-1.5 text-right">
+                        <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] ${g.sig ? 'bg-jade/15 text-jade' : 'bg-white/10 text-muted'}`}>{g.sig ? t('significant', 'significant') : '—'}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-muted">
+              {anyDiscovery
+                ? t('At least one area survives FDR correction — a genuine candidate signal worth more data, not a proof.', 'ကဏ္ဍတစ်ခုအနည်းဆုံးက FDR ပြင်ဆင်ချက်ကို ကျော်ဖြတ်သည် — data ပိုစုသင့်သော candidate signal ဖြစ်ပြီး၊ သက်သေ မဟုတ်သေးပါ။')
+                : t('No area survives FDR correction — consistent with chance once multiple comparisons are accounted for.', 'မည်သည့်ကဏ္ဍမျှ FDR ပြင်ဆင်ချက်ကို မကျော်ဖြတ်ပါ — multiple comparison ထည့်တွက်လျှင် ကံအလျောက်နှင့် ကိုက်ညီသည်။')}
+            </p>
           </div>
         )}
       </div>

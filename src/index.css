@@ -93,6 +93,17 @@ html[data-theme="dark"] .neon-glow {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
+/* KaTeX formula blocks (Algorithms page). Glyphs inherit `currentColor` from the
+   wrapper's `text-fg`, so formulas stay readable in BOTH light and dark themes.
+   Left-align + reset margins so long formulas scroll horizontally without the
+   leading terms being clipped. */
+.katex-block .katex-display { margin: 0; text-align: left; }
+.katex-block .katex-display > .katex { text-align: left; white-space: nowrap; }
+.katex-block .katex { color: inherit; }
+@media (max-width: 640px) {
+  .katex-block .katex { font-size: 1rem; }
+}
+
 /* Laptop & up: keep the smallest reading labels readable (≥ 11px). */
 .vedin-page .text-\[10px\] { font-size: 11px; }
 

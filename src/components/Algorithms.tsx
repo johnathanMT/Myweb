@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Copy, Check, FlaskConical } from 'lucide-react'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
 
 type Lang = 'en' | 'mm'
 
@@ -11,7 +13,7 @@ interface Section {
   complexity?: string
   en: ReactNode
   mm: ReactNode
-  formula: string
+  formula: string[]   // one or more display-mode LaTeX strings
   code: string
 }
 
@@ -32,8 +34,24 @@ function Code({ code }: { code: string }) {
   )
 }
 
-const Formula = ({ children }: { children: string }) => (
-  <pre className="mt-3 overflow-x-auto rounded-xl border border-accent/20 bg-accent/[0.05] p-4 text-center font-mono text-[13px] leading-relaxed text-accent-light" style={{ WebkitOverflowScrolling: 'touch' }}>{children}</pre>
+// ── LaTeX (KaTeX) display block ──
+// KaTeX glyphs inherit `currentColor`, so the wrapper's `text-fg` makes the
+// math readable in BOTH light and dark themes (was previously light-violet on a
+// light background → invisible in light mode).
+function Math({ tex }: { tex: string }) {
+  let html: string
+  try {
+    html = katex.renderToString(tex, { displayMode: true, throwOnError: false, output: 'html' })
+  } catch {
+    html = `<span class="font-mono text-coral">${tex}</span>`
+  }
+  return <div className="katex-block overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }} dangerouslySetInnerHTML={{ __html: html }} />
+}
+
+const Formula = ({ formula }: { formula: string[] }) => (
+  <div className="mt-3 space-y-3 rounded-xl border border-accent/20 bg-accent/[0.05] px-4 py-4 text-fg">
+    {formula.map((f, i) => <Math key={i} tex={f} />)}
+  </div>
 )
 
 const SECTIONS: Section[] = [
@@ -42,7 +60,10 @@ const SECTIONS: Section[] = [
     tags: ['#integer-division', '#floor', '#epoch', '#edge-cases'],
     en: 'The Fliegel–Van Flandern (1968) algorithm converts a calendar date to a Julian Day Number using only integer floor-division — no floating point, so it is exact. The tricky part is the Gregorian/Julian switch and overflow for far dates.',
     mm: 'Fliegel–Van Flandern (၁၉၆၈) algorithm သည် ပြက္ခဒိန်ရက်စွဲကို Julian Day Number အဖြစ် integer floor-division သီးသန့်ဖြင့် ပြောင်းသည် — floating point မသုံးသဖြင့် အတိအကျ။ ခက်ခဲသည့်အပိုင်းက Gregorian/Julian ကူးပြောင်းမှုနှင့် ရက်ဝေးများ၏ overflow။',
-    formula: 'JDN = ⌊1461·(Y+4800+⌊(M−14)/12⌋)/4⌋\n    + ⌊367·(M−2−12·⌊(M−14)/12⌋)/12⌋\n    − ⌊3·⌊(Y+4900+⌊(M−14)/12⌋)/100⌋/4⌋\n    + D − 32075',
+    formula: [
+      'a = \\left\\lfloor \\dfrac{M-14}{12} \\right\\rfloor',
+      '\\mathrm{JDN} = \\left\\lfloor \\dfrac{1461\\,(Y+4800+a)}{4} \\right\\rfloor + \\left\\lfloor \\dfrac{367\\,(M-2-12a)}{12} \\right\\rfloor - \\left\\lfloor \\dfrac{3\\left\\lfloor (Y+4900+a)/100 \\right\\rfloor}{4} \\right\\rfloor + D - 32075',
+    ],
     code: `function julianDayNumber(y: number, m: number, d: number): number {
   const a = Math.floor((m - 14) / 12);           // −1 for Jan/Feb, else 0
   return (
@@ -59,7 +80,10 @@ const SECTIONS: Section[] = [
     complexity: 'O(n) in the number of retained terms — accuracy/size tradeoff.',
     en: 'A planet’s heliocentric longitude is a sum of thousands of periodic terms. VSOP87 truncates the series: keep the largest terms, drop the rest. Fewer terms → smaller tables but larger error. τ is time in Julian millennia from J2000. A ΔT polynomial (Espenak–Meeus) corrects TT vs UT.',
     mm: 'ဂြိုဟ်၏ heliocentric longitude သည် periodic term ထောင်ချီ၏ ပေါင်းလဒ်ဖြစ်သည်။ VSOP87 က series ကို truncate လုပ်သည် — အကြီးဆုံး term များ ထားပြီး ကျန်ကို ဖယ်။ term နည်း → table သေး၊ error ကြီး။ τ သည် J2000 မှ Julian millennia အချိန်။ ΔT polynomial (Espenak–Meeus) က TT/UT ကွာဟမှုကို ပြင်သည်။',
-    formula: 'L = Σᵢ Aᵢ · cos(Bᵢ + Cᵢ · τ)\nτ = (JD − 2451545.0) / 365250',
+    formula: [
+      'L = \\sum_{i} A_i \\cos\\!\\left(B_i + C_i\\,\\tau\\right)',
+      '\\tau = \\dfrac{JD - 2451545.0}{365250}',
+    ],
     code: `type Term = [A: number, B: number, C: number];
 function vsop(series: Term[], jd: number): number {
   const tau = (jd - 2451545.0) / 365250;         // Julian millennia
@@ -73,7 +97,10 @@ function vsop(series: Term[], jd: number): number {
     tags: ['#linear-algebra', '#rotation-matrix', '#spherical-trig', '#atan2'],
     en: 'Ecliptic → equatorial coordinates is a rotation about the x-axis by the obliquity ε. The Ascendant (Lagna) — the rising ecliptic degree — comes from spherical trigonometry using local sidereal time θ and latitude φ. The classic bug is atan2 quadrant handling and φ → ±90°.',
     mm: 'Ecliptic → equatorial ပြောင်းခြင်းသည် obliquity ε ဖြင့် x-ဝင်ရိုးပတ် rotation တစ်ခုပါ။ လဂ်နာ (Ascendant) — ထွက်ပေါ်လာသော ecliptic ဒီဂရီ — ကို local sidereal time θ နှင့် latitude φ သုံး၍ spherical trigonometry ဖြင့် တွက်သည်။ ရိုးရာ bug က atan2 quadrant ကိုင်တွယ်မှုနှင့် φ → ±90° ဖြစ်သည်။',
-    formula: '[x′]   [1    0      0  ] [x]\n[y′] = [0  cosε  −sinε] [y]\n[z′]   [0  sinε   cosε] [z]\n\nAsc = atan2( cosθ, −(sinθ·cosε + tanφ·sinε) )',
+    formula: [
+      '\\begin{bmatrix} x\' \\\\ y\' \\\\ z\' \\end{bmatrix} = \\begin{bmatrix} 1 & 0 & 0 \\\\ 0 & \\cos\\varepsilon & -\\sin\\varepsilon \\\\ 0 & \\sin\\varepsilon & \\cos\\varepsilon \\end{bmatrix} \\begin{bmatrix} x \\\\ y \\\\ z \\end{bmatrix}',
+      '\\mathrm{Asc} = \\operatorname{atan2}\\!\\big(\\cos\\theta,\\; -(\\sin\\theta\\cos\\varepsilon + \\tan\\phi\\sin\\varepsilon)\\big)',
+    ],
     code: `function ascendant(theta: number, phi: number, eps: number): number {
   // theta = local sidereal time, phi = latitude, eps = obliquity (radians)
   const asc = Math.atan2(Math.cos(theta),
@@ -86,7 +113,10 @@ function vsop(series: Term[], jd: number): number {
     tags: ['#modular-arithmetic', '#group-theory', '#negative-modulo'],
     en: 'The whole of Jyotish is stacked cyclic groups: signs ℤ/12, nakshatras ℤ/27, the dasha cycle ℤ/9, padas ℤ/4, all over the circle ℝ/360ℤ. The classic pitfall: in JS, −30 % 360 = −30 (not 330). Always re-normalise with ((x % n) + n) % n.',
     mm: 'ဇျောတိသတစ်ခုလုံးသည် cyclic group အထပ်ထပ်ဖြစ်သည်: ရာသီ ℤ/12၊ နက္ခတ် ℤ/27၊ ဒသာစက်ဝန်း ℤ/9၊ ပါဒ ℤ/4၊ အားလုံး ℝ/360ℤ စက်ဝိုင်းပေါ်တွင်။ ရိုးရာ pitfall — JS မှာ −30 % 360 = −30 (330 မဟုတ်)။ ((x % n) + n) % n ဖြင့် အမြဲ ပြန်ချိန်ပါ။',
-    formula: 'sign(λ)      = ⌊λ/30⌋ mod 12\nnakshatra(λ) = ⌊λ/(40/3)⌋ mod 27      (40/3 = 13°20′)\npada(λ)      = ⌊(λ mod 40/3)/(10/3)⌋ + 1',
+    formula: [
+      '\\begin{aligned} \\operatorname{sign}(\\lambda) &= \\left\\lfloor \\lambda/30 \\right\\rfloor \\bmod 12 \\\\[2pt] \\operatorname{nak}(\\lambda) &= \\left\\lfloor \\lambda/\\tfrac{40}{3} \\right\\rfloor \\bmod 27 \\quad (\\tfrac{40}{3}=13^\\circ20\') \\\\[2pt] \\operatorname{pada}(\\lambda) &= \\left\\lfloor \\dfrac{\\lambda \\bmod \\tfrac{40}{3}}{\\tfrac{10}{3}} \\right\\rfloor + 1 \\end{aligned}',
+      '\\text{safe modulo: } \\; ((x \\bmod n) + n) \\bmod n',
+    ],
     code: `const mod = (x: number, n: number) => ((x % n) + n) % n;   // safe modulo
 const sign      = (lon: number) => mod(Math.floor(lon / 30), 12);
 const nakshatra = (lon: number) => mod(Math.floor(lon / (40 / 3)), 27);
@@ -97,7 +127,10 @@ const pada      = (lon: number) => Math.floor((lon % (40 / 3)) / (10 / 3)) + 1;`
     tags: ['#piecewise-function', '#lookup-table', '#generalization'],
     en: 'Each divisional chart is a function f : [0°,360°) → ℤ/12. The Navamsa (D9) divides every sign into 9 parts of 3°20′; the starting sign follows a period-4 pattern by movable/fixed/dual sign. A nice research question: can all 16 vargas share one uniform interface?',
     mm: 'ဇာတာခွဲတစ်ခုစီသည် function f : [0°,360°) → ℤ/12 တစ်ခုပါ။ နဝင်း (D9) က ရာသီတိုင်းကို 3°20′ စီ ၉ ပိုင်း ခွဲသည်; စတင်ရာသီသည် စရ/သ္ထိရ/ဒွိသွဘာဝ အလိုက် period-4 pattern။ စိတ်ဝင်စားစရာ research question — ဝဂ် ၁၆ ခုလုံးကို uniform interface တစ်ခုတည်းဖြင့် ကိုင်တွယ်နိုင်မလား?',
-    formula: 'D9(λ) = ( sₛₜₐᵣₜ(⌊λ/30⌋) + ⌊(λ mod 30)/(10/3)⌋ ) mod 12\nsₛₜₐᵣₜ = [0, 9, 6, 3][sign mod 4]   (movable/fixed/dual)',
+    formula: [
+      'D_9(\\lambda) = \\Big( s_{\\text{start}} + \\left\\lfloor \\dfrac{\\lambda \\bmod 30}{10/3} \\right\\rfloor \\Big) \\bmod 12',
+      's_{\\text{start}} = [\\,0,\\,9,\\,6,\\,3\\,]\\big[\\operatorname{sign}(\\lambda) \\bmod 4\\big] \\quad (\\text{movable / fixed / dual})',
+    ],
     code: `const NAVAMSA_START = [0, 9, 6, 3];             // period-4 pattern
 function navamsa(lon: number): number {
   const sign = Math.floor(lon / 30);
@@ -111,7 +144,10 @@ function navamsa(lon: number): number {
     complexity: 'Naïve full tree O(9ᵈ) — depth 5 = 59,049 nodes. Use lazy expansion + O(d·9) interval search for the active path.',
     en: 'The dasha timeline is self-similar: each period subdivides into 9 sub-periods in the same fixed order, each sized by the sub-lord’s share of 120 years. Fully expanding all levels is O(9ᵈ) — so expand lazily, and binary-search the active branch. Deep levels need rational arithmetic to avoid date drift.',
     mm: 'ဒသာ timeline သည် self-similar ဖြစ်သည်: ကာလတစ်ခုစီ တူညီသော အစီအစဉ်ဖြင့် sub-period ၉ ခု ခွဲ၊ တစ်ခုစီ၏ အရွယ်က sub-lord ၏ ၁၂၀ နှစ်အတွင်း ဝေစုအလိုက်။ အဆင့်အားလုံး အပြည့်ချဲ့ခြင်း O(9ᵈ) — ထို့ကြောင့် lazy ချဲ့ပြီး active branch ကို binary-search။ အဆင့်နက်လျှင် ရက်စွဲ လွဲမှုရှောင်ရန် rational arithmetic လို။',
-    formula: 'T(p, t₀, Δ) = { (pᵢ, t₀ + Σⱼ<ᵢ δⱼ, δᵢ) }ᵢ₌₀…₈\nδᵢ = Δ · yₚᵢ / 120',
+    formula: [
+      'T(p, t_0, \\Delta) = \\Big\\{ \\big(p_i,\\; t_0 + \\textstyle\\sum_{j<i} \\delta_j,\\; \\delta_i\\big) \\Big\\}_{i=0}^{8}',
+      '\\delta_i = \\Delta \\cdot \\dfrac{y_{p_i}}{120} \\qquad \\text{full tree: } O(9^{d})',
+    ],
     code: `const ORDER = ['Ke','Ve','Su','Mo','Ma','Ra','Ju','Sa','Me'];
 const YEARS: Record<string, number> = { Ke:7,Ve:20,Su:6,Mo:10,Ma:7,Ra:18,Ju:16,Sa:19,Me:17 };
 
@@ -134,7 +170,10 @@ function expand(lord: string, start: number, span: number, depth: number): Node 
     tags: ['#combinatorics', '#bitmask', '#circular-shift', '#invariant'],
     en: 'For each planet, eight references (7 grahas + the Ascendant) each contribute a benefit bit to certain houses counted from themselves — an 8×12 boolean matrix. Store each reference’s benefic houses as a 12-bit mask and shift. A great unit-test invariant: the Sarvashtakavarga total is always 337.',
     mm: 'ဂြိုဟ်တစ်လုံးအတွက် reference ၈ ခု (ဂြိုဟ် ၇ + လဂ်နာ) စီက သူ့ကနေ ရေတွက်သော အိမ်အချို့သို့ benefit bit ပေးသည် — 8×12 boolean matrix။ reference တစ်ခုစီ၏ benefic အိမ်များကို 12-bit mask အဖြစ်သိမ်း၍ shift။ ကောင်းမွန်သော unit-test invariant — Sarvashtakavarga စုစုပေါင်း အမြဲ ၃၃၇။',
-    formula: 'BAV[P][s] = Σ_c [ ((s − sign(c)) mod 12 + 1) ∈ benefic(P,c) ]\nSAV[s] = Σ_P BAV[P][s]     ⟹     Σₛ SAV[s] = 337',
+    formula: [
+      '\\mathrm{BAV}[P][s] = \\sum_{c} \\big[\\, ((s - \\operatorname{sign}(c)) \\bmod 12 + 1) \\in \\mathcal{B}(P,c) \\,\\big]',
+      '\\mathrm{SAV}[s] = \\sum_{P} \\mathrm{BAV}[P][s] \\quad\\Longrightarrow\\quad \\sum_{s=1}^{12} \\mathrm{SAV}[s] = 337',
+    ],
     code: `type Mask = number;   // 12 bits, bit i = "i+1 houses away earns a point"
 function bav(planet: Planet, chart: Chart): number[] {
   const counts = new Array(12).fill(0);
@@ -152,7 +191,9 @@ function bav(planet: Planet, chart: Chart): number[] {
     tags: ['#determinism', '#golden-fixtures', '#property-testing', '#rational'],
     en: 'Every calculation is a pure function — no Date.now(), no global state — so the same input always gives the same output. Golden fixtures (tolerance ±0.02°) pin known charts; property-based tests assert invariants (SAV = 337, varga ∈ [0,12), dasha spans sum to the parent). On the critical path, rational arithmetic avoids float drift.',
     mm: 'တွက်ချက်မှုတိုင်းသည် pure function — Date.now() မရှိ၊ global state မရှိ — ထို့ကြောင့် input တူ → output အမြဲတူ။ Golden fixtures (tolerance ±0.02°) က သိထားသော ဇာတာများကို ပုံသေချုပ်; property-based test များက invariant များ (SAV = 337၊ varga ∈ [0,12)၊ dasha span များ ပေါင်းလျှင် parent) ကို အတည်ပြု။ critical path တွင် rational arithmetic က float လွဲမှု ရှောင်သည်။',
-    formula: '∀ chart:   Σₛ SAV[s] = 337\n∀ λ:       varga(λ) ∈ {0,…,11}\n∀ node:    Σ child.span = parent.span',
+    formula: [
+      '\\begin{aligned} \\forall\\,\\text{chart}: &\\quad \\textstyle\\sum_{s} \\mathrm{SAV}[s] = 337 \\\\[2pt] \\forall\\,\\lambda: &\\quad \\operatorname{varga}(\\lambda) \\in \\{0,\\dots,11\\} \\\\[2pt] \\forall\\,\\text{node}: &\\quad \\textstyle\\sum \\text{child.span} = \\text{parent.span} \\end{aligned}',
+    ],
     code: `import { test } from 'vitest';
 import fc from 'fast-check';
 
@@ -213,7 +254,7 @@ export default function Algorithms() {
                 {s.tags.map((tag) => <span key={tag} className="rounded-full border border-accent/25 bg-accent/[0.06] px-2 py-0.5 font-mono text-[10px] text-accent-light">{tag}</span>)}
               </div>
               <p className="mt-3 text-sm leading-relaxed text-muted">{lang === 'mm' ? s.mm : s.en}</p>
-              <Formula>{s.formula}</Formula>
+              <Formula formula={s.formula} />
               {s.complexity && <p className="mt-3 rounded-lg border border-white/8 bg-white/[0.03] px-3 py-2 font-mono text-[11px] text-muted"><span className="text-accent-light">Complexity:</span> {s.complexity}</p>}
               <Code code={s.code} />
             </article>
