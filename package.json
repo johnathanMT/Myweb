@@ -26,6 +26,7 @@
     "gsap": "^3.15.0",
     "katex": "^0.18.1",
     "lucide-react": "^0.383.0",
+    "marked": "^18.0.7",
     "postprocessing": "^6.39.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

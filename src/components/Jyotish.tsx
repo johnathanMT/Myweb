@@ -1,6 +1,6 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight } from 'lucide-react'
+import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, Bot, Trash2, RefreshCw } from 'lucide-react'
 import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
@@ -10,6 +10,7 @@ import TimelineChart from './TimelineChart'
 import AshtakavargaView from './AshtakavargaView'
 import ShadbalaView from './ShadbalaView'
 import CustomerPanel, { type SavedChart } from './CustomerPanel'
+import MarkdownView from './MarkdownView'
 import type { BirthChartData, BirthChartRequest, PlanetPosition, TransitPos } from '../types/astrology'
 import { JT, type Lang, type Naynan, vargaSign, signLabel, planetName, readingFor, naynan, activeBhukti, activePratyantar, toMmDigits, themeWord, transitNoteText, findPlanet, dignityLabel, currentAreaEffect } from '../lib/jyotish'
 
@@ -29,7 +30,9 @@ const browserTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().
 const TZ_OPTIONS = [...new Set([browserTz, ...PRESETS.map((p) => p.tz), 'UTC'])]
 
 interface GeoResult { display_name: string; lat: string; lon: string }
-type Tab = 'reading' | 'timeline' | 'd1' | 'vargas' | 'ashtaka' | 'shadbala'
+type Tab = 'ai' | 'reading' | 'timeline' | 'd1' | 'vargas' | 'ashtaka' | 'shadbala'
+
+interface SavedReading { id: number; title: string; markdown: string; model: string; createdAt: string }
 
 const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = [
   { n: 2, name: 'D2 · Hora', desc: { en: 'Wealth & resources.', mm: 'ဥစ္စာဓန နှင့် အရင်းအမြစ်။' } },
@@ -190,6 +193,14 @@ export default function Jyotish() {
 
   // Customer account (email-only sign-up); token drives per-account chart saving.
   const [customerToken, setCustomerToken] = useState<string | null>(null)
+
+  // AI reading
+  const [aiMarkdown, setAiMarkdown] = useState('')
+  const [aiModel, setAiModel] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
+  const [aiSaved, setAiSaved] = useState(false)
+  const [myReadings, setMyReadings] = useState<SavedReading[]>([])
   const loadSavedChart = (c: SavedChart) => {
     setName(c.name || ''); setGender(c.gender === 'female' ? 'female' : 'male')
     setDate(c.birthDate || date); setTime(c.birthTime || time)
@@ -302,8 +313,86 @@ export default function Jyotish() {
   const bhukti = data ? activeBhukti(data) : undefined
   const prat = data ? activePratyantar(data) : undefined
 
+  // ── AI reading: summarise the computed chart → backend → markdown ───────────
+  const loadMyReadings = async () => {
+    if (!customerToken) return
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/my-readings`, { headers: { Authorization: `Bearer ${customerToken}` } })
+      const json = (await res.json().catch(() => null)) as { success?: boolean; data?: SavedReading[] } | null
+      if (json?.success && Array.isArray(json.data)) setMyReadings(json.data)
+    } catch { /* ignore */ }
+  }
+  useEffect(() => { if (customerToken) loadMyReadings() }, [customerToken]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const buildAiPayload = () => {
+    if (!data) return null
+    const en: Lang = 'en'
+    const moonP = data.planets.find((p) => p.name === 'Moon')
+    const sunP = data.planets.find((p) => p.name === 'Sun')
+    const dig = (d: string) => (d && d !== '-' ? dignityLabel(d, en) : undefined)
+    const sav = data.ashtakavarga?.sav ?? []
+    let ashNotes: string | undefined
+    if (sav.length === 12) {
+      let hi = 0, lo = 0
+      for (let i = 1; i < 12; i++) { if (sav[i] > sav[hi]) hi = i; if (sav[i] < sav[lo]) lo = i }
+      ashNotes = `Strongest ${signLabel(hi, en)} (${sav[hi]}); weakest ${signLabel(lo, en)} (${sav[lo]})`
+    }
+    const yr = data.timeline?.find((y) => y.year === thisYear)
+    return {
+      name: querent?.name || name.trim() || undefined,
+      gender: querent?.gender || gender,
+      nayNan: querent?.nn ? `${querent.nn.enDay} (No. ${querent.nn.num}, ${querent.nn.planet})` : undefined,
+      ascendant: signLabel(data.ascendant.sign, en),
+      moonSign: moonP ? signLabel(moonP.sign, en) : undefined,
+      sunSign: sunP ? signLabel(sunP.sign, en) : undefined,
+      placements: data.planets.slice(0, 20).map((p) => ({
+        planet: planetName(p.name, en), sign: signLabel(p.sign, en), house: p.house,
+        nakshatra: p.nakshatraName, retrograde: p.retrograde, dignity: dig(p.dignity),
+      })),
+      mahadasha: reading ? planetName(reading.lord, en) : undefined,
+      antardasha: bhukti ? planetName(bhukti.lord, en) : undefined,
+      pratyantardasha: prat ? planetName(prat.lord, en) : undefined,
+      dashaWindow: bhukti ? `${bhukti.startUtc} → ${bhukti.endUtc}` : undefined,
+      sadeSatiStatus: yr?.sadeSati ? 'Active this year' : 'Not active this year',
+      sarvashtakavargaBySign: sav.length === 12 ? sav : undefined,
+      ashtakavargaNotes: ashNotes,
+      yogas: (data.yogas ?? []).map((y) => y.name).slice(0, 30),
+      language: lang === 'mm' ? 'my' : 'en',
+    }
+  }
+
+  const generateAiReading = async () => {
+    if (!data || aiLoading) return
+    const payload = buildAiPayload()
+    if (!payload) return
+    setAiLoading(true); setAiError(''); setAiSaved(false); setAiMarkdown('')
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (customerToken) headers.Authorization = `Bearer ${customerToken}`
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/generate-ai-reading`, {
+        method: 'POST', headers, body: JSON.stringify(payload),
+      })
+      const json = (await res.json().catch(() => null)) as
+        { success?: boolean; data?: { markdown: string; model: string; savedId?: number }; message?: string } | null
+      if (!res.ok || !json?.success || !json.data) throw new Error(json?.message || `Failed (${res.status})`)
+      setAiMarkdown(json.data.markdown); setAiModel(json.data.model || '')
+      if (json.data.savedId) { setAiSaved(true); loadMyReadings() }
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Could not generate the reading.')
+    } finally { setAiLoading(false) }
+  }
+
+  const deleteReading = async (id: number) => {
+    if (!customerToken) return
+    try {
+      await fetch(`${SITE.apiUrl}/api/astrology/my-readings/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${customerToken}` } })
+      setMyReadings((prev) => prev.filter((r) => r.id !== id))
+    } catch { /* ignore */ }
+  }
+
   const curVarga = VARGAS.find((v) => v.n === vargaN) ?? VARGAS[4]
   const TABS: { id: Tab; label: string }[] = [
+    { id: 'ai', label: lang === 'mm' ? '🤖 AI ဟောစာတမ်း' : '🤖 AI Reading' },
     { id: 'reading', label: t.tabReading }, { id: 'timeline', label: t.tabTimeline }, { id: 'd1', label: t.tabD1 },
     { id: 'vargas', label: lang === 'mm' ? 'ခွဲဝေဇာတာ' : 'Vargas' },
     { id: 'ashtaka', label: lang === 'mm' ? 'အဋ္ဌကဝဂ်' : 'Ashtaka' },
@@ -323,7 +412,7 @@ export default function Jyotish() {
           {(['en', 'mm'] as Lang[]).map((l) => (
             <button key={l} type="button" onClick={() => setLang(l)}
               className={`rounded-full px-3 py-1 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
-              {l === 'en' ? 'EN' : 'မြန်မာ'}
+              {l === 'en' ? 'EN' : 'မြန်မာစာ'}
             </button>
           ))}
         </div>
@@ -333,13 +422,13 @@ export default function Jyotish() {
             style={{ background: 'conic-gradient(from 200deg, #eab308, #a855f7, #22d3ee, #eab308)', boxShadow: '0 0 44px -6px rgba(168,85,247,0.65), 0 0 30px -8px rgba(234,179,8,0.6)' }}>
             <div className="relative h-full w-full overflow-hidden rounded-full bg-card">
               <span className="absolute inset-0 flex items-center justify-center font-groovy text-5xl text-accent">ဘ</span>
-              <img src="/sayar.jpg" alt="Sayar Bhone Min Thike Din" className="relative h-full w-full object-cover" loading="lazy"
+              <img src="/sayar.jpg" alt="Bhone Min Thike Din" className="relative h-full w-full object-cover" loading="lazy"
                 onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
             </div>
           </div>
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light">{lang === 'mm' ? 'ပရော်ဖက်ရှင်နယ် ဗေဒင်ပညာရှင်' : 'Professional Vedic Astrologer'}</p>
-            <h1 className="mt-1.5 font-groovy text-3xl text-fg sm:text-4xl">{lang === 'mm' ? 'ဆရာ ဘုန်းမင်းသိုက်ဒင်' : 'Sayar Bhone Min Thike Din'}</h1>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light">{lang === 'mm' ? 'ဗေဒင်ပညာ လေ့လာဆည်းပူးသူ' : 'Vedic Astrology Enthusiast'}</p>
+            <h1 className="mt-1.5 font-groovy text-3xl text-fg sm:text-4xl">{lang === 'mm' ? 'ဘုန်းမင်းသိုက်ဒင်' : 'Bhone Min Thike Din'}</h1>
             <p className="mt-1 font-mono text-xs text-muted">{lang === 'mm' ? 'နက္ခတ်ဗေဒင် · ဝိံရှောတ္တရီ ဒသာ · ဆဒ္ဗလ' : 'Sidereal Jyotish · Vimshottari Dasha · Shadbala'}</p>
           </div>
           <p className="text-[15px] leading-relaxed text-muted">{lang === 'mm' ? BIO_MM : BIO_EN}</p>
@@ -357,10 +446,10 @@ export default function Jyotish() {
               <Sigma size={22} />
             </span>
             <div className="min-w-0">
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-accent-light">{lang === 'mm' ? 'ကွန်ပျူတာဆိုင်ရာ အခြေခံ' : 'The Computation'}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-accent-light">{lang === 'mm' ? 'ကွန်ပျူတာသိပ္ပံဆိုင်ရာ အခြေခံ' : 'The Computation'}</p>
               <h3 className="mt-1 font-groovy text-xl text-fg">{lang === 'mm' ? 'အယ်လဂိုရီသမ်များ' : 'The Algorithm'}</h3>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{lang === 'mm' ? 'ဇာတာများ၏ နောက်ကွယ်မှ သင်္ချာနှင့် ကုဒ် — Julian Day မှ Ashtakavarga အထိ။' : 'The math & code behind the charts — from Julian Day to Ashtakavarga.'}</p>
-              <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-accent-light transition group-hover:gap-2.5">{lang === 'mm' ? 'အသေးစိတ်ကြည့်ရန်' : 'Explore'} <ArrowRight size={13} /></span>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{lang === 'mm' ? 'ဇာတာများ၏ နောက်ကွယ်မှကိန်းအောင်းနေသော သင်္ချာနှင့် ကုဒ်များ — Julian Day မှ Ashtakavarga အထိ။' : 'The math & code behind the charts — from Julian Day to Ashtakavarga.'}</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-accent-light transition group-hover:gap-2.5">{lang === 'mm' ? 'အသေးစိတ်ကြည့်ရှုရန်' : 'Explore'} <ArrowRight size={13} /></span>
             </div>
           </div>
         </Link>
@@ -376,8 +465,8 @@ export default function Jyotish() {
             <div className="min-w-0">
               <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-jade">{lang === 'mm' ? 'သိပ္ပံနည်းကျ ရိုးသားမှု' : 'Honest Science'}</p>
               <h3 className="mt-1 font-groovy text-xl text-fg">{lang === 'mm' ? 'တိုင်းတာနိုင်သော သုတေသန' : 'Falsifiable Research'}</h3>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{lang === 'mm' ? 'ကြိုတင်မှတ်တမ်း၊ base rate၊ permutation test — ဟောကြားချက်ကို တိုင်းတာသည်၊ မကြွားပါ။' : 'Pre-registration, base rates, permutation tests — we measure claims, not boast them.'}</p>
-              <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-jade transition group-hover:gap-2.5">{lang === 'mm' ? 'လုပ်ထုံးကြည့်ရန်' : 'View protocol'} <ArrowRight size={13} /></span>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{lang === 'mm' ? 'ကြိုတင်မှတ်တမ်း၊ base rate၊ permutation test — ဟောကြားချက်ကို တိုင်းတာနိုင်သည်။' : 'Pre-registration, base rates, permutation tests — we measure claims, not boast them.'}</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-jade transition group-hover:gap-2.5">{lang === 'mm' ? 'လုပ်ထုံးလုပ်နည်းများ ကြည့်ရန်' : 'View protocol'} <ArrowRight size={13} /></span>
             </div>
           </div>
         </Link>
@@ -455,7 +544,7 @@ export default function Jyotish() {
               {[...new Set([tz, ...TZ_OPTIONS])].map((z) => <option key={z} value={z} className="text-black">{z}</option>)}
             </select>
           </label>
-          <label className="mt-3 block"><span className={labelCls}>{lang === 'mm' ? 'အယနံသ (Ayanamsa)' : 'Ayanamsa'}</span>
+          <label className="mt-3 block"><span className={labelCls}>{lang === 'mm' ? 'အယနန္သ (Ayanamsa)' : 'Ayanamsa'}</span>
             <select value={ayanamsa} onChange={(e) => setAyanamsa(e.target.value)} className={field}>
               <option value="lahiri" className="text-black">Lahiri (default)</option>
               <option value="raman" className="text-black">Raman</option>
@@ -478,12 +567,12 @@ export default function Jyotish() {
 
           <label className={`mt-4 flex items-start gap-2 rounded-xl border p-3 text-xs leading-relaxed transition ${consent ? 'border-jade/40 bg-jade/5 text-muted' : 'border-coral/40 bg-coral/5 text-fg/80'}`}>
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-accent" />
-            <span><span className="text-coral">*</span> {lang === 'mm' ? 'ဆရာ ဟောကိန်း အထောက်အကူအတွက် ကျွန်ုပ်၏ မွေးဇာတာ အချက်အလက်ကို လုံခြုံစွာ သိမ်းဆည်းရန် သဘောတူပါသည်။' : "I consent to securely storing my birth details to assist the astrologer's readings."}</span>
+            <span><span className="text-coral">*</span> {lang === 'mm' ? 'အနာဂါတ်ဟောကိန်းများပိုမိုတိကျမှန်ကန်စွာ အထောက်အကူအတွက် ကျွန်ုပ်၏ မွေးဇာတာ အချက်အလက်ကို လုံခြုံစွာ သိမ်းဆည်းရန် သဘောတူပါသည်။' : "I consent to securely storing my birth details to assist the future astrologer's readings."}</span>
           </label>
 
           <button type="submit" disabled={loading || !canSubmit}
             className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
-            {loading ? <><Loader2 size={16} className="animate-spin" /> {lang === 'mm' ? 'တွက်ချက်နေသည်…' : 'Calculating…'}</> : <><Sparkles size={16} /> {lang === 'mm' ? 'ဇာတာ တွက်မည်' : 'Generate Chart'}</>}
+            {loading ? <><Loader2 size={16} className="animate-spin" /> {lang === 'mm' ? 'တွက်ချက်ပေးနေပါသည်…' : 'Calculating…'}</> : <><Sparkles size={16} /> {lang === 'mm' ? 'ဇာတာ တွက်မည်' : 'Generate Chart'}</>}
           </button>
           {!canSubmit && (
             <ul className="mt-2 space-y-1">
@@ -500,7 +589,7 @@ export default function Jyotish() {
         <div className="min-w-0">
           {!data && !loading && (
             <div className="glass-card flex min-h-[300px] items-center justify-center p-8 text-center text-sm text-muted no-print">
-              {lang === 'mm' ? 'မွေးဖွားအချက်အလက်ထည့်၍ ဟောစာတမ်း၊ ဇာတာခွင်များ (D1/D9/D10/D7) ကြည့်ရှုပါ။' : 'Enter birth details to see the reading and the D1 / D9 / D10 / D7 charts.'}
+              {lang === 'mm' ? 'မွေးသက္ကာရာဇ်နှင့်အချက်အလက်ထည့်၍ ဟောစာတမ်း၊ ဇာတာခွင်များ (D1/D9/D10/D7) ကြည့်ရှုပါ။' : 'Enter birth details to see the reading and the D1 / D9 / D10 / D7 charts.'}
             </div>
           )}
 
@@ -511,7 +600,7 @@ export default function Jyotish() {
                 <h2 className="font-groovy text-lg text-fg">{place || t.portalTitle}</h2>
                 <button type="button" onClick={downloadPdf}
                   className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-4 py-2 text-xs font-semibold text-space shadow-lg shadow-accent/25 transition hover:brightness-110">
-                  <Download size={14} /> {lang === 'mm' ? 'PDF အပြည့်အစုံ ရယူရန်' : 'Download full PDF'}
+                  <Download size={14} /> {lang === 'mm' ? 'ဟောစာတမ်း PDF အပြည့်အစုံ ရယူရန်' : 'Download full PDF'}
                 </button>
               </div>
               <div className="no-print sticky top-14 z-30 -mx-1 border-b border-accent/20 px-1 py-2.5 backdrop-blur-md sm:top-16"
@@ -530,13 +619,86 @@ export default function Jyotish() {
                       {(['diamond', 'grid'] as ChartStyle[]).map((s) => (
                         <button key={s} type="button" onClick={() => setChartStyle(s)}
                           className={`rounded-full px-2.5 py-1 font-mono text-[11px] transition ${chartStyle === s ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>
-                          {s === 'diamond' ? (lang === 'mm' ? 'စိန်ပုံ' : 'Diamond') : (lang === 'mm' ? 'ဇယားကွက်' : 'Grid')}
+                          {s === 'diamond' ? (lang === 'mm' ? 'စိန်ပုံစံ' : 'Diamond') : (lang === 'mm' ? 'ဇယားကွက်ပုံစံ' : 'Grid')}
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
+
+              {/* ── AI READING ── */}
+              {(tab === 'ai' || printAll) && (
+                <div className="space-y-5">
+                  {/* Generate card */}
+                  <div className="relative overflow-hidden rounded-2xl border border-accent/30 p-6 no-print"
+                    style={{ background: 'linear-gradient(135deg, rgb(var(--card)), rgb(var(--surface)))', boxShadow: '0 0 50px -18px rgb(var(--accent) / 0.5)' }}>
+                    <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
+                    <div className="relative">
+                      <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent-light"><Bot size={15} /> {lang === 'mm' ? 'AI ဗေဒင် ဟောစာတမ်း' : 'AI Vedic Reading'}</p>
+                      <h3 className="mt-2 font-groovy text-xl text-fg">{lang === 'mm' ? 'သင့်ဇာတာအတွက် ကိုယ်ပိုင် ဟောစာတမ်း' : 'A personalised reading for your chart'}</h3>
+                      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{lang === 'mm'
+                        ? 'တွက်ချက်ပြီးသော ဒသာ၊ ဂြိုဟ်တည်နေရာ၊ Sade Sati နှင့် အဋ္ဌကဝဂ် အချက်အလက်များကို အခြေခံ၍ AI က မြန်မာဘာသာဖြင့် အသေးစိတ် ဟောစာတမ်းတစ်စောင် ရေးသားပေးပါမည်။'
+                        : 'Grounded in your computed dasha, placements, Sade Sati and Ashtakavarga, the AI writes a detailed, structured reading.'}</p>
+                      <button type="button" onClick={generateAiReading} disabled={aiLoading}
+                        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent via-violet-500 to-jade px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+                        {aiLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                        {aiLoading ? (lang === 'mm' ? 'ဟောပြောပေးနေသည်…' : 'Generating…') : (lang === 'mm' ? '✨ AI ဖြင့် ဟောစာတမ်း အပြည့်အစုံ ရယူရန်' : '✨ Generate full AI reading')}
+                      </button>
+                      <p className="mt-2 font-mono text-[11px] text-muted">{customerToken
+                        ? (lang === 'mm' ? 'သင့်အကောင့်တွင် အလိုအလျောက် သိမ်းဆည်းပါမည်။' : 'Saved to your account automatically.')
+                        : (lang === 'mm' ? 'သိမ်းဆည်းလိုပါက အထက်တွင် အကောင့်ဝင်ပါ။' : 'Sign in above to save readings to your account.')}</p>
+                    </div>
+                  </div>
+
+                  {aiError && <div className="rounded-xl border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral no-print">{aiError}</div>}
+
+                  {aiLoading && (
+                    <div className="glass-card flex items-center gap-3 p-6 text-sm text-muted no-print">
+                      <Loader2 size={18} className="animate-spin text-accent" />
+                      {lang === 'mm' ? 'AI မှ တွက်ချက်ဟောပြောနေပါသည်… စက္ကန့်အနည်းငယ် စောင့်ဆိုင်းပေးပါ။' : 'The AI is computing your reading… please wait a few seconds.'}
+                    </div>
+                  )}
+
+                  {aiMarkdown && !aiLoading && (
+                    <div className="relative overflow-hidden rounded-2xl border border-accent/35 p-6 sm:p-8"
+                      style={{ background: 'linear-gradient(160deg, rgb(var(--card)) 0%, rgb(var(--surface)) 100%)', boxShadow: '0 0 60px -20px rgb(var(--accent) / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.05)' }}>
+                      <div className="pointer-events-none absolute -left-16 -bottom-20 h-56 w-56 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--jade)) 0%, transparent 70%)' }} />
+                      <div className="relative">
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 no-print">
+                          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent-light"><Bot size={14} /> {lang === 'mm' ? 'AI ဟောစာတမ်း' : 'AI Reading'}{aiModel && <span className="text-muted"> · {aiModel}</span>}</p>
+                          {aiSaved && <span className="rounded-full bg-jade/15 px-2.5 py-0.5 font-mono text-[10px] text-jade">{lang === 'mm' ? 'သိမ်းဆည်းပြီး' : 'saved'}</span>}
+                        </div>
+                        <MarkdownView markdown={aiMarkdown} />
+                        <p className="mt-5 border-t border-white/10 pt-3 text-[11px] leading-relaxed text-muted">{lang === 'mm'
+                          ? 'ဤဟောစာတမ်းသည် AI ဖြင့် ထုတ်ပေးထားခြင်းဖြစ်ပြီး၊ တွက်ချက်မှုများ တိကျသော်လည်း ရလဒ်များမှာ မိမိကိုယ်တိုင် ပြန်လည်ဆင်ခြင်သုံးသပ်ရန်အတွက် လမ်းညွှန်ချက်သာ ဖြစ်ပါသည်။'
+                          : 'This reading is AI-generated. The calculations are precise, but the interpretations are guidance for reflection, not certainty.'}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Saved readings (signed-in) */}
+                  {customerToken && myReadings.length > 0 && (
+                    <div className="glass-card p-5 no-print">
+                      <div className="mb-3 flex items-center justify-between">
+                        <h4 className="font-groovy text-base text-fg">{lang === 'mm' ? 'သိမ်းဆည်းထားသော ဟောစာတမ်းများ' : 'Saved readings'}</h4>
+                        <button type="button" onClick={loadMyReadings} className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 font-mono text-[11px] text-muted transition hover:text-fg"><RefreshCw size={12} /> {lang === 'mm' ? 'ပြန်ရယူ' : 'Refresh'}</button>
+                      </div>
+                      <ul className="space-y-2">
+                        {myReadings.map((r) => (
+                          <li key={r.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/[0.03] px-3 py-2">
+                            <button type="button" onClick={() => { setAiMarkdown(r.markdown); setAiModel(r.model); setAiSaved(true); setAiError('') }} className="min-w-0 flex-1 text-left">
+                              <span className="block truncate text-sm text-fg/90">{r.title}</span>
+                              <span className="font-mono text-[10px] text-muted">{r.createdAt}{r.model ? ` · ${r.model}` : ''}</span>
+                            </button>
+                            <button type="button" onClick={() => deleteReading(r.id)} title="Delete" className="inline-flex items-center rounded-lg border border-coral/25 bg-coral/10 px-2 py-1 text-coral transition hover:bg-coral/20"><Trash2 size={12} /></button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* ── READING ── */}
               {(tab === 'reading' || printAll) && (
@@ -642,7 +804,7 @@ export default function Jyotish() {
 
                             {cur && (
                               <div className={`mt-3 rounded-lg border px-3 py-2 text-xs leading-relaxed ${cur.tone === 'good' ? 'border-jade/40 bg-jade/10 text-jade' : cur.tone === 'warn' ? 'border-coral/40 bg-coral/10 text-coral' : 'border-white/10 bg-white/[0.03] text-muted'}`}>
-                                <span className="font-semibold">{lang === 'mm' ? 'လက်ရှိကာလ သက်ရောက်မှု' : 'Current period'}: </span>{cur.text}
+                                <span className="font-semibold">{lang === 'mm' ? 'လက်ရှိကာလ၏ သက်ရောက်မှုများ' : 'Current period'}: </span>{cur.text}
                               </div>
                             )}
 
@@ -653,7 +815,7 @@ export default function Jyotish() {
                             {needsRemedy && (
                               <button type="button" onClick={() => openRemedy(a.label)}
                                 className="no-print mt-3 inline-flex items-center gap-1.5 self-start rounded-full border border-coral/40 bg-coral/10 px-3 py-1.5 text-xs text-coral transition hover:bg-coral/20">
-                                <Sparkles size={12} /> {lang === 'mm' ? 'ဤကဏ္ဍအတွက် ယတြာ တောင်းရန်' : 'Request a remedy for this area'}
+                                <Sparkles size={12} /> {lang === 'mm' ? 'ဤကဏ္ဍအတွက် ယတြာ တောင်းယူရန်' : 'Request a remedy for this area'}
                               </button>
                             )}
                           </div>
@@ -664,7 +826,7 @@ export default function Jyotish() {
 
                   {data.yogas.length > 0 && (
                     <div className="glass-card p-5">
-                      <h3 className="mb-3 font-groovy text-lg text-fg">{lang === 'mm' ? 'ဇာတာတွင် တွေ့ရသော ယောဂများ' : 'Yogas in your chart'}</h3>
+                      <h3 className="mb-3 font-groovy text-lg text-fg">{lang === 'mm' ? 'ဇာတာတွင် တွေ့ရတတ်သော ယောဂများ' : 'Yogas in your chart'}</h3>
                       <ul className="space-y-2.5">
                         {data.yogas.map((y) => (
                           <li key={y.name} className="rounded-xl border border-white/8 bg-white/[0.03] p-3">
@@ -679,8 +841,8 @@ export default function Jyotish() {
 
                   {/* Educational: what the yogas mean (incl. Neecha Bhanga Raja Yoga) */}
                   <div className="glass-card p-5">
-                    <h3 className="mb-1 font-groovy text-base text-fg">{lang === 'mm' ? 'ယောဂများ အကြောင်း အသေးစိတ်' : 'About Yogas'}</h3>
-                    <p className="mb-3 text-xs leading-relaxed text-muted">{lang === 'mm' ? 'ယောဂဆိုသည်မှာ ဂြိုဟ်များ၏ တည်နေရာ/ဆက်စပ်မှုကြောင့် ဖြစ်ပေါ်လာသော အထူးအကျိုးသက်ရောက်မှုများဖြစ်သည်။ အဓိကယောဂများကို အောက်တွင် ရှင်းပြထားသည်။' : 'A yoga is a special result formed by particular planetary placements or links. The main yogas are explained below.'}</p>
+                    <h3 className="mb-1 font-groovy text-base text-fg">{lang === 'mm' ? 'ယောဂများ အကြောင်း အသေးစိတ်ဖတ်ရှုရန်' : 'About Yogas'}</h3>
+                    <p className="mb-3 text-xs leading-relaxed text-muted">{lang === 'mm' ? 'ယောဂဆိုသည်မှာ ဂြိုဟ်များ၏ တည်နေရာ/ဆက်စပ်မှုကြောင့် ဖြစ်ပေါ်လာသော အထူးအကျိုးသက်ရောက်မှုများဖြစ်သည်။ အဓိကယောဂများကို အောက်တွင် ရှင်းပြပေးထားသည်။' : 'A yoga is a special result formed by particular planetary placements or links. The main yogas are explained below.'}</p>
                     <div className="space-y-1.5">
                       {Object.entries(YOGA_INFO).map(([name, info]) => (
                         <details key={name} className="group rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 transition hover:border-accent/30 open:border-accent/30 open:bg-accent/[0.04]">
@@ -696,62 +858,62 @@ export default function Jyotish() {
 
                   {/* Dasha periods — two across, full page width */}
                   <div className="grid gap-4 lg:grid-cols-2">
-                  <div className="glass-card p-5">
-                    <h3 className="mb-3 font-groovy text-lg text-fg">Vimshottari Dasha</h3>
-                    <ol className="space-y-1.5">
-                      {data.dashas.map((d) => {
-                        const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
-                        return (
-                          <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
-                            <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(d.lord, lang)}</span>
-                            <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
-                          </li>
-                        )
-                      })}
-                    </ol>
-                  </div>
-
-                  {/* Antardasha (bhukti) sub-periods of the current mahadasha */}
-                  {data.antardashas && data.antardashas.length > 0 && (
                     <div className="glass-card p-5">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-groovy text-lg text-fg">{t.currentBhukti}</h3>
-                        {bhukti && <span className="rounded-full bg-accent/15 px-3 py-1 text-sm font-semibold text-accent-light">{planetName(reading.lord, lang)} – {planetName(bhukti.lord, lang)}</span>}
-                      </div>
-                      <ol className="mt-3 space-y-1.5">
-                        {data.antardashas.map((d) => {
+                      <h3 className="mb-3 font-groovy text-lg text-fg">Vimshottari Dasha</h3>
+                      <ol className="space-y-1.5">
+                        {data.dashas.map((d) => {
                           const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
                           return (
                             <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
-                              <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(reading.lord, lang)} – {planetName(d.lord, lang)}</span>
+                              <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(d.lord, lang)}</span>
                               <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
                             </li>
                           )
                         })}
                       </ol>
                     </div>
-                  )}
 
-                  {/* Pratyantar dasha (3rd level) of the current bhukti */}
-                  {data.pratyantardashas && data.pratyantardashas.length > 0 && (
-                    <div className="glass-card p-5">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-groovy text-lg text-fg">{lang === 'mm' ? 'လက်ရှိ ပစ္စန္တရဒသာ' : 'Current Pratyantar'}</h3>
-                        {prat && <span className="rounded-full bg-accent/15 px-3 py-1 text-sm font-semibold text-accent-light">{planetName(bhukti?.lord ?? reading.lord, lang)} – {planetName(prat.lord, lang)}</span>}
+                    {/* Antardasha (bhukti) sub-periods of the current mahadasha */}
+                    {data.antardashas && data.antardashas.length > 0 && (
+                      <div className="glass-card p-5">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-groovy text-lg text-fg">{t.currentBhukti}</h3>
+                          {bhukti && <span className="rounded-full bg-accent/15 px-3 py-1 text-sm font-semibold text-accent-light">{planetName(reading.lord, lang)} – {planetName(bhukti.lord, lang)}</span>}
+                        </div>
+                        <ol className="mt-3 space-y-1.5">
+                          {data.antardashas.map((d) => {
+                            const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
+                            return (
+                              <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                                <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(reading.lord, lang)} – {planetName(d.lord, lang)}</span>
+                                <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
+                              </li>
+                            )
+                          })}
+                        </ol>
                       </div>
-                      <ol className="mt-3 space-y-1.5">
-                        {data.pratyantardashas.map((d) => {
-                          const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
-                          return (
-                            <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
-                              <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(bhukti?.lord ?? reading.lord, lang)} – {planetName(d.lord, lang)}</span>
-                              <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
-                            </li>
-                          )
-                        })}
-                      </ol>
-                    </div>
-                  )}
+                    )}
+
+                    {/* Pratyantar dasha (3rd level) of the current bhukti */}
+                    {data.pratyantardashas && data.pratyantardashas.length > 0 && (
+                      <div className="glass-card p-5">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-groovy text-lg text-fg">{lang === 'mm' ? 'လက်ရှိ ပစ္စန္တရဒသာ' : 'Current Pratyantar'}</h3>
+                          {prat && <span className="rounded-full bg-accent/15 px-3 py-1 text-sm font-semibold text-accent-light">{planetName(bhukti?.lord ?? reading.lord, lang)} – {planetName(prat.lord, lang)}</span>}
+                        </div>
+                        <ol className="mt-3 space-y-1.5">
+                          {data.pratyantardashas.map((d) => {
+                            const active = new Date(d.startUtc).getTime() <= now && now < new Date(d.endUtc).getTime()
+                            return (
+                              <li key={d.startUtc + d.lord} className={`flex items-center justify-between gap-3 rounded-xl px-4 py-2 ${active ? 'border border-accent/40 bg-accent/10' : 'bg-white/[0.03]'}`}>
+                                <span className={`font-semibold ${active ? 'text-accent-light' : 'text-fg'}`}>{planetName(bhukti?.lord ?? reading.lord, lang)} – {planetName(d.lord, lang)}</span>
+                                <span className="font-mono text-xs text-muted">{d.startUtc} → {d.endUtc}</span>
+                              </li>
+                            )
+                          })}
+                        </ol>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -765,7 +927,7 @@ export default function Jyotish() {
                     <div className="mt-3 flex flex-wrap gap-2 font-mono text-[10px]">
                       <span className="rounded bg-jade/15 px-1.5 py-0.5 text-jade">{lang === 'mm' ? 'ကောင်း' : 'benefic'}</span>
                       <span className="rounded bg-coral/15 px-1.5 py-0.5 text-coral">{lang === 'mm' ? 'သတိ / သာဓေသတီ' : 'caution / Sade Sati'}</span>
-                      <span className="text-muted">{lang === 'mm' ? '· ဂြိုဟ်သွားအိမ်ကို စန်းမှ ရေတွက်' : '· transit house counted from the Moon'}</span>
+                      <span className="text-muted">{lang === 'mm' ? '· ဂြိုဟ်သွားအိမ်ကို စန်းမှ ရေတွက်သော်' : '· transit house counted from the Moon'}</span>
                     </div>
                   </div>
                   <div className="glass-card p-5">
@@ -854,7 +1016,7 @@ export default function Jyotish() {
               {(tab === 'vargas' || printAll) && (
                 <div className="space-y-4">
                   <div className="no-print flex flex-wrap items-center gap-2">
-                    <span className={labelCls}>{lang === 'mm' ? 'ခွဲဝေဇာတာ ရွေးရန်' : 'Divisional chart'}</span>
+                    <span className={labelCls}>{lang === 'mm' ? 'ဇာတာခွဲများကို ရွေးချယ်ရန်' : 'Divisional chart'}</span>
                     <select value={vargaN} onChange={(e) => setVargaN(Number(e.target.value))}
                       className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-fg outline-none focus:border-accent/50">
                       {VARGAS.map((v) => <option key={v.n} value={v.n} className="text-black">{v.name}</option>)}
@@ -866,7 +1028,7 @@ export default function Jyotish() {
 
                   {/* D1–D60 educational accordion */}
                   <div className="glass-card p-5">
-                    <h3 className="mb-3 font-groovy text-base text-fg">{lang === 'mm' ? 'ခွဲဝေဇာတာများ၏ အဓိပ္ပာယ် (D1–D60)' : 'What each Divisional Chart means (D1–D60)'}</h3>
+                    <h3 className="mb-3 font-groovy text-base text-fg">{lang === 'mm' ? 'ဇာတာခွဲများ၏ အဓိပ္ပာယ်များ (D1–D60)' : 'What each Divisional Chart means (D1–D60)'}</h3>
                     <div className="space-y-1.5">
                       {VARGA_GUIDE.map((v) => (
                         <details key={v.code} className="group rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 transition hover:border-accent/30 open:border-accent/30 open:bg-accent/[0.04]">
@@ -884,15 +1046,15 @@ export default function Jyotish() {
 
               {/* Remedy (yatra) — contact the Sayar */}
               <div ref={remedyRef} className="no-print glass-card border border-accent/25 p-6">
-                <h3 className="font-groovy text-lg text-fg">{lang === 'mm' ? 'ယတြာ အစီအရင် — ဆရာ့ကို ဆက်သွယ်ရန်' : 'Remedy (Yatra) — Contact the Sayar'}</h3>
+                <h3 className="font-groovy text-lg text-fg">{lang === 'mm' ? 'ယတြာ အစီအရင်နှင့် အသေးစိတ်မေးမြန်းရန် — ကိုဘုန်းမင်းသိုက်ဒင်ထံ ဆက်သွယ်ရန်' : 'Remedy (Yatra) & More Details — Contact to Ko Bhone Min Thike Din'}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted">
                   {lang === 'mm'
-                    ? 'ကံညံ့/ဖိစီးနေသော ကဏ္ဍများအတွက် သင့်လျော်သည့် ယတြာ အစီအရင်ကို ဆရာ ဘုန်းမင်းသိုက်ဒင် ထံ တောင်းခံနိုင်ပါသည်။ အောက်တွင် ဖြည့်စွက်ပါ။'
-                    : 'For areas under strain, you may request a suitable remedy (yatra) from Sayar Bhone Min Thike Din. Fill in your details below.'}
+                    ? 'ကံညံ့/ဖိစီးနေသော ကဏ္ဍများအတွက် သင့်လျော်သည့် ယတြာ အစီအရင်နှင့် အကြံဉာဏ်အတွက် ကိုဘုန်းမင်းသိုက်ဒင် ထံ တောင်းခံနိုင်ပါသည်။ အောက်တွင် ဖြည့်စွက်ပါ။'
+                    : 'For areas under strain, you may request a suitable remedy (yatra)& Idea from Sayar Bhone Min Thike Din. Fill in your details below.'}
                 </p>
                 {remedyState === 'sent' ? (
                   <div className="mt-4 rounded-xl border border-jade/40 bg-jade/10 px-4 py-3 text-sm text-jade">
-                    {lang === 'mm' ? 'ကျေးဇူးတင်ပါသည်။ သင့်တောင်းဆိုမှုကို ဆရာ့ထံ ပေးပို့ပြီးပါပြီ — မကြာမီ ဆက်သွယ်ပါမည်။' : 'Thank you — your request has been sent to the Sayar. You will be contacted soon.'}
+                    {lang === 'mm' ? 'ကျေးဇူးတင်ပါသည်။ သင့်တောင်းဆိုမှုကို ကိုဘုန်းမင်းသိုက်ဒင်ထံ ပေးပို့ပြီးပါပြီ — မကြာမီ ဆက်သွယ်ပါမည်။' : 'Thank you — your request has been sent to Ko Bhone Min Thike Din. You will be contacted soon.'}
                   </div>
                 ) : (
                   <form onSubmit={submitRemedy} className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -904,9 +1066,9 @@ export default function Jyotish() {
                       <textarea value={remedyMsg} onChange={(e) => setRemedyMsg(e.target.value)} rows={3} className={`${field} resize-y`} placeholder={lang === 'mm' ? 'သင့် အခြေအနေ / မေးလိုသည့်အရာ' : 'Your situation / what you would like to ask'} /></label>
                     <div className="flex items-center gap-3 sm:col-span-2">
                       <button type="submit" disabled={remedyState === 'sending'} className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-space transition hover:brightness-110 disabled:opacity-60">
-                        {remedyState === 'sending' ? <><Loader2 size={15} className="animate-spin" /> {lang === 'mm' ? 'ပို့နေသည်…' : 'Sending…'}</> : (lang === 'mm' ? 'ဆရာ့ထံ ပေးပို့ရန်' : 'Send to the Sayar')}
+                        {remedyState === 'sending' ? <><Loader2 size={15} className="animate-spin" /> {lang === 'mm' ? 'ပေးပို့နေသည်…' : 'Sending…'}</> : (lang === 'mm' ? 'ကိုဘုန်းမင်းသိုက်ဒင်ထံ ပေးပို့ရန်' : 'Send to the Sayar')}
                       </button>
-                      {remedyState === 'error' && <span className="text-xs text-coral">{lang === 'mm' ? 'ပို့၍မရပါ — ပြန်ကြိုးစားပါ။' : 'Could not send — please try again.'}</span>}
+                      {remedyState === 'error' && <span className="text-xs text-coral">{lang === 'mm' ? 'ပေးပို့၍မရပါ — နောက်တစ်ကြိမ်ပြန်ကြိုးစားပါ။' : 'Could not send — please try again.'}</span>}
                     </div>
                   </form>
                 )}
@@ -923,15 +1085,15 @@ export default function Jyotish() {
         </p>
         <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-muted">
           {lang === 'mm'
-            ? 'ဇာတာများကို ဂန္ထဝင် ဇျောတိသကျမ်းများ၏ နည်းစနစ်အတိုင်း တိကျစွာ တွက်ချက်ထားပါသည်။ ဗေဒင်သည် သိပ္ပံနည်းကျ အတည်ပြုထားခြင်း မရှိသဖြင့် — ဆေးဘက်၊ ဥပဒေ သို့မဟုတ် ငွေကြေးဆိုင်ရာ ဆုံးဖြတ်ချက်များအတွက် အစားထိုး မသုံးသင့်ပါ။ ကိုယ့်ကိုယ်ကို ပြန်လည်သုံးသပ်ရန်နှင့် ယဉ်ကျေးမှုစိတ်ဝင်စားမှုအတွက်သာ တင်ဆက်ပါသည်။'
-            : 'Charts are computed precisely by the classical Jyotish methods. Astrology is not scientifically validated — this is offered for reflection and cultural interest, and is not a substitute for medical, legal, or financial advice.'}
+            ? 'အသိပေးချက် : ဇာတာများကို ဂန္ထဝင် ဇျောတိသကျမ်းများ၏ နည်းစနစ်များအတိုင်း တိကျစွာ တွက်ချက်ထားပါသည်။ သို့သော် ဗေဒင်ပညာသည် သိပ္ပံနည်းကျ အတည်ပြုထားခြင်း မရှိသဖြင့် — ဆေးဘက်ဆိုင်ရာ၊ ဥပဒေရေးရာ (သို့မဟုတ်) ငွေကြေးဆိုင်ရာ ကိစ္စရပ်များတွင် မျက်စိမှိတ်ယုံကြည်၍ တထစ်ချ ဆုံးဖြတ်ချက် မချသင့်ပါ။ အရေးကြီးသော ကိစ္စရပ်များအတွက် သက်ဆိုင်ရာ ကျွမ်းကျင်ပညာရှင်များနှင့်သာ ဆွေးနွေးတိုင်ပင်ပါ။ ဤတွက်ချက်မှု ရလဒ်များသည် မိမိကိုယ်ကို ပြန်လည်သုံးသပ်ရန်၊ ယဉ်ကျေးမှုအမွေအနှစ်အား လေ့လာရန်နှင့် ပုဂ္ဂိုလ်ရေးစိတ်ဝင်စားမှုအတွက်သာ ရည်ရွယ်တင်ဆက်ခြင်း ဖြစ်ပါသည်။'
+            : 'Disclaimer: These astrological charts are precisely calculated according to the traditional principles of classical Jyotish. However, astrology is not a scientifically validated discipline. Therefore, these readings should not be used as a substitute for professional medical, legal, or financial advice. Please consult relevant qualified professionals for major life decisions. The results presented here are strictly for self-reflection, cultural appreciation, and personal interest.'}
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           <Link to="/algorithms" className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 font-mono text-[11px] text-accent-light transition hover:bg-accent/20">
             <Star size={12} /> {lang === 'mm' ? 'algorithm များ (CS) →' : 'The algorithms (CS) →'}
           </Link>
           <Link to="/research" className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 font-mono text-[11px] text-accent-light transition hover:bg-accent/20">
-            <Star size={12} /> {lang === 'mm' ? 'တိုင်းတာနိုင်သော သုတေသန လုပ်ထုံး →' : 'Falsifiable research protocol →'}
+            <Star size={12} /> {lang === 'mm' ? 'တိုင်းတာနိုင်သော သုတေသနဆိုင်ရာ လုပ်ထုံးလုပ်နည်းများ →' : 'Falsifiable research protocol →'}
           </Link>
         </div>
       </footer>
