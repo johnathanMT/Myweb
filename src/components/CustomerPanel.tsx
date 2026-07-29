@@ -23,17 +23,27 @@ export interface SavedChart {
  *  reading tab's gate button, and inject a token from an email-confirm redirect. */
 export interface CustomerPanelHandle {
   openAuth: (mode: 'login' | 'signup') => void
+  openProfileEdit: () => void
   ingestToken: (token: string) => void
+}
+
+interface MeData {
+  id: number; email: string; username: string; emailConfirmed?: boolean
+  gender?: string; dob?: string; birthTime?: string; locationName?: string
+  latitude?: number; longitude?: number; timezone?: string; hasProfile?: boolean
 }
 
 const CustomerPanel = forwardRef<CustomerPanelHandle, {
   lang: Lang
   onLoadChart: (c: SavedChart) => void
   onAuthChange: (token: string | null) => void
-}>(function CustomerPanel({ lang, onLoadChart, onAuthChange }, ref) {
+  onProfileSaved?: () => void
+}>(function CustomerPanel({ lang, onLoadChart, onAuthChange, onProfileSaved }, ref) {
   const [token, setToken] = useState<string>(() => { try { return localStorage.getItem(CUST_TOKEN) || '' } catch { return '' } })
-  const [me, setMe] = useState<{ id: number; email: string; username: string } | null>(null)
-  const [modal, setModal] = useState<null | 'login' | 'signup'>(null)
+  const [me, setMe] = useState<MeData | null>(null)
+  const meRef = useRef<MeData | null>(null)
+  useEffect(() => { meRef.current = me }, [me])
+  const [modal, setModal] = useState<null | 'login' | 'signup' | 'profile'>(null)
   const [email, setEmail] = useState(''); const [username, setUsername] = useState('')
   const [pw, setPw] = useState(''); const [pw2, setPw2] = useState('')
   const [busy, setBusy] = useState(false)
@@ -92,6 +102,18 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
   // email-confirmation redirect (?token=…).
   useImperativeHandle(ref, () => ({
     openAuth: (mode) => { setModal(mode); setMsg(null); setNeedsVerify(false) },
+    openProfileEdit: () => {
+      const m = meRef.current
+      setSGender(m?.gender === 'female' ? 'female' : 'male')
+      setSDob(m?.dob || '1998-01-01')
+      setSTime(m?.birthTime || '12:00')
+      setSPlace(m?.locationName || '')
+      setSLat(m?.latitude != null ? String(m.latitude) : '')
+      setSLon(m?.longitude != null ? String(m.longitude) : '')
+      setSTz(m?.timezone || '')
+      setSPlaceOk(m?.latitude != null && m?.longitude != null)
+      setSHits([]); setMsg(null); setModal('profile')
+    },
     ingestToken: (tk) => { if (!tk) return; setToken(tk); persist(tk); setModal(null) },
   }), [])
 
@@ -137,6 +159,22 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
       setMsg({ ok: true, text: t('Account created — confirm the email we sent, then sign in.', 'အကောင့်ဖန်တီးပြီး — ပို့လိုက်သည့် အီးမေးလ်ကို အတည်ပြုပြီးမှ အကောင့်ဝင်ပါ။') })
       setModal('login'); setPw(''); setPw2('')
     } catch (err) { setMsg({ ok: false, text: err instanceof Error ? err.message : 'Sign up failed' }) } finally { setBusy(false) }
+  }
+  const saveProfile = async (e: FormEvent) => {
+    e.preventDefault()
+    setBusy(true); setMsg(null)
+    try {
+      const body = {
+        gender: sGender, dob: sDob, birthTime: sTime, locationName: sPlace.trim(),
+        latitude: sLat ? Number(sLat) : null, longitude: sLon ? Number(sLon) : null, timezone: sTz,
+      }
+      const r = await fetch(`${API}/api/customer/profile`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
+      })
+      const j = await r.json()
+      if (!r.ok || !j?.success) throw new Error(j?.message || 'Update failed')
+      setMe(j.data); setModal(null); onProfileSaved?.()
+    } catch (err) { setMsg({ ok: false, text: err instanceof Error ? err.message : 'Update failed' }) } finally { setBusy(false) }
   }
   const logout = () => { setToken(''); persist(''); setMe(null); setCharts([]) }
   const saveUsername = async () => {
@@ -202,28 +240,32 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setModal(null)}>
           <div className={`glass-card w-full ${modal === 'signup' ? 'max-w-md' : 'max-w-sm'} max-h-[90vh] overflow-y-auto p-6`} onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-groovy text-lg text-fg">{modal === 'login' ? t('Sign in', 'အကောင့်ဝင်') : t('Create account', 'အကောင့်ဖွင့်')}</h3>
+              <h3 className="font-groovy text-lg text-fg">{modal === 'login' ? t('Sign in', 'အကောင့်ဝင်') : modal === 'profile' ? t('Edit your natal profile', 'မွေးဇာတာ ပရိုဖိုင် ပြင်ရန်') : t('Create account', 'အကောင့်ဖွင့်')}</h3>
               <button type="button" onClick={() => setModal(null)} className="text-muted hover:text-fg"><X size={18} /></button>
             </div>
             {msg && <p className={`mb-3 rounded-xl border px-3 py-2 text-xs ${msg.ok ? 'border-jade/40 bg-jade/10 text-jade' : 'border-coral/40 bg-coral/10 text-coral'}`}>{msg.text}</p>}
-            <form onSubmit={modal === 'login' ? login : signup} className="space-y-3">
-              <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Email', 'အီးမေးလ်')}</span>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} /></label>
+            <form onSubmit={modal === 'login' ? login : modal === 'signup' ? signup : saveProfile} className="space-y-3">
+              {modal !== 'profile' && (
+                <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Email', 'အီးမေးလ်')}</span>
+                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} /></label>
+              )}
               {modal === 'signup' && (
                 <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Username', 'အသုံးပြုသူအမည်')}</span>
                   <input required value={username} onChange={(e) => setUsername(e.target.value)} className={inputCls} /></label>
               )}
-              <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Password', 'စကားဝှက်')}</span>
-                <input type="password" required minLength={8} value={pw} onChange={(e) => setPw(e.target.value)} className={inputCls} /></label>
+              {modal !== 'profile' && (
+                <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Password', 'စကားဝှက်')}</span>
+                  <input type="password" required minLength={8} value={pw} onChange={(e) => setPw(e.target.value)} className={inputCls} /></label>
+              )}
               {modal === 'signup' && (
                 <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Confirm password', 'စကားဝှက် အတည်ပြု')}</span>
                   <input type="password" required minLength={8} value={pw2} onChange={(e) => setPw2(e.target.value)} className={`${inputCls} ${pw2 && pw !== pw2 ? 'border-coral/50' : ''}`} /></label>
               )}
 
-              {/* Natal profile (optional) — makes the account render its own chart instantly */}
-              {modal === 'signup' && (
+              {/* Natal profile — makes the account render its own chart instantly */}
+              {(modal === 'signup' || modal === 'profile') && (
                 <div className="space-y-3 rounded-xl border border-jade/25 bg-jade/[0.05] p-3">
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-jade">{t('Your birth details (optional — unlocks your dashboard)', 'သင့်မွေးဖွားချက် (ရွေးချယ်နိုင် — Dashboard ဖွင့်ပေးသည်)')}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-jade">{modal === 'profile' ? t('Your birth details', 'သင့်မွေးဖွားချက်') : t('Your birth details (optional — unlocks your dashboard)', 'သင့်မွေးဖွားချက် (ရွေးချယ်နိုင် — Dashboard ဖွင့်ပေးသည်)')}</p>
                   <div className="grid grid-cols-2 gap-2">
                     <label className="block"><span className="font-mono text-[10px] uppercase tracking-wider text-muted">{t('Gender', 'ကျား/မ')}</span>
                       <select value={sGender} onChange={(e) => setSGender(e.target.value as 'male' | 'female')} className={inputCls}>
@@ -254,7 +296,7 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
               )}
 
               <button type="submit" disabled={busy} className="w-full rounded-xl bg-gradient-to-r from-accent to-violet-500 px-5 py-2.5 text-sm font-semibold text-space transition hover:brightness-110 disabled:opacity-60">
-                {busy ? <Loader2 size={15} className="mx-auto animate-spin" /> : modal === 'login' ? t('Sign in', 'ဝင်မည်') : t('Create account', 'အကောင့်ဖွင့်မည်')}
+                {busy ? <Loader2 size={15} className="mx-auto animate-spin" /> : modal === 'login' ? t('Sign in', 'ဝင်မည်') : modal === 'profile' ? t('Save profile', 'ပရိုဖိုင် သိမ်းမည်') : t('Create account', 'အကောင့်ဖွင့်မည်')}
               </button>
             </form>
             {modal === 'login' && needsVerify && (
@@ -263,9 +305,11 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
                 {cooldown > 0 ? t(`Resend in ${cooldown}s`, `${cooldown} စက္ကန့်အကြာ ပြန်ပို့`) : t('Resend confirmation email', 'အတည်ပြု email ပြန်ပို့ရန်')}
               </button>
             )}
-            <button type="button" onClick={() => { setModal(modal === 'login' ? 'signup' : 'login'); setMsg(null); setNeedsVerify(false) }} className="mt-3 w-full text-center font-mono text-[11px] text-muted hover:text-fg">
-              {modal === 'login' ? t("No account? Sign up", 'အကောင့်မရှိသေးဘူးလား? ဖွင့်မည်') : t('Have an account? Sign in', 'အကောင့်ရှိပြီးသားလား? ဝင်မည်')}
-            </button>
+            {modal !== 'profile' && (
+              <button type="button" onClick={() => { setModal(modal === 'login' ? 'signup' : 'login'); setMsg(null); setNeedsVerify(false) }} className="mt-3 w-full text-center font-mono text-[11px] text-muted hover:text-fg">
+                {modal === 'login' ? t("No account? Sign up", 'အကောင့်မရှိသေးဘူးလား? ဖွင့်မည်') : t('Have an account? Sign in', 'အကောင့်ရှိပြီးသားလား? ဝင်မည်')}
+              </button>
+            )}
           </div>
         </div>
       )}

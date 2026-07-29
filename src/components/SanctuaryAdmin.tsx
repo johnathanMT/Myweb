@@ -1,6 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, Fragment, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, FileText, Mail, Trash2, X, Send, ScrollText, Check, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, FileText, Mail, Trash2, X, Send, ScrollText, Check, UserRound, Eye, type LucideIcon } from 'lucide-react'
 import { SITE } from '../config/site'
 import AdminPoetryManager from './AdminPoetryManager'
 import type { Memory, EntityId } from '../types/api'
@@ -46,9 +46,15 @@ interface AdminRemedy { id: number; name: string; contact: string; area: string;
 const STATUSES = ['Pending', 'InProgress', 'Completed', 'Cancelled'] as const
 const statusColor = (s: string) => s === 'Completed' ? 'text-emerald-300' : s === 'Cancelled' ? 'text-rose-300' : s === 'InProgress' ? 'text-amber-300' : 'text-fg/80'
 interface AdminChart { id: number; name: string; gender: string; birthDate: string; birthTime: string; timeZone: string; location: string; nayNan: number; createdAt: string }
+// Natal context attached to a reading request when it came from a registered account.
+interface RegisteredInfo {
+  isRegistered?: boolean; accountEmail?: string; accountUsername?: string
+  gender?: string; dob?: string; birthTime?: string; locationName?: string
+  latitude?: number; longitude?: number; timezone?: string
+}
 // PDF Requests tab = reading requests awaiting a manual PDF email.
-interface AdminPdf { id: number; querentName: string; clientEmail?: string; status: string; createdAt: string }
-interface AdminReadingReq { id: number; querentName: string; clientEmail?: string; status: string; hasMarkdown: boolean; pdfRequested: boolean; createdAt: string; approvedAt?: string }
+interface AdminPdf extends RegisteredInfo { id: number; querentName: string; clientEmail?: string; status: string; createdAt: string }
+interface AdminReadingReq extends RegisteredInfo { id: number; querentName: string; clientEmail?: string; status: string; hasMarkdown: boolean; pdfRequested: boolean; createdAt: string; approvedAt?: string }
 type ReadingsFilter = 'Pending' | 'Approved' | 'Rejected'
 
 interface LoginResponse { data?: { token?: string; role?: string }; message?: string }
@@ -68,6 +74,7 @@ export default function SanctuaryAdmin() {
   const [readingReqs, setReadingReqs] = useState<AdminReadingReq[]>([])
   const [rowBusy, setRowBusy] = useState<{ id: number; action: 'approve' | 'reject' | 'sent' } | null>(null)
   const [readingsFilter, setReadingsFilter] = useState<ReadingsFilter>('Pending')
+  const [expandedRow, setExpandedRow] = useState<number | null>(null)
   const [toast, setToast] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -292,6 +299,39 @@ export default function SanctuaryAdmin() {
     </button>
   )
 
+  // Registered vs Guest badge (premium purple/green vs muted grey).
+  const UserBadge = ({ reg }: { reg?: boolean }) => reg
+    ? <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-gradient-to-r from-violet-500/25 to-emerald-400/20 px-2 py-0.5 font-mono text-[10px] text-violet-100"><UserRound size={10} /> Registered</span>
+    : <span className="inline-flex items-center gap-1 rounded-full border border-fg/15 bg-fg/5 px-2 py-0.5 font-mono text-[10px] text-fg/50">Guest</span>
+
+  // Full registered-account context, shown in an expanded row.
+  const RegisteredDetail = ({ r, cols }: { r: RegisteredInfo; cols: number }) => (
+    <tr className="border-t border-fg/5 bg-violet-500/[0.06]">
+      <td colSpan={cols} className="px-4 py-4">
+        <div className="rounded-xl border border-violet-400/25 bg-gradient-to-br from-violet-500/[0.08] to-emerald-400/[0.06] p-4">
+          <p className="mb-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-violet-200"><UserRound size={12} /> Registered account · full natal info</p>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+            {([
+              ['Name', r.accountUsername],
+              ['Email', r.accountEmail],
+              ['Gender', r.gender],
+              ['Date of birth', r.dob],
+              ['Birth time', r.birthTime],
+              ['Location', r.locationName],
+              ['Timezone', r.timezone],
+              ['Lat, Lon', r.latitude != null && r.longitude != null ? `${r.latitude}, ${r.longitude}` : undefined],
+            ] as [string, string | undefined][]).map(([k, v]) => (
+              <div key={k}>
+                <div className="font-mono text-[10px] uppercase tracking-wider text-fg/40">{k}</div>
+                <div className="text-fg/90">{v || <span className="text-fg/30">—</span>}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </td>
+    </tr>
+  )
+
   return (
     <div className="min-h-screen bg-space px-4 py-6 text-fg sm:px-8">
       <div className="mx-auto max-w-5xl">
@@ -464,25 +504,38 @@ export default function SanctuaryAdmin() {
                   ))}
                 </div>
                 <div className="mt-3 overflow-x-auto rounded-2xl border border-fg/10">
-                  <table className="w-full min-w-[560px] border-collapse text-left text-sm">
+                  <table className="w-full min-w-[680px] border-collapse text-left text-sm">
                     <thead className="bg-fg/5 font-mono text-[11px] uppercase tracking-wider text-fg/50">
                       <tr>
                         <th className="px-4 py-3">Querent</th>
                         <th className="px-4 py-3 whitespace-nowrap">Requested</th>
                         {readingsFilter !== 'Pending' && <th className="px-4 py-3 whitespace-nowrap">Approved</th>}
+                        <th className="px-4 py-3">User</th>
                         <th className="px-4 py-3">{readingsFilter === 'Pending' ? 'Actions' : 'Status'}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredReadingReqs.length === 0 ? (
-                        <tr><td colSpan={readingsFilter === 'Pending' ? 3 : 4} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : `No ${readingsFilter.toLowerCase()} requests.`}</td></tr>
+                      {(() => { const cols = readingsFilter === 'Pending' ? 4 : 5; return filteredReadingReqs.length === 0 ? (
+                        <tr><td colSpan={cols} className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : `No ${readingsFilter.toLowerCase()} requests.`}</td></tr>
                       ) : filteredReadingReqs.map((r) => {
                         const busy = rowBusy?.id === r.id
                         return (
-                          <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
+                          <Fragment key={r.id}>
+                          <tr className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
                             <td className="px-4 py-3 font-medium text-amber-300">{r.querentName || '—'}</td>
                             <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 16)}</td>
                             {readingsFilter !== 'Pending' && <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{r.approvedAt || <span className="text-fg/30">—</span>}</td>}
+                            <td className="px-4 py-3">
+                              <div className="flex flex-col items-start gap-1.5">
+                                <UserBadge reg={r.isRegistered} />
+                                {r.isRegistered && (
+                                  <button onClick={() => setExpandedRow(expandedRow === r.id ? null : r.id)}
+                                    className="inline-flex items-center gap-1 rounded-lg border border-violet-400/30 bg-violet-500/10 px-2 py-1 font-mono text-[10px] text-violet-100 transition hover:bg-violet-500/20">
+                                    <Eye size={11} /> {expandedRow === r.id ? 'Hide' : 'View Info'}
+                                  </button>
+                                )}
+                              </div>
+                            </td>
                             <td className="px-4 py-3">
                               {readingsFilter === 'Pending' ? (
                                 <div className="flex flex-wrap gap-1.5">
@@ -502,8 +555,10 @@ export default function SanctuaryAdmin() {
                               )}
                             </td>
                           </tr>
+                          {expandedRow === r.id && r.isRegistered && <RegisteredDetail r={r} cols={cols} />}
+                          </Fragment>
                         )
-                      })}
+                      }) })()}
                     </tbody>
                   </table>
                 </div>
@@ -641,7 +696,9 @@ export default function SanctuaryAdmin() {
                       const busy = rowBusy?.id === r.id
                       return (
                         <tr key={r.id} className="border-t border-fg/5 align-top hover:bg-fg/[0.03]">
-                          <td className="px-4 py-3 font-medium text-amber-300">{r.querentName || '—'}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-col items-start gap-1"><span className="font-medium text-amber-300">{r.querentName || '—'}</span><UserBadge reg={r.isRegistered} /></div>
+                          </td>
                           <td className="px-4 py-3 text-fg/90">{r.clientEmail || <span className="text-fg/30">—</span>}</td>
                           <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-fg/50">{(r.createdAt || '').slice(0, 16)}</td>
                           <td className="px-4 py-3">

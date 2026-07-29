@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, ScrollText, Clock, Mail, CheckCircle2, ChevronDown, Lock, UserPlus } from 'lucide-react'
+import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, ScrollText, Clock, Mail, CheckCircle2, ChevronDown, Lock, UserPlus, Pencil } from 'lucide-react'
 import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
@@ -323,6 +323,13 @@ export default function Jyotish() {
     return () => { cancelled = true }
   }, [customerToken])
 
+  const refreshProfile = () => {
+    if (!customerToken) return
+    fetch(`${SITE.apiUrl}/api/customer/me`, { headers: { Authorization: `Bearer ${customerToken}` } })
+      .then((r) => r.json()).then((j) => { if (j?.success && j.data) { setProfile(j.data as Profile); setOtherMode(false) } })
+      .catch(() => { /* ignore */ })
+  }
+
   // Registered + has profile + not "someone else" → instantly show their chart.
   const showDashboard = !!(customerToken && profile?.hasProfile && !otherMode)
   useEffect(() => {
@@ -589,7 +596,7 @@ export default function Jyotish() {
 
       {/* ── Customer account (sign in / saved charts) ── */}
       <div className="mb-6">
-        <CustomerPanel ref={customerPanelRef} lang={lang} onAuthChange={setCustomerToken} onLoadChart={loadSavedChart} />
+        <CustomerPanel ref={customerPanelRef} lang={lang} onAuthChange={setCustomerToken} onLoadChart={loadSavedChart} onProfileSaved={refreshProfile} />
       </div>
 
       {/* ── Registered dashboard banner (Emerald/Mint + Deep Purple) ── */}
@@ -608,10 +615,16 @@ export default function Jyotish() {
                 {profile.gender && <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-muted">{profile.gender === 'female' ? (lang === 'mm' ? 'မ' : 'Female') : (lang === 'mm' ? 'ကျား' : 'Male')}</span>}
               </div>
             </div>
-            <button type="button" onClick={startCalcForOther}
-              className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-fg transition hover:bg-white/20">
-              <Search size={15} /> {lang === 'mm' ? 'အခြားသူအတွက် တွက်ရန်' : 'Calculate for someone else'}
-            </button>
+            <div className="flex shrink-0 flex-col gap-2 self-start sm:items-end">
+              <button type="button" onClick={() => customerPanelRef.current?.openProfileEdit()}
+                className="inline-flex items-center gap-2 rounded-xl border border-jade/40 bg-jade/15 px-4 py-2.5 text-sm font-semibold text-jade transition hover:bg-jade/25">
+                <Pencil size={15} /> {lang === 'mm' ? 'ပရိုဖိုင် ပြင်ရန်' : 'Edit Profile'}
+              </button>
+              <button type="button" onClick={startCalcForOther}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-fg transition hover:bg-white/20">
+                <Search size={15} /> {lang === 'mm' ? 'အခြားသူအတွက် တွက်ရန်' : 'Calculate for someone else'}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -646,8 +659,12 @@ export default function Jyotish() {
         {!showDashboard && (<>
         {/* Fallback prompt — signed in but no saved birth profile */}
         {customerToken && profile && !profile.hasProfile && !otherMode && (
-          <div className="mx-auto w-full max-w-3xl rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4 text-sm leading-relaxed text-accent-light no-print">
-            {lang === 'mm' ? 'သင့်အကောင့်တွင် မွေးဇာတာ ပရိုဖိုင် မရှိသေးပါ။ အောက်ရှိ ဖောင်တွင် ဖြည့်၍ တွက်ချက်ပါ။' : 'Your account has no birth profile yet — fill in the form below to calculate a chart.'}
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4 text-sm leading-relaxed text-accent-light no-print sm:flex-row sm:items-center sm:justify-between">
+            <span>{lang === 'mm' ? 'သင့်အကောင့်တွင် မွေးဇာတာ ပရိုဖိုင် မရှိသေးပါ။ ပရိုဖိုင် ထည့်ပါ (သို့) အောက်ရှိ ဖောင်တွင် ဖြည့်ပါ။' : 'Your account has no birth profile yet — add one, or use the form below.'}</span>
+            <button type="button" onClick={() => customerPanelRef.current?.openProfileEdit()}
+              className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl bg-gradient-to-r from-accent to-violet-500 px-4 py-2 text-sm font-semibold text-space transition hover:brightness-110 sm:self-auto">
+              <Pencil size={15} /> {lang === 'mm' ? 'ပရိုဖိုင် ထည့်ရန်' : 'Add Profile'}
+            </button>
           </div>
         )}
         {/* ── How to use (accordion) + form title ── */}
