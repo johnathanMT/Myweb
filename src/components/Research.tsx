@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, Lock, Download, FlaskConical, Trash2 } from 'lucide-react'
 import {
   getPredictions, savePredictions, getJournal, saveJournal, hashPrediction, uid, exportCsv,
+  isSignedIn, fetchServerData, createPredictionServer, reviewPredictionServer, deletePredictionServer, createJournalServer,
   type Prediction, type JournalEntry, type Valence, type Outcome,
 } from '../lib/research'
 import { wilsonInterval, binomialNullSamples, permutationPValue, benjaminiHochberg } from '../lib/stats'
@@ -15,7 +16,17 @@ export default function Research() {
 
   const [preds, setPreds] = useState<Prediction[]>([])
   const [journal, setJournal] = useState<JournalEntry[]>([])
-  useEffect(() => { setPreds(getPredictions()); setJournal(getJournal()) }, [])
+  const [signedIn] = useState<boolean>(() => isSignedIn())
+  const [syncErr, setSyncErr] = useState('')
+  useEffect(() => {
+    if (signedIn) {
+      fetchServerData()
+        .then(({ predictions, journal }) => { setPreds(predictions); setJournal(journal) })
+        .catch((e) => { setSyncErr(e instanceof Error ? e.message : 'Could not load your saved data.'); setPreds(getPredictions()); setJournal(getJournal()) })
+    } else {
+      setPreds(getPredictions()); setJournal(getJournal())
+    }
+  }, [signedIn])
 
   // ── New prediction (pre-registered before its window opens) ──
   const [claim, setClaim] = useState(''); const [falsifier, setFalsifier] = useState('')
@@ -39,16 +50,36 @@ export default function Research() {
     const createdAt = new Date().toISOString()
     const locked = { createdAt, windowStart: wStart, windowEnd: wEnd, claim: claim.trim(), falsifier: falsifier.trim(), baseRate: br }
     const hash = await hashPrediction(locked)
-    const p: Prediction = { id: uid(), ...locked, area: area.trim(), baseRateSource: baseRateSource.trim(), intensity, valence, hash, locked: true }
-    const next = [p, ...preds]; setPreds(next); savePredictions(next)
+    const draft: Prediction = { id: uid(), ...locked, area: area.trim(), baseRateSource: baseRateSource.trim(), intensity, valence, hash, locked: true }
+
+    if (signedIn) {
+      try {
+        const saved = await createPredictionServer(draft)
+        setPreds((prev) => [saved, ...prev]); setSyncErr('')
+      } catch (e) { return setFormErr(e instanceof Error ? e.message : t('Could not save to your account.', 'သင့်အကောင့်သို့ မသိမ်းနိုင်ပါ။')) }
+    } else {
+      const next = [draft, ...preds]; setPreds(next); savePredictions(next)
+    }
     setClaim(''); setFalsifier(''); setArea(''); setBaseRateSource('')
   }
 
-  const review = (id: string, outcome: Outcome) => {
-    const next = preds.map((p) => (p.id === id ? { ...p, outcome, reviewedAt: new Date().toISOString() } : p))
-    setPreds(next); savePredictions(next)
+  const review = async (id: string, outcome: Outcome) => {
+    if (signedIn) {
+      try { const updated = await reviewPredictionServer(id, outcome); setPreds((prev) => prev.map((p) => (p.id === id ? updated : p))) }
+      catch (e) { setSyncErr(e instanceof Error ? e.message : 'Could not save the score.') }
+    } else {
+      const next = preds.map((p) => (p.id === id ? { ...p, outcome, reviewedAt: new Date().toISOString() } : p))
+      setPreds(next); savePredictions(next)
+    }
   }
-  const remove = (id: string) => { const next = preds.filter((p) => p.id !== id); setPreds(next); savePredictions(next) }
+  const remove = async (id: string) => {
+    if (signedIn) {
+      try { await deletePredictionServer(id); setPreds((prev) => prev.filter((p) => p.id !== id)) }
+      catch (e) { setSyncErr(e instanceof Error ? e.message : 'Could not delete.') }
+    } else {
+      const next = preds.filter((p) => p.id !== id); setPreds(next); savePredictions(next)
+    }
+  }
 
   // ── Dashboard ──
   const scored = preds.filter((p) => p.outcome)
@@ -97,10 +128,18 @@ export default function Research() {
 
   // ── Blind journal (life events, logged without seeing predictions) ──
   const [jMonth, setJMonth] = useState(''); const [jCat, setJCat] = useState(''); const [jDesc, setJDesc] = useState(''); const [jMag, setJMag] = useState<1 | 2 | 3>(2)
-  const addJournal = (e: FormEvent) => {
+  const addJournal = async (e: FormEvent) => {
     e.preventDefault(); if (!jMonth || !jDesc.trim()) return
-    const j: JournalEntry = { id: uid(), month: jMonth, category: jCat.trim(), description: jDesc.trim(), magnitude: jMag, createdAt: new Date().toISOString() }
-    const next = [j, ...journal]; setJournal(next); saveJournal(next); setJDesc(''); setJCat('')
+    if (signedIn) {
+      try {
+        const saved = await createJournalServer({ month: jMonth, category: jCat.trim(), description: jDesc.trim(), magnitude: jMag })
+        setJournal((prev) => [saved, ...prev]); setSyncErr('')
+      } catch (err) { return setSyncErr(err instanceof Error ? err.message : 'Could not save the entry.') }
+    } else {
+      const j: JournalEntry = { id: uid(), month: jMonth, category: jCat.trim(), description: jDesc.trim(), magnitude: jMag, createdAt: new Date().toISOString() }
+      const next = [j, ...journal]; setJournal(next); saveJournal(next)
+    }
+    setJDesc(''); setJCat('')
   }
 
   const field = 'mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-fg outline-none focus:border-accent/50'
@@ -131,6 +170,14 @@ export default function Research() {
           <p className="mt-1"><span className="text-accent-light">H₁</span> : {t('There is an association.', 'ဆက်စပ်မှု ရှိသည်။')}</p>
           <p className="mt-2 text-muted">{t('This project attempts to reject H₀. If it cannot, that outcome will be reported honestly.', 'ဤသုတေသနသည် H₀ ကို reject လုပ်ရန် ကြိုးစားသည်။ မအောင်မြင်ပါက ထိုရလဒ်ကို ရိုးသားစွာ ဖော်ပြမည်။')}</p>
         </div>
+      </div>
+
+      {/* Storage status */}
+      <div className={`mb-6 flex flex-wrap items-center gap-2 rounded-xl border px-4 py-3 text-xs leading-relaxed ${signedIn ? 'border-jade/30 bg-jade/[0.06] text-fg/90' : 'border-accent/25 bg-accent/[0.05] text-muted'}`}>
+        {signedIn
+          ? <span>{t('☁️ Signed in — your predictions & journal are saved to your account (any device).', '☁️ အကောင့်ဝင်ထားသည် — သင့် ဟောကိန်းများနှင့် ဂျာနယ်ကို အကောင့်တွင် သိမ်းထားသည် (မည်သည့်စက်မဆို)။')}</span>
+          : <span>{t('💾 Saved only in this browser. Sign in on the Vedin page to sync your research to your account.', '💾 ဤ browser ထဲမှာသာ သိမ်းထားသည်။ သုတေသနကို အကောင့်နှင့် ချိတ်ရန် Vedin စာမျက်နှာတွင် အကောင့်ဝင်ပါ။')}</span>}
+        {syncErr && <span className="text-coral">· {syncErr}</span>}
       </div>
 
       {/* Live dashboard */}
@@ -303,9 +350,20 @@ export default function Research() {
         </ul>
       </div>
 
+      {/* Bottom language toggle — no need to scroll back up */}
+      <div className="mb-6 flex justify-center">
+        <div className="flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
+          {(['en', 'mm'] as Lang[]).map((l) => (
+            <button key={l} type="button" onClick={() => setLang(l)} className={`rounded-full px-4 py-1.5 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>{l === 'en' ? 'EN' : 'မြန်မာ'}</button>
+          ))}
+        </div>
+      </div>
+
       <footer className="border-t border-accent/15 pt-6 text-center">
         <p className="font-mono text-[11px] tracking-wide text-accent-light">Sidereal · Lahiri ayanamsa (1955) · Whole-Sign houses · Mean node · Swiss Ephemeris</p>
-        <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-muted">{t('All data stays in your browser (localStorage). Astrology is not scientifically validated.', 'data အားလုံး သင့် browser ထဲ (localStorage) မှာသာ ရှိသည်။ ဗေဒင်သည် သိပ္ပံနည်းကျ အတည်ပြုထားခြင်း မရှိပါ။')}</p>
+        <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-muted">{signedIn
+          ? t('Signed in — data is saved to your account. Astrology is not scientifically validated.', 'အကောင့်ဝင်ထားသည် — data ကို အကောင့်တွင် သိမ်းထားသည်။ ဗေဒင်သည် သိပ္ပံနည်းကျ အတည်ပြုထားခြင်း မရှိပါ။')
+          : t('Anonymous — data stays in this browser (localStorage). Astrology is not scientifically validated.', 'အမည်မဖော် — data သည် ဤ browser ထဲ (localStorage) မှာသာ ရှိသည်။ ဗေဒင်သည် သိပ္ပံနည်းကျ အတည်ပြုထားခြင်း မရှိပါ။')}</p>
       </footer>
     </section>
   )

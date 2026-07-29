@@ -262,7 +262,16 @@ export default function Algorithms() {
         </div>
       </div>
 
-      <footer className="mt-10 border-t border-accent/15 pt-6 text-center">
+      {/* Bottom language toggle — no need to scroll back up */}
+      <div className="mt-10 flex justify-center">
+        <div className="flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
+          {(['en', 'mm'] as Lang[]).map((l) => (
+            <button key={l} type="button" onClick={() => setLang(l)} className={`rounded-full px-4 py-1.5 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>{l === 'en' ? 'EN' : 'မြန်မာ'}</button>
+          ))}
+        </div>
+      </div>
+
+      <footer className="mt-8 border-t border-accent/15 pt-6 text-center">
         <p className="font-mono text-[11px] tracking-wide text-accent-light">Sidereal · Lahiri ayanamsa (1955) · Whole-Sign houses · Mean node · Swiss Ephemeris</p>
         <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-muted">{t('Documenting the computation, not claiming the outcome. Astrology is not scientifically validated.', 'တွက်ချက်မှုကို မှတ်တမ်းတင်ခြင်းသာ — ရလဒ်ကို ကြေညာခြင်း မဟုတ်။ ဗေဒင်သည် သိပ္ပံနည်းကျ အတည်ပြုထားခြင်း မရှိပါ။')}</p>
         <Link to="/research" className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 font-mono text-[11px] text-accent-light transition hover:bg-accent/20">{t('Falsifiable research protocol →', 'တိုင်းတာနိုင်သော သုတေသန လုပ်ထုံး →')}</Link>

@@ -1,9 +1,15 @@
 // ============================================================================
-//  research.ts — pre-registered, falsifiable prediction store (localStorage).
+//  research.ts — pre-registered, falsifiable prediction store.
 //  A prediction is written BEFORE its window opens, then cryptographically
 //  hash-locked so it cannot be silently edited afterwards. Outcomes are scored
-//  later and compared against a stated base rate. No backend, no accounts.
+//  later and compared against a stated base rate.
+//
+//  Storage is two-tier:
+//   • Signed-in customers → persisted to the backend DB (survives devices/clears).
+//   • Anonymous visitors  → localStorage fallback (this browser only).
 // ============================================================================
+
+import { SITE } from '../config/site'
 
 export type Valence = 'supportive' | 'demanding' | 'mixed' | 'neutral'
 export type Outcome = 'hit' | 'partial' | 'miss'
@@ -62,6 +68,62 @@ export async function hashPrediction(p: Pick<Prediction, 'createdAt' | 'windowSt
   } catch {
     return 'hash-unavailable'
   }
+}
+
+// ── Server-backed store (signed-in customers) ───────────────────────────────
+// Reuses the same customer JWT the Vedin account panel stores.
+const CUST_TOKEN = 'mtn_customer_jwt'
+export const getCustomerToken = (): string => { try { return localStorage.getItem(CUST_TOKEN) || '' } catch { return '' } }
+export const isSignedIn = (): boolean => !!getCustomerToken()
+
+const api = (path: string) => `${SITE.apiUrl}/api/research${path}`
+const authHeaders = (json = false): Record<string, string> => {
+  const h: Record<string, string> = { Authorization: `Bearer ${getCustomerToken()}` }
+  if (json) h['Content-Type'] = 'application/json'
+  return h
+}
+
+async function unwrap<T>(res: Response): Promise<T> {
+  const j = (await res.json().catch(() => null)) as { success?: boolean; data?: T; message?: string } | null
+  if (!res.ok || !j?.success) throw new Error(j?.message || `Request failed (${res.status})`)
+  return j.data as T
+}
+
+/** Load the whole dataset for the signed-in account. */
+export async function fetchServerData(): Promise<{ predictions: Prediction[]; journal: JournalEntry[] }> {
+  const data = await unwrap<{ predictions: Prediction[]; journal: JournalEntry[] }>(
+    await fetch(api('/data'), { headers: authHeaders() }),
+  )
+  return { predictions: data.predictions ?? [], journal: data.journal ?? [] }
+}
+
+/** Persist a pre-registered prediction; returns the stored row (with server id). */
+export async function createPredictionServer(p: Omit<Prediction, 'id' | 'locked'>): Promise<Prediction> {
+  const body = {
+    createdAt: p.createdAt, windowStart: p.windowStart, windowEnd: p.windowEnd,
+    area: p.area, claim: p.claim, falsifier: p.falsifier, baseRate: p.baseRate,
+    baseRateSource: p.baseRateSource, intensity: p.intensity, valence: p.valence, hash: p.hash,
+  }
+  return unwrap<Prediction>(await fetch(api('/predictions'), { method: 'POST', headers: authHeaders(true), body: JSON.stringify(body) }))
+}
+
+export async function reviewPredictionServer(id: string, outcome: Outcome): Promise<Prediction> {
+  return unwrap<Prediction>(await fetch(api(`/predictions/${id}/outcome`), { method: 'PATCH', headers: authHeaders(true), body: JSON.stringify({ outcome }) }))
+}
+
+export async function deletePredictionServer(id: string): Promise<void> {
+  const res = await fetch(api(`/predictions/${id}`), { method: 'DELETE', headers: authHeaders() })
+  if (!res.ok) throw new Error(`Delete failed (${res.status})`)
+}
+
+export async function createJournalServer(j: Omit<JournalEntry, 'id' | 'createdAt'>): Promise<JournalEntry> {
+  const body = { month: j.month, category: j.category, description: j.description, magnitude: j.magnitude }
+  return unwrap<JournalEntry>(await fetch(api('/journal'), { method: 'POST', headers: authHeaders(true), body: JSON.stringify(body) }))
+}
+
+export async function deleteJournalServer(id: string): Promise<void> {
+  const res = await fetch(api(`/journal/${id}`), { method: 'DELETE', headers: authHeaders() })
+  if (!res.ok) throw new Error(`Delete failed (${res.status})`)
 }
 
 /** Export the full dataset for independent re-analysis (reproducibility). */

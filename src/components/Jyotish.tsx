@@ -1078,8 +1078,17 @@ export default function Jyotish() {
         </div>
       </div>
 
+      {/* Bottom language toggle — mirrors the top one so users needn't scroll back up */}
+      <div className="mt-12 flex justify-center no-print">
+        <div className="flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
+          {(['en', 'mm'] as const).map((l) => (
+            <button key={l} type="button" onClick={() => setLang(l)} className={`rounded-full px-4 py-1.5 font-mono text-xs transition ${lang === l ? 'bg-accent/70 text-space' : 'text-muted hover:text-fg'}`}>{l === 'en' ? 'EN' : 'မြန်မာ'}</button>
+          ))}
+        </div>
+      </div>
+
       {/* ── Methodology (a genuine differentiator) + honest disclaimer ── */}
-      <footer className="mt-12 border-t border-accent/15 pt-6 text-center">
+      <footer className="mt-8 border-t border-accent/15 pt-6 text-center">
         <p className="font-mono text-[11px] tracking-wide text-accent-light">
           Sidereal · Lahiri ayanamsa (1955) · Whole-Sign houses · Mean node · Swiss Ephemeris
         </p>
