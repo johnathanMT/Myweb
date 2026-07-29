@@ -30,6 +30,11 @@ const browserTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().
 const TZ_OPTIONS = [...new Set([browserTz, ...PRESETS.map((p) => p.tz), 'UTC'])]
 
 interface GeoResult { display_name: string; lat: string; lon: string }
+interface Profile {
+  id: number; email: string; username: string; emailConfirmed: boolean
+  gender?: string; dob?: string; birthTime?: string; locationName?: string
+  latitude?: number; longitude?: number; timezone?: string; hasProfile: boolean
+}
 type Tab = 'ai' | 'reading' | 'timeline' | 'd1' | 'vargas' | 'ashtaka' | 'shadbala'
 
 
@@ -207,6 +212,8 @@ export default function Jyotish() {
   const customerPanelRef = useRef<CustomerPanelHandle>(null)
   const [howtoOpen, setHowtoOpen] = useState(false)
   const [verifyToast, setVerifyToast] = useState('')
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [otherMode, setOtherMode] = useState(false)   // "calculate for someone else"
   const loadSavedChart = (c: SavedChart) => {
     setName(c.name || ''); setGender(c.gender === 'female' ? 'female' : 'male')
     setDate(c.birthDate || date); setTime(c.birthTime || time)
@@ -277,6 +284,58 @@ export default function Jyotish() {
       setError(err instanceof Error ? err.message : 'Could not compute the chart.')
     } finally { setLoading(false) }
   }
+
+  // ── Registered dashboard: compute the account's own chart from its profile.
+  // Also syncs the form state so the reading payload / status use this identity. ──
+  const computeFromProfile = async (p: Profile) => {
+    if (!p.dob || p.latitude == null || p.longitude == null) return
+    const g: 'male' | 'female' = p.gender === 'female' ? 'female' : 'male'
+    const bt = p.birthTime || '12:00'
+    setName(p.username || ''); setGender(g)
+    setDate(p.dob); setTime(bt)
+    setLat(String(p.latitude)); setLon(String(p.longitude))
+    if (p.timezone) setTz(p.timezone)
+    setPlace(p.locationName || 'My birth place'); setPlaceConfirmed(true)
+    setError(''); setLoading(true); setData(null)
+    try {
+      const [y, mo, d] = p.dob.split('-').map(Number)
+      const [h, mi] = bt.split(':').map(Number)
+      const body: BirthChartRequest = {
+        year: y, month: mo, day: d, hour: h || 0, minute: mi || 0, second: 0,
+        timeZone: p.timezone || tz, latitude: p.latitude, longitude: p.longitude, ayanamsa,
+      }
+      const res = await fetch(CHART_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const json = (await res.json().catch(() => null)) as { success?: boolean; data?: BirthChartData; message?: string } | null
+      if (!res.ok || !json?.success || !json.data) throw new Error(json?.message || `Failed (${res.status})`)
+      setData(json.data); setQuerent({ name: (p.username || '').trim(), gender: g, nn: naynan(p.dob, bt) }); setTab('reading')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not compute your chart.')
+    } finally { setLoading(false) }
+  }
+
+  // Fetch the profile whenever the auth token changes.
+  useEffect(() => {
+    if (!customerToken) { setProfile(null); setOtherMode(false); return }
+    let cancelled = false
+    fetch(`${SITE.apiUrl}/api/customer/me`, { headers: { Authorization: `Bearer ${customerToken}` } })
+      .then((r) => r.json()).then((j) => { if (!cancelled && j?.success && j.data) setProfile(j.data as Profile) })
+      .catch(() => { /* ignore */ })
+    return () => { cancelled = true }
+  }, [customerToken])
+
+  // Registered + has profile + not "someone else" → instantly show their chart.
+  const showDashboard = !!(customerToken && profile?.hasProfile && !otherMode)
+  useEffect(() => {
+    if (showDashboard && profile) computeFromProfile(profile)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDashboard, profile])
+
+  const startCalcForOther = () => {
+    setOtherMode(true); setData(null)
+    setName(''); setGender('male'); setPlace(''); setPlaceConfirmed(false); setResults([])
+    setReqStatus('none'); setReqMarkdown(''); setReqId(null); setPdfRequested(false); setPdfEmail(''); setReqError(''); setReqInfo('')
+  }
+  const backToDashboard = () => { setOtherMode(false); setReqStatus('none'); setReqMarkdown(''); setReqId(null); setPdfRequested(false) }
 
   const openRemedy = (areaLabel: string) => {
     setRemedyArea(areaLabel); setRemedyState('idle')
@@ -533,7 +592,32 @@ export default function Jyotish() {
         <CustomerPanel ref={customerPanelRef} lang={lang} onAuthChange={setCustomerToken} onLoadChart={loadSavedChart} />
       </div>
 
+      {/* ── Registered dashboard banner (Emerald/Mint + Deep Purple) ── */}
+      {showDashboard && profile && (
+        <div className="relative mb-6 overflow-hidden rounded-3xl border p-6 sm:p-8 no-print"
+          style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.20) 0%, rgba(20,16,34,0.55) 46%, rgba(124,58,237,0.30) 100%)', borderColor: 'rgba(124,58,237,0.42)', boxShadow: '0 0 70px -20px rgba(16,185,129,0.45), 0 0 60px -24px rgba(124,58,237,0.5)' }}>
+          <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full opacity-40 blur-3xl" style={{ background: 'radial-gradient(circle, #34d399 0%, transparent 70%)' }} />
+          <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full opacity-40 blur-3xl" style={{ background: 'radial-gradient(circle, #a855f7 0%, transparent 70%)' }} />
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em]" style={{ color: '#6ee7b7' }}><Sparkles size={14} /> {lang === 'mm' ? 'သင့်ကိုယ်ပိုင် Jyotish Dashboard' : 'Your personal Jyotish dashboard'}</p>
+              <h2 className="mt-2 font-groovy text-2xl text-fg sm:text-3xl">{lang === 'mm' ? `ကြိုဆိုပါတယ်၊ ${profile.username} 🙏` : `Welcome to your personal Jyotish dashboard, ${profile.username}`}</h2>
+              <div className="mt-3 flex flex-wrap gap-2 font-mono text-[11px]">
+                {profile.dob && <span className="rounded-full border border-jade/30 bg-jade/10 px-2.5 py-1 text-jade">🎂 {profile.dob}{profile.birthTime ? ` · ${profile.birthTime}` : ''}</span>}
+                {profile.locationName && <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-accent-light">📍 {profile.locationName}</span>}
+                {profile.gender && <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-muted">{profile.gender === 'female' ? (lang === 'mm' ? 'မ' : 'Female') : (lang === 'mm' ? 'ကျား' : 'Male')}</span>}
+              </div>
+            </div>
+            <button type="button" onClick={startCalcForOther}
+              className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-fg transition hover:bg-white/20">
+              <Search size={15} /> {lang === 'mm' ? 'အခြားသူအတွက် တွက်ရန်' : 'Calculate for someone else'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Intro: Chandra Lagna + Instructions ── */}
+      {!showDashboard && (
       <div className="mb-6 grid gap-4 md:grid-cols-2 no-print">
         <div className="glass-card p-5">
           <h2 className="mb-2 flex items-center gap-2 font-groovy text-base text-fg"><Star size={16} className="text-accent" /> {t.chandraTitle}</h2>
@@ -548,8 +632,24 @@ export default function Jyotish() {
           </ul>
         </div>
       </div>
+      )}
 
       <div className="space-y-8">
+        {/* Back to dashboard (while calculating for someone else) */}
+        {customerToken && profile?.hasProfile && otherMode && (
+          <button type="button" onClick={backToDashboard}
+            className="no-print inline-flex items-center gap-1.5 rounded-full border border-jade/30 bg-jade/10 px-4 py-2 font-mono text-xs text-jade transition hover:bg-jade/20">
+            ← {lang === 'mm' ? 'ကျွန်ုပ်၏ Dashboard သို့ ပြန်သွားရန်' : 'Back to my dashboard'}
+          </button>
+        )}
+
+        {!showDashboard && (<>
+        {/* Fallback prompt — signed in but no saved birth profile */}
+        {customerToken && profile && !profile.hasProfile && !otherMode && (
+          <div className="mx-auto w-full max-w-3xl rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4 text-sm leading-relaxed text-accent-light no-print">
+            {lang === 'mm' ? 'သင့်အကောင့်တွင် မွေးဇာတာ ပရိုဖိုင် မရှိသေးပါ။ အောက်ရှိ ဖောင်တွင် ဖြည့်၍ တွက်ချက်ပါ။' : 'Your account has no birth profile yet — fill in the form below to calculate a chart.'}
+          </div>
+        )}
         {/* ── How to use (accordion) + form title ── */}
         <div className="mx-auto w-full max-w-3xl no-print">
           <div className="overflow-hidden rounded-2xl border border-accent/25 bg-accent/[0.05]">
@@ -677,6 +777,7 @@ export default function Jyotish() {
           {error && <p className="mt-3 rounded-xl border border-coral/40 bg-coral/10 px-3 py-2 font-mono text-xs text-coral">{error}</p>}
           <p className="mt-4 font-mono text-[10px] leading-relaxed text-muted">{t.disclaimer}</p>
         </form>
+        </>)}
 
         {/* ── Result ── */}
         <div className="min-w-0">
@@ -693,7 +794,7 @@ export default function Jyotish() {
                 <h2 className="font-groovy text-lg text-fg">{place || t.portalTitle}</h2>
                 <button type="button" onClick={downloadPdf}
                   className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-4 py-2 text-xs font-semibold text-space shadow-lg shadow-accent/25 transition hover:brightness-110">
-                  <Download size={14} /> {lang === 'mm' ? 'ဟောစာတမ်း PDF အပြည့်အစုံ ရယူရန်' : 'Download full PDF'}
+                  <Download size={14} /> {lang === 'mm' ? 'မွေးဇာတာ ဟောစာတမ်း PDF အပြည့်အစုံ ရယူရန်တောင်းဆိုပါ' : 'Download Full Natal Chart PDF'}
                 </button>
               </div>
               <div className="no-print sticky top-14 z-30 -mx-1 border-b border-accent/20 px-1 py-2.5 backdrop-blur-md sm:top-16"
@@ -758,7 +859,9 @@ export default function Jyotish() {
                           {reqLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                           {reqLoading
                             ? (lang === 'mm' ? 'ပေးပို့နေသည်…' : 'Sending…')
-                            : (lang === 'mm' ? '✨ ဆရာ ကိုဘုန်းမင်းသိုက်ဒင်ထံမှ ဟောစာတမ်းအပြည့်အစုံ တောင်းဆိုရန်' : '✨ Request Full Reading from the Sayar')}
+                            : showDashboard
+                              ? (lang === 'mm' ? '✨ ကျွန်ုပ်၏ ပရိုဖိုင်ဖြင့် ဟောစာတမ်း တောင်းဆိုရန်' : '✨ Request Reading based on my profile')
+                              : (lang === 'mm' ? '✨ ဆရာ ကိုဘုန်းမင်းသိုက်ဒင်ထံမှ ဟောစာတမ်းအပြည့်အစုံ တောင်းဆိုရန်' : '✨ Request Full Reading from the Sayar')}
                         </button>
                         <p className="mt-2 font-mono text-[11px] text-muted">{lang === 'mm' ? 'တစ်လလျှင် တစ်ကြိမ် တောင်းဆိုနိုင်ပါသည်။' : 'One request per month.'}</p>
                       </div>

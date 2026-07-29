@@ -1,10 +1,13 @@
-import { useState, useEffect, useCallback, useImperativeHandle, forwardRef, type FormEvent } from 'react'
-import { LogOut, Loader2, Pencil, Check, UserRound, X } from 'lucide-react'
+import { useState, useEffect, useCallback, useImperativeHandle, useRef, forwardRef, type FormEvent } from 'react'
+import { LogOut, Loader2, Pencil, Check, UserRound, X, Search } from 'lucide-react'
+import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import type { Lang } from '../lib/jyotish'
 
 const API = SITE.apiUrl
 const CUST_TOKEN = 'mtn_customer_jwt'
+const GEO_URL = 'https://nominatim.openstreetmap.org/search'
+interface GeoHit { display_name: string; lat: string; lon: string }
 
 export interface SavedChart {
   id: number; name: string; gender: string; birthDate: string; birthTime: string
@@ -38,6 +41,33 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
   const [charts, setCharts] = useState<SavedChart[]>([])
   const [editingName, setEditingName] = useState(false); const [newName, setNewName] = useState('')
   const [needsVerify, setNeedsVerify] = useState(false); const [cooldown, setCooldown] = useState(0)
+
+  // ── Natal profile fields (signup only) ──────────────────────────────────────
+  const [sGender, setSGender] = useState<'male' | 'female'>('male')
+  const [sDob, setSDob] = useState('1998-01-01')
+  const [sTime, setSTime] = useState('12:00')
+  const [sPlace, setSPlace] = useState(''); const [sPlaceOk, setSPlaceOk] = useState(false)
+  const [sLat, setSLat] = useState(''); const [sLon, setSLon] = useState(''); const [sTz, setSTz] = useState('')
+  const [sHits, setSHits] = useState<GeoHit[]>([]); const [sSearching, setSSearching] = useState(false)
+  const sDeb = useRef<number | undefined>(undefined)
+  const onSPlaceChange = (v: string) => {
+    setSPlace(v); setSPlaceOk(false)
+    window.clearTimeout(sDeb.current)
+    if (v.trim().length < 3) { setSHits([]); return }
+    sDeb.current = window.setTimeout(async () => {
+      setSSearching(true)
+      try {
+        const r = await fetch(`${GEO_URL}?format=json&limit=5&q=${encodeURIComponent(v)}`, { headers: { Accept: 'application/json' } })
+        const j = (await r.json()) as GeoHit[]
+        setSHits(Array.isArray(j) ? j : [])
+      } catch { setSHits([]) } finally { setSSearching(false) }
+    }, 450)
+  }
+  const selectSPlace = (g: GeoHit) => {
+    const la = Number(g.lat), lo = Number(g.lon)
+    setSLat(String(la)); setSLon(String(lo)); setSPlace(g.display_name.split(',').slice(0, 2).join(',').trim()); setSHits([]); setSPlaceOk(true)
+    try { setSTz(tzlookup(la, lo)) } catch { /* keep */ }
+  }
 
   useEffect(() => {
     if (cooldown <= 0) return
@@ -98,7 +128,10 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
     if (pw !== pw2) { setMsg({ ok: false, text: t('Passwords do not match.', 'Password နှစ်ခု မတူပါ။') }); return }
     setBusy(true); setMsg(null)
     try {
-      const r = await fetch(`${API}/api/customer/signup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim(), username: username.trim(), password: pw, confirmPassword: pw2 }) })
+      const natal = sPlaceOk && sLat && sLon
+        ? { gender: sGender, dob: sDob, birthTime: sTime, locationName: sPlace.trim(), latitude: Number(sLat), longitude: Number(sLon), timezone: sTz }
+        : {}
+      const r = await fetch(`${API}/api/customer/signup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim(), username: username.trim(), password: pw, confirmPassword: pw2, ...natal }) })
       const j = await r.json()
       if (!r.ok) throw new Error(j?.message || 'Sign up failed')
       setMsg({ ok: true, text: t('Account created — confirm the email we sent, then sign in.', 'အကောင့်ဖန်တီးပြီး — ပို့လိုက်သည့် အီးမေးလ်ကို အတည်ပြုပြီးမှ အကောင့်ဝင်ပါ။') })
@@ -167,7 +200,7 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
       {/* ── Auth modal ── */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setModal(null)}>
-          <div className="glass-card w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
+          <div className={`glass-card w-full ${modal === 'signup' ? 'max-w-md' : 'max-w-sm'} max-h-[90vh] overflow-y-auto p-6`} onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-groovy text-lg text-fg">{modal === 'login' ? t('Sign in', 'အကောင့်ဝင်') : t('Create account', 'အကောင့်ဖွင့်')}</h3>
               <button type="button" onClick={() => setModal(null)} className="text-muted hover:text-fg"><X size={18} /></button>
@@ -186,6 +219,40 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
                 <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Confirm password', 'စကားဝှက် အတည်ပြု')}</span>
                   <input type="password" required minLength={8} value={pw2} onChange={(e) => setPw2(e.target.value)} className={`${inputCls} ${pw2 && pw !== pw2 ? 'border-coral/50' : ''}`} /></label>
               )}
+
+              {/* Natal profile (optional) — makes the account render its own chart instantly */}
+              {modal === 'signup' && (
+                <div className="space-y-3 rounded-xl border border-jade/25 bg-jade/[0.05] p-3">
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-jade">{t('Your birth details (optional — unlocks your dashboard)', 'သင့်မွေးဖွားချက် (ရွေးချယ်နိုင် — Dashboard ဖွင့်ပေးသည်)')}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="block"><span className="font-mono text-[10px] uppercase tracking-wider text-muted">{t('Gender', 'ကျား/မ')}</span>
+                      <select value={sGender} onChange={(e) => setSGender(e.target.value as 'male' | 'female')} className={inputCls}>
+                        <option value="male" className="text-black">{t('Male', 'ကျား')}</option>
+                        <option value="female" className="text-black">{t('Female', 'မ')}</option>
+                      </select></label>
+                    <label className="block"><span className="font-mono text-[10px] uppercase tracking-wider text-muted">{t('Birth time', 'မွေးချိန်')}</span>
+                      <input type="time" value={sTime} onChange={(e) => setSTime(e.target.value)} className={inputCls} /></label>
+                  </div>
+                  <label className="block"><span className="font-mono text-[10px] uppercase tracking-wider text-muted">{t('Date of birth', 'မွေးသက္ကရာဇ်')}</span>
+                    <input type="date" value={sDob} onChange={(e) => setSDob(e.target.value)} className={inputCls} /></label>
+                  <label className="relative block"><span className="font-mono text-[10px] uppercase tracking-wider text-muted">{t('Birth place (search)', 'မွေးရပ် (ရှာဖွေ)')}</span>
+                    <div className="relative">
+                      <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
+                      <input value={sPlace} onChange={(e) => onSPlaceChange(e.target.value)} placeholder={t('e.g. Yangon', 'ဥပမာ — ရန်ကုန်')} className={`${inputCls} pl-8 ${sPlaceOk ? 'border-jade/50' : ''}`} />
+                      {sSearching && <Loader2 size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 animate-spin text-muted" />}
+                    </div>
+                    {sHits.length > 0 && (
+                      <ul className="absolute z-10 mt-1 max-h-40 w-full overflow-auto rounded-xl border border-white/15 bg-space/95 backdrop-blur">
+                        {sHits.map((g, i) => (
+                          <li key={i}><button type="button" onClick={() => selectSPlace(g)} className="block w-full truncate px-3 py-2 text-left text-xs text-fg/90 hover:bg-accent/15">{g.display_name}</button></li>
+                        ))}
+                      </ul>
+                    )}
+                  </label>
+                  {sPlaceOk && <p className="font-mono text-[10px] text-jade">✓ {sPlace} · {sTz}</p>}
+                </div>
+              )}
+
               <button type="submit" disabled={busy} className="w-full rounded-xl bg-gradient-to-r from-accent to-violet-500 px-5 py-2.5 text-sm font-semibold text-space transition hover:brightness-110 disabled:opacity-60">
                 {busy ? <Loader2 size={15} className="mx-auto animate-spin" /> : modal === 'login' ? t('Sign in', 'ဝင်မည်') : t('Create account', 'အကောင့်ဖွင့်မည်')}
               </button>
