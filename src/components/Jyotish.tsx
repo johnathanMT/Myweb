@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, ScrollText, Clock, Mail, CheckCircle2, ChevronDown, Lock, UserPlus, Pencil } from 'lucide-react'
+import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, ScrollText, Clock, CheckCircle2, ChevronDown, Lock, UserPlus, Pencil } from 'lucide-react'
 import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
@@ -202,13 +202,11 @@ export default function Jyotish() {
   // Manual-approval reading workflow: request → pending → (Sayar approves) → approved.
   const [reqStatus, setReqStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none')
   const [reqMarkdown, setReqMarkdown] = useState('')
-  const [reqId, setReqId] = useState<number | null>(null)
+  const [, setReqId] = useState<number | null>(null)   // tracked on status load; value unused since PDF is client-side now
   const [reqLoading, setReqLoading] = useState(false)
   const [reqError, setReqError] = useState('')
   const [reqInfo, setReqInfo] = useState('')
-  const [pdfRequested, setPdfRequested] = useState(false)
-  const [pdfLoading, setPdfLoading] = useState(false)
-  const [pdfEmail, setPdfEmail] = useState('')
+  const readingRef = useRef<HTMLDivElement>(null)   // the rendered reading, for client-side PDF
   const customerPanelRef = useRef<CustomerPanelHandle>(null)
   const [howtoOpen, setHowtoOpen] = useState(false)
   const [verifyToast, setVerifyToast] = useState('')
@@ -340,9 +338,9 @@ export default function Jyotish() {
   const startCalcForOther = () => {
     setOtherMode(true); setData(null)
     setName(''); setGender('male'); setPlace(''); setPlaceConfirmed(false); setResults([])
-    setReqStatus('none'); setReqMarkdown(''); setReqId(null); setPdfRequested(false); setPdfEmail(''); setReqError(''); setReqInfo('')
+    setReqStatus('none'); setReqMarkdown(''); setReqId(null); setReqError(''); setReqInfo('')
   }
-  const backToDashboard = () => { setOtherMode(false); setReqStatus('none'); setReqMarkdown(''); setReqId(null); setPdfRequested(false) }
+  const backToDashboard = () => { setOtherMode(false); setReqStatus('none'); setReqMarkdown(''); setReqId(null) }
 
   const openRemedy = (areaLabel: string) => {
     setRemedyArea(areaLabel); setRemedyState('idle')
@@ -435,15 +433,14 @@ export default function Jyotish() {
     }
   }
 
-  type StatusData = { status: string; requestId: number; markdown?: string; pdfRequested?: boolean; alreadyRequested?: boolean }
+  type StatusData = { status: string; requestId: number; markdown?: string; alreadyRequested?: boolean }
   const applyStatus = (d: StatusData | null | undefined) => {
     if (d && d.status && d.status.toLowerCase() !== 'none') {
       setReqStatus(d.status.toLowerCase() as 'pending' | 'approved' | 'rejected')
       setReqId(d.requestId ?? null)
       setReqMarkdown(d.markdown || '')
-      setPdfRequested(!!d.pdfRequested)
     } else {
-      setReqStatus('none'); setReqId(null); setReqMarkdown(''); setPdfRequested(false)
+      setReqStatus('none'); setReqId(null); setReqMarkdown('')
     }
   }
 
@@ -480,16 +477,57 @@ export default function Jyotish() {
     } finally { setReqLoading(false) }
   }
 
-  const emailOk = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim())
-  const requestReadingPdf = async () => {
-    if (!reqId || pdfLoading || pdfRequested || !emailOk(pdfEmail)) return
-    setPdfLoading(true)
-    try {
-      const res = await fetch(`${SITE.apiUrl}/api/astrology/reading/${reqId}/request-pdf`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: pdfEmail.trim() }),
-      })
-      if (res.ok) setPdfRequested(true)
-    } catch { /* ignore */ } finally { setPdfLoading(false) }
+  // Direct client-side PDF: render the approved reading into a clean, self-contained
+  // print document (light theme, Padauk font, selectable Burmese text) and open the
+  // browser's Save-as-PDF dialog. No server round-trip, no email.
+  const downloadReadingPdf = () => {
+    if (!customerToken) { openAuth('login'); return }
+    const body = readingRef.current?.innerHTML
+    if (!body) return
+    const who = (querent?.name || '').trim()
+    const today = new Date().toISOString().slice(0, 10)
+    const title = who ? `${who} — Vedin Reading` : 'Vedin Detailed Reading'
+    const win = window.open('', '_blank', 'noopener,width=860,height=1024')
+    if (!win) { window.alert(lang === 'mm' ? 'Popup ကို ခွင့်ပြုပေးပါ။' : 'Please allow pop-ups to download the PDF.'); return }
+    win.document.write(`<!doctype html><html lang="my"><head><meta charset="utf-8">
+<title>${title}</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Noto+Sans+Myanmar:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#fff; color:#1a1730;
+    font-family:'Padauk','Noto Sans Myanmar',system-ui,Segoe UI,sans-serif; line-height:1.95; }
+  .page { max-width:720px; margin:0 auto; padding:40px 34px; }
+  .head { border-bottom:2px solid #7c3aed; padding-bottom:14px; margin-bottom:22px; }
+  .brand { font:700 12px 'Segoe UI'; letter-spacing:.28em; text-transform:uppercase; color:#a16207; }
+  .name { font-size:22px; font-weight:700; margin:6px 0 2px; }
+  .meta { font:12px 'Segoe UI'; color:#6b7280; }
+  .md h1,.md h2,.md h3,.md h4 { color:#4c1d95; font-weight:700; margin:1.2em 0 .4em; line-height:1.4; }
+  .md h1{font-size:1.4rem} .md h2{font-size:1.2rem} .md h3{font-size:1.08rem} .md h4{font-size:1rem}
+  .md p { margin:.6em 0; }
+  .md strong { color:#047857; font-weight:700; }
+  .md em { color:#7c3aed; font-style:normal; }
+  .md ul,.md ol { margin:.5em 0; padding-left:1.4em; }
+  .md li { margin:.3em 0; }
+  .md hr { border:0; border-top:1px solid #e5e7eb; margin:1.2em 0; }
+  .foot { margin-top:26px; border-top:1px solid #e5e7eb; padding-top:12px; font:11px 'Segoe UI'; color:#8b8b8b; line-height:1.7; }
+  @media print { .page { padding:0; } }
+</style></head>
+<body><div class="page">
+  <div class="head">
+    <div class="brand">Vedin · Sayar Bhone Min Thike Din</div>
+    <div class="name">${who || (lang === 'mm' ? 'အသေးစိတ် ဟောစာတမ်း' : 'Detailed Reading')}</div>
+    <div class="meta">${today}</div>
+  </div>
+  <div class="md">${body}</div>
+  <div class="foot">${lang === 'mm'
+    ? 'ဤဟောစာတမ်းအား ဂန္ထဝင် ဇျောတိသ သင်္ချာနည်းစနစ်များဖြင့် တွက်ချက်ပြီး ဆရာ ကိုယ်တိုင် စိစစ်အတည်ပြုထားပါသည်။ ရလဒ်များမှာ ဆင်ခြင်သုံးသပ်ရန်အတွက် လမ်းညွှန်ချက်ဖြစ်ပါသည်။'
+    : 'Computed with classical Jyotish formulas and personally verified by the Sayar. Guidance for reflection.'}</div>
+</div>
+<script>window.onload=function(){setTimeout(function(){window.focus();window.print();},400);};</script>
+</body></html>`)
+    win.document.close()
   }
 
   // Task 3 — after the email-confirm redirect (…/jyotish?verified=true&token=…),
@@ -916,30 +954,27 @@ export default function Jyotish() {
                           <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent-light"><ScrollText size={14} /> {lang === 'mm' ? 'အသေးစိတ် ဟောစာတမ်း' : 'Detailed Reading'}</p>
                           <span className="inline-flex items-center gap-1 rounded-full bg-jade/15 px-2.5 py-0.5 font-mono text-[10px] text-jade no-print"><CheckCircle2 size={11} /> {lang === 'mm' ? 'ဆရာ အတည်ပြုပြီး' : 'Approved by the Sayar'}</span>
                         </div>
-                        <MarkdownView markdown={reqMarkdown} />
+                        <div ref={readingRef}><MarkdownView markdown={reqMarkdown} /></div>
                         <p className="mt-5 border-t border-white/10 pt-3 text-[11px] leading-relaxed text-muted">{lang === 'mm'
                           ? 'ဤဟောစာတမ်းအား ဂန္ထဝင် ဇျောတိသ သင်္ချာနည်းစနစ်များဖြင့် တိကျစွာ တွက်ချက်ပြီး ဆရာ ကိုယ်တိုင် စိစစ်အတည်ပြုထားပါသည်။ ရလဒ်များမှာ မိမိကိုယ်တိုင် ပြန်လည်ဆင်ခြင်သုံးသပ်ရန်အတွက် လမ်းညွှန်ချက်ဖြစ်ပါသည်။'
                           : 'This reading was computed with classical Jyotish formulas and personally verified by the Sayar. The interpretations are guidance for reflection.'}</p>
 
-                        {/* Phase 4 — request the reading as a PDF by email */}
+                        {/* Direct client-side PDF download (logged-in users only) */}
                         <div className="mt-5 no-print">
-                          {!pdfRequested && (
-                            <div className="mb-3 max-w-sm">
-                              <label className="block font-mono text-[11px] uppercase tracking-wider text-muted">{lang === 'mm' ? 'PDF လက်ခံမည့် Email' : 'Email for the PDF'}</label>
-                              <input type="email" inputMode="email" value={pdfEmail} onChange={(e) => setPdfEmail(e.target.value)}
-                                placeholder="you@example.com"
-                                className="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-fg outline-none focus:border-accent/50" />
+                          {customerToken ? (
+                            <button type="button" onClick={downloadReadingPdf}
+                              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent via-violet-500 to-jade px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/30 transition hover:brightness-110">
+                              <Download size={16} /> {lang === 'mm' ? '📥 မွေးဇာတာ ဟောစာတမ်း PDF အပြည့်အစုံ Download ဆွဲရန်' : '📥 Download Full Reading PDF'}
+                            </button>
+                          ) : (
+                            <div className="flex flex-col items-start gap-2">
+                              <p className="text-[13px] leading-relaxed text-muted">{lang === 'mm' ? 'PDF ဒေါင်းလုဒ်ရယူရန် အကောင့်ဝင်ရန် လိုအပ်ပါသည်။' : 'Log in to download the PDF.'}</p>
+                              <button type="button" onClick={() => openAuth('login')}
+                                className="inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-semibold text-accent-light transition hover:bg-accent/20">
+                                <Lock size={15} /> {lang === 'mm' ? 'အကောင့်ဝင်ရန်' : 'Log In'}
+                              </button>
                             </div>
                           )}
-                          <button type="button" onClick={requestReadingPdf} disabled={pdfLoading || pdfRequested || !emailOk(pdfEmail)}
-                            className="inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-semibold text-accent-light transition hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-60">
-                            {pdfLoading ? <Loader2 size={15} className="animate-spin" /> : pdfRequested ? <CheckCircle2 size={15} className="text-jade" /> : <Mail size={15} />}
-                            {pdfRequested
-                              ? (lang === 'mm' ? 'PDF တောင်းဆိုမှု ပေးပို့ပြီးပါပြီ' : 'PDF request sent')
-                              : (lang === 'mm' ? '✉️ PDF ဟောစာတမ်းကို Email ဖြင့် တောင်းဆိုရန်' : '✉️ Request the reading as a PDF by email')}
-                          </button>
-                          {!pdfRequested && pdfEmail.length > 0 && !emailOk(pdfEmail) && <p className="mt-2 text-[11px] text-coral">{lang === 'mm' ? 'မှန်ကန်သော Email လိပ်စာ ထည့်ပါ။' : 'Enter a valid email address.'}</p>}
-                          {pdfRequested && <p className="mt-2 text-[11px] text-muted">{lang === 'mm' ? 'ဆရာမှ PDF ဟောစာတမ်းကို သင့် Email သို့ ပေးပို့ပေးပါလိမ့်မည်။' : 'The Sayar will email the PDF reading to you.'}</p>}
                         </div>
                       </div>
                     </div>
