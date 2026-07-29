@@ -1855,6 +1855,7 @@ html[data-theme="light"] .section-subtitle {
   header,
   footer,
   .no-print,
+  .print-hide,               /* Phase 4: profile photo + biography omitted from the PDF */
   [aria-hidden="true"] {
     display: none !important;
   }
@@ -1873,5 +1874,27 @@ html[data-theme="light"] .section-subtitle {
 
   .section-container {
     padding-top: 0 !important;
+  }
+
+  /* Phase 4: timeline / chart tables must print in full — never clipped by the
+     horizontal-scroll wrapper. Drop the scroll, drop the min-width, shrink to fit. */
+  .overflow-x-auto {
+    overflow: visible !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
+  .overflow-x-auto table,
+  .vedin-page table {
+    min-width: 0 !important;
+    width: 100% !important;
+    font-size: 9px !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .vedin-page thead {
+    display: table-header-group;   /* repeat the header row across printed pages */
+  }
+  .vedin-page tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }

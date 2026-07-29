@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, Bot, Trash2, RefreshCw } from 'lucide-react'
+import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, ScrollText, Clock, Mail, CheckCircle2 } from 'lucide-react'
 import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
@@ -32,7 +32,6 @@ const TZ_OPTIONS = [...new Set([browserTz, ...PRESETS.map((p) => p.tz), 'UTC'])]
 interface GeoResult { display_name: string; lat: string; lon: string }
 type Tab = 'ai' | 'reading' | 'timeline' | 'd1' | 'vargas' | 'ashtaka' | 'shadbala'
 
-interface SavedReading { id: number; title: string; markdown: string; model: string; createdAt: string }
 
 const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = [
   { n: 2, name: 'D2 · Hora', desc: { en: 'Wealth & resources.', mm: 'ဥစ္စာဓန နှင့် အရင်းအမြစ်။' } },
@@ -48,8 +47,8 @@ const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = 
   { n: 60, name: 'D60 · Shashtiamsa', desc: { en: 'Overall karma — the most refined chart.', mm: 'အလုံးစုံ ကံ — အသိမ်မွေ့ဆုံး ဇာတာ။' } },
 ]
 
-const BIO_EN = 'Sayar Bhone Min Thike Din prepares every reading with authentic Vedic (Jyotish) methods — the sidereal zodiac with the Lahiri ayanamsa, whole-sign houses, the Chandra Lagna (Moon ascendant), the sixteen divisional charts (D1–D60), the Vimśottarī dasha & antardasha system, planetary aspects (drishti), the six-fold Shadbala strengths and Ashtakavarga — all computed precisely by the classical Jyotish śāstras and offered as guidance for your own reflection.'
-const BIO_MM = 'ဆရာ ဘုန်းမင်းသိုက်ဒင် သည် ဟောကိန်းတိုင်းကို စစ်မှန်သော နက္ခတ်ဗေဒင် (Jyotish) နည်းစနစ်များဖြင့် ပြင်ဆင်ပါသည် — နက္ခတ်ရာသီစက်နှင့် Lahiri အယနံသ၊ Whole-Sign အိမ်စနစ်၊ စန်းလဂ် (Chandra Lagna)၊ ဇာတာခွဲ ၁၆ မျိုး (D1–D60)၊ ဝိံရှောတ္တရီ ဒသာ/အန္တရ်ဒသာစနစ်၊ ဂြိုဟ်အမြင် (ဒြိဋ္ဌိ)၊ ဆဒ္ဗလ ဂြိုဟ်အား ၆ မျိုးနှင့် အဋ္ဌကဝဂ် — တို့ကို ဂန္ထဝင် ဇျောတိသကျမ်းများ၏ နည်းစနစ်အတိုင်း တိကျစွာ တွက်ချက်ပြီး၊ ကိုယ့်ကိုယ်ကို ပြန်လည်သုံးသပ်ရန် လမ်းညွှန်ချက်များ ပေးပါသည်။'
+const BIO_EN = 'Ko Bhone Min Thike Din prepares every reading with authentic Vedic (Jyotish) methods — the sidereal zodiac with the Lahiri ayanamsa, whole-sign houses, the Chandra Lagna (Moon ascendant), the sixteen divisional charts (D1–D60), the Vimśottarī dasha & antardasha system, planetary aspects (drishti), the six-fold Shadbala strengths and Ashtakavarga — all computed precisely by the classical Jyotish śāstras and offered as guidance for your own reflection.'
+const BIO_MM = 'ကိုဘုန်းမင်းသိုက်ဒင် သည် ဟောကိန်းတိုင်းကို စစ်မှန်သော နက္ခတ်ဗေဒင် (Jyotish) နည်းစနစ်များဖြင့် အသေးစိတ် စစ်ဆေးတွက်ချက်ပါသည် — နက္ခတ်ရာသီစက်နှင့် Lahiri အယနန္သ၊ Whole-Sign အိမ်စနစ်၊ စန်းလဂ် (Chandra Lagna)၊ ဇာတာခွဲ ၁၆ မျိုး (D1–D60)၊ ဗိံရှောတ္တရီ ဒသာ/အန္တရ်ဒသာစနစ်၊ ဂြိုဟ်အမြင် (ဒြိဋ္ဌိ)၊ ဆဒ္ဗလ ဂြိုဟ်အား ၆ မျိုးနှင့် အဋ္ဌကဝဂ် — တို့ကို ဂန္ထဝင် ဇျောတိသကျမ်းများ၏ နည်းစနစ်အတိုင်း တိကျစွာ တွက်ချက်ပြီး၊ ကိုယ့်ကိုယ်ကို ပြန်လည်သုံးသပ်ရန် လမ်းညွှန်ချက်များ ပေးပါသည်။'
 
 // D1–D60 educational meanings (simple, bilingual).
 const VARGA_GUIDE: { code: string; en: string; mm: string }[] = [
@@ -181,7 +180,7 @@ export default function Jyotish() {
   const [ayanamsa, setAyanamsa] = useState('lahiri')
   const [consent, setConsent] = useState(false)
 
-  // Remedy / contact-the-Sayar form.
+  // Remedy / contact-to-Ko Bhone Min Thike Din form.
   const remedyRef = useRef<HTMLDivElement>(null)
   const [remedyArea, setRemedyArea] = useState('')
   const [remedyContact, setRemedyContact] = useState('')
@@ -195,12 +194,15 @@ export default function Jyotish() {
   const [customerToken, setCustomerToken] = useState<string | null>(null)
 
   // AI reading
-  const [aiMarkdown, setAiMarkdown] = useState('')
-  const [aiModel, setAiModel] = useState('')
-  const [aiLoading, setAiLoading] = useState(false)
-  const [aiError, setAiError] = useState('')
-  const [aiSaved, setAiSaved] = useState(false)
-  const [myReadings, setMyReadings] = useState<SavedReading[]>([])
+  // Manual-approval reading workflow: request → pending → (Sayar approves) → approved.
+  const [reqStatus, setReqStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none')
+  const [reqMarkdown, setReqMarkdown] = useState('')
+  const [reqId, setReqId] = useState<number | null>(null)
+  const [reqLoading, setReqLoading] = useState(false)
+  const [reqError, setReqError] = useState('')
+  const [reqInfo, setReqInfo] = useState('')
+  const [pdfRequested, setPdfRequested] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
   const loadSavedChart = (c: SavedChart) => {
     setName(c.name || ''); setGender(c.gender === 'female' ? 'female' : 'male')
     setDate(c.birthDate || date); setTime(c.birthTime || time)
@@ -313,16 +315,14 @@ export default function Jyotish() {
   const bhukti = data ? activeBhukti(data) : undefined
   const prat = data ? activePratyantar(data) : undefined
 
-  // ── AI reading: summarise the computed chart → backend → markdown ───────────
-  const loadMyReadings = async () => {
-    if (!customerToken) return
-    try {
-      const res = await fetch(`${SITE.apiUrl}/api/astrology/my-readings`, { headers: { Authorization: `Bearer ${customerToken}` } })
-      const json = (await res.json().catch(() => null)) as { success?: boolean; data?: SavedReading[] } | null
-      if (json?.success && Array.isArray(json.data)) setMyReadings(json.data)
-    } catch { /* ignore */ }
-  }
-  useEffect(() => { if (customerToken) loadMyReadings() }, [customerToken]) // eslint-disable-line react-hooks/exhaustive-deps
+  // ── Detailed reading: summarise the computed chart → request → Sayar approves ─
+  // Identity used for the 30-day dedup hash on the backend (must match the payload).
+  const readingIdentity = () => ({
+    name: querent?.name || name.trim() || undefined,
+    birthDate: date,
+    birthTime: time,
+    location: place.trim() || `${lat},${lon}`,
+  })
 
   const buildAiPayload = () => {
     if (!data) return null
@@ -358,41 +358,70 @@ export default function Jyotish() {
       ashtakavargaNotes: ashNotes,
       yogas: (data.yogas ?? []).map((y) => y.name).slice(0, 30),
       language: lang === 'mm' ? 'my' : 'en',
+      // birthDate / birthTime / location → used only for the 30-day dedup hash
+      birthDate: date,
+      birthTime: time,
+      location: place.trim() || `${lat},${lon}`,
     }
   }
 
-  const generateAiReading = async () => {
-    if (!data || aiLoading) return
+  type StatusData = { status: string; requestId: number; markdown?: string; pdfRequested?: boolean; alreadyRequested?: boolean }
+  const applyStatus = (d: StatusData | null | undefined) => {
+    if (d && d.status && d.status.toLowerCase() !== 'none') {
+      setReqStatus(d.status.toLowerCase() as 'pending' | 'approved' | 'rejected')
+      setReqId(d.requestId ?? null)
+      setReqMarkdown(d.markdown || '')
+      setPdfRequested(!!d.pdfRequested)
+    } else {
+      setReqStatus('none'); setReqId(null); setReqMarkdown(''); setPdfRequested(false)
+    }
+  }
+
+  // On chart compute (and revisits), check whether a request already exists / is approved.
+  const checkReadingStatus = async () => {
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/reading-status`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(readingIdentity()),
+      })
+      const json = (await res.json().catch(() => null)) as { data?: StatusData } | null
+      applyStatus(json?.data)
+    } catch { /* ignore */ }
+  }
+  useEffect(() => { if (data) { setReqError(''); setReqInfo(''); checkReadingStatus() } }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Submit a request — NO AI call; the Sayar reviews and approves later.
+  const requestReading = async () => {
+    if (!data || reqLoading) return
     const payload = buildAiPayload()
     if (!payload) return
-    setAiLoading(true); setAiError(''); setAiSaved(false); setAiMarkdown('')
+    setReqLoading(true); setReqError(''); setReqInfo('')
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
       if (customerToken) headers.Authorization = `Bearer ${customerToken}`
-      const res = await fetch(`${SITE.apiUrl}/api/astrology/generate-ai-reading`, {
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/request-reading`, {
         method: 'POST', headers, body: JSON.stringify(payload),
       })
-      const json = (await res.json().catch(() => null)) as
-        { success?: boolean; data?: { markdown: string; model: string; savedId?: number }; message?: string } | null
-      if (!res.ok || !json?.success || !json.data) throw new Error(json?.message || `Failed (${res.status})`)
-      setAiMarkdown(json.data.markdown); setAiModel(json.data.model || '')
-      if (json.data.savedId) { setAiSaved(true); loadMyReadings() }
+      const json = (await res.json().catch(() => null)) as { success?: boolean; message?: string; data?: StatusData } | null
+      if (!res.ok || !json?.data) throw new Error(json?.message || `Failed (${res.status})`)
+      applyStatus(json.data)
+      if (json.data.alreadyRequested) setReqInfo(json.message || '')
     } catch (err) {
-      setAiError(err instanceof Error ? err.message : 'Could not generate the reading.')
-    } finally { setAiLoading(false) }
+      setReqError(err instanceof Error ? err.message : 'Could not send the request.')
+    } finally { setReqLoading(false) }
   }
 
-  const deleteReading = async (id: number) => {
-    if (!customerToken) return
+  const requestReadingPdf = async () => {
+    if (!reqId || pdfLoading || pdfRequested) return
+    setPdfLoading(true)
     try {
-      await fetch(`${SITE.apiUrl}/api/astrology/my-readings/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${customerToken}` } })
-      setMyReadings((prev) => prev.filter((r) => r.id !== id))
-    } catch { /* ignore */ }
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/reading/${reqId}/request-pdf`, { method: 'POST' })
+      if (res.ok) setPdfRequested(true)
+    } catch { /* ignore */ } finally { setPdfLoading(false) }
   }
 
   const curVarga = VARGAS.find((v) => v.n === vargaN) ?? VARGAS[4]
   const TABS: { id: Tab; label: string }[] = [
-    { id: 'ai', label: lang === 'mm' ? '🤖 AI ဟောစာတမ်း' : '🤖 AI Reading' },
+    { id: 'ai', label: lang === 'mm' ? '📜 အသေးစိတ် ဟောစာတမ်း' : '📜 Detailed Reading' },
     { id: 'reading', label: t.tabReading }, { id: 'timeline', label: t.tabTimeline }, { id: 'd1', label: t.tabD1 },
     { id: 'vargas', label: lang === 'mm' ? 'ခွဲဝေဇာတာ' : 'Vargas' },
     { id: 'ashtaka', label: lang === 'mm' ? 'အဋ္ဌကဝဂ်' : 'Ashtaka' },
@@ -402,7 +431,8 @@ export default function Jyotish() {
   return (
     <section className="section-container vedin-page">
       {/* ── Grand Astrologer Profile — centered, large photo, bio below ── */}
-      <div className="relative mb-8 overflow-hidden rounded-3xl border border-accent/25 p-6 text-center sm:p-10"
+      {/* print-hide: the photo + bio are omitted from the printed PDF (Phase 4) */}
+      <div className="print-hide relative mb-8 overflow-hidden rounded-3xl border border-accent/25 p-6 text-center sm:p-10"
         style={{ background: 'linear-gradient(135deg, rgb(var(--card)) 0%, rgb(var(--surface)) 100%)', boxShadow: '0 0 60px -20px rgb(var(--accent) / 0.45)' }}>
         <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
         <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, #a855f7 0%, transparent 70%)' }} />
@@ -627,74 +657,80 @@ export default function Jyotish() {
                 </div>
               </div>
 
-              {/* ── AI READING ── */}
+              {/* ── DETAILED READING (manual-approval workflow) ── */}
               {(tab === 'ai' || printAll) && (
                 <div className="space-y-5">
-                  {/* Generate card */}
-                  <div className="relative overflow-hidden rounded-2xl border border-accent/30 p-6 no-print"
-                    style={{ background: 'linear-gradient(135deg, rgb(var(--card)), rgb(var(--surface)))', boxShadow: '0 0 50px -18px rgb(var(--accent) / 0.5)' }}>
-                    <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
-                    <div className="relative">
-                      <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent-light"><Bot size={15} /> {lang === 'mm' ? 'AI ဗေဒင် ဟောစာတမ်း' : 'AI Vedic Reading'}</p>
-                      <h3 className="mt-2 font-groovy text-xl text-fg">{lang === 'mm' ? 'သင့်ဇာတာအတွက် ကိုယ်ပိုင် ဟောစာတမ်း' : 'A personalised reading for your chart'}</h3>
-                      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{lang === 'mm'
-                        ? 'တွက်ချက်ပြီးသော ဒသာ၊ ဂြိုဟ်တည်နေရာ၊ Sade Sati နှင့် အဋ္ဌကဝဂ် အချက်အလက်များကို အခြေခံ၍ AI က မြန်မာဘာသာဖြင့် အသေးစိတ် ဟောစာတမ်းတစ်စောင် ရေးသားပေးပါမည်။'
-                        : 'Grounded in your computed dasha, placements, Sade Sati and Ashtakavarga, the AI writes a detailed, structured reading.'}</p>
-                      <button type="button" onClick={generateAiReading} disabled={aiLoading}
-                        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent via-violet-500 to-jade px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
-                        {aiLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                        {aiLoading ? (lang === 'mm' ? 'ဟောပြောပေးနေသည်…' : 'Generating…') : (lang === 'mm' ? '✨ AI ဖြင့် ဟောစာတမ်း အပြည့်အစုံ ရယူရန်' : '✨ Generate full AI reading')}
-                      </button>
-                      <p className="mt-2 font-mono text-[11px] text-muted">{customerToken
-                        ? (lang === 'mm' ? 'သင့်အကောင့်တွင် အလိုအလျောက် သိမ်းဆည်းပါမည်။' : 'Saved to your account automatically.')
-                        : (lang === 'mm' ? 'သိမ်းဆည်းလိုပါက အထက်တွင် အကောင့်ဝင်ပါ။' : 'Sign in above to save readings to your account.')}</p>
-                    </div>
-                  </div>
-
-                  {aiError && <div className="rounded-xl border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral no-print">{aiError}</div>}
-
-                  {aiLoading && (
-                    <div className="glass-card flex items-center gap-3 p-6 text-sm text-muted no-print">
-                      <Loader2 size={18} className="animate-spin text-accent" />
-                      {lang === 'mm' ? 'AI မှ တွက်ချက်ဟောပြောနေပါသည်… စက္ကန့်အနည်းငယ် စောင့်ဆိုင်းပေးပါ။' : 'The AI is computing your reading… please wait a few seconds.'}
+                  {/* Request card — shown when there is no active/approved request */}
+                  {(reqStatus === 'none' || reqStatus === 'rejected') && (
+                    <div className="relative overflow-hidden rounded-2xl border border-accent/30 p-6 no-print"
+                      style={{ background: 'linear-gradient(135deg, rgb(var(--card)), rgb(var(--surface)))', boxShadow: '0 0 50px -18px rgb(var(--accent) / 0.5)' }}>
+                      <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
+                      <div className="relative">
+                        <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent-light"><ScrollText size={15} /> {lang === 'mm' ? 'အသေးစိတ် ဟောစာတမ်း' : 'Detailed Reading'}</p>
+                        <h3 className="mt-2 font-groovy text-xl text-fg">{lang === 'mm' ? 'သင့်ဇာတာအတွက် ဆရာ ကိုယ်တိုင် စစ်ဆေးသော ဟောစာတမ်း' : 'A reading personally reviewed by the Sayar'}</h3>
+                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{lang === 'mm'
+                          ? 'သင့်ဇာတာအား ဂန္ထဝင် ဇျောတိသ သင်္ချာနည်းစနစ်များဖြင့် တိကျစွာ တွက်ချက်ပြီး၊ ဆရာ ကိုဘုန်းမင်းသိုက်ဒင် ကိုယ်တိုင် စိစစ်အတည်ပြု၍ ဘဝကဏ္ဍ ၇ ရပ် အပြည့်အစုံ ဟောစာတမ်း ရေးသားပေးပါမည်။'
+                          : 'Your chart is computed precisely with classical Jyotish formulas, then personally verified and approved by Sayar Ko Bhone Min Thike Din before your full 7-life-area reading is written.'}</p>
+                        <button type="button" onClick={requestReading} disabled={reqLoading}
+                          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent via-violet-500 to-jade px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+                          {reqLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                          {reqLoading
+                            ? (lang === 'mm' ? 'ပေးပို့နေသည်…' : 'Sending…')
+                            : (lang === 'mm' ? '✨ ဆရာ ကိုဘုန်းမင်းသိုက်ဒင်ထံမှ ဟောစာတမ်းအပြည့်အစုံ တောင်းဆိုရန်' : '✨ Request Full Reading from the Sayar')}
+                        </button>
+                        <p className="mt-2 font-mono text-[11px] text-muted">{lang === 'mm' ? 'တစ်လလျှင် တစ်ကြိမ် တောင်းဆိုနိုင်ပါသည်။' : 'One request per month.'}</p>
+                      </div>
                     </div>
                   )}
 
-                  {aiMarkdown && !aiLoading && (
+                  {reqError && <div className="rounded-xl border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral no-print">{reqError}</div>}
+                  {reqInfo && <div className="rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent-light no-print">{reqInfo}</div>}
+
+                  {/* Pending — awaiting the Sayar's approval */}
+                  {reqStatus === 'pending' && (
+                    <div className="relative overflow-hidden rounded-2xl border border-accent/30 p-6 sm:p-8 no-print"
+                      style={{ background: 'linear-gradient(135deg, rgb(var(--card)), rgb(var(--surface)))', boxShadow: '0 0 50px -20px rgb(var(--accent) / 0.5)' }}>
+                      <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
+                      <div className="relative flex flex-col items-center gap-3 text-center">
+                        <span className="grid h-14 w-14 place-items-center rounded-full border border-accent/40 bg-accent/15 text-accent-light">
+                          <Clock size={26} className="animate-pulse" />
+                        </span>
+                        <h3 className="font-groovy text-xl text-fg">{lang === 'mm' ? 'ဆရာမှ စစ်ဆေးနေပါသည်' : 'Awaiting the Sayar’s review'}</h3>
+                        <p className="max-w-xl text-sm leading-relaxed text-muted">{lang === 'mm'
+                          ? 'ဆရာမှ သင့်ဇာတာအား အသေးစိတ် စစ်ဆေးနေပါသည်။ အတည်ပြုပြီးပါက ဟောစာတမ်းအပြည့်အစုံကို ဤနေရာတွင် ပြန်လည် ဝင်ရောက်ကြည့်ရှုနိုင်ပါသည်။ ခဏ စောင့်ဆိုင်းပေးပါ။'
+                          : 'The Sayar is personally reviewing your chart. Once approved, your full reading will appear here — please check back shortly.'}</p>
+                        <span className="mt-1 rounded-full bg-accent/15 px-3 py-1 font-mono text-[11px] text-accent-light">{lang === 'mm' ? 'အခြေအနေ — စစ်ဆေးဆဲ' : 'Status — Pending'}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Approved — the finished reading (printable) */}
+                  {reqStatus === 'approved' && reqMarkdown && (
                     <div className="relative overflow-hidden rounded-2xl border border-accent/35 p-6 sm:p-8"
                       style={{ background: 'linear-gradient(160deg, rgb(var(--card)) 0%, rgb(var(--surface)) 100%)', boxShadow: '0 0 60px -20px rgb(var(--accent) / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.05)' }}>
                       <div className="pointer-events-none absolute -left-16 -bottom-20 h-56 w-56 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--jade)) 0%, transparent 70%)' }} />
                       <div className="relative">
-                        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 no-print">
-                          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent-light"><Bot size={14} /> {lang === 'mm' ? 'AI ဟောစာတမ်း' : 'AI Reading'}{aiModel && <span className="text-muted"> · {aiModel}</span>}</p>
-                          {aiSaved && <span className="rounded-full bg-jade/15 px-2.5 py-0.5 font-mono text-[10px] text-jade">{lang === 'mm' ? 'သိမ်းဆည်းပြီး' : 'saved'}</span>}
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-accent-light"><ScrollText size={14} /> {lang === 'mm' ? 'အသေးစိတ် ဟောစာတမ်း' : 'Detailed Reading'}</p>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-jade/15 px-2.5 py-0.5 font-mono text-[10px] text-jade no-print"><CheckCircle2 size={11} /> {lang === 'mm' ? 'ဆရာ အတည်ပြုပြီး' : 'Approved by the Sayar'}</span>
                         </div>
-                        <MarkdownView markdown={aiMarkdown} />
+                        <MarkdownView markdown={reqMarkdown} />
                         <p className="mt-5 border-t border-white/10 pt-3 text-[11px] leading-relaxed text-muted">{lang === 'mm'
-                          ? 'ဤဟောစာတမ်းသည် AI ဖြင့် ထုတ်ပေးထားခြင်းဖြစ်ပြီး၊ တွက်ချက်မှုများ တိကျသော်လည်း ရလဒ်များမှာ မိမိကိုယ်တိုင် ပြန်လည်ဆင်ခြင်သုံးသပ်ရန်အတွက် လမ်းညွှန်ချက်သာ ဖြစ်ပါသည်။'
-                          : 'This reading is AI-generated. The calculations are precise, but the interpretations are guidance for reflection, not certainty.'}</p>
-                      </div>
-                    </div>
-                  )}
+                          ? 'ဤဟောစာတမ်းအား ဂန္ထဝင် ဇျောတိသ သင်္ချာနည်းစနစ်များဖြင့် တိကျစွာ တွက်ချက်ပြီး ဆရာ ကိုယ်တိုင် စိစစ်အတည်ပြုထားပါသည်။ ရလဒ်များမှာ မိမိကိုယ်တိုင် ပြန်လည်ဆင်ခြင်သုံးသပ်ရန်အတွက် လမ်းညွှန်ချက်ဖြစ်ပါသည်။'
+                          : 'This reading was computed with classical Jyotish formulas and personally verified by the Sayar. The interpretations are guidance for reflection.'}</p>
 
-                  {/* Saved readings (signed-in) */}
-                  {customerToken && myReadings.length > 0 && (
-                    <div className="glass-card p-5 no-print">
-                      <div className="mb-3 flex items-center justify-between">
-                        <h4 className="font-groovy text-base text-fg">{lang === 'mm' ? 'သိမ်းဆည်းထားသော ဟောစာတမ်းများ' : 'Saved readings'}</h4>
-                        <button type="button" onClick={loadMyReadings} className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 font-mono text-[11px] text-muted transition hover:text-fg"><RefreshCw size={12} /> {lang === 'mm' ? 'ပြန်ရယူ' : 'Refresh'}</button>
+                        {/* Phase 4 — request the reading as a PDF by email */}
+                        <div className="mt-5 no-print">
+                          <button type="button" onClick={requestReadingPdf} disabled={pdfLoading || pdfRequested}
+                            className="inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-semibold text-accent-light transition hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-60">
+                            {pdfLoading ? <Loader2 size={15} className="animate-spin" /> : pdfRequested ? <CheckCircle2 size={15} className="text-jade" /> : <Mail size={15} />}
+                            {pdfRequested
+                              ? (lang === 'mm' ? 'PDF တောင်းဆိုမှု ပေးပို့ပြီးပါပြီ' : 'PDF request sent')
+                              : (lang === 'mm' ? '✉️ PDF ဟောစာတမ်းကို Email ဖြင့် တောင်းဆိုရန်' : '✉️ Request the reading as a PDF by email')}
+                          </button>
+                          {pdfRequested && <p className="mt-2 text-[11px] text-muted">{lang === 'mm' ? 'ဆရာမှ PDF ဟောစာတမ်းကို သင့် Email သို့ ပေးပို့ပေးပါလိမ့်မည်။' : 'The Sayar will email the PDF reading to you.'}</p>}
+                        </div>
                       </div>
-                      <ul className="space-y-2">
-                        {myReadings.map((r) => (
-                          <li key={r.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/[0.03] px-3 py-2">
-                            <button type="button" onClick={() => { setAiMarkdown(r.markdown); setAiModel(r.model); setAiSaved(true); setAiError('') }} className="min-w-0 flex-1 text-left">
-                              <span className="block truncate text-sm text-fg/90">{r.title}</span>
-                              <span className="font-mono text-[10px] text-muted">{r.createdAt}{r.model ? ` · ${r.model}` : ''}</span>
-                            </button>
-                            <button type="button" onClick={() => deleteReading(r.id)} title="Delete" className="inline-flex items-center rounded-lg border border-coral/25 bg-coral/10 px-2 py-1 text-coral transition hover:bg-coral/20"><Trash2 size={12} /></button>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   )}
                 </div>
@@ -1044,13 +1080,13 @@ export default function Jyotish() {
                 </div>
               )}
 
-              {/* Remedy (yatra) — contact the Sayar */}
+              {/* Remedy (yatra) — contact to Ko Bhone Min Thike Din */}
               <div ref={remedyRef} className="no-print glass-card border border-accent/25 p-6">
-                <h3 className="font-groovy text-lg text-fg">{lang === 'mm' ? 'ယတြာ အစီအရင်နှင့် အသေးစိတ်မေးမြန်းရန် — ကိုဘုန်းမင်းသိုက်ဒင်ထံ ဆက်သွယ်ရန်' : 'Remedy (Yatra) & More Details — Contact to Ko Bhone Min Thike Din'}</h3>
+                <h3 className="font-groovy text-lg text-fg">{lang === 'mm' ? 'ယတြာ အစီအရင်နှင့် အသေးစိတ်မေးမြန်းရန် — ကိုဘုန်းမင်းသိုက်ဒင်ထံ ဆက်သွယ်ရန်' : 'Remedy (Yatra) & More Details — Contact to Ko Bhone Min Thike Din'}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted">
                   {lang === 'mm'
                     ? 'ကံညံ့/ဖိစီးနေသော ကဏ္ဍများအတွက် သင့်လျော်သည့် ယတြာ အစီအရင်နှင့် အကြံဉာဏ်အတွက် ကိုဘုန်းမင်းသိုက်ဒင် ထံ တောင်းခံနိုင်ပါသည်။ အောက်တွင် ဖြည့်စွက်ပါ။'
-                    : 'For areas under strain, you may request a suitable remedy (yatra)& Idea from Sayar Bhone Min Thike Din. Fill in your details below.'}
+                    : 'For areas under strain, you may request a suitable remedy (yatra)& Idea from Ko Bhone Min Thike Din. Fill in your details below.'}
                 </p>
                 {remedyState === 'sent' ? (
                   <div className="mt-4 rounded-xl border border-jade/40 bg-jade/10 px-4 py-3 text-sm text-jade">
@@ -1066,7 +1102,7 @@ export default function Jyotish() {
                       <textarea value={remedyMsg} onChange={(e) => setRemedyMsg(e.target.value)} rows={3} className={`${field} resize-y`} placeholder={lang === 'mm' ? 'သင့် အခြေအနေ / မေးလိုသည့်အရာ' : 'Your situation / what you would like to ask'} /></label>
                     <div className="flex items-center gap-3 sm:col-span-2">
                       <button type="submit" disabled={remedyState === 'sending'} className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-space transition hover:brightness-110 disabled:opacity-60">
-                        {remedyState === 'sending' ? <><Loader2 size={15} className="animate-spin" /> {lang === 'mm' ? 'ပေးပို့နေသည်…' : 'Sending…'}</> : (lang === 'mm' ? 'ကိုဘုန်းမင်းသိုက်ဒင်ထံ ပေးပို့ရန်' : 'Send to the Sayar')}
+                        {remedyState === 'sending' ? <><Loader2 size={15} className="animate-spin" /> {lang === 'mm' ? 'ပေးပို့နေသည်…' : 'Sending…'}</> : (lang === 'mm' ? 'ကိုဘုန်းမင်းသိုက်ဒင်ထံ ပေးပို့ရန်' : 'Send to Ko Bhone Min Thike Din')}
                       </button>
                       {remedyState === 'error' && <span className="text-xs text-coral">{lang === 'mm' ? 'ပေးပို့၍မရပါ — နောက်တစ်ကြိမ်ပြန်ကြိုးစားပါ။' : 'Could not send — please try again.'}</span>}
                     </div>
