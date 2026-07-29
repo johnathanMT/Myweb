@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useImperativeHandle, useRef, forwardRef, type FormEvent } from 'react'
-import { LogOut, Loader2, Pencil, Check, UserRound, X, Search } from 'lucide-react'
+import { LogOut, Loader2, UserRound, X, Search } from 'lucide-react'
 import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import type { Lang } from '../lib/jyotish'
@@ -49,7 +49,6 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [charts, setCharts] = useState<SavedChart[]>([])
-  const [editingName, setEditingName] = useState(false); const [newName, setNewName] = useState('')
   const [needsVerify, setNeedsVerify] = useState(false); const [cooldown, setCooldown] = useState(0)
 
   // ── Natal profile fields (signup only) ──────────────────────────────────────
@@ -173,20 +172,18 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
       const r = await fetch(`${API}/api/customer/profile`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
       })
-      const j = await r.json()
-      if (!r.ok || !j?.success) throw new Error(j?.message || 'Update failed')
-      setMe(j.data); setModal(null); onProfileSaved?.()
-    } catch (err) { setMsg({ ok: false, text: err instanceof Error ? err.message : 'Update failed' }) } finally { setBusy(false) }
+      // Parse defensively — a 400 (e.g. the 90-day cooldown) still returns JSON we
+      // want to surface; only a true network failure lands in catch below.
+      const j = (await r.json().catch(() => null)) as { success?: boolean; message?: string; data?: MeData } | null
+      if (!r.ok || !j?.success) throw new Error(j?.message || `Update failed (${r.status})`)
+      setMe(j.data ?? null); setModal(null); onProfileSaved?.()
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : 'Update failed'
+      const networky = /load failed|failed to fetch|networkerror|network request failed/i.test(raw)
+      setMsg({ ok: false, text: networky ? t('Could not reach the server. Please check your connection and try again.', 'ဆာဗာနှင့် ဆက်သွယ်၍မရပါ။ အင်တာနက် ချိတ်ဆက်မှုကို စစ်ပြီး ထပ်စမ်းကြည့်ပါ။') : raw })
+    } finally { setBusy(false) }
   }
   const logout = () => { setToken(''); persist(''); setMe(null); setCharts([]) }
-  const saveUsername = async () => {
-    if (!newName.trim()) return
-    try {
-      const r = await fetch(`${API}/api/customer/username`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ username: newName.trim() }) })
-      if (!r.ok) throw new Error()
-      setMe((m) => (m ? { ...m, username: newName.trim() } : m)); setEditingName(false)
-    } catch { /* ignore */ }
-  }
   const inputCls = 'mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-fg outline-none focus:border-accent/50'
 
   return (
@@ -205,17 +202,7 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/15 text-accent-light"><UserRound size={16} /></span>
-              {editingName ? (
-                <span className="flex items-center gap-1">
-                  <input value={newName} onChange={(e) => setNewName(e.target.value)} className="w-32 rounded-lg border border-white/15 bg-white/5 px-2 py-1 text-sm text-fg outline-none" />
-                  <button type="button" onClick={saveUsername} className="text-jade"><Check size={15} /></button>
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5">
-                  <span className="text-sm font-semibold text-fg">{me?.username}</span>
-                  <button type="button" onClick={() => { setNewName(me?.username || ''); setEditingName(true) }} className="text-muted hover:text-fg"><Pencil size={12} /></button>
-                </span>
-              )}
+              <span className="text-sm font-semibold text-fg">{me?.username}</span>
               <span className="font-mono text-[11px] text-muted">· {me?.email}</span>
             </div>
             <button type="button" onClick={logout} className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-muted transition hover:text-fg"><LogOut size={13} /> {t('Log out', 'ထွက်')}</button>

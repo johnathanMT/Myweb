@@ -52,7 +52,7 @@ const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = 
   { n: 60, name: 'D60 · Shashtiamsa', desc: { en: 'Overall karma — the most refined chart.', mm: 'အလုံးစုံ ကံ — အသိမ်မွေ့ဆုံး ဇာတာ။' } },
 ]
 
-const BIO_EN = 'Mingalaba. I am Bhone Min Thike Din, and it is my honour to sit with your birth chart and read it for you with patience, care and genuine respect. Every reading I give rests on the exact mathematics of the classical Jyotish śāstras — the sidereal zodiac computed with the Lahiri ayanamsa, Whole-Sign houses anchored on your Chandra Lagna (the Moon ascendant), the sixteen divisional charts from D1 to D60, the Vimśottarī dasha and antardasha periods, the planetary aspects (drishti), the six-fold Shadbala strengths and the Ashtakavarga — each figure calculated carefully, step by step. Yet the numbers and placements are only the skeleton of a chart; my real work is to see the living person behind them — your feelings, your seasons and the paths open to you — and to speak of them with understanding. I blend this deep, ancient mathematical precision with warm, practical and compassionate guidance. My wish is never to frighten you, but to help you look at your own life clearly, gently, and with quiet confidence.'
+const BIO_EN = 'Bhone Min Thike Din delivers each reading with the rigor of an exact Vedic science. Every chart is decoded through a demanding, multi-layered methodology — the sidereal zodiac fixed by the Lahiri Ayanamsa, Whole-Sign houses anchored on the Chandra Lagna, the complete set of sixteen divisional charts from D1 to D60, the Vimśottarī Dasha timeline of planetary periods, the six-fold Shadbala strength metrics and the Ashtakavarga point system. This is not vague fortune-telling; it is a precise mathematical blueprint of your life, computed to the exacting standard of the classical Jyotish śāstras. From that blueprint he delivers clear, strategic life guidance — decisive, practical, and grounded in absolute confidence and professional mastery.'
 // Astrologer credential pills — each a distinct gradient/glow colour.
 const PROFILE_PILLS: { mm: string; en: string; cls: string }[] = [
   { mm: 'နက္ခတ်ဗေဒင်', en: 'Sidereal Jyotish', cls: 'from-emerald-400/25 to-teal-500/10 border-emerald-300/45 text-emerald-100 shadow-emerald-500/25' },
@@ -63,7 +63,7 @@ const PROFILE_PILLS: { mm: string; en: string; cls: string }[] = [
   { mm: 'အဋ္ဌကဝဂ်', en: 'Ashtakavarga', cls: 'from-indigo-400/25 to-blue-500/10 border-indigo-300/45 text-indigo-100 shadow-indigo-500/25' },
 ]
 
-const BIO_MM = 'မင်္ဂလာပါ။ ကျွန်တော် ဘုန်းမင်းသိုက်ဒင် ဖြစ်ပါတယ်။ သင့်မွေးဇာတာကို စိတ်ရှည်သည်းခံစွာ၊ ဂရုတစိုက်နှင့် ရိုသေလေးစားစွာ ဖတ်ရှုဟောကြားပေးရတာ ကျွန်တော့်အတွက် ဂုဏ်ယူစရာပါ။ ကျွန်တော့် ဟောကြားချက်တိုင်းဟာ ဂန္ထဝင် ဇျောတိသကျမ်းများရဲ့ တိကျသေချာတဲ့ သင်္ချာနည်းစနစ်တွေအပေါ် အခြေခံထားပါတယ် — နက္ခတ်ရာသီစက် (Sidereal) ကို Lahiri အယနန္သနဲ့ တွက်ချက်ပြီး၊ သင့်ရဲ့ စန်းလဂ် (Chandra Lagna) ကို အခြေခံတဲ့ Whole-Sign အိမ်စနစ်၊ ဇာတာခွဲ ၁၆ မျိုး (D1 မှ D60)၊ ဗိံရှောတ္တရီ ဒသာ/အန္တရ်ဒသာ ကာလများ၊ ဂြိုဟ်တို့ရဲ့ အမြင် (ဒြိဋ္ဌိ)၊ ဆဒ္ဗလ အင်အား ၆ မျိုးနဲ့ အဋ္ဌကဝဂ်အထိ — တစ်ဆင့်ချင်း ဂရုတစိုက် တွက်ချက်ပါတယ်။ ဒါပေမဲ့ နံပါတ်တွေနဲ့ ဂြိုဟ်တည်နေရာတွေဟာ ဇာတာရဲ့ အရိုးအရင်းသာဖြစ်ပြီး၊ သူတို့နောက်ကွယ်က အသက်ရှင်နေတဲ့ လူသားတစ်ဦး — သင့်ရဲ့ ခံစားချက်၊ ဘဝအခိုက်အတန့်တွေနဲ့ ရွေးချယ်နိုင်တဲ့ လမ်းကြောင်းတွေကို နားလည်စာနာစွာ မြင်အောင် ကြည့်ပေးဖို့ကသာ ကျွန်တော့်ရဲ့ တကယ့်တာဝန်ပါ။ ရှေးဟောင်း သင်္ချာ တိကျမှုနဲ့ ခေတ်သစ် ကရုဏာ၊ လက်တွေ့ကျတဲ့ ဘဝလမ်းညွှန်မှုတွေကို ပေါင်းစပ်ပြီး — သင့်ကို ကြောက်ရွံ့စေဖို့ မဟုတ်ဘဲ၊ မိမိကိုယ်ကို ကြည်လင်စွာ၊ နူးညံ့စွာ၊ ယုံကြည်စိတ်ချစွာ ပြန်လည်ဆင်ခြင်နိုင်အောင် ကူညီပေးလိုပါတယ်။'
+const BIO_MM = 'ရှေးဟောင်း ဂဏန်းသင်္ချာနှင့် နက္ခတ်ဗေဒင်သိပ္ပံ (Vedic Astrology / Jyotish) ၏ အဆင့်မြင့် တွက်ကိန်းများကို အခြေခံ၍ — Sidereal Zodiac ကို Lahiri Ayanamsa ဖြင့် တိကျစွာ ချိန်ညှိတွက်ချက်ခြင်း၊ Chandra Lagna (စန္ဒလဂ်) ကို အခြေခံသော Whole-Sign House စနစ်၊ အခြေခံဇာတာမှသည် အနုစိတ်ဇာတာများအထိ ပါဝင်သော ဇာတာခွင် ၁၆ မျိုး (D1 မှ D60 Vargas)၊ ဝိံရှာတ္တရီ (Vimsottari) ဒဿနှင့် အန္တရဒဿ ကာလများ၊ ဂြိုလ်တို့၏ အမြင် (Drishti)၊ ဂြိုလ်စွမ်းအားပြည့်ဝမှုကို တိုင်းတာသည့် ဆုဒ္ဓလ (Shadbala) နှင့် အဋ္ဌကဝဂ် (Ashtakavarga) စသည့် ရှေးဟောင်း နက္ခတ်သင်္ချာနည်းစနစ်များကို အလွှာလိုက် (Layer-by-layer) စေ့စေ့စပ်စပ် စစ်ဆေးခွဲခြမ်းစိတ်ဖြာကာ တိကျသေချာစွာ တွက်ချက်ဖော်ပြပေးပါသည်။'
 
 // D1–D60 educational meanings (simple, bilingual).
 const VARGA_GUIDE: { code: string; en: string; mm: string }[] = [
@@ -543,8 +543,8 @@ export default function Jyotish() {
     <div class="meta">${today}</div></div>
   <div class="md">${bodyHtml}</div>
   <div class="foot">${lang === 'mm'
-    ? 'ဤဟောစာတမ်းအား ဂန္ထဝင် ဇျောတိသ သင်္ချာနည်းစနစ်များဖြင့် တွက်ချက်ပြီး ဆရာ ကိုယ်တိုင် စိစစ်အတည်ပြုထားပါသည်။ ရလဒ်များမှာ ဆင်ခြင်သုံးသပ်ရန်အတွက် လမ်းညွှန်ချက်ဖြစ်ပါသည်။'
-    : 'Computed with classical Jyotish formulas and personally verified by the Sayar. Guidance for reflection.'}</div>
+          ? 'ဤဟောစာတမ်းအား ဂန္ထဝင် ဇျောတိသ သင်္ချာနည်းစနစ်များဖြင့် တွက်ချက်ပြီး ဆရာ ကိုယ်တိုင် စိစစ်အတည်ပြုထားပါသည်။ ရလဒ်များမှာ ဆင်ခြင်သုံးသပ်ရန်အတွက် လမ်းညွှန်ချက်ဖြစ်ပါသည်။'
+          : 'Computed with classical Jyotish formulas and personally verified by the Sayar. Guidance for reflection.'}</div>
 </div></body></html>`
 
       const iframe = document.createElement('iframe')
@@ -735,20 +735,20 @@ export default function Jyotish() {
 
       {/* ── Intro: Chandra Lagna + Instructions ── */}
       {!showDashboard && (
-      <div className="mb-6 grid gap-4 md:grid-cols-2 no-print">
-        <div className="glass-card p-5">
-          <h2 className="mb-2 flex items-center gap-2 font-groovy text-base text-fg"><Star size={16} className="text-accent" /> {t.chandraTitle}</h2>
-          <p className="text-sm leading-relaxed text-muted">{t.chandra}</p>
+        <div className="mb-6 grid gap-4 md:grid-cols-2 no-print">
+          <div className="glass-card p-5">
+            <h2 className="mb-2 flex items-center gap-2 font-groovy text-base text-fg"><Star size={16} className="text-accent" /> {t.chandraTitle}</h2>
+            <p className="text-sm leading-relaxed text-muted">{t.chandra}</p>
+          </div>
+          <div className="glass-card p-5">
+            <h2 className="mb-2 flex items-center gap-2 font-groovy text-base text-fg"><Info size={16} className="text-accent" /> {t.instrTitle}</h2>
+            <ul className="space-y-1.5 text-sm text-muted">
+              {[t.instr1, t.instr2, t.instr3].map((s, i) => (
+                <li key={i} className="flex gap-2"><span className="mt-0.5 text-accent-light">•</span><span className="leading-relaxed">{s}</span></li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <div className="glass-card p-5">
-          <h2 className="mb-2 flex items-center gap-2 font-groovy text-base text-fg"><Info size={16} className="text-accent" /> {t.instrTitle}</h2>
-          <ul className="space-y-1.5 text-sm text-muted">
-            {[t.instr1, t.instr2, t.instr3].map((s, i) => (
-              <li key={i} className="flex gap-2"><span className="mt-0.5 text-accent-light">•</span><span className="leading-relaxed">{s}</span></li>
-            ))}
-          </ul>
-        </div>
-      </div>
       )}
 
       <div className="space-y-8">
@@ -761,143 +761,143 @@ export default function Jyotish() {
         )}
 
         {!showDashboard && (<>
-        {/* Fallback prompt — signed in but no saved birth profile */}
-        {customerToken && profile && !profile.hasProfile && !otherMode && (
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4 text-sm leading-relaxed text-accent-light no-print sm:flex-row sm:items-center sm:justify-between">
-            <span>{lang === 'mm' ? 'သင့်အကောင့်တွင် မွေးဇာတာ ပရိုဖိုင် မရှိသေးပါ။ ပရိုဖိုင် ထည့်ပါ (သို့) အောက်ရှိ ဖောင်တွင် ဖြည့်ပါ။' : 'Your account has no birth profile yet — add one, or use the form below.'}</span>
-            <button type="button" onClick={() => customerPanelRef.current?.openProfileEdit()}
-              className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl bg-gradient-to-r from-accent to-violet-500 px-4 py-2 text-sm font-semibold text-space transition hover:brightness-110 sm:self-auto">
-              <Pencil size={15} /> {lang === 'mm' ? 'ပရိုဖိုင် ထည့်ရန်' : 'Add Profile'}
-            </button>
+          {/* Fallback prompt — signed in but no saved birth profile */}
+          {customerToken && profile && !profile.hasProfile && !otherMode && (
+            <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4 text-sm leading-relaxed text-accent-light no-print sm:flex-row sm:items-center sm:justify-between">
+              <span>{lang === 'mm' ? 'သင့်အကောင့်တွင် မွေးဇာတာ ပရိုဖိုင် မရှိသေးပါ။ ပရိုဖိုင် ထည့်ပါ (သို့) အောက်ရှိ ဖောင်တွင် ဖြည့်ပါ။' : 'Your account has no birth profile yet — add one, or use the form below.'}</span>
+              <button type="button" onClick={() => customerPanelRef.current?.openProfileEdit()}
+                className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl bg-gradient-to-r from-accent to-violet-500 px-4 py-2 text-sm font-semibold text-space transition hover:brightness-110 sm:self-auto">
+                <Pencil size={15} /> {lang === 'mm' ? 'ပရိုဖိုင် ထည့်ရန်' : 'Add Profile'}
+              </button>
+            </div>
+          )}
+          {/* ── How to use (accordion) + form title ── */}
+          <div className="mx-auto w-full max-w-3xl no-print">
+            <div className="overflow-hidden rounded-2xl border border-accent/25 bg-accent/[0.05]">
+              <button type="button" onClick={() => setHowtoOpen((o) => !o)} aria-expanded={howtoOpen}
+                className="flex w-full items-center justify-between gap-2 px-5 py-3.5 text-left transition hover:bg-accent/[0.08]">
+                <span className="flex items-center gap-2 font-groovy text-base text-fg"><Info size={16} className="text-accent" /> {lang === 'mm' ? 'အသုံးပြုနည်း' : 'How to use'}</span>
+                <ChevronDown size={18} className={`shrink-0 text-accent-light transition-transform ${howtoOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {howtoOpen && (
+                <ol className="space-y-2.5 border-t border-accent/15 px-5 py-4 text-sm leading-relaxed text-muted">
+                  {(lang === 'mm'
+                    ? [
+                      'မွေးသက္ကရာဇ် အချက်အလက်များ ဖြည့်သွင်းပါ။',
+                      'ဇာတာများ သိမ်းဆည်းရန်နှင့် ဟောစာတမ်းတောင်းရန် အကောင့် ဖွင့်/ဝင်ပါ။',
+                      '"အသေးစိတ် ဟောစာတမ်း" နေရာမှတစ်ဆင့် ဆရာ့ထံသို့ တောင်းဆိုမှု ပြုလုပ်ပါ။',
+                      'ဆရာမှ အတည်ပြု (Approve) ပြီးပါက ဟောစာတမ်းဖတ်ရှုနိုင်ပြီး PDF ရယူနိုင်ပါသည်။',
+                    ]
+                    : [
+                      'Fill in your birth details.',
+                      'Create / sign in to an account to save charts and request a reading.',
+                      'Submit a request to the Sayar from the “Detailed Reading” tab.',
+                      'Once the Sayar approves, you can read the reading and get the PDF.',
+                    ]
+                  ).map((step, i) => (
+                    <li key={i} className="flex gap-3">
+                      <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accent/20 font-mono text-[11px] font-semibold text-accent-light">{i + 1}</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+            <h2 className="mt-6 text-center font-groovy text-lg text-fg sm:text-xl">
+              {lang === 'mm' ? 'မိမိရဲ့ မွေးဇာတာစစ်ဆေးရန် အချက်အလက်များကို အပြည့်အစုံဖြည့်သွင်းပါ' : 'Enter your birth details to check your chart'}
+            </h2>
           </div>
-        )}
-        {/* ── How to use (accordion) + form title ── */}
-        <div className="mx-auto w-full max-w-3xl no-print">
-          <div className="overflow-hidden rounded-2xl border border-accent/25 bg-accent/[0.05]">
-            <button type="button" onClick={() => setHowtoOpen((o) => !o)} aria-expanded={howtoOpen}
-              className="flex w-full items-center justify-between gap-2 px-5 py-3.5 text-left transition hover:bg-accent/[0.08]">
-              <span className="flex items-center gap-2 font-groovy text-base text-fg"><Info size={16} className="text-accent" /> {lang === 'mm' ? 'အသုံးပြုနည်း' : 'How to use'}</span>
-              <ChevronDown size={18} className={`shrink-0 text-accent-light transition-transform ${howtoOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {howtoOpen && (
-              <ol className="space-y-2.5 border-t border-accent/15 px-5 py-4 text-sm leading-relaxed text-muted">
-                {(lang === 'mm'
-                  ? [
-                    'မွေးသက္ကရာဇ် အချက်အလက်များ ဖြည့်သွင်းပါ။',
-                    'ဇာတာများ သိမ်းဆည်းရန်နှင့် ဟောစာတမ်းတောင်းရန် အကောင့် ဖွင့်/ဝင်ပါ။',
-                    '"အသေးစိတ် ဟောစာတမ်း" နေရာမှတစ်ဆင့် ဆရာ့ထံသို့ တောင်းဆိုမှု ပြုလုပ်ပါ။',
-                    'ဆရာမှ အတည်ပြု (Approve) ပြီးပါက ဟောစာတမ်းဖတ်ရှုနိုင်ပြီး PDF ရယူနိုင်ပါသည်။',
-                  ]
-                  : [
-                    'Fill in your birth details.',
-                    'Create / sign in to an account to save charts and request a reading.',
-                    'Submit a request to the Sayar from the “Detailed Reading” tab.',
-                    'Once the Sayar approves, you can read the reading and get the PDF.',
-                  ]
-                ).map((step, i) => (
-                  <li key={i} className="flex gap-3">
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-accent/20 font-mono text-[11px] font-semibold text-accent-light">{i + 1}</span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-          <h2 className="mt-6 text-center font-groovy text-lg text-fg sm:text-xl">
-            {lang === 'mm' ? 'မိမိရဲ့ မွေးဇာတာစစ်ဆေးရန် အချက်အလက်များကို အပြည့်အစုံဖြည့်သွင်းပါ' : 'Enter your birth details to check your chart'}
-          </h2>
-        </div>
 
-        {/* ── Form (centered on top; results span the full page below) ── */}
-        <form onSubmit={submit} className="glass-card mx-auto w-full max-w-3xl p-6 no-print">
-          <div className="mb-3 grid grid-cols-2 gap-3">
-            <label><span className={labelCls}>{t.fldName} <span className="text-coral">*</span></span>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={lang === 'mm' ? 'အမည်' : 'Full name'}
-                className={`${field} ${!name.trim() ? 'border-coral/40' : ''}`} /></label>
-            <label><span className={labelCls}>{t.fldGender}</span>
-              <select value={gender} onChange={(e) => setGender(e.target.value as 'male' | 'female')} className={field}>
-                <option value="male" className="text-black">{t.male}</option>
-                <option value="female" className="text-black">{t.female}</option>
-              </select></label>
-          </div>
-          <label className="relative block">
-            <span className={labelCls}>{lang === 'mm' ? 'မွေးဖွားရာ မြို့/ဇာတိ' : 'Birth place'} <span className="text-coral">*</span></span>
-            <span className="relative mt-1.5 block">
-              <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-              <input value={place} onChange={(e) => onPlaceChange(e.target.value)} placeholder={lang === 'mm' ? 'မြို့ ရှာရန်…' : 'Search a city…'}
-                className={`w-full rounded-xl border bg-white/5 py-2.5 pl-9 pr-8 text-sm text-fg outline-none transition focus:border-accent/50 ${placeConfirmed ? 'border-jade/50' : 'border-coral/40'}`} />
-              {searching
-                ? <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted" />
-                : placeConfirmed && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-jade">✓</span>}
-            </span>
-            {!placeConfirmed && place.trim().length > 0 && !searching && (
-              <span className="mt-1 block font-mono text-[10px] text-coral">{lang === 'mm' ? 'စာရင်းထဲမှ မြို့တစ်ခုကို ရွေးချယ်ပါ။' : 'Pick a city from the list.'}</span>
-            )}
-            {results.length > 0 && (
-              <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-white/15 bg-surface/95 backdrop-blur-md">
-                {results.map((g, i) => (
-                  <li key={i}><button type="button" onClick={() => selectPlace(g)}
-                    className="block w-full px-3 py-2 text-left text-xs text-fg/90 transition hover:bg-accent/15">{g.display_name}</button></li>
+          {/* ── Form (centered on top; results span the full page below) ── */}
+          <form onSubmit={submit} className="glass-card mx-auto w-full max-w-3xl p-6 no-print">
+            <div className="mb-3 grid grid-cols-2 gap-3">
+              <label><span className={labelCls}>{t.fldName} <span className="text-coral">*</span></span>
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder={lang === 'mm' ? 'အမည်' : 'Full name'}
+                  className={`${field} ${!name.trim() ? 'border-coral/40' : ''}`} /></label>
+              <label><span className={labelCls}>{t.fldGender}</span>
+                <select value={gender} onChange={(e) => setGender(e.target.value as 'male' | 'female')} className={field}>
+                  <option value="male" className="text-black">{t.male}</option>
+                  <option value="female" className="text-black">{t.female}</option>
+                </select></label>
+            </div>
+            <label className="relative block">
+              <span className={labelCls}>{lang === 'mm' ? 'မွေးဖွားရာ မြို့/ဇာတိ' : 'Birth place'} <span className="text-coral">*</span></span>
+              <span className="relative mt-1.5 block">
+                <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                <input value={place} onChange={(e) => onPlaceChange(e.target.value)} placeholder={lang === 'mm' ? 'မြို့ ရှာရန်…' : 'Search a city…'}
+                  className={`w-full rounded-xl border bg-white/5 py-2.5 pl-9 pr-8 text-sm text-fg outline-none transition focus:border-accent/50 ${placeConfirmed ? 'border-jade/50' : 'border-coral/40'}`} />
+                {searching
+                  ? <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted" />
+                  : placeConfirmed && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-jade">✓</span>}
+              </span>
+              {!placeConfirmed && place.trim().length > 0 && !searching && (
+                <span className="mt-1 block font-mono text-[10px] text-coral">{lang === 'mm' ? 'စာရင်းထဲမှ မြို့တစ်ခုကို ရွေးချယ်ပါ။' : 'Pick a city from the list.'}</span>
+              )}
+              {results.length > 0 && (
+                <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-white/15 bg-surface/95 backdrop-blur-md">
+                  {results.map((g, i) => (
+                    <li key={i}><button type="button" onClick={() => selectPlace(g)}
+                      className="block w-full px-3 py-2 text-left text-xs text-fg/90 transition hover:bg-accent/15">{g.display_name}</button></li>
+                  ))}
+                </ul>
+              )}
+            </label>
+
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <label><span className={labelCls}>Date of birth</span>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={field} /></label>
+              <label><span className={labelCls}>Time (24h)</span>
+                <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required className={field} /></label>
+              <label><span className={labelCls}>Latitude</span>
+                <input type="number" step="any" value={lat} onChange={(e) => setLat(e.target.value)} required className={field} /></label>
+              <label><span className={labelCls}>Longitude</span>
+                <input type="number" step="any" value={lon} onChange={(e) => setLon(e.target.value)} required className={field} /></label>
+            </div>
+            <label className="mt-3 block"><span className={labelCls}>Time zone</span>
+              <select value={tz} onChange={(e) => setTz(e.target.value)} className={field}>
+                {[...new Set([tz, ...TZ_OPTIONS])].map((z) => <option key={z} value={z} className="text-black">{z}</option>)}
+              </select>
+            </label>
+            <label className="mt-3 block"><span className={labelCls}>{lang === 'mm' ? 'အယနန္သ (Ayanamsa)' : 'Ayanamsa'}</span>
+              <select value={ayanamsa} onChange={(e) => setAyanamsa(e.target.value)} className={field}>
+                <option value="lahiri" className="text-black">Lahiri (default)</option>
+                <option value="raman" className="text-black">Raman</option>
+                <option value="kp" className="text-black">KP (Krishnamurti)</option>
+                <option value="truechitra" className="text-black">True Chitra</option>
+              </select>
+            </label>
+
+            <div className="mt-4">
+              <span className={labelCls}>Quick locations</span>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {PRESETS.map((p) => (
+                  <button key={p.label} type="button" onClick={() => applyPreset(p)}
+                    className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-white/5 px-3 py-1 text-xs text-muted transition hover:border-accent/40 hover:text-fg">
+                    <MapPin size={11} /> {p.label}
+                  </button>
                 ))}
+              </div>
+            </div>
+
+            <label className={`mt-4 flex items-start gap-2 rounded-xl border p-3 text-xs leading-relaxed transition ${consent ? 'border-jade/40 bg-jade/5 text-muted' : 'border-coral/40 bg-coral/5 text-fg/80'}`}>
+              <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-accent" />
+              <span><span className="text-coral">*</span> {lang === 'mm' ? 'အနာဂါတ်ဟောကိန်းများပိုမိုတိကျမှန်ကန်စွာ အထောက်အကူအတွက် ကျွန်ုပ်၏ မွေးဇာတာ အချက်အလက်ကို လုံခြုံစွာ သိမ်းဆည်းရန် သဘောတူပါသည်။' : "I consent to securely storing my birth details to assist the future astrologer's readings."}</span>
+            </label>
+
+            <button type="submit" disabled={loading || !canSubmit}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+              {loading ? <><Loader2 size={16} className="animate-spin" /> {lang === 'mm' ? 'တွက်ချက်ပေးနေပါသည်…' : 'Calculating…'}</> : <><Sparkles size={16} /> {lang === 'mm' ? 'ဇာတာ တွက်မည်' : 'Generate Chart'}</>}
+            </button>
+            {!canSubmit && (
+              <ul className="mt-2 space-y-1">
+                {!name.trim() && <li className="flex items-start gap-1.5 font-mono text-[11px] leading-relaxed text-coral"><span>•</span>{lang === 'mm' ? 'အမည် ဖြည့်သွင်းပါ။' : 'Please enter a name.'}</li>}
+                {!placeConfirmed && <li className="flex items-start gap-1.5 font-mono text-[11px] leading-relaxed text-coral"><span>•</span>{lang === 'mm' ? 'မွေးဖွားရာ မြို့/ဇာတိကို ရှာဖွေ၍ စာရင်းထဲမှ ရွေးချယ်ပါ။' : 'Search and select your birth city from the list.'}</li>}
+                {!consent && <li className="flex items-start gap-1.5 font-mono text-[11px] leading-relaxed text-coral"><span>•</span>{lang === 'mm' ? 'အချက်အလက်သိမ်းဆည်းခွင့်ကို သဘောတူညီပေးပါ။' : 'Please agree to the data-storage consent.'}</li>}
               </ul>
             )}
-          </label>
-
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <label><span className={labelCls}>Date of birth</span>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={field} /></label>
-            <label><span className={labelCls}>Time (24h)</span>
-              <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required className={field} /></label>
-            <label><span className={labelCls}>Latitude</span>
-              <input type="number" step="any" value={lat} onChange={(e) => setLat(e.target.value)} required className={field} /></label>
-            <label><span className={labelCls}>Longitude</span>
-              <input type="number" step="any" value={lon} onChange={(e) => setLon(e.target.value)} required className={field} /></label>
-          </div>
-          <label className="mt-3 block"><span className={labelCls}>Time zone</span>
-            <select value={tz} onChange={(e) => setTz(e.target.value)} className={field}>
-              {[...new Set([tz, ...TZ_OPTIONS])].map((z) => <option key={z} value={z} className="text-black">{z}</option>)}
-            </select>
-          </label>
-          <label className="mt-3 block"><span className={labelCls}>{lang === 'mm' ? 'အယနန္သ (Ayanamsa)' : 'Ayanamsa'}</span>
-            <select value={ayanamsa} onChange={(e) => setAyanamsa(e.target.value)} className={field}>
-              <option value="lahiri" className="text-black">Lahiri (default)</option>
-              <option value="raman" className="text-black">Raman</option>
-              <option value="kp" className="text-black">KP (Krishnamurti)</option>
-              <option value="truechitra" className="text-black">True Chitra</option>
-            </select>
-          </label>
-
-          <div className="mt-4">
-            <span className={labelCls}>Quick locations</span>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {PRESETS.map((p) => (
-                <button key={p.label} type="button" onClick={() => applyPreset(p)}
-                  className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-white/5 px-3 py-1 text-xs text-muted transition hover:border-accent/40 hover:text-fg">
-                  <MapPin size={11} /> {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <label className={`mt-4 flex items-start gap-2 rounded-xl border p-3 text-xs leading-relaxed transition ${consent ? 'border-jade/40 bg-jade/5 text-muted' : 'border-coral/40 bg-coral/5 text-fg/80'}`}>
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-accent" />
-            <span><span className="text-coral">*</span> {lang === 'mm' ? 'အနာဂါတ်ဟောကိန်းများပိုမိုတိကျမှန်ကန်စွာ အထောက်အကူအတွက် ကျွန်ုပ်၏ မွေးဇာတာ အချက်အလက်ကို လုံခြုံစွာ သိမ်းဆည်းရန် သဘောတူပါသည်။' : "I consent to securely storing my birth details to assist the future astrologer's readings."}</span>
-          </label>
-
-          <button type="submit" disabled={loading || !canSubmit}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-5 py-3 text-sm font-semibold text-space shadow-lg shadow-accent/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
-            {loading ? <><Loader2 size={16} className="animate-spin" /> {lang === 'mm' ? 'တွက်ချက်ပေးနေပါသည်…' : 'Calculating…'}</> : <><Sparkles size={16} /> {lang === 'mm' ? 'ဇာတာ တွက်မည်' : 'Generate Chart'}</>}
-          </button>
-          {!canSubmit && (
-            <ul className="mt-2 space-y-1">
-              {!name.trim() && <li className="flex items-start gap-1.5 font-mono text-[11px] leading-relaxed text-coral"><span>•</span>{lang === 'mm' ? 'အမည် ဖြည့်သွင်းပါ။' : 'Please enter a name.'}</li>}
-              {!placeConfirmed && <li className="flex items-start gap-1.5 font-mono text-[11px] leading-relaxed text-coral"><span>•</span>{lang === 'mm' ? 'မွေးဖွားရာ မြို့/ဇာတိကို ရှာဖွေ၍ စာရင်းထဲမှ ရွေးချယ်ပါ။' : 'Search and select your birth city from the list.'}</li>}
-              {!consent && <li className="flex items-start gap-1.5 font-mono text-[11px] leading-relaxed text-coral"><span>•</span>{lang === 'mm' ? 'အချက်အလက်သိမ်းဆည်းခွင့်ကို သဘောတူညီပေးပါ။' : 'Please agree to the data-storage consent.'}</li>}
-            </ul>
-          )}
-          {error && <p className="mt-3 rounded-xl border border-coral/40 bg-coral/10 px-3 py-2 font-mono text-xs text-coral">{error}</p>}
-          <p className="mt-4 font-mono text-[10px] leading-relaxed text-muted">{t.disclaimer}</p>
-        </form>
+            {error && <p className="mt-3 rounded-xl border border-coral/40 bg-coral/10 px-3 py-2 font-mono text-xs text-coral">{error}</p>}
+            <p className="mt-4 font-mono text-[10px] leading-relaxed text-muted">{t.disclaimer}</p>
+          </form>
         </>)}
 
         {/* ── Result ── */}
