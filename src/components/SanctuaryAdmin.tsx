@@ -1,8 +1,11 @@
 import { useEffect, useState, Fragment, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, FileText, Mail, Trash2, X, Send, ScrollText, Check, UserRound, Eye, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, Lock, RefreshCw, LogOut, Search, Download, MessageSquare, Sprout, BookOpen, KeyRound, Sparkles, Star, FileText, Mail, Trash2, X, Send, ScrollText, Check, UserRound, Eye, BarChart3, type LucideIcon } from 'lucide-react'
 import { SITE } from '../config/site'
 import AdminPoetryManager from './AdminPoetryManager'
+import KundliChart from './KundliChart'
+import { signLabel } from '../lib/jyotish'
+import type { BirthChartData } from '../types/astrology'
 import type { Memory, EntityId } from '../types/api'
 
 /**
@@ -176,6 +179,32 @@ export default function SanctuaryAdmin() {
     } catch { setError('Could not delete.') }
   }
 
+  // ── Inline natal chart (reuses the public /chart engine + <KundliChart>) ─────
+  const [natalCharts, setNatalCharts] = useState<Record<number, BirthChartData>>({})
+  const [chartBusy, setChartBusy] = useState<number | null>(null)
+  const [chartErr, setChartErr] = useState<Record<number, string>>({})
+  const [chartShown, setChartShown] = useState<Record<number, boolean>>({})
+
+  const loadChart = async (id: number, r: RegisteredInfo) => {
+    if (!r.dob || r.latitude == null || r.longitude == null) { setChartErr((e) => ({ ...e, [id]: 'Incomplete birth data for this account.' })); return }
+    setChartBusy(id); setChartErr((e) => ({ ...e, [id]: '' }))
+    try {
+      const [y, mo, d] = r.dob.split('-').map(Number)
+      const [h, mi] = (r.birthTime || '12:00').split(':').map(Number)
+      const body = { year: y, month: mo, day: d, hour: h || 0, minute: mi || 0, second: 0, timeZone: r.timezone || 'UTC', latitude: r.latitude, longitude: r.longitude, ayanamsa: 'lahiri' }
+      const res = await fetch(`${SITE.apiUrl}/api/astrology/chart`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const j = (await res.json().catch(() => null)) as { success?: boolean; data?: BirthChartData; message?: string } | null
+      if (!res.ok || !j?.success || !j.data) throw new Error(j?.message || `Failed (${res.status})`)
+      setNatalCharts((c) => ({ ...c, [id]: j.data as BirthChartData }))
+    } catch (err) { setChartErr((e) => ({ ...e, [id]: err instanceof Error ? err.message : 'Could not compute the chart.' })) }
+    finally { setChartBusy(null) }
+  }
+  const toggleChart = (id: number, r: RegisteredInfo) => {
+    const willShow = !chartShown[id]
+    setChartShown((s) => ({ ...s, [id]: willShow }))
+    if (willShow && !natalCharts[id]) loadChart(id, r)
+  }
+
   // Reply / send-reading modal
   const [reply, setReply] = useState<{ id: number; name: string; contact: string } | null>(null)
   const [replySubject, setReplySubject] = useState('')
@@ -304,8 +333,14 @@ export default function SanctuaryAdmin() {
     ? <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-gradient-to-r from-violet-500/25 to-emerald-400/20 px-2 py-0.5 font-mono text-[10px] text-violet-100"><UserRound size={10} /> Registered</span>
     : <span className="inline-flex items-center gap-1 rounded-full border border-fg/15 bg-fg/5 px-2 py-0.5 font-mono text-[10px] text-fg/50">Guest</span>
 
-  // Full registered-account context, shown in an expanded row.
-  const RegisteredDetail = ({ r, cols }: { r: RegisteredInfo; cols: number }) => (
+  // Full registered-account context + inline computed natal chart.
+  const RegisteredDetail = ({ r, cols }: { r: RegisteredInfo & { id: number }; cols: number }) => {
+    const shown = !!chartShown[r.id]
+    const chart = natalCharts[r.id]
+    const busy = chartBusy === r.id
+    const err = chartErr[r.id]
+    const canChart = !!r.dob && r.latitude != null && r.longitude != null
+    return (
     <tr className="border-t border-fg/5 bg-violet-500/[0.06]">
       <td colSpan={cols} className="px-4 py-4">
         <div className="rounded-xl border border-violet-400/25 bg-gradient-to-br from-violet-500/[0.08] to-emerald-400/[0.06] p-4">
@@ -327,10 +362,61 @@ export default function SanctuaryAdmin() {
               </div>
             ))}
           </div>
+
+          {/* Inline natal chart toggle */}
+          <div className="mt-4">
+            <button type="button" onClick={() => toggleChart(r.id, r)} disabled={busy || !canChart}
+              className="inline-flex items-center gap-2 rounded-xl border border-emerald-300/40 bg-gradient-to-r from-emerald-400/20 to-violet-500/25 px-4 py-2 font-mono text-[12px] font-semibold text-emerald-50 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+              {busy ? <RefreshCw size={13} className="animate-spin" /> : <BarChart3 size={13} />}
+              📊 ဇာတာခွင် တွက်ချက်ကြည့်ရှုရန် (View Natal Chart)
+            </button>
+            {!canChart && <p className="mt-2 font-mono text-[10px] text-fg/40">No stored birth data — chart unavailable.</p>}
+          </div>
+
+          {/* Inline computed chart */}
+          {shown && canChart && (
+            <div className="mt-4">
+              {err && <p className="mb-2 rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-xs text-rose-200">{err}</p>}
+              {busy && !chart && <p className="font-mono text-xs text-fg/50">Computing chart…</p>}
+              {chart && (
+                <div className="grid gap-4 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+                  <div className="min-w-0 rounded-xl border border-violet-400/20 bg-space/40 p-3">
+                    <KundliChart data={chart} title="Rasi · D1" subtitle={r.accountUsername || undefined} />
+                  </div>
+                  <div className="min-w-0 overflow-x-auto rounded-xl border border-fg/10">
+                    <table className="w-full min-w-[340px] border-collapse text-left text-xs">
+                      <thead className="bg-fg/5 font-mono text-[10px] uppercase tracking-wider text-fg/50">
+                        <tr><th className="px-3 py-2">Planet</th><th className="px-3 py-2">Sign</th><th className="px-3 py-2">House</th><th className="px-3 py-2">Nakshatra</th><th className="px-3 py-2">R</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-t border-fg/5">
+                          <td className="px-3 py-1.5 font-medium text-violet-200">Lagna</td>
+                          <td className="px-3 py-1.5">{signLabel(chart.ascendant.sign, 'en')}</td>
+                          <td className="px-3 py-1.5 font-mono">1</td>
+                          <td className="px-3 py-1.5 text-fg/50">—</td>
+                          <td className="px-3 py-1.5" />
+                        </tr>
+                        {chart.planets.map((p) => (
+                          <tr key={p.name} className="border-t border-fg/5">
+                            <td className="px-3 py-1.5 font-medium text-amber-200">{p.name}</td>
+                            <td className="px-3 py-1.5">{signLabel(p.sign, 'en')}</td>
+                            <td className="px-3 py-1.5 font-mono">{p.house}</td>
+                            <td className="px-3 py-1.5 text-fg/70">{p.nakshatraName || '—'}</td>
+                            <td className="px-3 py-1.5">{p.retrograde ? <span className="text-rose-300">R</span> : ''}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </td>
     </tr>
-  )
+    )
+  }
 
   return (
     <div className="min-h-screen bg-space px-4 py-6 text-fg sm:px-8">
