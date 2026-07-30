@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  // `dark:` variants track the manual theme toggle (html[data-theme="dark"]),
+  // not the OS media query — so light/dark utility pairs work with our switcher.
+  darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {

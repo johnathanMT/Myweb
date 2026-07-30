@@ -53,14 +53,15 @@ const VARGAS: { n: number; name: string; desc: { en: string; mm: string } }[] = 
 ]
 
 const BIO_EN = 'Bhone Min Thike Din delivers each reading with the rigor of an exact Vedic science. Every chart is decoded through a demanding, multi-layered methodology — the sidereal zodiac fixed by the Lahiri Ayanamsa, Whole-Sign houses anchored on the Chandra Lagna, the complete set of sixteen divisional charts from D1 to D60, the Vimśottarī Dasha timeline of planetary periods, the six-fold Shadbala strength metrics and the Ashtakavarga point system. This is not vague fortune-telling; it is a precise mathematical blueprint of your life, computed to the exacting standard of the classical Jyotish śāstras. From that blueprint he delivers clear, strategic life guidance — decisive, practical, and grounded in absolute confidence and professional mastery.'
-// Astrologer credential pills — each a distinct gradient/glow colour.
+// Astrologer credential pills — readable in BOTH light and dark (dark shades on
+// light bg, light shades on dark bg), each with a distinct colour + soft glow.
 const PROFILE_PILLS: { mm: string; en: string; cls: string }[] = [
-  { mm: 'နက္ခတ်ဗေဒင်', en: 'Sidereal Jyotish', cls: 'from-emerald-400/25 to-teal-500/10 border-emerald-300/45 text-emerald-100 shadow-emerald-500/25' },
-  { mm: 'Lahiri အယနန္သ', en: 'Lahiri Ayanamsa', cls: 'from-cyan-400/25 to-sky-500/10 border-cyan-300/45 text-cyan-100 shadow-cyan-500/25' },
-  { mm: 'ဝိံရှောတ္တရီ ဒသာ', en: 'Vimśottarī Dasha', cls: 'from-violet-400/30 to-fuchsia-500/10 border-violet-300/45 text-violet-100 shadow-violet-500/30' },
-  { mm: 'ဇာတာခွဲ D1–D60', en: 'D1–D60 Vargas', cls: 'from-amber-300/30 to-orange-500/10 border-amber-300/50 text-amber-100 shadow-amber-500/30' },
-  { mm: 'ဆဒ္ဗလ', en: 'Shadbala', cls: 'from-rose-400/25 to-pink-500/10 border-rose-300/45 text-rose-100 shadow-rose-500/25' },
-  { mm: 'အဋ္ဌကဝဂ်', en: 'Ashtakavarga', cls: 'from-indigo-400/25 to-blue-500/10 border-indigo-300/45 text-indigo-100 shadow-indigo-500/25' },
+  { mm: 'နက္ခတ်ဗေဒင်', en: 'Sidereal Jyotish', cls: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-400/40 shadow-emerald-500/20' },
+  { mm: 'Lahiri Ayanamsa', en: 'Lahiri Ayanamsa', cls: 'bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-cyan-900/40 dark:text-cyan-200 dark:border-cyan-400/40 shadow-cyan-500/20' },
+  { mm: 'ဝိံရှောတ္တရီ ဒသာ', en: 'Vimśottarī Dasha', cls: 'bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-900/40 dark:text-violet-200 dark:border-violet-400/40 shadow-violet-500/25' },
+  { mm: 'ဇာတာခွဲ D1–D60', en: 'D1–D60 Vargas', cls: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-400/50 shadow-amber-500/25' },
+  { mm: 'ဆဒ္ဗလ', en: 'Shadbala', cls: 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-900/40 dark:text-rose-200 dark:border-rose-400/40 shadow-rose-500/20' },
+  { mm: 'အဋ္ဌကဝဂ်', en: 'Ashtakavarga', cls: 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-400/40 shadow-indigo-500/20' },
 ]
 
 const BIO_MM = 'ရှေးဟောင်း ဂဏန်းသင်္ချာနှင့် နက္ခတ်ဗေဒင်သိပ္ပံ (Vedic Astrology / Jyotish) ၏ အဆင့်မြင့် တွက်ကိန်းများကို အခြေခံ၍ — Sidereal Zodiac ကို Lahiri Ayanamsa ဖြင့် တိကျစွာ ချိန်ညှိတွက်ချက်ခြင်း၊ Chandra Lagna (စန္ဒလဂ်) ကို အခြေခံသော Whole-Sign House စနစ်၊ အခြေခံဇာတာမှသည် အနုစိတ်ဇာတာများအထိ ပါဝင်သော ဇာတာခွင် ၁၆ မျိုး (D1 မှ D60 Vargas)၊ ဝိံရှာတ္တရီ (Vimsottari) ဒဿနှင့် အန္တရဒဿ ကာလများ၊ ဂြိုလ်တို့၏ အမြင် (Drishti)၊ ဂြိုလ်စွမ်းအားပြည့်ဝမှုကို တိုင်းတာသည့် ဆုဒ္ဓလ (Shadbala) နှင့် အဋ္ဌကဝဂ် (Ashtakavarga) စသည့် ရှေးဟောင်း နက္ခတ်သင်္ချာနည်းစနစ်များကို အလွှာလိုက် (Layer-by-layer) စေ့စေ့စပ်စပ် စစ်ဆေးခွဲခြမ်းစိတ်ဖြာကာ တိကျသေချာစွာ တွက်ချက်ဖော်ပြပေးပါသည်။'
@@ -613,8 +614,8 @@ export default function Jyotish() {
     <section className="section-container vedin-page">
       {/* ── Grand Astrologer Profile — centered, large photo, bio below ── */}
       {/* print-hide: the photo + bio are omitted from the printed PDF (Phase 4) */}
-      <div className="print-hide relative mb-8 overflow-hidden rounded-3xl border border-accent/25 p-6 text-center sm:p-10"
-        style={{ background: 'linear-gradient(135deg, rgb(var(--card)) 0%, rgb(var(--surface)) 100%)', boxShadow: '0 0 60px -20px rgb(var(--accent) / 0.45)' }}>
+      <div className="print-hide relative mb-8 overflow-hidden rounded-3xl border border-amber-400/30 p-6 text-center sm:p-10"
+        style={{ background: 'linear-gradient(135deg, rgb(var(--card)) 0%, rgb(var(--surface)) 100%)', boxShadow: '0 0 64px -22px rgba(234,179,8,0.42), 0 0 44px -18px rgb(var(--accent) / 0.35)' }}>
         <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, rgb(var(--accent)) 0%, transparent 70%)' }} />
         <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, #a855f7 0%, transparent 70%)' }} />
 
@@ -629,25 +630,25 @@ export default function Jyotish() {
         </div>
 
         <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-5">
-          <div className="relative h-36 w-36 shrink-0 rounded-full p-[4px] sm:h-44 sm:w-44"
-            style={{ background: 'conic-gradient(from 200deg, #eab308, #a855f7, #22d3ee, #eab308)', boxShadow: '0 0 44px -6px rgba(168,85,247,0.65), 0 0 30px -8px rgba(234,179,8,0.6)' }}>
+          <div className="relative h-36 w-36 shrink-0 rounded-full p-[4px] ring-2 ring-amber-400/40 sm:h-44 sm:w-44"
+            style={{ background: 'conic-gradient(from 210deg, #fef3c7, #eab308, #b45309, #f59e0b, #fde68a, #eab308)', boxShadow: '0 0 48px -4px rgba(234,179,8,0.72), 0 0 32px -8px rgba(180,83,9,0.55)' }}>
             <div className="relative h-full w-full overflow-hidden rounded-full bg-card">
-              <span className="absolute inset-0 flex items-center justify-center font-groovy text-5xl text-accent">ဘ</span>
+              <span className="absolute inset-0 flex items-center justify-center font-groovy text-5xl text-amber-500">ဘ</span>
               <img src="/sayar.jpg" alt="Bhone Min Thike Din" className="relative h-full w-full object-cover" loading="lazy"
                 onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} />
             </div>
           </div>
           <div>
-            <p className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.28em] text-accent-light">
-              <Sparkles size={11} /> {lang === 'mm' ? 'ဗေဒင်ပညာ လေ့လာဆည်းပူးသူ' : 'Vedic Astrology Enthusiast'}
+            <p className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.28em] text-amber-700 dark:text-amber-200">
+              <Sparkles size={11} className="text-amber-500 dark:text-amber-300" /> {lang === 'mm' ? 'ဗေဒင်ပညာ လေ့လာဆည်းပူးသူ' : 'Vedic Astrology Enthusiast'}
             </p>
-            <h1 className="mt-2.5 font-groovy text-3xl text-fg sm:text-4xl" style={{ textShadow: '0 0 34px rgb(var(--accent) / 0.35)' }}>
+            <h1 className="mt-2.5 font-groovy text-3xl text-fg sm:text-4xl" style={{ textShadow: '0 0 34px rgba(234,179,8,0.4)' }}>
               {lang === 'mm' ? 'ဘုန်းမင်းသိုက်ဒင်' : 'Bhone Min Thike Din'}
             </h1>
-            {/* colourful credential pills */}
+            {/* colourful credential pills — readable in light & dark */}
             <div className="mt-3.5 flex flex-wrap justify-center gap-2">
               {PROFILE_PILLS.map((p) => (
-                <span key={p.en} className={`inline-flex items-center rounded-full border bg-gradient-to-r px-3 py-1 font-mono text-[11px] font-medium shadow-lg backdrop-blur-sm transition hover:brightness-110 ${p.cls}`}>
+                <span key={p.en} className={`inline-flex items-center rounded-full border px-3 py-1 font-mono text-[11px] font-semibold shadow-md transition hover:brightness-105 ${p.cls}`}>
                   {lang === 'mm' ? p.mm : p.en}
                 </span>
               ))}
@@ -702,21 +703,21 @@ export default function Jyotish() {
       {/* ── Registered dashboard banner (Emerald/Mint + Deep Purple) ── */}
       {showDashboard && profile && (
         <div className="relative mb-6 overflow-hidden rounded-3xl border p-6 sm:p-8 no-print"
-          style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.20) 0%, rgba(20,16,34,0.55) 46%, rgba(124,58,237,0.30) 100%)', borderColor: 'rgba(124,58,237,0.42)', boxShadow: '0 0 70px -20px rgba(16,185,129,0.45), 0 0 60px -24px rgba(124,58,237,0.5)' }}>
+          style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.34) 0%, rgba(15,12,26,0.94) 46%, rgba(124,58,237,0.44) 100%)', borderColor: 'rgba(234,179,8,0.4)', boxShadow: '0 0 70px -20px rgba(16,185,129,0.4), 0 0 60px -22px rgba(234,179,8,0.35)' }}>
           <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full opacity-40 blur-3xl" style={{ background: 'radial-gradient(circle, #34d399 0%, transparent 70%)' }} />
           <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full opacity-40 blur-3xl" style={{ background: 'radial-gradient(circle, #a855f7 0%, transparent 70%)' }} />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em]" style={{ color: '#6ee7b7' }}><Sparkles size={14} /> {lang === 'mm' ? 'သင့်ကိုယ်ပိုင် ဇာတာ ဟောစာတမ်းများကို ကြည့်ရှုရန် Dashboard' : 'Your personal Jyotish dashboard'}</p>
-              <h2 className="mt-2 font-groovy text-2xl text-fg sm:text-3xl">
+              <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-emerald-200"><Sparkles size={14} className="text-amber-300" /> {lang === 'mm' ? 'သင့်ကိုယ်ပိုင် ဇာတာ ဟောစာတမ်းများကို ကြည့်ရှုရန် Dashboard' : 'Your personal Jyotish dashboard'}</p>
+              <h2 className="mt-2 font-groovy text-2xl text-white sm:text-3xl">
                 {lang === 'mm' ? `ကြိုဆိုပါတယ်၊ ${profile.username} ` : `Welcome to your personal Jyotish dashboard, ${profile.username} `}
-                {ageLabel(profile.dob) && <span className="text-xl text-jade sm:text-2xl">{ageLabel(profile.dob)}</span>}
+                {ageLabel(profile.dob) && <span className="text-xl text-amber-300 sm:text-2xl">{ageLabel(profile.dob)}</span>}
                 {lang === 'mm' ? ' 🙏' : ''}
               </h2>
               <div className="mt-3 flex flex-wrap gap-2 font-mono text-[11px]">
-                {profile.dob && <span className="rounded-full border border-jade/30 bg-jade/10 px-2.5 py-1 text-jade">🎂 {profile.dob}{profile.birthTime ? ` · ${profile.birthTime}` : ''}</span>}
-                {profile.locationName && <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-accent-light">📍 {profile.locationName}</span>}
-                {profile.gender && <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-muted">{profile.gender === 'female' ? (lang === 'mm' ? 'မ' : 'Female') : (lang === 'mm' ? 'ကျား' : 'Male')}</span>}
+                {profile.dob && <span className="rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2.5 py-1 text-emerald-100">🎂 {profile.dob}{profile.birthTime ? ` · ${profile.birthTime}` : ''}</span>}
+                {profile.locationName && <span className="rounded-full border border-violet-400/40 bg-violet-500/15 px-2.5 py-1 text-violet-100">📍 {profile.locationName}</span>}
+                {profile.gender && <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-white/80">{profile.gender === 'female' ? (lang === 'mm' ? 'မ' : 'Female') : (lang === 'mm' ? 'ကျား' : 'Male')}</span>}
               </div>
             </div>
             <div className="flex shrink-0 flex-col gap-2 self-start sm:items-end">

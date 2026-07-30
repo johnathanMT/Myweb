@@ -232,7 +232,7 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
               <h3 className="font-groovy text-lg text-fg">{modal === 'login' ? t('Sign in', 'အကောင့်ဝင်') : modal === 'profile' ? t('Edit your natal profile', 'မွေးဇာတာ ပရိုဖိုင် ပြင်ရန်') : t('Create account', 'အကောင့်ဖွင့်')}</h3>
               <button type="button" onClick={() => setModal(null)} className="text-muted hover:text-fg"><X size={18} /></button>
             </div>
-            {msg && <p className={`mb-3 rounded-xl border px-3 py-2 text-xs ${msg.ok ? 'border-jade/40 bg-jade/10 text-jade' : 'border-coral/40 bg-coral/10 text-coral'}`}>{msg.text}</p>}
+            {msg && <p className={`mb-3 rounded-xl border px-3 py-2 text-xs ${msg.ok ? 'border-emerald-400/40 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200' : 'border-coral/40 bg-coral/10 text-coral'}`}>{msg.text}</p>}
             <form onSubmit={modal === 'login' ? login : modal === 'signup' ? signup : saveProfile} className="space-y-3">
               {modal !== 'profile' && (
                 <label className="block"><span className="font-mono text-[11px] uppercase tracking-wider text-muted">{t('Email', 'အီးမေးလ်')}</span>
@@ -254,7 +254,7 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
               {/* Natal profile — makes the account render its own chart instantly */}
               {(modal === 'signup' || modal === 'profile') && (
                 <div className="space-y-3 rounded-xl border border-jade/25 bg-jade/[0.05] p-3">
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-jade">{modal === 'profile' ? t('Your birth details', 'သင့်မွေးဖွားချက်') : t('Your birth details (optional — unlocks your dashboard)', 'သင့်မွေးဖွားချက် (ရွေးချယ်နိုင် — Dashboard ဖွင့်ပေးသည်)')}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-emerald-700 dark:text-emerald-300">{modal === 'profile' ? t('Your birth details', 'သင့်မွေးဖွားချက်') : t('Your birth details (optional — unlocks your dashboard)', 'သင့်မွေးဖွားချက် (ရွေးချယ်နိုင် — Dashboard ဖွင့်ပေးသည်)')}</p>
                   {modal === 'profile' && (
                     <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-2.5 py-2 text-[11px] leading-relaxed text-amber-200">⚠️ မွေးဇာတာ အချက်အလက်များကို ရက်ပေါင်း 90 မှ တစ်ကြိမ်သာ ပြောင်းလဲနိုင်ပါသည်။</p>
                   )}
@@ -283,7 +283,7 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
                       </ul>
                     )}
                   </label>
-                  {sPlaceOk && <p className="font-mono text-[10px] text-jade">✓ {sPlace} · {sTz}</p>}
+                  {sPlaceOk && <p className="font-mono text-[10px] text-emerald-700 dark:text-emerald-300">✓ {sPlace} · {sTz}</p>}
                 </div>
               )}
 
