@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, ScrollText, Clock, CheckCircle2, ChevronDown, Lock, UserPlus, Pencil } from 'lucide-react'
+import { Sparkles, MapPin, Loader2, Search, Download, Star, Info, Sigma, FlaskConical, ArrowRight, ScrollText, Clock, CheckCircle2, ChevronDown, Lock, UserPlus, Pencil, Send } from 'lucide-react'
 import tzlookup from 'tz-lookup'
 import { SITE } from '../config/site'
 import KundliChart from './KundliChart'
@@ -35,6 +35,7 @@ interface Profile {
   gender?: string; dob?: string; birthTime?: string; locationName?: string
   latitude?: number; longitude?: number; timezone?: string; hasProfile: boolean
 }
+interface ChatMsg { id: number; senderRole: string; text: string; createdAt: string }
 type Tab = 'ai' | 'reading' | 'timeline' | 'd1' | 'vargas' | 'ashtaka' | 'shadbala'
 
 
@@ -198,10 +199,10 @@ export default function Jyotish() {
 
   // Remedy / contact-to-Ko Bhone Min Thike Din form.
   const remedyRef = useRef<HTMLDivElement>(null)
-  const [remedyArea, setRemedyArea] = useState('')
-  const [remedyContact, setRemedyContact] = useState('')
-  const [remedyMsg, setRemedyMsg] = useState('')
-  const [remedyState, setRemedyState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatBusy, setChatBusy] = useState(false)
+  const chatEndRef = useRef<HTMLDivElement>(null)
 
   // Full-reading PDF via the browser's print engine (captures every tab's charts & tables).
   const [printAll, setPrintAll] = useState(false)
@@ -370,25 +371,33 @@ export default function Jyotish() {
   }
   const backToDashboard = () => { setOtherMode(false); setReqStatus('none'); setReqMarkdown(''); setReqId(null) }
 
+  // Life-area "get remedy" → pre-fill the consultation chat with that area.
   const openRemedy = (areaLabel: string) => {
-    setRemedyArea(areaLabel); setRemedyState('idle')
+    setChatInput(lang === 'mm' ? `${areaLabel} ကဏ္ဍအတွက် သင့်လျော်သော ယတြာ/အကြံဉာဏ် လိုအပ်ပါသည်။` : `I would like a suitable remedy / advice for: ${areaLabel}.`)
     setTimeout(() => remedyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 40)
   }
-  const submitRemedy = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setRemedyState('sending')
+  const loadMessages = async () => {
+    if (!customerToken) return
     try {
-      const res = await fetch(`${SITE.apiUrl}/api/astrology/remedy-request`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: (querent?.name || name).trim(), contact: remedyContact.trim(),
-          area: remedyArea.trim(), message: remedyMsg.trim(), birthDate: date, birthTime: time,
-        }),
-      })
-      if (!res.ok) throw new Error()
-      setRemedyState('sent'); setRemedyMsg('')
-    } catch { setRemedyState('error') }
+      const res = await fetch(`${SITE.apiUrl}/api/customer/messages`, { headers: { Authorization: `Bearer ${customerToken}` } })
+      const j = (await res.json().catch(() => null)) as { success?: boolean; data?: ChatMsg[] } | null
+      if (j?.success && Array.isArray(j.data)) setChatMsgs(j.data)
+    } catch { /* ignore */ }
   }
+  const sendMessage = async () => {
+    const text = chatInput.trim()
+    if (!text || !customerToken || chatBusy) return
+    setChatBusy(true)
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/customer/messages`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${customerToken}` }, body: JSON.stringify({ text }),
+      })
+      const j = (await res.json().catch(() => null)) as { success?: boolean; data?: ChatMsg } | null
+      if (j?.success && j.data) { setChatMsgs((m) => [...m, j.data as ChatMsg]); setChatInput('') }
+    } catch { /* ignore */ } finally { setChatBusy(false) }
+  }
+  useEffect(() => { if (customerToken) loadMessages() }, [customerToken]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }, [chatMsgs])
 
   // Render every tab, switch to the light (print-friendly) theme, then open the
   // browser's Save-as-PDF dialog. The full reading — charts, tables, timeline —
@@ -602,12 +611,13 @@ export default function Jyotish() {
   const openAuth = (mode: 'login' | 'signup') => customerPanelRef.current?.openAuth(mode)
 
   const curVarga = VARGAS.find((v) => v.n === vargaN) ?? VARGAS[4]
-  const TABS: { id: Tab; label: string }[] = [
-    { id: 'ai', label: lang === 'mm' ? '📜 အသေးစိတ် ဟောစာတမ်း' : '📜 Detailed Reading' },
-    { id: 'reading', label: lang === 'mm' ? 'မွေးဇာတာစစ်ဆေးရန်' : t.tabReading }, { id: 'timeline', label: t.tabTimeline }, { id: 'd1', label: t.tabD1 },
-    { id: 'vargas', label: lang === 'mm' ? 'ခွဲဝေဇာတာ' : 'Vargas' },
-    { id: 'ashtaka', label: lang === 'mm' ? 'အဋ္ဌကဝဂ်' : 'Ashtaka' },
-    { id: 'shadbala', label: lang === 'mm' ? 'ဆဒ္ဗလ' : 'Shadbala' },
+  const TABS: { id: Tab; label: string; variant?: 'main' | 'ashtaka' | 'shadbala' }[] = [
+    { id: 'ai', label: lang === 'mm' ? '📜 အသေးစိတ် ဟောစာတမ်း' : '📜 Detailed Reading', variant: 'main' },
+    { id: 'reading', label: lang === 'mm' ? 'မွေးဇာတာဟောစာတမ်း' : t.tabReading },
+    { id: 'timeline', label: t.tabTimeline },
+    { id: 'vargas', label: lang === 'mm' ? 'ဇာတာခွဲများ' : 'Charts' },
+    { id: 'ashtaka', label: lang === 'mm' ? 'အဋ္ဌကဝဂ်' : 'Ashtaka', variant: 'ashtaka' },
+    { id: 'shadbala', label: lang === 'mm' ? 'ဆဒ္ဗလ' : 'Shadbala', variant: 'shadbala' },
   ]
 
   return (
@@ -642,7 +652,8 @@ export default function Jyotish() {
             <p className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.28em] text-amber-700 dark:text-amber-200">
               <Sparkles size={11} className="text-amber-500 dark:text-amber-300" /> {lang === 'mm' ? 'ဗေဒင်ပညာ လေ့လာဆည်းပူးသူ' : 'Vedic Astrology Enthusiast'}
             </p>
-            <h1 className="mt-2.5 font-groovy text-3xl text-fg sm:text-4xl" style={{ textShadow: '0 0 34px rgba(234,179,8,0.4)' }}>
+            <h1 className="mt-2.5 bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600 bg-clip-text font-groovy text-4xl font-bold text-transparent sm:text-5xl"
+              style={{ filter: 'drop-shadow(0 1px 12px rgba(234,179,8,0.4))' }}>
               {lang === 'mm' ? 'ဘုန်းမင်းသိုက်ဒင်' : 'Bhone Min Thike Din'}
             </h1>
             {/* colourful credential pills — readable in light & dark */}
@@ -922,13 +933,35 @@ export default function Jyotish() {
               <div className="no-print sticky top-14 z-30 -mx-1 border-b border-accent/20 px-1 py-2.5 backdrop-blur-md sm:top-16"
                 style={{ background: 'rgb(var(--space) / 0.85)' }}>
                 <div className="flex items-center gap-2">
-                  <div className="no-scrollbar flex flex-1 gap-1.5 overflow-x-auto whitespace-nowrap">
-                    {TABS.map((tb) => (
-                      <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
-                        className={`shrink-0 rounded-full border px-4 py-1.5 font-mono text-xs transition ${tab === tb.id ? 'border-accent/60 bg-accent/15 text-accent-light' : 'border-white/12 bg-white/5 text-muted hover:text-fg'}`}>
-                        {tb.label}
-                      </button>
-                    ))}
+                  <div className="no-scrollbar flex flex-1 items-center gap-2 overflow-x-auto whitespace-nowrap py-0.5">
+                    {TABS.map((tb) => {
+                      const active = tab === tb.id
+                      if (tb.variant === 'main') return (
+                        <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
+                          className={`shrink-0 rounded-full border-2 px-5 py-2 font-groovy text-sm transition ${active
+                            ? 'border-amber-400 bg-gradient-to-r from-amber-400/25 to-yellow-300/15 text-amber-700 shadow-[0_0_22px_-4px_rgba(234,179,8,0.7)] dark:text-amber-100'
+                            : 'border-amber-400/60 bg-amber-400/10 text-amber-700 shadow-[0_0_16px_-6px_rgba(234,179,8,0.55)] hover:bg-amber-400/20 dark:text-amber-200'}`}>
+                          {tb.label}
+                        </button>
+                      )
+                      if (tb.variant === 'ashtaka' || tb.variant === 'shadbala') {
+                        const grad = tb.variant === 'ashtaka'
+                          ? (active ? 'from-indigo-500 to-blue-600 text-white shadow-[0_0_22px_-4px_rgba(99,102,241,0.75)]' : 'from-indigo-400/30 to-blue-500/20 text-indigo-700 hover:brightness-110 dark:text-indigo-100')
+                          : (active ? 'from-rose-500 to-pink-600 text-white shadow-[0_0_22px_-4px_rgba(244,63,94,0.7)]' : 'from-rose-400/30 to-pink-500/20 text-rose-700 hover:brightness-110 dark:text-rose-100')
+                        return (
+                          <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
+                            className={`shrink-0 rounded-full border border-white/20 bg-gradient-to-r px-6 py-2 font-groovy text-base font-semibold shadow-lg transition ${grad}`}>
+                            {tb.label}
+                          </button>
+                        )
+                      }
+                      return (
+                        <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
+                          className={`shrink-0 rounded-full border px-4 py-1.5 font-mono text-xs transition ${active ? 'border-accent/60 bg-accent/15 text-accent-light' : 'border-white/12 bg-white/5 text-muted hover:text-fg'}`}>
+                          {tb.label}
+                        </button>
+                      )
+                    })}
                   </div>
                   {(tab === 'd1' || tab === 'vargas') && (
                     <div className="flex shrink-0 items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1">
@@ -1008,6 +1041,22 @@ export default function Jyotish() {
                           : 'The Sayar is personally reviewing your chart. Once approved, your full reading will appear here — please check back shortly.'}</p>
                         <span className="mt-1 rounded-full bg-accent/15 px-3 py-1 font-mono text-[11px] text-accent-light">{lang === 'mm' ? 'အခြေအနေ — စစ်ဆေးဆဲ' : 'Status — Pending'}</span>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Approved — majestic success banner + critical refresh warning */}
+                  {reqStatus === 'approved' && (
+                    <div className="no-print space-y-2.5">
+                      <div className="relative overflow-hidden rounded-2xl border-2 border-amber-400/60 p-4 text-center sm:p-5"
+                        style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.24) 0%, rgba(234,179,8,0.24) 100%)', boxShadow: '0 0 46px -10px rgba(234,179,8,0.55)' }}>
+                        <p className="flex flex-wrap items-center justify-center gap-2 font-groovy text-lg text-fg sm:text-xl">
+                          <CheckCircle2 size={22} className="text-emerald-500" />
+                          {lang === 'mm' ? '🎉 ဆရာမှ သင့်ဟောစာတမ်းကို အတည်ပြုပြီးပါပြီ။' : '🎉 The Sayar has approved your reading.'}
+                        </p>
+                      </div>
+                      <p className="rounded-xl border border-rose-400/50 bg-rose-500/10 px-4 py-2.5 text-center text-sm font-bold text-rose-600 dark:text-rose-300">
+                        ⚠️ ဟောစာတမ်း အပြည့်အစုံကို ဖတ်ရှုရန် Page ကို Refresh (ပြန်လည်ဆွဲချ) လုပ်ပေးပါ။
+                      </p>
                     </div>
                   )}
 
@@ -1332,8 +1381,8 @@ export default function Jyotish() {
               {/* ── SHADBALA ── */}
               {(tab === 'shadbala' || printAll) && <ShadbalaView data={data} lang={lang} />}
 
-              {/* ── D1 ── */}
-              {(tab === 'd1' || printAll) && (
+              {/* ── D1 (now shown under the merged "ဇာတာခွဲများ" tab) ── */}
+              {(tab === 'vargas' || printAll) && (
                 <div className="space-y-5">
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="glass-card p-5"><ChartView style={chartStyle} data={data} /></div>
@@ -1393,33 +1442,51 @@ export default function Jyotish() {
                 </div>
               )}
 
-              {/* Remedy (yatra) — contact to Ko Bhone Min Thike Din */}
-              <div ref={remedyRef} className="no-print glass-card border border-accent/25 p-6">
-                <h3 className="font-groovy text-lg text-fg">{lang === 'mm' ? 'ယတြာ အစီအရင်နှင့် အသေးစိတ်မေးမြန်းရန် — ကိုဘုန်းမင်းသိုက်ဒင်ထံ ဆက်သွယ်ရန်' : 'Remedy (Yatra) & More Details — Contact to Ko Bhone Min Thike Din'}</h3>
+              {/* ── In-app consultation chat with the Sayar ── */}
+              <div ref={remedyRef} className="no-print glass-card border border-amber-400/25 p-6">
+                <h3 className="flex items-center gap-2 font-groovy text-lg text-fg"><Sparkles size={16} className="text-amber-500 dark:text-amber-300" /> {lang === 'mm' ? 'ယတြာ အစီအရင်နှင့် အသေးစိတ်မေးမြန်းရန် — ဆရာဘုန်းမင်းသိုက်ဒင်ထံ တိုက်ရိုက် ဆက်သွယ်ရန်' : 'Remedy (Yatra) & Consultation — chat with Saya Phone Myint Thaik Din'}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted">
-                  {lang === 'mm'
-                    ? 'ကံညံ့/ဖိစီးနေသော ကဏ္ဍများအတွက် သင့်လျော်သည့် ယတြာ အစီအရင်နှင့် အကြံဉာဏ်အတွက် ကိုဘုန်းမင်းသိုက်ဒင် ထံ တောင်းခံနိုင်ပါသည်။ အောက်တွင် ဖြည့်စွက်ပါ။'
-                    : 'For areas under strain, you may request a suitable remedy (yatra)& Idea from Ko Bhone Min Thike Din. Fill in your details below.'}
+                  {lang === 'mm' ? 'ဆရာနှင့် တိုက်ရိုက် စကားပြောနိုင်ပါသည်။ သင့် မေးခွန်းများနှင့် ယတြာ တောင်းဆိုမှုများကို အောက်တွင် ရိုက်ထည့်ပါ။' : 'Chat directly with the Sayar. Type your questions and remedy requests below.'}
                 </p>
-                {remedyState === 'sent' ? (
-                  <div className="mt-4 rounded-xl border border-jade/40 bg-jade/10 px-4 py-3 text-sm text-jade">
-                    {lang === 'mm' ? 'ကျေးဇူးတင်ပါသည်။ သင့်တောင်းဆိုမှုကို ကိုဘုန်းမင်းသိုက်ဒင်ထံ ပေးပို့ပြီးပါပြီ — မကြာမီ ဆက်သွယ်ပါမည်။' : 'Thank you — your request has been sent to Ko Bhone Min Thike Din. You will be contacted soon.'}
+
+                {!customerToken ? (
+                  <div className="mt-4 flex flex-col items-start gap-3 rounded-xl border border-accent/30 bg-accent/10 px-5 py-4">
+                    <p className="text-sm text-accent-light">{lang === 'mm' ? 'ဆရာနှင့် စကားပြောရန် အကောင့်ဝင်ပါ။' : 'Log in to chat with the Sayar.'}</p>
+                    <button type="button" onClick={() => openAuth('login')} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-4 py-2 text-sm font-semibold text-space transition hover:brightness-110"><Lock size={15} /> {lang === 'mm' ? 'အကောင့်ဝင်ရန်' : 'Log In'}</button>
                   </div>
                 ) : (
-                  <form onSubmit={submitRemedy} className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <label><span className={labelCls}>{lang === 'mm' ? 'ကဏ္ဍ' : 'Area'}</span>
-                      <input value={remedyArea} onChange={(e) => setRemedyArea(e.target.value)} className={field} placeholder={lang === 'mm' ? 'ဥပမာ — အလုပ်အကိုင်' : 'e.g. Career'} /></label>
-                    <label><span className={labelCls}>{lang === 'mm' ? 'ဆက်သွယ်ရန် (ဖုန်း/အီးမေးလ်)' : 'Contact (phone / email)'}</span>
-                      <input value={remedyContact} onChange={(e) => setRemedyContact(e.target.value)} required className={field} /></label>
-                    <label className="sm:col-span-2"><span className={labelCls}>{lang === 'mm' ? 'အသေးစိတ် မက်ဆေ့ချ်' : 'Message'}</span>
-                      <textarea value={remedyMsg} onChange={(e) => setRemedyMsg(e.target.value)} rows={3} className={`${field} resize-y`} placeholder={lang === 'mm' ? 'သင့် အခြေအနေ / မေးလိုသည့်အရာ' : 'Your situation / what you would like to ask'} /></label>
-                    <div className="flex items-center gap-3 sm:col-span-2">
-                      <button type="submit" disabled={remedyState === 'sending'} className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-space transition hover:brightness-110 disabled:opacity-60">
-                        {remedyState === 'sending' ? <><Loader2 size={15} className="animate-spin" /> {lang === 'mm' ? 'ပေးပို့နေသည်…' : 'Sending…'}</> : (lang === 'mm' ? 'ကိုဘုန်းမင်းသိုက်ဒင်ထံ ပေးပို့ရန်' : 'Send to Ko Bhone Min Thike Din')}
-                      </button>
-                      {remedyState === 'error' && <span className="text-xs text-coral">{lang === 'mm' ? 'ပေးပို့၍မရပါ — နောက်တစ်ကြိမ်ပြန်ကြိုးစားပါ။' : 'Could not send — please try again.'}</span>}
+                  <div className="mt-4">
+                    <div className="flex h-80 flex-col gap-2.5 overflow-y-auto rounded-2xl border border-fg/10 bg-fg/[0.03] p-4">
+                      {chatMsgs.length === 0 ? (
+                        <p className="m-auto max-w-xs text-center text-sm text-muted">{lang === 'mm' ? 'စကားပြောဆိုမှု မရှိသေးပါ — အောက်တွင် စတင်မေးမြန်းပါ။' : 'No messages yet — start the conversation below.'}</p>
+                      ) : chatMsgs.map((m) => {
+                        const mine = m.senderRole === 'Customer'
+                        return (
+                          <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[82%] rounded-2xl border px-3.5 py-2 text-sm leading-relaxed ${mine
+                              ? 'rounded-br-md border-amber-300/40 bg-gradient-to-br from-amber-200/30 to-violet-500/25 text-fg'
+                              : 'rounded-bl-md border-emerald-400/30 bg-emerald-500/15 text-fg'}`}>
+                              {!mine && <div className="mb-0.5 font-mono text-[10px] font-semibold text-emerald-600 dark:text-emerald-300">ဆရာဘုန်းမင်းသိုက်ဒင်</div>}
+                              <div className="whitespace-pre-wrap break-words">{m.text}</div>
+                              <div className="mt-1 text-right font-mono text-[9px] text-muted">{(m.createdAt || '').slice(5, 16)}</div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                      <div ref={chatEndRef} />
                     </div>
-                  </form>
+                    <div className="mt-3 flex items-end gap-2">
+                      <textarea value={chatInput} onChange={(e) => setChatInput(e.target.value)} rows={2}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
+                        placeholder={lang === 'mm' ? 'မေးခွန်း ရိုက်ထည့်ပါ… (Enter = ပို့)' : 'Type your question… (Enter to send)'}
+                        className={`${field} flex-1 resize-none`} />
+                      <button type="button" onClick={sendMessage} disabled={chatBusy || !chatInput.trim()}
+                        className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-accent to-violet-500 px-4 py-3 text-sm font-semibold text-space transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+                        {chatBusy ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} {lang === 'mm' ? 'ပို့မည်' : 'Send'}
+                      </button>
+                    </div>
+                    <button type="button" onClick={loadMessages} className="mt-2 font-mono text-[11px] text-muted transition hover:text-fg">↻ {lang === 'mm' ? 'ပြန်လည်ရယူ' : 'Refresh chat'}</button>
+                  </div>
                 )}
               </div>
             </div>

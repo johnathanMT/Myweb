@@ -1786,6 +1786,23 @@ html[data-theme="light"] ::selection {
   color: rgb(var(--fg));
 }
 
+/* ── Majestic parchment light mode — scoped to the Vedin page only ──
+   Warm cream base + sepia ink instead of cool white/grey, so the reading
+   feels like an ancient illuminated manuscript. */
+html[data-theme="light"] .vedin-page {
+  --space: 250 246 236;      /* #FAF6EC warm parchment */
+  --surface: 245 238 221;    /* #F5EEDD aged panel */
+  --card: 255 253 247;       /* #FFFDF7 warm ivory card */
+  --card-hover: 250 244 230;
+  --fg: 43 35 24;            /* #2B2318 sepia ink */
+  --muted: 107 93 69;        /* #6B5D45 faded ink */
+}
+html[data-theme="light"] .vedin-page .glass-card {
+  border-color: rgba(176, 132, 42, 0.24);   /* antique gold rule */
+  background: linear-gradient(180deg, #fffdf7, #f7f0df);
+  box-shadow: 0 12px 32px -20px rgba(120, 90, 30, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
 /* text flip: near-white utilities → dark fg; mid grays → muted */
 html[data-theme="light"] [class*="text-white"],
 html[data-theme="light"] .text-gray-100,

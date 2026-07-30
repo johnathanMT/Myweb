@@ -19,9 +19,10 @@ const PDF_URL = `${SITE.apiUrl}/api/astrology/admin/pdf-reading-requests`
 const READINGS_BASE = `${SITE.apiUrl}/api/astrology/admin/reading-requests`
 const QUERENT_URL = `${SITE.apiUrl}/api/astrology/admin/charts`
 const USERS_URL = `${SITE.apiUrl}/api/customer/admin/users`
+const MSG_THREADS_URL = `${SITE.apiUrl}/api/customer/admin/message-threads`
 const TOKEN_KEY = 'mtn_admin_jwt'
 
-type Tab = 'readings' | 'pdf' | 'charts' | 'querent' | 'users' | 'remedy'
+type Tab = 'readings' | 'pdf' | 'charts' | 'querent' | 'users' | 'remedy' | 'messages'
 
 interface AdminRemedy { id: number; name: string; contact: string; area: string; message: string; birthInfo: string; handled: boolean; status: string; notes: string; createdAt: string }
 const STATUSES = ['Pending', 'InProgress', 'Completed', 'Cancelled'] as const
@@ -43,6 +44,8 @@ interface RegisteredInfo {
 interface AdminPdf extends RegisteredInfo { id: number; querentName: string; clientEmail?: string; status: string; createdAt: string }
 interface AdminReadingReq extends RegisteredInfo { id: number; querentName: string; clientEmail?: string; status: string; hasMarkdown: boolean; pdfRequested: boolean; createdAt: string; approvedAt?: string }
 interface AdminUser extends RegisteredInfo { id: number; username: string; email: string; isSuspended: boolean; emailConfirmed: boolean; hasProfile: boolean; createdAt: string }
+interface MessageThread { customerId: number; username: string; email: string; lastMessage: string; lastAt: string; unread: number }
+interface ChatMsg { id: number; senderRole: string; text: string; createdAt: string }
 type ReadingsFilter = 'Pending' | 'Approved' | 'Rejected'
 
 interface LoginResponse { data?: { token?: string; role?: string }; message?: string }
@@ -57,6 +60,10 @@ export default function VedinAdmin() {
   const [querentCharts, setQuerentCharts] = useState<AdminChart[]>([])
   const [users, setUsers] = useState<AdminUser[]>([])
   const [userBusy, setUserBusy] = useState<number | null>(null)
+  const [threads, setThreads] = useState<MessageThread[]>([])
+  const [activeThread, setActiveThread] = useState<{ customerId: number; username: string } | null>(null)
+  const [threadMsgs, setThreadMsgs] = useState<ChatMsg[]>([])
+  const [chatReply, setChatReply] = useState(''); const [chatReplyBusy, setChatReplyBusy] = useState(false)
   const [pdfs, setPdfs] = useState<AdminPdf[]>([])
   const [readingReqs, setReadingReqs] = useState<AdminReadingReq[]>([])
   const [rowBusy, setRowBusy] = useState<{ id: number; action: 'approve' | 'reject' | 'sent' } | null>(null)
@@ -82,25 +89,46 @@ export default function VedinAdmin() {
       setToken(tk); persist(tk); setPassword('')
     } catch (err) { setError(err instanceof Error ? err.message : 'Login failed.') } finally { setLoading(false) }
   }
-  const logout = () => { setToken(''); persist(''); setRemedies([]); setCharts([]); setQuerentCharts([]); setUsers([]); setPdfs([]); setReadingReqs([]) }
+  const logout = () => { setToken(''); persist(''); setRemedies([]); setCharts([]); setQuerentCharts([]); setUsers([]); setPdfs([]); setReadingReqs([]); setThreads([]); setActiveThread(null); setThreadMsgs([]) }
 
   const load = async (which: Tab = tab) => {
     if (!token) return
     setError(''); setLoading(true)
     try {
-      const url = which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : which === 'querent' ? QUERENT_URL : which === 'users' ? USERS_URL : which === 'pdf' ? PDF_URL : `${READINGS_BASE}?status=${readingsFilter}`
+      const url = which === 'remedy' ? REMEDIES_URL : which === 'charts' ? CHARTS_URL : which === 'querent' ? QUERENT_URL : which === 'users' ? USERS_URL : which === 'messages' ? MSG_THREADS_URL : which === 'pdf' ? PDF_URL : `${READINGS_BASE}?status=${readingsFilter}`
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expired or not an Admin. Please log in again.') }
       if (!res.ok) throw new Error(`Failed to load (${res.status})`)
-      const data = (await res.json()) as { data?: AdminRemedy[] | AdminChart[] | AdminPdf[] | AdminReadingReq[] | AdminUser[] }
+      const data = (await res.json()) as { data?: AdminRemedy[] | AdminChart[] | AdminPdf[] | AdminReadingReq[] | AdminUser[] | MessageThread[] }
       const arr = Array.isArray(data?.data) ? data.data : []
       if (which === 'remedy') setRemedies(arr as AdminRemedy[])
       else if (which === 'charts') setCharts(arr as AdminChart[])
       else if (which === 'querent') setQuerentCharts(arr as AdminChart[])
       else if (which === 'users') setUsers(arr as AdminUser[])
+      else if (which === 'messages') setThreads(arr as MessageThread[])
       else if (which === 'pdf') setPdfs(arr as AdminPdf[])
       else setReadingReqs(arr as AdminReadingReq[])
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not load data.') } finally { setLoading(false) }
+  }
+
+  const openThread = async (t: MessageThread) => {
+    setActiveThread({ customerId: t.customerId, username: t.username }); setThreadMsgs([])
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/customer/admin/messages/${t.customerId}`, { headers: { Authorization: `Bearer ${token}` } })
+      const j = (await res.json().catch(() => null)) as { success?: boolean; data?: ChatMsg[] } | null
+      if (j?.success && Array.isArray(j.data)) setThreadMsgs(j.data)
+      setThreads((ts) => ts.map((x) => (x.customerId === t.customerId ? { ...x, unread: 0 } : x)))
+    } catch { setError('Could not open the thread.') }
+  }
+  const sendChatReply = async () => {
+    const text = chatReply.trim()
+    if (!text || !activeThread || chatReplyBusy) return
+    setChatReplyBusy(true)
+    try {
+      const res = await fetch(`${SITE.apiUrl}/api/customer/admin/messages/${activeThread.customerId}`, { method: 'POST', headers: authJson, body: JSON.stringify({ text }) })
+      const j = (await res.json().catch(() => null)) as { success?: boolean; data?: ChatMsg } | null
+      if (j?.success && j.data) { setThreadMsgs((m) => [...m, j.data as ChatMsg]); setChatReply('') }
+    } catch { setError('Could not send.') } finally { setChatReplyBusy(false) }
   }
 
   const authJson = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
@@ -254,8 +282,8 @@ export default function VedinAdmin() {
   const filteredPdfs = pdfs.filter((r) => !s || (r.querentName || '').toLowerCase().includes(s) || (r.clientEmail || '').toLowerCase().includes(s))
   const filteredReadingReqs = readingReqs.filter((r) => !s || (r.querentName || '').toLowerCase().includes(s))
 
-  const total = tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : tab === 'querent' ? querentCharts.length : tab === 'users' ? users.length : tab === 'pdf' ? pdfs.length : readingReqs.length
-  const shown = tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : tab === 'querent' ? filteredQuerentCharts.length : tab === 'users' ? filteredUsers.length : tab === 'pdf' ? filteredPdfs.length : filteredReadingReqs.length
+  const total = tab === 'remedy' ? remedies.length : tab === 'charts' ? charts.length : tab === 'querent' ? querentCharts.length : tab === 'users' ? users.length : tab === 'messages' ? threads.length : tab === 'pdf' ? pdfs.length : readingReqs.length
+  const shown = tab === 'remedy' ? filteredRemedies.length : tab === 'charts' ? filteredCharts.length : tab === 'querent' ? filteredQuerentCharts.length : tab === 'users' ? filteredUsers.length : tab === 'messages' ? threads.length : tab === 'pdf' ? filteredPdfs.length : filteredReadingReqs.length
 
   const TabBtn = ({ id, icon: Icon, label }: { id: Tab; icon: LucideIcon; label: string }) => (
     <button type="button" onClick={() => setTab(id)}
@@ -382,6 +410,7 @@ export default function VedinAdmin() {
               <TabBtn id="charts" icon={Star} label="Saved Charts" />
               <TabBtn id="querent" icon={Star} label="Querent Charts" />
               <TabBtn id="users" icon={UserRound} label="Users" />
+              <TabBtn id="messages" icon={Mail} label="Messages" />
               <TabBtn id="remedy" icon={Sparkles} label="Remedy" />
               <Link to="/sanctuary-admin" className="inline-flex items-center gap-2 rounded-full border border-amber-300/40 bg-amber-300/10 px-4 py-2 font-mono text-xs text-amber-100 transition hover:bg-amber-300/20"><ArrowLeft size={13} /> Sanctuary Admin</Link>
             </div>
@@ -623,6 +652,73 @@ export default function VedinAdmin() {
                     })}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* ── MESSAGES (consultation chat threads) ── */}
+            {tab === 'messages' && (
+              <div className="mt-4 grid gap-4 md:grid-cols-[300px_1fr]">
+                {/* Thread list */}
+                <div className="overflow-hidden rounded-2xl border border-fg/10">
+                  <div className="border-b border-fg/10 bg-fg/5 px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider text-fg/50">Threads</div>
+                  <div className="max-h-[560px] divide-y divide-fg/5 overflow-y-auto">
+                    {threads.length === 0 ? (
+                      <div className="px-4 py-10 text-center font-mono text-sm text-fg/40">{loading ? 'Loading…' : 'No conversations yet.'}</div>
+                    ) : threads.map((t) => (
+                      <button key={t.customerId} type="button" onClick={() => openThread(t)}
+                        className={`flex w-full items-start gap-2 px-4 py-3 text-left transition ${activeThread?.customerId === t.customerId ? 'bg-violet-500/15' : 'hover:bg-fg/[0.04]'}`}>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="truncate font-medium text-amber-300">{t.username || `#${t.customerId}`}</span>
+                            {t.unread > 0 && <span className="ml-auto shrink-0 rounded-full bg-rose-500 px-1.5 py-0.5 font-mono text-[9px] font-bold text-white">{t.unread}</span>}
+                          </div>
+                          <div className="truncate font-mono text-[11px] text-fg/50">{t.lastMessage}</div>
+                          <div className="mt-0.5 font-mono text-[10px] text-fg/35">{(t.lastAt || '').slice(0, 16).replace('T', ' ')}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Conversation pane */}
+                <div className="flex min-h-[560px] flex-col overflow-hidden rounded-2xl border border-fg/10">
+                  {!activeThread ? (
+                    <div className="flex flex-1 items-center justify-center px-4 py-10 text-center font-mono text-sm text-fg/40">Select a conversation to reply.</div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 border-b border-fg/10 bg-fg/5 px-4 py-2.5">
+                        <UserRound size={14} className="text-amber-300" />
+                        <span className="font-medium text-amber-300">{activeThread.username || `#${activeThread.customerId}`}</span>
+                      </div>
+                      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+                        {threadMsgs.length === 0 ? (
+                          <div className="py-10 text-center font-mono text-sm text-fg/40">No messages.</div>
+                        ) : threadMsgs.map((m) => {
+                          const isAdmin = (m.senderRole || '').toLowerCase() === 'admin'
+                          return (
+                            <div key={m.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[78%] rounded-2xl px-3.5 py-2 text-sm ${isAdmin ? 'rounded-br-sm bg-gradient-to-br from-violet-500/30 to-amber-400/20 text-fg' : 'rounded-bl-sm border border-emerald-400/30 bg-emerald-500/10 text-fg'}`}>
+                                <div className="mb-0.5 font-mono text-[9px] uppercase tracking-wider text-fg/40">{isAdmin ? 'ဆရာဘုန်းမင်းသိုက်ဒင်' : (activeThread.username || 'Customer')}</div>
+                                <div className="whitespace-pre-wrap break-words leading-relaxed">{m.text}</div>
+                                <div className="mt-1 text-right font-mono text-[9px] text-fg/35">{(m.createdAt || '').slice(0, 16).replace('T', ' ')}</div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <div className="flex items-end gap-2 border-t border-fg/10 bg-fg/5 px-3 py-3">
+                        <textarea value={chatReply} onChange={(e) => setChatReply(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatReply() } }}
+                          rows={2} placeholder="Reply to the customer… (Enter to send)"
+                          className="flex-1 resize-none rounded-xl border border-fg/15 bg-space/40 px-3 py-2 text-sm text-fg outline-none focus:border-violet-400/50" />
+                        <button type="button" onClick={sendChatReply} disabled={chatReplyBusy || !chatReply.trim()}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-violet-400/50 bg-violet-500/20 px-4 py-2.5 font-mono text-xs font-semibold text-violet-100 transition hover:bg-violet-500/30 disabled:opacity-50">
+                          {chatReplyBusy ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />} Send
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             )}
 
