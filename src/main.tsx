@@ -16,11 +16,11 @@ import './index.css'
 // Lazy: pulls in tsparticles — code-split out of the main bundle.
 const Sanctuary = lazy(() => import('./components/Sanctuary'))
 const SanctuaryAdmin = lazy(() => import('./components/SanctuaryAdmin'))
-const VedinAdmin = lazy(() => import('./components/VedinAdmin'))
 const FarewellRSVP = lazy(() => import('./components/FarewellRSVP'))
-const Jyotish = lazy(() => import('./components/Jyotish'))   // pulls in tz-lookup → code-split
-const Research = lazy(() => import('./components/Research'))
-const Algorithms = lazy(() => import('./components/Algorithms'))
+// NOTE: the Vedin / Jyotish astrology app now lives in its own repository:
+// https://vedin-frontend-git-main-myo-thant-naing-s-projects.vercel.app
+// Its routes (/jyotish, /research, /algorithms, /vedin-admin) and all its
+// components have been removed from this portfolio to cut bundle size.
 
 // Set the theme attribute BEFORE React paints, so there's no light/dark flash.
 // (CSP blocks inline <script> in index.html, so we do it here in a module.)
@@ -57,15 +57,11 @@ ReactDOM.createRoot(rootEl).render(
           <Route path="/bibliography" element={<><Seo title="Bibliography" path="/bibliography" description="Books, papers, and references that shaped my path from caregiving to coding and AI engineering." /><PageShell journeyHub="bibliography"><Bibliography /></PageShell></>} />
           <Route path="/github" element={<><Seo title="GitHub Projects" path="/github" description="Open-source projects by Myo Thant Naing — AI bots, IoT hardware, full-stack web apps, and Python automation scripts." /><PageShell><GitHubProjects /></PageShell></>} />
           <Route path="/gallery" element={<><Seo title="Gallery" path="/gallery" description="A visual gallery of moments, projects, and life in Japan — from the lab to the everyday." /><PageShell><GalleryPage /></PageShell></>} />
-          <Route path="/jyotish" element={<><Seo title="Sayar Bhone Min Thike Din - Professional Vedic Astrology" path="/jyotish" description="Get your accurate Vedic astrology reading, Chandra Lagna, and full Shadbala analysis." image="/astrology-og.jpg" /><PageShell><Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading…</div>}><Jyotish /></Suspense></PageShell></>} />
-          <Route path="/research" element={<><Seo title="Vedin Research — Falsifiable Protocol" path="/research" description="A pre-registered, falsifiable protocol that measures whether Vedic astrology beats chance — honest methodology, hash-locked predictions, live statistics." noindex /><PageShell><Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading…</div>}><Research /></Suspense></PageShell></>} />
-          <Route path="/algorithms" element={<><Seo title="Vedin Algorithms — Computational Reconstruction" path="/algorithms" description="The classical astronomical & astrological algorithms behind the charts — Julian Day, VSOP87, coordinate transforms, modular arithmetic, varga maps, dasha recursion, Ashtakavarga — with formulas and TypeScript." /><PageShell><Suspense fallback={<div className="py-24 text-center font-mono text-sm text-muted">Loading…</div>}><Algorithms /></Suspense></PageShell></>} />
           {/* Sanctuary is full-screen immersive → no PageShell. */}
           <Route path="/sanctuary" element={<><Seo title="Memory Sanctuary" path="/sanctuary" description="An interactive 3D Studio-Ghibli-inspired world where colleagues leave farewell memories." /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#070b1c' }} />}><Sanctuary /></Suspense></>} />
           {/* private / admin → not indexed */}
           <Route path="/farewell" element={<><Seo title="Farewell RSVP" path="/farewell" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#070b1c' }} />}><FarewellRSVP /></Suspense></>} />
           <Route path="/sanctuary-admin" element={<><Seo title="Admin" path="/sanctuary-admin" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b0e1a' }} />}><SanctuaryAdmin /></Suspense></>} />
-          <Route path="/vedin-admin" element={<><Seo title="Vedin Admin" path="/vedin-admin" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b0e1a' }} />}><VedinAdmin /></Suspense></>} />
           {/* unknown paths fall back to the homepage (mode-aware), not indexed */}
           <Route path="*" element={<><Seo noindex /><App /></>} />
         </Routes>

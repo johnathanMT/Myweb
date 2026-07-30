@@ -73,7 +73,7 @@ export const PROJECTS = [
     id: 'jyotish', title: 'Vedin — Vedic Astrology',
     desc: 'A sidereal Jyotish portal — Rasi & Navamsa charts, Vimshottari dasha, a whole-life timeline and Shadbala strengths.',
     icon: 'fas fa-star-and-crescent', color: '#eab308',
-    url: '/jyotish', ext: false,             // in-app React route
+    url: 'https://vedin-frontend-git-main-myo-thant-naing-s-projects.vercel.app', ext: true,   // external Vedin app (separate repo)
   },
 ]
 

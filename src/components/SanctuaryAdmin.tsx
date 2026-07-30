@@ -170,7 +170,7 @@ export default function SanctuaryAdmin() {
             <button type="submit" disabled={loading} className="mt-5 w-full rounded-xl bg-gradient-to-r from-amber-300 to-rose-300 px-5 py-3 font-serif text-sm font-bold text-amber-950 transition hover:brightness-105 disabled:opacity-60">
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
-            <Link to="/vedin-admin" className="mt-4 block text-center font-mono text-[11px] text-violet-300 hover:text-violet-200">✦ Vedin Control Dashboard →</Link>
+            <a href="https://vedin-frontend-git-main-myo-thant-naing-s-projects.vercel.app/vedin-admin" target="_blank" rel="noopener noreferrer" className="mt-4 block text-center font-mono text-[11px] text-violet-300 hover:text-violet-200">✦ Vedin Control Dashboard →</a>
           </form>
         ) : (
           /* ── DASHBOARD ── */
@@ -180,7 +180,7 @@ export default function SanctuaryAdmin() {
               <TabBtn id="farewell" icon={Sprout} label="Farewell RSVPs" />
               <TabBtn id="poetry" icon={BookOpen} label="Poetry" />
               <TabBtn id="account" icon={KeyRound} label="Account" />
-              <Link to="/vedin-admin" className="inline-flex items-center gap-2 rounded-full border border-violet-400/40 bg-violet-500/10 px-4 py-2 font-mono text-xs text-violet-100 transition hover:bg-violet-500/20"><Sparkles size={13} /> Vedin Dashboard →</Link>
+              <a href="https://vedin-frontend-git-main-myo-thant-naing-s-projects.vercel.app/vedin-admin" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-violet-400/40 bg-violet-500/10 px-4 py-2 font-mono text-xs text-violet-100 transition hover:bg-violet-500/20"><Sparkles size={13} /> Vedin Dashboard →</a>
             </div>
 
             {/* search/refresh bar — only for the list tabs (not poetry/account) */}
