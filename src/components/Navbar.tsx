@@ -33,7 +33,7 @@ const NAV_LINKS: NavLink[] = [
   { href: '#stack', key: 'stack' },
   { href: '#gallery', key: 'gallery' },
   { href: '#exploring', key: 'exploring' },
-  { href: 'https://vedin-frontend-git-main-myo-thant-naing-s-projects.vercel.app', key: 'jyotish', isExternal: true },   // Vedin astrology app (separate repo)
+  { href: 'https://vedin.myothant.dev', key: 'jyotish', isExternal: true },   // Vedin astrology app (separate repo)
   { route: '/sanctuary', key: 'sanctuary' },     // dedicated route (#/sanctuary)
   { href: blogPath, key: 'blog', isExternal: true },
 ]

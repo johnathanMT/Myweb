@@ -18,7 +18,7 @@ const Sanctuary = lazy(() => import('./components/Sanctuary'))
 const SanctuaryAdmin = lazy(() => import('./components/SanctuaryAdmin'))
 const FarewellRSVP = lazy(() => import('./components/FarewellRSVP'))
 // NOTE: the Vedin / Jyotish astrology app now lives in its own repository:
-// https://vedin-frontend-git-main-myo-thant-naing-s-projects.vercel.app
+// https://vedin.myothant.dev
 // Its routes (/jyotish, /research, /algorithms, /vedin-admin) and all its
 // components have been removed from this portfolio to cut bundle size.
 
