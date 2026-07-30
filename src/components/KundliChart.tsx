@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { BirthChartData, PlanetPosition } from '../types/astrology'
 
 /**
@@ -19,7 +20,7 @@ const PLANET_ABBR: Record<string, string> = {
   Sun: 'Su', Moon: 'Mo', Mars: 'Ma', Mercury: 'Me', Jupiter: 'Ju', Venus: 'Ve', Saturn: 'Sa', Rahu: 'Ra', Ketu: 'Ke',
 }
 
-export default function KundliChart({
+function KundliChart({
   data, lagnaSign, signFor = (p) => p.sign, title = 'Rasi · D1', subtitle,
 }: { data: BirthChartData; lagnaSign?: number; signFor?: (p: PlanetPosition) => number; title?: string; subtitle?: string }) {
   const S = 90
@@ -65,3 +66,5 @@ export default function KundliChart({
     </svg>
   )
 }
+
+export default memo(KundliChart)

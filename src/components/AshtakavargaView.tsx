@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { BirthChartData } from '../types/astrology'
 import { signLabel, planetName, type Lang } from '../lib/jyotish'
 
@@ -8,7 +9,7 @@ import { signLabel, planetName, type Lang } from '../lib/jyotish'
  */
 const PLANETS = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn']
 
-export default function AshtakavargaView({ data, lang }: { data: BirthChartData; lang: Lang }) {
+function AshtakavargaView({ data, lang }: { data: BirthChartData; lang: Lang }) {
   const av = data.ashtakavarga
   if (!av?.sav?.length) return null
   const maxSav = Math.max(...av.sav, 1)
@@ -67,3 +68,5 @@ export default function AshtakavargaView({ data, lang }: { data: BirthChartData;
     </div>
   )
 }
+
+export default memo(AshtakavargaView)

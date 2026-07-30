@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { BirthChartData, PlanetStrength } from '../types/astrology'
 import { planetName, type Lang } from '../lib/jyotish'
 
@@ -17,7 +18,9 @@ const COLS: { key: BalaKey; en: string; mm: string }[] = [
   { key: 'drikBala', en: 'Drik', mm: 'ဒြိဋ်' },
 ]
 
-export default function ShadbalaView({ data, lang }: { data: BirthChartData; lang: Lang }) {
+// React.memo: props (data, lang) only change on a new chart load, so this heavy
+// 7×6 table never re-renders on unrelated parent state changes (chat input, geo search).
+function ShadbalaView({ data, lang }: { data: BirthChartData; lang: Lang }) {
   const rows = ORDER
     .map((n) => ({ n, s: data.planets.find((p) => p.name === n)?.strength as PlanetStrength | null | undefined }))
     .filter((r): r is { n: string; s: PlanetStrength } => !!r.s)
@@ -71,3 +74,5 @@ export default function ShadbalaView({ data, lang }: { data: BirthChartData; lan
     </div>
   )
 }
+
+export default memo(ShadbalaView)

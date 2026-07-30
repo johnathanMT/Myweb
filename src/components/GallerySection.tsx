@@ -91,7 +91,7 @@ export default function GallerySection({ lang = 'en' }: { lang?: string }) {
                     <img
                       src={it.url}
                       alt={altOf(it)}
-                      loading="lazy"
+                      loading="lazy" decoding="async"
                       className="h-full w-full object-cover"
                     />
                     {/* caption on hover, clipped to the hexagon */}

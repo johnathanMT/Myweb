@@ -104,7 +104,7 @@ function Thumb({ r, active, onSelect, lang }: { r: Reel; active: boolean; onSele
         {/* themed placeholder behind the poster */}
         <span className="absolute inset-0" style={{ background: `linear-gradient(150deg, ${r.accent}33, #141414 75%)` }} />
         {ok && (
-          <img src={shot(r.id)} alt="" loading="lazy" onError={() => setOk(false)}
+          <img src={shot(r.id)} alt="" loading="lazy" decoding="async" onError={() => setOk(false)}
             className="absolute inset-0 h-full w-full object-cover object-center transform-gpu [backface-visibility:hidden] saturate-[1.15] contrast-[1.06] brightness-95 transition-all duration-500 ease-out group-hover:scale-[1.08] group-hover:saturate-[1.4] group-hover:contrast-110 group-hover:brightness-110" />
         )}
         {/* dim veil lifts on hover so the poster pops into sharp focus */}

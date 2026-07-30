@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { YearForecast } from '../types/astrology'
 import type { Lang } from '../lib/jyotish'
 
@@ -10,7 +11,7 @@ const ABBR: Record<string, string> = {
   Sun: 'Su', Moon: 'Mo', Mars: 'Ma', Mercury: 'Me', Jupiter: 'Ju', Venus: 'Ve', Saturn: 'Sa', Rahu: 'Ra', Ketu: 'Ke',
 }
 
-export default function TimelineChart({ timeline, currentAge, lang }: { timeline: YearForecast[]; currentAge: number; lang: Lang }) {
+function TimelineChart({ timeline, currentAge, lang }: { timeline: YearForecast[]; currentAge: number; lang: Lang }) {
   if (!timeline.length) return null
   const W = 720, H = 240, ML = 34, MR = 14, MT = 26, MB = 26
   const plotW = W - ML - MR, plotH = H - MT - MB
@@ -65,3 +66,5 @@ export default function TimelineChart({ timeline, currentAge, lang }: { timeline
     </svg>
   )
 }
+
+export default memo(TimelineChart)

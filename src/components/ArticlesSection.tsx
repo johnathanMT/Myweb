@@ -86,7 +86,7 @@ export default function ArticlesSection() {
 
               <div className="relative h-44 overflow-hidden">
                 {/* the real image — encrypted (blurred/desaturated) until hover */}
-                <img src={preview(a)} alt="" loading="lazy" className="radio-img h-full w-full object-cover" />
+                <img src={preview(a)} alt="" loading="lazy" decoding="async" className="radio-img h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
 
                 {/* Default "encrypted signal" veil: scanning grid + radio wave + EQ bars */}

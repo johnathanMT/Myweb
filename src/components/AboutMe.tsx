@@ -30,7 +30,7 @@ export default function AboutMe({ photo = '/Myweb_photo/wat-arun.jpg' }: { photo
             <img
               src={photo}
               alt="Myo Thant Naing — Wat Arun, Bangkok"
-              loading="lazy"
+              loading="lazy" decoding="async"
               onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1563492065599-3520f775eeed?w=1000&q=80' }}
               className="h-full min-h-[22rem] w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />

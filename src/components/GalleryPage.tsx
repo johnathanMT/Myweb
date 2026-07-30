@@ -59,7 +59,7 @@ export default function GalleryPage() {
                   <img
                     src={it.url}
                     alt={altOf(it)}
-                    loading="lazy"
+                    loading="lazy" decoding="async"
                     className="w-full"
                   />
                   {/* caption gradient on hover */}

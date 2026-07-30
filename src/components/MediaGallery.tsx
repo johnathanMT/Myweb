@@ -53,7 +53,7 @@ export default function MediaGallery({ media, images, videoUrl, alt = '', classN
         <img
           src={current.url}
           alt={alt}
-          loading="lazy"
+          loading="lazy" decoding="async"
           onError={(e) => { e.currentTarget.src = fallback }}
           className="h-full w-full object-cover transition-transform duration-700"
         />

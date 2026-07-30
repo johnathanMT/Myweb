@@ -132,6 +132,46 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
   }, [])
   useEffect(() => { if (token) { loadMe(token); loadCharts(token) } else { setMe(null); setCharts([]) } }, [token, loadMe, loadCharts])
 
+  // ── Auto-advance while awaiting email verification ──────────────────────────
+  // While the user sits on the "check your email" screen, silently poll their
+  // verification status every 4s. The moment the account is confirmed (on THIS or
+  // ANY other device), we exchange the credentials still held in memory for a real
+  // session token and drop them straight into the dashboard — no "I've verified"
+  // button, no manual refresh. The interval is torn down on unmount and the instant
+  // we succeed; network blips are swallowed and simply retried on the next tick.
+  useEffect(() => {
+    if (!(modal === 'login' && needsVerify)) return
+    const em = email.trim()
+    const password = pw
+    if (!em || !password) return
+
+    let stopped = false
+    const tick = async () => {
+      if (stopped) return
+      try {
+        const sr = await fetch(`${API}/api/customer/verification-status?email=${encodeURIComponent(em)}`)
+        if (!sr.ok) return
+        const sj = (await sr.json().catch(() => null)) as { data?: { verified?: boolean } } | null
+        if (stopped || !sj?.data?.verified) return
+
+        // Verified → do ONE real (password-checked) login to obtain the session.
+        const lr = await fetch(`${API}/api/customer/login`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: em, password }),
+        })
+        const lj = (await lr.json().catch(() => null)) as { data?: { token?: string } } | null
+        if (stopped) return
+        if (lr.ok && lj?.data?.token) {
+          setToken(lj.data.token); persist(lj.data.token)
+          setModal(null); setNeedsVerify(false); setPw(''); setPw2(''); setMsg(null)
+        }
+      } catch { /* silent — a dropped tick just retries on the next interval */ }
+    }
+
+    const id = window.setInterval(tick, 4000)
+    return () => { stopped = true; window.clearInterval(id) }
+  }, [modal, needsVerify, email, pw])
+
   const login = async (e: FormEvent) => {
     e.preventDefault(); setBusy(true); setMsg(null)
     try {
@@ -156,8 +196,11 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
       const r = await fetch(`${API}/api/customer/signup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim(), username: username.trim(), password: pw, confirmPassword: pw2, ...natal }) })
       const j = await r.json()
       if (!r.ok) throw new Error(j?.message || 'Sign up failed')
-      setMsg({ ok: true, text: t('Account created — confirm the email we sent, then sign in.', 'အကောင့်ဖန်တီးပြီး — ပို့လိုက်သည့် အီးမေးလ်ကို အတည်ပြုပြီးမှ အကောင့်ဝင်ပါ။') })
-      setModal('login'); setPw(''); setPw2('')
+      setMsg({ ok: true, text: t('Account created — open the email we sent and confirm. This device will sign you in automatically once verified.', 'အကောင့်ဖန်တီးပြီး — ပို့လိုက်သည့် အီးမေးလ်ကို ဖွင့်၍ အတည်ပြုပါ။ အတည်ပြုပြီးသည်နှင့် ဤစက်တွင် အလိုအလျောက် ဝင်ရောက်ပေးပါမည်။') })
+      // Keep the password in memory (clear only the confirm field) and enter the
+      // "awaiting verification" state so the auto-advance poll below can silently
+      // log this device in the instant the email is confirmed — on ANY device.
+      setModal('login'); setPw2(''); setNeedsVerify(true)
     } catch (err) { setMsg({ ok: false, text: err instanceof Error ? err.message : 'Sign up failed' }) } finally { setBusy(false) }
   }
   const saveProfile = async (e: FormEvent) => {
@@ -292,10 +335,16 @@ const CustomerPanel = forwardRef<CustomerPanelHandle, {
               </button>
             </form>
             {modal === 'login' && needsVerify && (
-              <button type="button" onClick={resendConfirm} disabled={cooldown > 0}
-                className="mt-3 w-full rounded-xl border border-accent/30 bg-accent/10 px-4 py-2 text-xs text-accent-light transition hover:bg-accent/20 disabled:opacity-50">
-                {cooldown > 0 ? t(`Resend in ${cooldown}s`, `${cooldown} စက္ကန့်အကြာ ပြန်ပို့`) : t('Resend confirmation email', 'အတည်ပြု email ပြန်ပို့ရန်')}
-              </button>
+              <>
+                <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-center text-xs text-emerald-700 dark:text-emerald-200">
+                  <Loader2 size={14} className="animate-spin" />
+                  {t('Waiting for verification — this device will sign you in automatically.', 'အတည်ပြုချက်ကို စောင့်နေသည် — အတည်ပြုပြီးသည်နှင့် ဤစက်တွင် အလိုအလျောက် ဝင်ရောက်ပေးပါမည်။')}
+                </div>
+                <button type="button" onClick={resendConfirm} disabled={cooldown > 0}
+                  className="mt-2 w-full rounded-xl border border-accent/30 bg-accent/10 px-4 py-2 text-xs text-accent-light transition hover:bg-accent/20 disabled:opacity-50">
+                  {cooldown > 0 ? t(`Resend in ${cooldown}s`, `${cooldown} စက္ကန့်အကြာ ပြန်ပို့`) : t('Resend confirmation email', 'အတည်ပြု email ပြန်ပို့ရန်')}
+                </button>
+              </>
             )}
             {modal !== 'profile' && (
               <button type="button" onClick={() => { setModal(modal === 'login' ? 'signup' : 'login'); setMsg(null); setNeedsVerify(false) }} className="mt-3 w-full text-center font-mono text-[11px] text-muted hover:text-fg">

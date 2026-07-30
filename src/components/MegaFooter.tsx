@@ -119,7 +119,7 @@ export default function MegaFooter({ lang = 'en' }: { lang?: string }) {
               {techStack.map((tech) => (
                 <li key={tech.name} className="group flex flex-col items-center gap-2.5 text-center">
                   <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] transition-all duration-300 group-hover:-translate-y-1.5 group-hover:border-accent/50 group-hover:shadow-[0_0_20px_-4px_rgb(var(--accent)/0.6)]">
-                    <img src={techLogo(tech)} alt={`${tech.name} logo`} loading="lazy" className="h-7 w-7" />
+                    <img src={techLogo(tech)} alt={`${tech.name} logo`} loading="lazy" decoding="async" className="h-7 w-7" />
                   </div>
                   <div className="leading-tight">
                     <p className="text-xs font-medium text-gray-200">{tech.name}</p>

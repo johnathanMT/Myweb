@@ -74,7 +74,7 @@ function MonthCard({ m, lang = 'en' }: { m: Month; lang?: string }) {
         <img
           src={src}
           alt={`${festival} — ${m.name}`}
-          loading="lazy"
+          loading="lazy" decoding="async"
           onError={() => setImgOk(false)}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />

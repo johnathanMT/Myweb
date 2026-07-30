@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { BirthChartData, PlanetPosition } from '../types/astrology'
 
 /**
@@ -27,7 +28,7 @@ const dignityColor = (d: string): string =>
       : d === 'Own' ? 'rgb(var(--accent))'
         : 'rgb(var(--fg))'
 
-export default function DiamondChart({
+function DiamondChart({
   data, lagnaSign, signFor = (p) => p.sign, title = 'Rasi · D1', subtitle,
 }: { data: BirthChartData; lagnaSign?: number; signFor?: (p: PlanetPosition) => number; title?: string; subtitle?: string }) {
   const ascSign = lagnaSign ?? data.ascendant.sign
@@ -74,3 +75,5 @@ export default function DiamondChart({
     </svg>
   )
 }
+
+export default memo(DiamondChart)
