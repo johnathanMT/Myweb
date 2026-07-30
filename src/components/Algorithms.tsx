@@ -29,8 +29,8 @@ function Code({ code }: { code: string }) {
       </button>
       {/* Background is always near-black, so the text colour is fixed light —
           never theme-dependent (a themed `text-fg` turns dark → invisible in light mode). */}
-      <pre className="overflow-x-auto rounded-xl border border-accent/15 bg-[rgb(10_10_18)] p-4 text-[12.5px] leading-relaxed" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <code className="font-mono text-[rgb(226_232_240)]">{code}</code>
+      <pre className="w-full overflow-x-auto overflow-y-hidden overscroll-x-contain scrollbar-hide touch-pan-x rounded-xl border border-accent/15 bg-[rgb(10_10_18)] p-4 text-[12.5px] leading-relaxed" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <code className="block min-w-max font-mono text-[rgb(226_232_240)]">{code}</code>
       </pre>
     </div>
   )
@@ -78,8 +78,8 @@ function MathBlock({ tex }: { tex: string }) {
     // max-w-full → never wider than the parent grid/flex cell (with the section
     // column's min-w-0, this stops displayMode from blowing out the layout).
     // overflow-x-auto → swipe fallback if a formula is still too wide after shrinking.
-    <div ref={wrapRef} className="katex-block max-w-full overflow-x-auto">
-      <div ref={innerRef} dangerouslySetInnerHTML={{ __html: html }} />
+    <div ref={wrapRef} className="katex-block w-full max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain pb-2 scrollbar-hide touch-pan-x">
+      <div ref={innerRef} className="min-w-max" dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   )
 }

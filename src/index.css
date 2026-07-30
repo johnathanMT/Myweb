@@ -93,6 +93,11 @@ html[data-theme="dark"] .neon-glow {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
+/* Same, exposed under the `scrollbar-hide` name used by the mobile formula/table
+   scroll wrappers (keeps the swipe area clean — no visible scrollbar on mobile). */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 /* KaTeX formula blocks (Algorithms page). Glyphs inherit `currentColor` from the
    wrapper's `text-fg`, so formulas stay readable in BOTH light and dark themes.
    The display box is inline-block + nowrap so it sizes to the formula's true
@@ -129,9 +134,37 @@ html[data-theme="dark"] .neon-glow {
   font-family: ui-monospace, monospace; font-size: 0.9em;
   background: rgb(var(--fg) / 0.08); padding: 0.1em 0.4em; border-radius: 6px;
 }
-.vedin-md table { width: 100%; border-collapse: collapse; margin: 0.9em 0; font-size: 0.92rem; }
-.vedin-md th, .vedin-md td { border: 1px solid rgb(var(--fg) / 0.14); padding: 0.5em 0.7em; text-align: left; }
+/* Tables in the reading can be wide — make each one its own horizontal-scroll
+   region (display:block enables overflow-x) so a wide table swipes locally on
+   mobile instead of stretching the page. overscroll-x contains the scroll. */
+.vedin-md table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border-collapse: collapse;
+  margin: 0.9em 0;
+  font-size: 0.92rem;
+}
+.vedin-md th, .vedin-md td { border: 1px solid rgb(var(--fg) / 0.14); padding: 0.5em 0.7em; text-align: left; white-space: nowrap; }
 .vedin-md th { background: rgb(var(--accent) / 0.08); color: rgb(var(--accent)); }
+
+/* Fenced code blocks in the reading swipe horizontally rather than overflow. */
+.vedin-md pre {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.9em 1em;
+  border-radius: 10px;
+  background: rgb(var(--fg) / 0.06);
+}
+.vedin-md pre code { background: none; padding: 0; white-space: pre; }
 
 /* Laptop & up: keep the smallest reading labels readable (≥ 11px). */
 .vedin-page .text-\[10px\] { font-size: 11px; }

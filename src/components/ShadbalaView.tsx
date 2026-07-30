@@ -38,7 +38,7 @@ function ShadbalaView({ data, lang }: { data: BirthChartData; lang: Lang }) {
         </p>
       </div>
 
-      <div className="glass-card overflow-x-auto p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="glass-card w-full overflow-x-auto overflow-y-hidden overscroll-x-contain pb-2 scrollbar-hide touch-pan-x p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
         <table className="w-full min-w-[720px] border-collapse text-center text-xs">
           <thead className="font-mono text-[10px] uppercase tracking-wider text-muted">
             <tr>

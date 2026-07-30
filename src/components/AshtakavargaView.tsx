@@ -42,8 +42,9 @@ function AshtakavargaView({ data, lang }: { data: BirthChartData; lang: Lang }) 
         <p className="mt-2 text-right font-mono text-[11px] text-muted">SAV total: {av.sav.reduce((a, b) => a + b, 0)} / 337</p>
       </div>
 
-      {/* BAV table */}
-      <div className="glass-card overflow-x-auto p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* BAV table — horizontally swipeable on mobile; the local scroll is contained
+          so it never drags the whole page sideways. */}
+      <div className="glass-card w-full overflow-x-auto overflow-y-hidden overscroll-x-contain pb-2 scrollbar-hide touch-pan-x p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
         <table className="w-full min-w-[640px] border-collapse text-center text-xs">
           <thead className="font-mono text-[10px] uppercase tracking-wider text-muted">
             <tr>

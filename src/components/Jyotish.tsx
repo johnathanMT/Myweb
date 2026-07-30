@@ -171,7 +171,7 @@ function VargaPanel({ data, lang, signOf, lagnaSign, title, subtitle, desc, char
 }
 
 export default function Jyotish() {
-  const [lang, setLang] = useState<Lang>('en')
+  const [lang, setLang] = useState<Lang>('mm')   // default to Burmese; toggle switches to English
   const t = JT[lang]
 
   const [name, setName] = useState('')
@@ -1370,7 +1370,7 @@ export default function Jyotish() {
                   <div className="glass-card p-5">
                     <TimelineChart timeline={data.timeline} currentAge={data.timeline.find((yy) => yy.year === thisYear)?.age ?? -1} lang={lang} />
                   </div>
-                  <div className="glass-card overflow-x-auto p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <div className="glass-card w-full overflow-x-auto overflow-y-hidden overscroll-x-contain pb-2 scrollbar-hide touch-pan-x p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                     <table className="w-full min-w-[760px] border-collapse text-left text-xs">
                       <thead className="font-mono text-[10px] uppercase tracking-wider text-muted">
                         <tr>
@@ -1428,7 +1428,7 @@ export default function Jyotish() {
                     {moon && <div className="glass-card p-5"><ChartView style={chartStyle} data={data} lagnaSign={moon.sign} title="Chandra · D1" subtitle={`Moon: ${moon.signName}`} /></div>}
                   </div>
                   <div className="glass-card p-5"><p className="text-sm leading-relaxed text-muted">{t.d1Desc}</p></div>
-                  <div className="glass-card my-2 overflow-x-auto rounded-lg border border-accent/20 p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <div className="glass-card my-2 w-full overflow-x-auto overflow-y-hidden overscroll-x-contain pb-2 scrollbar-hide touch-pan-x rounded-lg border border-accent/20 p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                     <table className="w-full min-w-[650px] border-collapse text-left text-sm">
                       <thead className="font-mono text-[11px] uppercase tracking-wider text-muted">
                         <tr>{['Planet', 'Sign', 'Degree', 'Nakshatra (pada)', 'House', 'Dignity'].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}</tr>
