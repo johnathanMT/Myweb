@@ -23,6 +23,7 @@ interface Project {
   url: string
   ext: boolean
   featured?: boolean
+  sameTab?: boolean   // external link that should navigate in the SAME tab (no target=_blank)
 }
 
 /**
@@ -48,8 +49,10 @@ function ProjectLink({
   children: React.ReactNode
 }) {
   if (project.ext) {
+    // sameTab → external link that opens in the SAME tab (no new window).
+    const extAttrs = project.sameTab ? {} : { target: '_blank', rel: 'noopener noreferrer' }
     return (
-      <a href={project.url} target="_blank" rel="noopener noreferrer" className={className}>
+      <a href={project.url} {...extAttrs} className={className}>
         {children}
       </a>
     )

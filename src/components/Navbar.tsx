@@ -180,7 +180,6 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
                   <a
                     href={route ? `#${route}` : href}
                     onClick={(e) => handleNav(e, item)}
-                    {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                     className={`px-2.5 py-2 rounded-lg text-xs font-medium font-groovy tracking-wide transition-all duration-200 ${isActive
                       ? 'text-white bg-accent/20 neon-glow'
                       : 'text-muted hover:text-white hover:bg-white/5'
@@ -293,7 +292,6 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
                 <a
                   href={item.route ? `#${item.route}` : item.href}
                   onClick={(e) => handleNav(e, item)}
-                  {...(item.isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   className="block px-4 py-2.5 rounded-xl text-sm font-medium font-groovy tracking-wide text-muted hover:text-white hover:bg-white/5 transition-all"
                 >
                   {t[item.key] ?? NAV_T.en[item.key]}
