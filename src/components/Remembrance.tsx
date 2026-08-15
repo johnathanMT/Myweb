@@ -143,14 +143,14 @@ export default function Remembrance() {
                 </button>
               </div>
 
-              <div className="grid min-h-0 flex-1 md:grid-cols-[2fr_3fr]">
-                {/* Left — portrait (short on mobile, full-height column on desktop) */}
-                <div className="relative h-48 shrink-0 sm:h-56 md:h-auto md:min-h-full">
+              <div className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] md:grid-rows-none md:grid-cols-[2fr_3fr]">
+                {/* Left — portrait (full & uncropped on mobile; full-height column on desktop) */}
+                <div className="relative md:min-h-full">
                   <img
                     src={MEMORIAL_DATA.image}
                     alt={MEMORIAL_DATA.imageAlt}
                     loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover object-center"
+                    className="block w-full aspect-[4/5] object-cover object-top md:aspect-auto md:h-full"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/80 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-neutral-900/70" />
                 </div>
