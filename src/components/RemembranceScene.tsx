@@ -26,14 +26,16 @@ const GARDEN_STONE_SIZE = 2.5   // garden.glb = a memorial stone, human height
 const AIRBUS_SIZE = 35          // a full-sized, majestic aircraft in the distance
 const GRAVE_SIZE = 1.8          // a human-readable headstone
 
-// Six lanterns scattered from the memorials toward the Airbus, lighting the path.
+// Eleven lanterns scattered organically around the memorials, forming a gentle
+// path toward the grounded Airbus in the background.
 const LANTERN_POSITIONS: [number, number, number][] = [
   [-3, 0, 4], [3, 0, 4], [0, 0, 1], [-5, 0, -5], [4, 0, -8], [0, 0, -12],
+  [6, 0, -2], [-7, 0, 2], [2, 0, -3], [-2, 0, -8], [8, 0, -10],
 ]
 
 // Camera framing presets: [posX, posY, posZ, targetX, targetY, targetZ].
 const OVERVIEW: [number, number, number, number, number, number] = [0, 2, 8, 0, 0.9, 3]   // eye-level, on the memorial
-const AIRBUS_GAZE: [number, number, number, number, number, number] = [0, 5, -8, 0, 8, -25]
+const AIRBUS_GAZE: [number, number, number, number, number, number] = [0, 4, -6, 0, 4, -25]
 
 /** Loads a GLTF, enables shadows, and normalises it to `targetSize`. */
 function useNormalizedModel(url: string, targetSize: number, groundAlign = true) {
@@ -77,11 +79,11 @@ function GardenModel({ onSelect }: Clickable) {
   )
 }
 
-// ── The Airbus — full-sized, elevated, far in the background ──
+// ── The Airbus — full-sized, resting peacefully on the ground in the background ──
 function AirbusModel({ onSelect }: Clickable) {
-  const { object, scale, offset } = useNormalizedModel(AIRBUS, AIRBUS_SIZE, false)
+  const { object, scale, offset } = useNormalizedModel(AIRBUS, AIRBUS_SIZE, true)
   return (
-    <group position={[0, 8, -25]} rotation={[0, Math.PI * 0.12, 0]}>
+    <group position={[0, 0, -25]} rotation={[0, Math.PI * 0.12, 0]}>
       <primitive object={object} scale={scale} position={offset}
         onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
         onPointerOver={overCursor} onPointerOut={outCursor} />

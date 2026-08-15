@@ -7,33 +7,48 @@ import { ArrowLeft, X } from 'lucide-react'
 import RemembranceScene from './RemembranceScene'
 
 /**
- * MEMORIAL_DATA — edit the tribute here (text + image) without touching the JSX.
- * Swap `image` for a personal photo when ready.
+ * MEMORIAL_DATA — the bilingual tribute. Each text field has `.mm` (Burmese) and
+ * `.en` (English) keys; edit here without touching the JSX. The image is served
+ * from /public via BASE_URL (Vite base = "/Myweb/").
  */
 const MEMORIAL_DATA = {
-  eyebrow: 'In Loving Memory',
-  title: 'Aerospace Engineer & Mentor',
-  years: '1945 – 2026',
-  image: 'https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?q=80&w=800&auto=format&fit=crop',
-  imageAlt: 'A warm sunset sky',
-  tags: ['Aerospace', 'Mentor', 'Father Figure'],
-  story:
-    'A guiding light and a father figure. Across decades in aerospace he turned complex engineering ' +
-    'into clear purpose — and turned students into engineers. His patience, precision, and quiet ' +
-    'warmth shaped every path around him.',
-  legacy:
-    'The aircraft he helped bring to life still cross the sky; the people he mentored still reach for ' +
-    'the stars. His kindness is the quiet engine behind a hundred careers — and it flies on.',
+  image: `${import.meta.env.BASE_URL}u_hlaing_bwa.jpg`,
+  imageAlt: 'Aba U Hlaing Bwa',
+  eyebrow: { mm: 'ချစ်ခင်လေးစားစွာ အောက်မေ့လျက်', en: 'In Loving Memory' },
+  title: {
+    mm: 'အဘ ဦးလှိုင်ဘွား (1945 - 2026)',
+    en: 'Aba U Hlaing Bwa (1945 - 2026)',
+  },
+  tags: {
+    mm: ['အဘ', 'ဆရာသမား', 'ကျေးဇူးရှင်'],
+    en: ['Aerospace', 'Mentor', 'Father Figure'],
+  },
+  storyLabel: { mm: 'အမှတ်တရ', en: 'The Story' },
+  legacyLabel: { mm: 'နှုတ်ဆက်စကား', en: 'Legacy' },
+  story: {
+    mm: 'သားတို့ ပြန်တွေ့နိုင်အုံးမယ် ထင်ခဲ့ပေမယ့် မတွေ့နိုင်တော့ဘူး အဘရယ်၊ တောင်ဥက္ကမှာ မွေးတဲ့အချိန်ထဲကနေ အခုအချိန်ထိ ကူညီစောင့်ရှောက်ပေးခဲ့တဲ့ အတွက် အထူးကျေးဇူးတင်ပါတယ်။ မကြာမကြာ ဆုံးမစကားတွေပြော၊ စာတွေပို့ပို့ပြီး ဆုံးမပေးခဲ့တာတွေကိုလဲ နားထောင်ပါ့မယ်။ နောက်ဆုံးခရီးကို လိုက်မပို့နိုင်ခဲ့တာ ခွင့်လွှတ်ပါ ။',
+    en: "I thought we would meet again, but we can't anymore, Aba. Thank you so much for helping and looking after me from the time I was born in South Okkalapa until now. I will always remember your guidance and the messages you sent to teach me. Please forgive me for not being able to attend your final journey.",
+  },
+  legacy: {
+    mm: 'ကောင်းရာသုဂတိ ရောက်ပါစေ အဘ။ - ပူးပူး',
+    en: 'May your soul rest in peace, Aba. - Pu Pu',
+  },
 }
+
+type Lang = 'mm' | 'en'
 
 /**
  * Remembrance — a standalone, full-screen 3D memorial route (/remembrance).
  * A serene sunset world honouring a beloved aerospace engineer & mentor.
- * Clicking the Airbus, grave, or memorial stone opens a premium tribute card.
+ * Clicking the Airbus, grave, or memorial stone opens a bilingual tribute card.
  */
 export default function Remembrance() {
   const [showMemorialCard, setShowMemorialCard] = useState(false)
+  const [lang, setLang] = useState<Lang>('mm')
   const close = () => setShowMemorialCard(false)
+
+  // Burmese renders best in the default sans stack; English gets the elegant serif.
+  const titleFont = lang === 'en' ? 'font-serif' : 'font-sans'
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-[#1a1024]">
@@ -70,7 +85,7 @@ export default function Remembrance() {
         </div>
       )}
 
-      {/* ── Premium tribute card (HTML overlay outside the Canvas) ── */}
+      {/* ── Bilingual tribute card (transparent overlay so the scene shows through) ── */}
       <AnimatePresence>
         {showMemorialCard && (
           <motion.div
@@ -86,38 +101,52 @@ export default function Remembrance() {
               exit={{ opacity: 0, scale: 0.96, y: 10 }}
               transition={{ type: 'spring', stiffness: 240, damping: 26 }}
               onClick={(e) => e.stopPropagation()}
+              lang={lang === 'mm' ? 'my' : 'en'}
               className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/15 bg-black/40 text-white shadow-2xl backdrop-blur-md"
             >
               {/* gold accent line */}
               <div className="absolute inset-x-0 top-0 z-10 h-[3px] bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
-              {/* Close */}
-              <button
-                onClick={close}
-                aria-label="Close"
-                className="absolute right-4 top-4 z-20 rounded-full bg-black/40 p-1.5 text-white/70 backdrop-blur-md transition hover:bg-black/60 hover:text-white"
-              >
-                <X size={18} />
-              </button>
+              {/* Top-right controls: language toggle + close */}
+              <div className="absolute right-4 top-4 z-20 flex items-center gap-2">
+                <div className="inline-flex overflow-hidden rounded-full border border-white/20 bg-black/40 font-mono text-[11px] backdrop-blur-md">
+                  {(['mm', 'en'] as const).map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => setLang(l)}
+                      aria-pressed={lang === l}
+                      className={`px-2.5 py-1 transition-colors ${lang === l ? 'bg-amber-500/30 text-amber-100' : 'text-white/70 hover:text-white'}`}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={close}
+                  aria-label="Close"
+                  className="rounded-full bg-black/40 p-1.5 text-white/70 backdrop-blur-md transition hover:bg-black/60 hover:text-white"
+                >
+                  <X size={18} />
+                </button>
+              </div>
 
               <div className="grid md:grid-cols-2">
-                {/* Left — image */}
-                <div className="relative min-h-[200px] md:min-h-[440px]">
+                {/* Left — portrait */}
+                <div className="relative min-h-[220px] md:min-h-[460px]">
                   <img
                     src={MEMORIAL_DATA.image}
                     alt={MEMORIAL_DATA.imageAlt}
                     loading="lazy"
                     className="absolute inset-0 h-full w-full object-cover"
                   />
-                  {/* soft blend into the card body */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-black/50" />
                 </div>
 
                 {/* Right — content */}
                 <div className="relative p-7 sm:p-9">
                   {/* tags */}
-                  <div className="flex flex-wrap gap-2">
-                    {MEMORIAL_DATA.tags.map((tag) => (
+                  <div className="flex flex-wrap gap-2 pr-24">
+                    {MEMORIAL_DATA.tags[lang].map((tag) => (
                       <span
                         key={tag}
                         className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[11px] font-medium tracking-wide text-amber-200"
@@ -127,30 +156,29 @@ export default function Remembrance() {
                     ))}
                   </div>
 
-                  <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.35em] text-amber-300/90">
-                    {MEMORIAL_DATA.eyebrow}
+                  <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.3em] text-amber-300/90">
+                    {MEMORIAL_DATA.eyebrow[lang]}
                   </p>
-                  <h2 className="mt-2 font-serif text-3xl font-bold leading-tight sm:text-4xl">
-                    {MEMORIAL_DATA.title}
+                  <h2 className={`mt-2 text-2xl font-bold leading-snug sm:text-3xl ${titleFont}`}>
+                    {MEMORIAL_DATA.title[lang]}
                   </h2>
-                  <p className="mt-1 font-mono text-sm text-white/55">{MEMORIAL_DATA.years}</p>
 
                   <div className="mt-6 space-y-5">
                     <section>
                       <h3 className="flex items-center gap-2 text-sm font-semibold text-amber-100">
-                        <span aria-hidden>🌿</span> The Story
+                        <span aria-hidden>🌿</span> {MEMORIAL_DATA.storyLabel[lang]}
                       </h3>
-                      <p className="mt-1.5 text-[14px] leading-relaxed text-white/80">
-                        {MEMORIAL_DATA.story}
+                      <p className="mt-1.5 text-[14px] leading-relaxed text-white/85">
+                        {MEMORIAL_DATA.story[lang]}
                       </p>
                     </section>
 
                     <section>
                       <h3 className="flex items-center gap-2 text-sm font-semibold text-amber-100">
-                        <span aria-hidden>📜</span> Legacy
+                        <span aria-hidden>📜</span> {MEMORIAL_DATA.legacyLabel[lang]}
                       </h3>
-                      <p className="mt-1.5 text-[14px] leading-relaxed text-white/80">
-                        {MEMORIAL_DATA.legacy}
+                      <p className="mt-1.5 text-[14px] leading-relaxed text-white/85">
+                        {MEMORIAL_DATA.legacy[lang]}
                       </p>
                     </section>
                   </div>
@@ -159,7 +187,7 @@ export default function Remembrance() {
                     onClick={close}
                     className="mt-7 inline-flex items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-500/15 px-5 py-2.5 text-sm font-semibold text-amber-100 transition hover:bg-amber-500/25"
                   >
-                    Close
+                    {lang === 'mm' ? 'ပိတ်ရန်' : 'Close'}
                   </button>
                 </div>
               </div>
