@@ -15,6 +15,7 @@ import './index.css'
 
 // Lazy: pulls in tsparticles — code-split out of the main bundle.
 const Sanctuary = lazy(() => import('./components/Sanctuary'))
+const Remembrance = lazy(() => import('./components/Remembrance'))
 const SanctuaryAdmin = lazy(() => import('./components/SanctuaryAdmin'))
 const FarewellRSVP = lazy(() => import('./components/FarewellRSVP'))
 // NOTE: the Vedin / Jyotish astrology app now lives in its own repository:
@@ -59,6 +60,8 @@ ReactDOM.createRoot(rootEl).render(
           <Route path="/gallery" element={<><Seo title="Gallery" path="/gallery" description="A visual gallery of moments, projects, and life in Japan — from the lab to the everyday." /><PageShell><GalleryPage /></PageShell></>} />
           {/* Sanctuary is full-screen immersive → no PageShell. */}
           <Route path="/sanctuary" element={<><Seo title="Memory Sanctuary" path="/sanctuary" description="An interactive 3D Studio-Ghibli-inspired world where colleagues leave farewell memories." /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#070b1c' }} />}><Sanctuary /></Suspense></>} />
+
+          <Route path="/remembrance" element={<><Seo title="In Loving Memory" path="/remembrance" description="A serene 3D sunset memorial honouring a beloved aerospace engineer and mentor." noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#1a1024' }} />}><Remembrance /></Suspense></>} />
           {/* private / admin → not indexed */}
           <Route path="/farewell" element={<><Seo title="Farewell RSVP" path="/farewell" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#070b1c' }} />}><FarewellRSVP /></Suspense></>} />
           <Route path="/sanctuary-admin" element={<><Seo title="Admin" path="/sanctuary-admin" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b0e1a' }} />}><SanctuaryAdmin /></Suspense></>} />
