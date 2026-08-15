@@ -77,7 +77,7 @@ export default function Remembrance() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 p-4"
+            className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm"
             onClick={close}
           >
             <motion.div
@@ -86,7 +86,7 @@ export default function Remembrance() {
               exit={{ opacity: 0, scale: 0.96, y: 10 }}
               transition={{ type: 'spring', stiffness: 240, damping: 26 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10 bg-black/50 text-white shadow-2xl backdrop-blur-xl"
+              className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/15 bg-black/40 text-white shadow-2xl backdrop-blur-md"
             >
               {/* gold accent line */}
               <div className="absolute inset-x-0 top-0 z-10 h-[3px] bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
