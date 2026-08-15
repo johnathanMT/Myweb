@@ -191,16 +191,17 @@ export default function RemembranceScene({
 
   return (
     <PerformanceMonitor>
-      {/* Sunset / twilight sky */}
-      <Sky sunPosition={[0, -0.1, -1]} turbidity={9} rayleigh={2.2} mieCoefficient={0.02} mieDirectionalG={0.92} />
-      <fog attach="fog" args={['#e0966b', 30, 95]} />
+      {/* Deeper twilight sky — sun lower + softer scattering, so the flames and
+          portrait read against a dimmer backdrop. */}
+      <Sky sunPosition={[0, -0.18, -1]} turbidity={10} rayleigh={1.3} mieCoefficient={0.02} mieDirectionalG={0.9} />
+      <fog attach="fog" args={['#b56a4a', 26, 90]} />
 
-      {/* ── Lighting — warm sunset ── */}
-      <ambientLight intensity={0.4} color="#ffb77a" />
-      <hemisphereLight args={['#ffd9a0', '#5a4030', 0.35]} />
+      {/* ── Lighting — dimmed warm dusk (lets the lantern flames glow) ── */}
+      <ambientLight intensity={0.25} color="#ffb77a" />
+      <hemisphereLight args={['#e8b483', '#2e2018', 0.22]} />
       <directionalLight
         position={[8, 9, -6]}
-        intensity={0.85}
+        intensity={0.55}
         color="#ff9e5e"
         castShadow
         shadow-mapSize={IS_MOBILE ? [1024, 1024] : [2048, 2048]}

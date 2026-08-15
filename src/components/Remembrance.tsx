@@ -8,8 +8,9 @@ import RemembranceScene from './RemembranceScene'
 
 /**
  * MEMORIAL_DATA — the bilingual tribute. Each text field has `.mm` (Burmese) and
- * `.en` (English) keys; edit here without touching the JSX. The image is served
- * from /public via BASE_URL (Vite base = "/Myweb/").
+ * `.en` (English) keys; edit here without touching the JSX. `story` is an array of
+ * paragraphs; `legacy` splits into a quote + a signature. The image is served from
+ * /public via BASE_URL (Vite base = "/Myweb/").
  */
 const MEMORIAL_DATA = {
   image: `${import.meta.env.BASE_URL}u_hlaing_bwa.jpg`,
@@ -20,18 +21,30 @@ const MEMORIAL_DATA = {
     en: 'Aba U Hlaing Bwa (1945 - 2026)',
   },
   tags: {
-    mm: ['အဘ', 'ဆရာသမား', 'ကျေးဇူးရှင်'],
-    en: ['Aerospace', 'Mentor', 'Father Figure'],
+    mm: ['ဆရာသမား', 'အဘ','လေယာဥ်အင်ဂျင်နီယာ'],
+    en: ['Mentor', 'Grandfather Figure', 'Aircraft Engineer'],
   },
   storyLabel: { mm: 'အမှတ်တရ', en: 'The Story' },
   legacyLabel: { mm: 'နှုတ်ဆက်စကား', en: 'Legacy' },
   story: {
-    mm: 'သားတို့ ပြန်တွေ့နိုင်အုံးမယ် ထင်ခဲ့ပေမယ့် မတွေ့နိုင်တော့ဘူး အဘရယ်၊ တောင်ဥက္ကမှာ မွေးတဲ့အချိန်ထဲကနေ အခုအချိန်ထိ ကူညီစောင့်ရှောက်ပေးခဲ့တဲ့ အတွက် အထူးကျေးဇူးတင်ပါတယ်။ မကြာမကြာ ဆုံးမစကားတွေပြော၊ စာတွေပို့ပို့ပြီး ဆုံးမပေးခဲ့တာတွေကိုလဲ နားထောင်ပါ့မယ်။ နောက်ဆုံးခရီးကို လိုက်မပို့နိုင်ခဲ့တာ ခွင့်လွှတ်ပါ ။',
-    en: "I thought we would meet again, but we can't anymore, Aba. Thank you so much for helping and looking after me from the time I was born in South Okkalapa until now. I will always remember your guidance and the messages you sent to teach me. Please forgive me for not being able to attend your final journey.",
+    mm: [
+      'သားတို့ ပြန်တွေ့နိုင်အုံးမယ် ထင်ခဲ့ပေမယ့် မတွေ့နိုင်တော့ဘူး အဘရယ်၊ တောင်ဥက္ကမှာ မွေးတဲ့အချိန်ထဲကနေ အခုအချိန်ထိ ကူညီစောင့်ရှောက်ပေးခဲ့တဲ့ အတွက် အထူးကျေးဇူးတင်ပါတယ်။',
+      'မကြာမကြာ ဆုံးမစကားတွေပြော၊ စာတွေပို့ပို့ပြီး ဆုံးမပေးခဲ့တာတွေကိုလဲ နားထောင်ပါ့မယ်။ နောက်ဆုံးခရီးကို လိုက်မပို့နိုင်ခဲ့တာ ခွင့်လွှတ်ပါ ။',
+    ],
+    en: [
+      "I thought we would meet again, but we can't anymore, Grandpa. Thank you so much for helping and looking after me from the time I was born in South Okkalapa until now.",
+      'I will always remember your guidance and the messages you sent to teach me. Please forgive me for not being able to attend your final journey.',
+    ],
   },
   legacy: {
-    mm: 'ကောင်းရာသုဂတိ ရောက်ပါစေ အဘ။ - ပူးပူး',
-    en: 'May your soul rest in peace, Aba. - Pu Pu',
+    quote: {
+      mm: 'ကောင်းရာသုဂတိ ရောက်ပါစေ အဘ။',
+      en: 'May your soul rest in peace, Grandpa.',
+    },
+    signature: {
+      mm: '- ပူးပူး',
+      en: '- Pue Pue',
+    },
   },
 }
 
@@ -102,7 +115,7 @@ export default function Remembrance() {
               transition={{ type: 'spring', stiffness: 240, damping: 26 }}
               onClick={(e) => e.stopPropagation()}
               lang={lang === 'mm' ? 'my' : 'en'}
-              className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/15 bg-black/40 text-white shadow-2xl backdrop-blur-md"
+              className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/15 bg-neutral-900/85 text-white shadow-2xl backdrop-blur-md"
             >
               {/* gold accent line */}
               <div className="absolute inset-x-0 top-0 z-10 h-[3px] bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
@@ -132,18 +145,18 @@ export default function Remembrance() {
 
               <div className="grid md:grid-cols-2">
                 {/* Left — portrait */}
-                <div className="relative min-h-[220px] md:min-h-[460px]">
+                <div className="relative min-h-[220px] md:min-h-[520px]">
                   <img
                     src={MEMORIAL_DATA.image}
                     alt={MEMORIAL_DATA.imageAlt}
                     loading="lazy"
                     className="absolute inset-0 h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-black/50" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/80 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-neutral-900/70" />
                 </div>
 
                 {/* Right — content */}
-                <div className="relative p-7 sm:p-9">
+                <div className="relative overflow-y-auto p-7 sm:p-9 md:max-h-[520px]">
                   {/* tags */}
                   <div className="flex flex-wrap gap-2 pr-24">
                     {MEMORIAL_DATA.tags[lang].map((tag) => (
@@ -163,22 +176,34 @@ export default function Remembrance() {
                     {MEMORIAL_DATA.title[lang]}
                   </h2>
 
-                  <div className="mt-6 space-y-5">
+                  <div className="mt-6 space-y-6">
+                    {/* The Story — an elegant, letter-like italic serif */}
                     <section>
                       <h3 className="flex items-center gap-2 text-sm font-semibold text-amber-100">
                         <span aria-hidden>🌿</span> {MEMORIAL_DATA.storyLabel[lang]}
                       </h3>
-                      <p className="mt-1.5 text-[14px] leading-relaxed text-white/85">
-                        {MEMORIAL_DATA.story[lang]}
-                      </p>
+                      <div className="mt-2">
+                        {MEMORIAL_DATA.story[lang].map((para, i) => (
+                          <p
+                            key={i}
+                            className="mb-4 font-serif text-[15px] italic leading-relaxed text-white/90 last:mb-0"
+                          >
+                            {para}
+                          </p>
+                        ))}
+                      </div>
                     </section>
 
+                    {/* Legacy — quote + right-aligned signature */}
                     <section>
                       <h3 className="flex items-center gap-2 text-sm font-semibold text-amber-100">
                         <span aria-hidden>📜</span> {MEMORIAL_DATA.legacyLabel[lang]}
                       </h3>
-                      <p className="mt-1.5 text-[14px] leading-relaxed text-white/85">
-                        {MEMORIAL_DATA.legacy[lang]}
+                      <p className="mt-2 font-serif text-[15px] italic leading-relaxed text-white/90">
+                        {MEMORIAL_DATA.legacy.quote[lang]}
+                      </p>
+                      <p className="mt-2 text-right font-serif text-sm italic text-amber-400/90">
+                        {MEMORIAL_DATA.legacy.signature[lang]}
                       </p>
                     </section>
                   </div>
