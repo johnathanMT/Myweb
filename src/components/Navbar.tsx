@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment, type MouseEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { ChevronDown } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { ChevronDown, Flame } from 'lucide-react'
 import { PERSONAL } from '../data/content'
 import ThemeToggle from './ThemeToggle'
 import type { Theme } from '../hooks/useTheme'
@@ -257,6 +257,16 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
               </button>
             ))}
           </div>
+
+          {/* In Memoriam — a quiet candle link to the 3D remembrance world */}
+          <Link
+            to="/remembrance"
+            aria-label="In Memoriam"
+            title="In Memoriam"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-amber-300/80 transition-colors hover:bg-white/5 hover:text-amber-200"
+          >
+            <Flame size={16} />
+          </Link>
 
           {/* Light / dark toggle */}
           <ThemeToggle theme={theme} onToggle={toggleTheme} />

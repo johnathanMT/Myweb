@@ -1,10 +1,10 @@
-import { useMemo } from 'react'
+import { Suspense, useEffect, useMemo, useRef, Component, type ReactNode } from 'react'
 import * as THREE from 'three'
-import { type ThreeEvent } from '@react-three/fiber'
-import { useGLTF, Sky, OrbitControls, ContactShadows } from '@react-three/drei'
+import { useFrame, type ThreeEvent } from '@react-three/fiber'
+import { useGLTF, Sky, Sparkles, CameraControls, ContactShadows, Html } from '@react-three/drei'
 
-// Vite serves /public at BASE_URL (base = "/Myweb/"), so every model URL must be
-// prefixed — otherwise the .glb files 404 in production.
+// Vite serves /public at BASE_URL (base = "/Myweb/"), so every model URL MUST be
+// prefixed — otherwise the .glb files 404 in production (and the scene stays blank).
 const BASE = import.meta.env.BASE_URL || '/'
 const u = (f: string): string => `${BASE}${f}`
 
@@ -12,11 +12,15 @@ const GARDEN = u('garden.glb')
 const AIRBUS = u('airbus.glb')
 const GRAVE = u('grave.glb')
 
-// Warm the cache before first paint so the scene resolves in one go.
+// Warm the cache before first paint so the scene resolves in one pass.
 ;[GARDEN, AIRBUS, GRAVE].forEach((url) => useGLTF.preload(url))
 
-/** Loads a GLTF and returns a clone with shadow casting/receiving enabled on
- *  every mesh (cloning keeps each placement independent + memo-stable). */
+// Framing presets for the camera (position xyz → look-at target xyz).
+const OVERVIEW: [number, number, number, number, number, number] = [9, 4, 12, 0, 0.5, 2]
+const AIRBUS_GAZE: [number, number, number, number, number, number] = [2.6, 4.6, -1.5, 0, 3, -10]
+
+/** Loads a GLTF and returns a clone with shadows enabled on every mesh
+ *  (cloning keeps each placement independent + memo-stable). */
 function useShadowedScene(url: string): THREE.Object3D {
   const { scene } = useGLTF(url)
   return useMemo(() => {
@@ -40,17 +44,14 @@ function GardenModel() {
 // ── The Airbus — resting majestically in the background ──
 function AirbusModel({ onSelect }: Clickable) {
   const scene = useShadowedScene(AIRBUS)
-  const click = (e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }
-  const over = (e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }
-  const out = () => { document.body.style.cursor = 'auto' }
   return (
     <primitive
       object={scene}
       position={[0, 3, -10]}
       rotation={[0, Math.PI * 0.12, 0]}
-      onClick={click}
-      onPointerOver={over}
-      onPointerOut={out}
+      onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
+      onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
+      onPointerOut={() => { document.body.style.cursor = 'auto' }}
     />
   )
 }
@@ -58,16 +59,13 @@ function AirbusModel({ onSelect }: Clickable) {
 // ── The memorial stone — intimate, in the foreground ──
 function GraveModel({ onSelect }: Clickable) {
   const scene = useShadowedScene(GRAVE)
-  const click = (e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }
-  const over = (e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }
-  const out = () => { document.body.style.cursor = 'auto' }
   return (
     <primitive
       object={scene}
       position={[0, 0, 4]}
-      onClick={click}
-      onPointerOver={over}
-      onPointerOut={out}
+      onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
+      onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
+      onPointerOut={() => { document.body.style.cursor = 'auto' }}
     />
   )
 }
@@ -76,14 +74,11 @@ function GraveModel({ onSelect }: Clickable) {
 function Lantern() {
   return (
     <group position={[1, 0, 4]}>
-      {/* localized warm light — the flame */}
       <pointLight position={[0, 1, 0]} color="#ffaa00" intensity={2} distance={6} />
-      {/* simple lantern body placeholder */}
       <mesh position={[0, 0.5, 0]} castShadow>
         <boxGeometry args={[0.24, 0.42, 0.24]} />
         <meshStandardMaterial color="#3a2a17" emissive="#ffaa00" emissiveIntensity={0.5} />
       </mesh>
-      {/* glowing flame bulb (unlit by tone mapping so it stays bright) */}
       <mesh position={[0, 0.55, 0]}>
         <sphereGeometry args={[0.07, 16, 16]} />
         <meshStandardMaterial color="#fff3c4" emissive="#ffcc55" emissiveIntensity={3} toneMapped={false} />
@@ -92,22 +87,67 @@ function Lantern() {
   )
 }
 
+/** Keeps a single failed model (404 / bad file) from blanking the whole route. */
+class ModelBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch(err: unknown) { console.error('[Remembrance] model failed to load:', err) }
+  render() {
+    if (this.state.failed) {
+      return <Html center><div className="rounded-lg bg-black/60 px-3 py-2 text-xs text-white/80">A model could not load.</div></Html>
+    }
+    return this.props.children
+  }
+}
+
+function LoadingLabel() {
+  return (
+    <Html center>
+      <div className="rounded-full border border-white/15 bg-black/50 px-4 py-2 text-sm text-white/85 backdrop-blur-md">
+        Loading…
+      </div>
+    </Html>
+  )
+}
+
 /**
- * RemembranceScene — the serene sunset memorial scene graph (everything that
- * lives inside <Canvas>). Clicking the Airbus or the stone calls onMemorialClick.
+ * RemembranceScene — the serene sunset memorial scene graph (everything inside
+ * <Canvas>). Clicking the Airbus or the stone calls onMemorialClick; when
+ * `focused` is true the camera smoothly glides to gaze at the Airbus, and
+ * returns to the overview when it goes false.
  */
-export default function RemembranceScene({ onMemorialClick }: { onMemorialClick: () => void }) {
+export default function RemembranceScene({
+  onMemorialClick,
+  focused,
+}: {
+  onMemorialClick: () => void
+  focused: boolean
+}) {
+  const controls = useRef<CameraControls>(null)
+
+  // Smooth camera glide on open/close (the `true` flag = animated transition).
+  useEffect(() => {
+    const c = controls.current
+    if (!c) return
+    const [px, py, pz, tx, ty, tz] = focused ? AIRBUS_GAZE : OVERVIEW
+    c.setLookAt(px, py, pz, tx, ty, tz, true)
+  }, [focused])
+
+  // Gentle idle drift when not focused and not mid-transition — the peaceful rotate.
+  useFrame((_, delta) => {
+    const c = controls.current
+    if (c && !focused && !c.active) c.rotate(0.045 * delta, 0, false)
+  })
+
   return (
     <>
       {/* Sunset / twilight sky (sun dipping below the horizon → warm orange/pink/purple) */}
       <Sky sunPosition={[0, -0.1, -1]} turbidity={9} rayleigh={2.2} mieCoefficient={0.02} mieDirectionalG={0.92} />
-      {/* warm haze that fades the horizon into the sky */}
       <fog attach="fog" args={['#e0966b', 20, 60]} />
 
       {/* ── Lighting — warm sunset ── */}
       <ambientLight intensity={0.4} color="#ffb77a" />
       <hemisphereLight args={['#ffd9a0', '#5a4030', 0.35]} />
-      {/* the setting sun — low angle, casts soft long shadows */}
       <directionalLight
         position={[5, 5, -10]}
         intensity={0.8}
@@ -119,26 +159,30 @@ export default function RemembranceScene({ onMemorialClick }: { onMemorialClick:
         <orthographicCamera attach="shadow-camera" args={[-24, 24, 24, -24, 0.1, 70]} />
       </directionalLight>
 
-      {/* ── The composition ── */}
-      <GardenModel />
-      <AirbusModel onSelect={onMemorialClick} />
-      <GraveModel onSelect={onMemorialClick} />
-      <Lantern />
+      {/* Floating fireflies / embers */}
+      <Sparkles count={150} scale={15} size={3} speed={0.2} opacity={0.6} color="#ffb77a" position={[0, 4, -3]} />
 
-      {/* soft grounding shadow beneath the memorial */}
-      <ContactShadows position={[0, -0.49, 4]} opacity={0.45} scale={16} blur={2.8} far={6} color="#2a1a10" />
+      {/* ── The composition — gated behind its own Suspense so the sky + lights
+          render immediately and a "Loading…" label shows while the .glb files
+          stream in; an error boundary keeps a bad file from blanking the page. ── */}
+      <ModelBoundary>
+        <Suspense fallback={<LoadingLabel />}>
+          <GardenModel />
+          <AirbusModel onSelect={onMemorialClick} />
+          <GraveModel onSelect={onMemorialClick} />
+          <Lantern />
+          <ContactShadows position={[0, -0.49, 4]} opacity={0.45} scale={16} blur={2.8} far={6} color="#2a1a10" />
+        </Suspense>
+      </ModelBoundary>
 
-      {/* ── Peaceful, restricted camera ── */}
-      <OrbitControls
+      {/* ── Smooth, restricted camera ── */}
+      <CameraControls
+        ref={controls}
         makeDefault
-        enablePan={false}
-        autoRotate
-        autoRotateSpeed={0.3}
-        minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI / 2 - 0.05}
         minDistance={5}
         maxDistance={20}
-        target={[0, 0.5, 2]}
+        minPolarAngle={Math.PI / 6}
+        maxPolarAngle={Math.PI / 2 - 0.05}
       />
     </>
   )

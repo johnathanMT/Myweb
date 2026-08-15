@@ -32,7 +32,10 @@ export default function Remembrance() {
         gl={{ antialias: true, powerPreference: 'high-performance' }}
       >
         <Suspense fallback={null}>
-          <RemembranceScene onMemorialClick={() => setShowMemorialCard(true)} />
+          <RemembranceScene
+            focused={showMemorialCard}
+            onMemorialClick={() => setShowMemorialCard(true)}
+          />
         </Suspense>
       </Canvas>
 
