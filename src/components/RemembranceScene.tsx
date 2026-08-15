@@ -15,16 +15,17 @@ const GRAVE = u('grave.glb')
 ;[GARDEN, AIRBUS, GRAVE].forEach((url) => useGLTF.preload(url))
 
 // ── Target real-world sizes (largest dimension, in scene units) ──────────────
-// Because every .glb is authored in different units, we normalise each model to a
-// target size from its own bounding box. This fixes the "giant ground / tiny
-// airbus" problem deterministically — tune these numbers, not raw scale factors.
-const GARDEN_SIZE = 60   // a broad ground the composition sits on
-const AIRBUS_SIZE = 34   // a full-sized, majestic aircraft
-const GRAVE_SIZE = 1.8   // a human-readable memorial stone
+// Every .glb is authored in different units, so we normalise each model to a
+// target size from its own bounding box. NOTE: garden.glb is NOT a ground plane —
+// it is a memorial stone / urn monument, so it is sized human-scale, and a real
+// floor is added below for shadows.
+const GARDEN_STONE_SIZE = 2.5   // garden.glb = a memorial stone, human height
+const AIRBUS_SIZE = 35          // a full-sized, majestic aircraft in the distance
+const GRAVE_SIZE = 1.8          // a human-readable headstone
 
 // Camera framing presets: [posX, posY, posZ, targetX, targetY, targetZ].
-const OVERVIEW: [number, number, number, number, number, number] = [0, 2, 8, 0, 0.8, 2]   // eye-level, on the grave
-const AIRBUS_GAZE: [number, number, number, number, number, number] = [3, 6, -6, 0, 5, -20]
+const OVERVIEW: [number, number, number, number, number, number] = [0, 2, 8, 0, 0.9, 3]   // eye-level, on the memorial
+const AIRBUS_GAZE: [number, number, number, number, number, number] = [0, 5, -8, 0, 4, -25]
 
 /**
  * Loads a GLTF, enables shadows, and normalises it to `targetSize` (its largest
@@ -61,21 +62,28 @@ interface Clickable { onSelect: () => void }
 const overCursor = (e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }
 const outCursor = () => { document.body.style.cursor = 'auto' }
 
-// ── The garden — the ground the memorial rests on ──
-function GardenModel() {
-  const { object, scale, offset } = useNormalizedModel(GARDEN, GARDEN_SIZE, true)
+// ── garden.glb → a Memorial Stone (foreground, human height) ──
+function GardenModel({ onSelect }: Clickable) {
+  const { object, scale, offset } = useNormalizedModel(GARDEN, GARDEN_STONE_SIZE, true)
   return (
-    <group position={[0, -0.5, 0]}>
-      <primitive object={object} scale={scale} position={offset} />
+    <group position={[2, 0, 3]}>
+      <primitive
+        object={object}
+        scale={scale}
+        position={offset}
+        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
+        onPointerOver={overCursor}
+        onPointerOut={outCursor}
+      />
     </group>
   )
 }
 
-// ── The Airbus — full-sized, framing the background ──
+// ── The Airbus — full-sized, far in the background ──
 function AirbusModel({ onSelect }: Clickable) {
   const { object, scale, offset } = useNormalizedModel(AIRBUS, AIRBUS_SIZE, false)
   return (
-    <group position={[0, 5, -20]} rotation={[0, Math.PI * 0.12, 0]}>
+    <group position={[0, 4, -25]} rotation={[0, Math.PI * 0.12, 0]}>
       <primitive
         object={object}
         scale={scale}
@@ -88,11 +96,11 @@ function AirbusModel({ onSelect }: Clickable) {
   )
 }
 
-// ── The memorial stone — intimate, in the immediate foreground ──
+// ── The grave — foreground, beside the memorial stone ──
 function GraveModel({ onSelect }: Clickable) {
   const { object, scale, offset } = useNormalizedModel(GRAVE, GRAVE_SIZE, true)
   return (
-    <group position={[0, 0, 2]}>
+    <group position={[-2, 0, 3]}>
       <primitive
         object={object}
         scale={scale}
@@ -105,12 +113,29 @@ function GraveModel({ onSelect }: Clickable) {
   )
 }
 
-// ── A small lantern beside the stone, glowing warmly against the sunset ──
+/**
+ * A realistic trembling candle/fire light: a smooth sine wobble plus a random
+ * jitter each frame, so the flame never repeats. Feeds a warm point light.
+ */
+function FlickeringLight({ position }: { position: [number, number, number] }) {
+  const lightRef = useRef<THREE.PointLight>(null)
+  useFrame(({ clock }) => {
+    const l = lightRef.current
+    if (!l) return
+    const t = clock.elapsedTime
+    // base glow ~2, gentle 10Hz wobble, plus per-frame random tremble
+    const flicker = 2 + Math.sin(t * 10) * 0.35 + (Math.random() - 0.5) * 0.9
+    l.intensity = Math.max(0.5, flicker)
+  })
+  return <pointLight ref={lightRef} position={position} color="#ffaa00" distance={8} intensity={2} />
+}
+
+// ── A small lantern between the memorials, holding the flickering flame ──
 function Lantern() {
   return (
-    <group position={[0.8, 0, 2.6]}>
-      <pointLight position={[0, 0.7, 0]} color="#ffaa00" intensity={2} distance={6} />
-      <mesh position={[0, 0.35, 0]} castShadow>
+    <group position={[0, 0, 3.4]}>
+      <FlickeringLight position={[0, 0.55, 0]} />
+      <mesh position={[0, 0.32, 0]} castShadow>
         <boxGeometry args={[0.18, 0.34, 0.18]} />
         <meshStandardMaterial color="#3a2a17" emissive="#ffaa00" emissiveIntensity={0.5} />
       </mesh>
@@ -147,8 +172,8 @@ function LoadingLabel() {
 
 /**
  * RemembranceScene — the serene sunset memorial (everything inside <Canvas>).
- * Clicking the Airbus or the stone calls onMemorialClick; when `focused` is true
- * the camera glides to gaze at the Airbus and returns to the overview otherwise.
+ * Clicking the Airbus, the grave, or the memorial stone calls onMemorialClick;
+ * when `focused` the camera glides to gaze at the Airbus, else the overview.
  */
 export default function RemembranceScene({
   onMemorialClick,
@@ -159,7 +184,7 @@ export default function RemembranceScene({
 }) {
   const controls = useRef<CameraControls>(null)
 
-  // Start at human eye-level looking at the grave, then glide on open/close.
+  // Start at eye-level on the memorial, then glide on open/close.
   useEffect(() => {
     const c = controls.current
     if (!c) return
@@ -194,23 +219,29 @@ export default function RemembranceScene({
         <orthographicCamera attach="shadow-camera" args={[-40, 40, 40, -40, 0.1, 120]} />
       </directionalLight>
 
-      {/* Floating fireflies / embers, spanning the grave → Airbus depth */}
-      <Sparkles count={150} scale={26} size={3} speed={0.2} opacity={0.6} color="#ffb77a" position={[0, 5, -8]} />
+      {/* Floating fireflies / embers over the composition */}
+      <Sparkles count={150} scale={28} size={3} speed={0.2} opacity={0.6} color="#ffb77a" position={[0, 4, -10]} />
+
+      {/* Dark ground so shadows have a place to land (garden.glb is a monument, not the floor) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial color="#111111" roughness={1} metalness={0} />
+      </mesh>
 
       {/* ── The composition — its own Suspense so sky + lights render immediately
           and a "Loading…" label shows while the .glb files stream in; the error
           boundary keeps a bad file from blanking the page. ── */}
       <ModelBoundary>
         <Suspense fallback={<LoadingLabel />}>
-          <GardenModel />
           <AirbusModel onSelect={onMemorialClick} />
           <GraveModel onSelect={onMemorialClick} />
+          <GardenModel onSelect={onMemorialClick} />
           <Lantern />
-          <ContactShadows position={[0, 0.02, 2]} opacity={0.5} scale={10} blur={2.6} far={5} color="#2a1a10" />
+          <ContactShadows position={[0, 0.02, 3]} opacity={0.55} scale={12} blur={2.6} far={5} color="#000000" />
         </Suspense>
       </ModelBoundary>
 
-      {/* ── Smooth, restricted camera (starts at eye-level on the grave) ── */}
+      {/* ── Smooth, restricted camera (starts at eye-level on the memorial) ── */}
       <CameraControls
         ref={controls}
         makeDefault
