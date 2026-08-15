@@ -29,11 +29,11 @@ const MEMORIAL_DATA = {
   story: {
     mm: [
       'သားတို့ ပြန်တွေ့နိုင်အုံးမယ် ထင်ခဲ့ပေမယ့် မတွေ့နိုင်တော့ဘူး အဘရယ်၊ တောင်ဥက္ကမှာ မွေးတဲ့အချိန်ထဲကနေ အခုအချိန်ထိ ကူညီစောင့်ရှောက်ပေးခဲ့တဲ့ အတွက် အထူးကျေးဇူးတင်ပါတယ်။',
-      'မကြာမကြာ ဆုံးမစကားတွေပြော၊ စာတွေပို့ပို့ပြီး ဆုံးမပေးခဲ့တာတွေကိုလဲ နားထောင်ပါ့မယ်။ နောက်ဆုံးခရီးကို လိုက်မပို့နိုင်ခဲ့တာ ခွင့်လွှတ်ပါ ။',
+      'မကြာမကြာ ဆုံးမစကားတွေပြော၊ စာတွေပို့ပို့ပြီး ဆုံးမပေးခဲ့တာတွေကိုလဲ နားထောင်ပါ့မယ်။ နောက်ဆုံးခရီးကို လိုက်မပို့နိုင်ခဲ့တာ ခွင့်လွှတ်ပါ ။ အထူးဝမ်းနည်းကြေကွဲရပါတယ်။',
     ],
     en: [
       "I thought we would meet again, but we can't anymore, Grandpa. Thank you so much for helping and looking after me from the time I was born in South Okkalapa until now.",
-      'I will always remember your guidance and the messages you sent to teach me. Please forgive me for not being able to attend your final journey.',
+      'I will always remember your guidance and the messages you sent to teach me. Please forgive me for not being able to attend your final journey. My deepest condolences.',
     ],
   },
   legacy: {
@@ -115,7 +115,7 @@ export default function Remembrance() {
               transition={{ type: 'spring', stiffness: 240, damping: 26 }}
               onClick={(e) => e.stopPropagation()}
               lang={lang === 'mm' ? 'my' : 'en'}
-              className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/15 bg-neutral-900/85 text-white shadow-2xl backdrop-blur-md"
+              className="relative flex max-h-[95vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-white/15 bg-neutral-900/85 text-white shadow-2xl backdrop-blur-md"
             >
               {/* gold accent line */}
               <div className="absolute inset-x-0 top-0 z-10 h-[3px] bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
@@ -143,50 +143,50 @@ export default function Remembrance() {
                 </button>
               </div>
 
-              <div className="grid md:grid-cols-2">
-                {/* Left — portrait */}
-                <div className="relative min-h-[220px] md:min-h-[520px]">
+              <div className="grid min-h-0 flex-1 md:grid-cols-[2fr_3fr]">
+                {/* Left — portrait (short on mobile, full-height column on desktop) */}
+                <div className="relative h-32 shrink-0 sm:h-36 md:h-auto md:min-h-full">
                   <img
                     src={MEMORIAL_DATA.image}
                     alt={MEMORIAL_DATA.imageAlt}
                     loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover object-top"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/80 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-neutral-900/70" />
                 </div>
 
                 {/* Right — content */}
-                <div className="relative overflow-y-auto p-7 sm:p-9 md:max-h-[520px]">
+                <div className="relative min-h-0 overflow-y-auto p-4 sm:p-5">
                   {/* tags */}
-                  <div className="flex flex-wrap gap-2 pr-24">
+                  <div className="flex flex-wrap gap-1.5 pr-24">
                     {MEMORIAL_DATA.tags[lang].map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[11px] font-medium tracking-wide text-amber-200"
+                        className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium tracking-wide text-amber-200"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
 
-                  <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.3em] text-amber-300/90">
+                  <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-300/90">
                     {MEMORIAL_DATA.eyebrow[lang]}
                   </p>
-                  <h2 className={`mt-2 text-2xl font-bold leading-snug sm:text-3xl ${titleFont}`}>
+                  <h2 className={`mt-1.5 text-xl font-bold leading-snug sm:text-2xl ${titleFont}`}>
                     {MEMORIAL_DATA.title[lang]}
                   </h2>
 
-                  <div className="mt-6 space-y-6">
+                  <div className="mt-4 space-y-4">
                     {/* The Story — an elegant, letter-like italic serif */}
                     <section>
-                      <h3 className="flex items-center gap-2 text-sm font-semibold text-amber-100">
+                      <h3 className="flex items-center gap-2 text-xs font-semibold text-amber-100">
                         <span aria-hidden>🌿</span> {MEMORIAL_DATA.storyLabel[lang]}
                       </h3>
-                      <div className="mt-2">
+                      <div className="mt-1.5">
                         {MEMORIAL_DATA.story[lang].map((para, i) => (
                           <p
                             key={i}
-                            className="mb-4 font-serif text-[15px] italic leading-relaxed text-white/90 last:mb-0"
+                            className="mb-2.5 font-serif text-sm italic leading-normal text-white/90 last:mb-0"
                           >
                             {para}
                           </p>
@@ -196,13 +196,13 @@ export default function Remembrance() {
 
                     {/* Legacy — quote + right-aligned signature */}
                     <section>
-                      <h3 className="flex items-center gap-2 text-sm font-semibold text-amber-100">
+                      <h3 className="flex items-center gap-2 text-xs font-semibold text-amber-100">
                         <span aria-hidden>📜</span> {MEMORIAL_DATA.legacyLabel[lang]}
                       </h3>
-                      <p className="mt-2 font-serif text-[15px] italic leading-relaxed text-white/90">
+                      <p className="mt-1.5 font-serif text-sm italic leading-normal text-white/90">
                         {MEMORIAL_DATA.legacy.quote[lang]}
                       </p>
-                      <p className="mt-2 text-right font-serif text-sm italic text-amber-400/90">
+                      <p className="mt-1.5 text-right font-serif text-xs italic text-amber-400/90">
                         {MEMORIAL_DATA.legacy.signature[lang]}
                       </p>
                     </section>
@@ -210,7 +210,7 @@ export default function Remembrance() {
 
                   <button
                     onClick={close}
-                    className="mt-7 inline-flex items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-500/15 px-5 py-2.5 text-sm font-semibold text-amber-100 transition hover:bg-amber-500/25"
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-500/15 px-4 py-2 text-xs font-semibold text-amber-100 transition hover:bg-amber-500/25"
                   >
                     {lang === 'mm' ? 'ပိတ်ရန်' : 'Close'}
                   </button>

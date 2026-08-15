@@ -191,17 +191,17 @@ export default function RemembranceScene({
 
   return (
     <PerformanceMonitor>
-      {/* Deeper twilight sky — sun lower + softer scattering, so the flames and
-          portrait read against a dimmer backdrop. */}
-      <Sky sunPosition={[0, -0.18, -1]} turbidity={10} rayleigh={1.3} mieCoefficient={0.02} mieDirectionalG={0.9} />
-      <fog attach="fog" args={['#b56a4a', 26, 90]} />
+      {/* Warm, vibrant sunset — sun lifted just above the horizon for a glowing
+          golden-hour backdrop. */}
+      <Sky sunPosition={[0, -0.05, -1]} turbidity={10} rayleigh={1.3} mieCoefficient={0.02} mieDirectionalG={0.9} />
+      <fog attach="fog" args={['#e0966b', 26, 90]} />
 
-      {/* ── Lighting — dimmed warm dusk (lets the lantern flames glow) ── */}
-      <ambientLight intensity={0.25} color="#ffb77a" />
-      <hemisphereLight args={['#e8b483', '#2e2018', 0.22]} />
+      {/* ── Lighting — warm golden dusk ── */}
+      <ambientLight intensity={0.4} color="#ffb77a" />
+      <hemisphereLight args={['#e8b483', '#2e2018', 0.3]} />
       <directionalLight
         position={[8, 9, -6]}
-        intensity={0.55}
+        intensity={0.8}
         color="#ff9e5e"
         castShadow
         shadow-mapSize={IS_MOBILE ? [1024, 1024] : [2048, 2048]}
@@ -210,8 +210,8 @@ export default function RemembranceScene({
         <orthographicCamera attach="shadow-camera" args={[-40, 40, 40, -40, 0.1, 120]} />
       </directionalLight>
 
-      {/* Floating embers (fewer on mobile) */}
-      <Sparkles count={IS_MOBILE ? 80 : 150} scale={28} size={3} speed={0.2} opacity={0.6} color="#ffb77a" position={[0, 4, -10]} />
+      {/* Magical floating fireflies — visible on both mobile and desktop */}
+      <Sparkles count={150} scale={20} size={3} speed={0.4} opacity={0.6} color="#ffb77a" position={[0, 2, 0]} />
 
       {/* Dark ground so shadows have a place to land */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
