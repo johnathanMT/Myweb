@@ -12,75 +12,110 @@ const GARDEN = u('garden.glb')
 const AIRBUS = u('airbus.glb')
 const GRAVE = u('grave.glb')
 
-// Warm the cache before first paint so the scene resolves in one pass.
 ;[GARDEN, AIRBUS, GRAVE].forEach((url) => useGLTF.preload(url))
 
-// Framing presets for the camera (position xyz → look-at target xyz).
-const OVERVIEW: [number, number, number, number, number, number] = [9, 4, 12, 0, 0.5, 2]
-const AIRBUS_GAZE: [number, number, number, number, number, number] = [2.6, 4.6, -1.5, 0, 3, -10]
+// ── Target real-world sizes (largest dimension, in scene units) ──────────────
+// Because every .glb is authored in different units, we normalise each model to a
+// target size from its own bounding box. This fixes the "giant ground / tiny
+// airbus" problem deterministically — tune these numbers, not raw scale factors.
+const GARDEN_SIZE = 60   // a broad ground the composition sits on
+const AIRBUS_SIZE = 34   // a full-sized, majestic aircraft
+const GRAVE_SIZE = 1.8   // a human-readable memorial stone
 
-/** Loads a GLTF and returns a clone with shadows enabled on every mesh
- *  (cloning keeps each placement independent + memo-stable). */
-function useShadowedScene(url: string): THREE.Object3D {
+// Camera framing presets: [posX, posY, posZ, targetX, targetY, targetZ].
+const OVERVIEW: [number, number, number, number, number, number] = [0, 2, 8, 0, 0.8, 2]   // eye-level, on the grave
+const AIRBUS_GAZE: [number, number, number, number, number, number] = [3, 6, -6, 0, 5, -20]
+
+/**
+ * Loads a GLTF, enables shadows, and normalises it to `targetSize` (its largest
+ * dimension). Returns the clone plus the scale + offset that centres it on X/Z and
+ * (when groundAlign) drops its base onto y=0 — so the outer <group position> is the
+ * spot where the model's feet land.
+ */
+function useNormalizedModel(url: string, targetSize: number, groundAlign = true) {
   const { scene } = useGLTF(url)
   return useMemo(() => {
-    const clone = scene.clone(true)
-    clone.traverse((o) => {
+    const object = scene.clone(true)
+    object.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (mesh.isMesh) { mesh.castShadow = true; mesh.receiveShadow = true }
     })
-    return clone
-  }, [scene])
+    object.updateWorldMatrix(true, true)
+
+    const box = new THREE.Box3().setFromObject(object)
+    const size = new THREE.Vector3(); box.getSize(size)
+    const center = new THREE.Vector3(); box.getCenter(center)
+    const maxDim = Math.max(size.x, size.y, size.z) || 1
+    const scale = targetSize / maxDim
+
+    const offset: [number, number, number] = groundAlign
+      ? [-center.x * scale, -box.min.y * scale, -center.z * scale]  // feet on the ground
+      : [-center.x * scale, -center.y * scale, -center.z * scale]   // centred (airborne)
+
+    return { object, scale, offset }
+  }, [scene, targetSize, groundAlign])
 }
 
 interface Clickable { onSelect: () => void }
 
-// ── The garden — the base the whole memorial rests on ──
-function GardenModel() {
-  const scene = useShadowedScene(GARDEN)
-  return <primitive object={scene} position={[0, -0.5, 0]} />
-}
+const overCursor = (e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }
+const outCursor = () => { document.body.style.cursor = 'auto' }
 
-// ── The Airbus — resting majestically in the background ──
-function AirbusModel({ onSelect }: Clickable) {
-  const scene = useShadowedScene(AIRBUS)
+// ── The garden — the ground the memorial rests on ──
+function GardenModel() {
+  const { object, scale, offset } = useNormalizedModel(GARDEN, GARDEN_SIZE, true)
   return (
-    <primitive
-      object={scene}
-      position={[0, 3, -10]}
-      rotation={[0, Math.PI * 0.12, 0]}
-      onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
-      onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
-      onPointerOut={() => { document.body.style.cursor = 'auto' }}
-    />
+    <group position={[0, -0.5, 0]}>
+      <primitive object={object} scale={scale} position={offset} />
+    </group>
   )
 }
 
-// ── The memorial stone — intimate, in the foreground ──
-function GraveModel({ onSelect }: Clickable) {
-  const scene = useShadowedScene(GRAVE)
+// ── The Airbus — full-sized, framing the background ──
+function AirbusModel({ onSelect }: Clickable) {
+  const { object, scale, offset } = useNormalizedModel(AIRBUS, AIRBUS_SIZE, false)
   return (
-    <primitive
-      object={scene}
-      position={[0, 0, 4]}
-      onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
-      onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
-      onPointerOut={() => { document.body.style.cursor = 'auto' }}
-    />
+    <group position={[0, 5, -20]} rotation={[0, Math.PI * 0.12, 0]}>
+      <primitive
+        object={object}
+        scale={scale}
+        position={offset}
+        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
+        onPointerOver={overCursor}
+        onPointerOut={outCursor}
+      />
+    </group>
+  )
+}
+
+// ── The memorial stone — intimate, in the immediate foreground ──
+function GraveModel({ onSelect }: Clickable) {
+  const { object, scale, offset } = useNormalizedModel(GRAVE, GRAVE_SIZE, true)
+  return (
+    <group position={[0, 0, 2]}>
+      <primitive
+        object={object}
+        scale={scale}
+        position={offset}
+        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
+        onPointerOver={overCursor}
+        onPointerOut={outCursor}
+      />
+    </group>
   )
 }
 
 // ── A small lantern beside the stone, glowing warmly against the sunset ──
 function Lantern() {
   return (
-    <group position={[1, 0, 4]}>
-      <pointLight position={[0, 1, 0]} color="#ffaa00" intensity={2} distance={6} />
-      <mesh position={[0, 0.5, 0]} castShadow>
-        <boxGeometry args={[0.24, 0.42, 0.24]} />
+    <group position={[0.8, 0, 2.6]}>
+      <pointLight position={[0, 0.7, 0]} color="#ffaa00" intensity={2} distance={6} />
+      <mesh position={[0, 0.35, 0]} castShadow>
+        <boxGeometry args={[0.18, 0.34, 0.18]} />
         <meshStandardMaterial color="#3a2a17" emissive="#ffaa00" emissiveIntensity={0.5} />
       </mesh>
-      <mesh position={[0, 0.55, 0]}>
-        <sphereGeometry args={[0.07, 16, 16]} />
+      <mesh position={[0, 0.4, 0]}>
+        <sphereGeometry args={[0.06, 16, 16]} />
         <meshStandardMaterial color="#fff3c4" emissive="#ffcc55" emissiveIntensity={3} toneMapped={false} />
       </mesh>
     </group>
@@ -111,10 +146,9 @@ function LoadingLabel() {
 }
 
 /**
- * RemembranceScene — the serene sunset memorial scene graph (everything inside
- * <Canvas>). Clicking the Airbus or the stone calls onMemorialClick; when
- * `focused` is true the camera smoothly glides to gaze at the Airbus, and
- * returns to the overview when it goes false.
+ * RemembranceScene — the serene sunset memorial (everything inside <Canvas>).
+ * Clicking the Airbus or the stone calls onMemorialClick; when `focused` is true
+ * the camera glides to gaze at the Airbus and returns to the overview otherwise.
  */
 export default function RemembranceScene({
   onMemorialClick,
@@ -125,7 +159,7 @@ export default function RemembranceScene({
 }) {
   const controls = useRef<CameraControls>(null)
 
-  // Smooth camera glide on open/close (the `true` flag = animated transition).
+  // Start at human eye-level looking at the grave, then glide on open/close.
   useEffect(() => {
     const c = controls.current
     if (!c) return
@@ -143,44 +177,45 @@ export default function RemembranceScene({
     <>
       {/* Sunset / twilight sky (sun dipping below the horizon → warm orange/pink/purple) */}
       <Sky sunPosition={[0, -0.1, -1]} turbidity={9} rayleigh={2.2} mieCoefficient={0.02} mieDirectionalG={0.92} />
-      <fog attach="fog" args={['#e0966b', 20, 60]} />
+      {/* haze pushed out so the distant Airbus stays visible */}
+      <fog attach="fog" args={['#e0966b', 30, 95]} />
 
       {/* ── Lighting — warm sunset ── */}
       <ambientLight intensity={0.4} color="#ffb77a" />
       <hemisphereLight args={['#ffd9a0', '#5a4030', 0.35]} />
       <directionalLight
-        position={[5, 5, -10]}
-        intensity={0.8}
+        position={[8, 9, -6]}
+        intensity={0.85}
         color="#ff9e5e"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0004}
       >
-        <orthographicCamera attach="shadow-camera" args={[-24, 24, 24, -24, 0.1, 70]} />
+        <orthographicCamera attach="shadow-camera" args={[-40, 40, 40, -40, 0.1, 120]} />
       </directionalLight>
 
-      {/* Floating fireflies / embers */}
-      <Sparkles count={150} scale={15} size={3} speed={0.2} opacity={0.6} color="#ffb77a" position={[0, 4, -3]} />
+      {/* Floating fireflies / embers, spanning the grave → Airbus depth */}
+      <Sparkles count={150} scale={26} size={3} speed={0.2} opacity={0.6} color="#ffb77a" position={[0, 5, -8]} />
 
-      {/* ── The composition — gated behind its own Suspense so the sky + lights
-          render immediately and a "Loading…" label shows while the .glb files
-          stream in; an error boundary keeps a bad file from blanking the page. ── */}
+      {/* ── The composition — its own Suspense so sky + lights render immediately
+          and a "Loading…" label shows while the .glb files stream in; the error
+          boundary keeps a bad file from blanking the page. ── */}
       <ModelBoundary>
         <Suspense fallback={<LoadingLabel />}>
           <GardenModel />
           <AirbusModel onSelect={onMemorialClick} />
           <GraveModel onSelect={onMemorialClick} />
           <Lantern />
-          <ContactShadows position={[0, -0.49, 4]} opacity={0.45} scale={16} blur={2.8} far={6} color="#2a1a10" />
+          <ContactShadows position={[0, 0.02, 2]} opacity={0.5} scale={10} blur={2.6} far={5} color="#2a1a10" />
         </Suspense>
       </ModelBoundary>
 
-      {/* ── Smooth, restricted camera ── */}
+      {/* ── Smooth, restricted camera (starts at eye-level on the grave) ── */}
       <CameraControls
         ref={controls}
         makeDefault
-        minDistance={5}
-        maxDistance={20}
+        minDistance={2}
+        maxDistance={40}
         minPolarAngle={Math.PI / 6}
         maxPolarAngle={Math.PI / 2 - 0.05}
       />

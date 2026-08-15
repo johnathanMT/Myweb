@@ -28,7 +28,7 @@ export default function Remembrance() {
       <Canvas
         shadows
         dpr={[1, 1.5]}
-        camera={{ position: [9, 4, 12], fov: 45, near: 0.1, far: 200 }}
+        camera={{ position: [0, 2, 8], fov: 45, near: 0.1, far: 300 }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
       >
         <Suspense fallback={null}>

@@ -258,14 +258,15 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
             ))}
           </div>
 
-          {/* In Memoriam — a quiet candle link to the 3D remembrance world */}
+          {/* In Memoriam — a visible, elegant candle button into the 3D remembrance world */}
           <Link
             to="/remembrance"
             aria-label="In Memoriam"
-            title="In Memoriam"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-amber-300/80 transition-colors hover:bg-white/5 hover:text-amber-200"
+            title="In Memoriam — a 3D remembrance world"
+            className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-200 shadow-sm transition-colors hover:border-amber-300/60 hover:bg-amber-500/20 hover:text-amber-100"
           >
-            <Flame size={16} />
+            <Flame size={14} className="text-amber-300" />
+            <span className="hidden sm:inline">In Memoriam</span>
           </Link>
 
           {/* Light / dark toggle */}
@@ -326,6 +327,17 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
               )}
             </Fragment>
           ))}
+
+          {/* In Memoriam — candle link into the 3D remembrance world */}
+          <li className="mt-1">
+            <Link
+              to="/remembrance"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2.5 rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-2.5 text-sm font-semibold font-groovy tracking-wide text-amber-200 transition-colors hover:border-amber-300/60 hover:bg-amber-500/20 hover:text-amber-100"
+            >
+              <Flame size={15} className="text-amber-300" /> In Memoriam
+            </Link>
+          </li>
 
           {/* Language flags inside the mobile menu */}
           <li className="pt-3 border-t border-white/5 mt-2">
