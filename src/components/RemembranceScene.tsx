@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef, Component, type ReactNode } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState, Component, type ReactNode } from 'react'
 import * as THREE from 'three'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import {
@@ -14,8 +14,11 @@ const u = (f: string): string => `${BASE}${f}`
 const GARDEN = u('garden.glb')
 const AIRBUS = u('airbus.glb')
 const GRAVE = u('grave.glb')
+const GRANDPA = u('grandpa_statue.glb')   // Draco-compressed statue of Grandpa U Hlaing Bwa
 
-;[GARDEN, AIRBUS, GRAVE].forEach((url) => useGLTF.preload(url))
+// The `true` flag turns on Draco + Meshopt decoding (drei wires up DRACOLoader
+// with the gstatic decoder automatically), so the optimized .glb files load fine.
+;[GARDEN, AIRBUS, GRAVE, GRANDPA].forEach((url) => useGLTF.preload(url, true))
 
 const IS_MOBILE = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
 
@@ -25,6 +28,11 @@ const IS_MOBILE = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|
 const GARDEN_STONE_SIZE = 2.5   // garden.glb = a memorial stone, human height
 const AIRBUS_SIZE = 35          // a full-sized, majestic aircraft in the distance
 const GRAVE_SIZE = 1.8          // a human-readable headstone
+const GRANDPA_SIZE = 2.0        // a life-scale memorial statue beside the tombstone
+
+// Distinct hover captions for each memorial object.
+const GRAVE_LABEL = 'Aba U Hlaing Bwa · 1945–2026'
+const GRANDPA_LABEL = 'In loving memory of Grandpa U Hlaing Bwa'
 
 // Eleven lanterns scattered organically around the memorials, forming a gentle
 // path toward the grounded Airbus in the background.
@@ -37,9 +45,9 @@ const LANTERN_POSITIONS: [number, number, number][] = [
 const OVERVIEW: [number, number, number, number, number, number] = [0, 2, 8, 0, 0.9, 3]   // eye-level, on the memorial
 const AIRBUS_GAZE: [number, number, number, number, number, number] = [0, 4, -6, 0, 4, -25]
 
-/** Loads a GLTF, enables shadows, and normalises it to `targetSize`. */
+/** Loads a GLTF (Draco/Meshopt-aware), enables shadows, and normalises it to `targetSize`. */
 function useNormalizedModel(url: string, targetSize: number, groundAlign = true) {
-  const { scene } = useGLTF(url)
+  const { scene } = useGLTF(url, true) // `true` → decode Draco-compressed geometry
   return useMemo(() => {
     const object = scene.clone(true)
     object.traverse((o) => {
@@ -66,6 +74,17 @@ interface Clickable { onSelect: () => void }
 
 const overCursor = (e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }
 const outCursor = () => { document.body.style.cursor = 'auto' }
+
+/** A small screen-space caption that floats above a memorial object on hover. */
+function HoverLabel({ text, y }: { text: string; y: number }) {
+  return (
+    <Html position={[0, y, 0]} center zIndexRange={[100, 0]} pointerEvents="none">
+      <div className="-translate-y-2 whitespace-nowrap rounded-full border border-amber-300/40 bg-black/70 px-3 py-1.5 text-xs font-medium text-amber-100 shadow-lg backdrop-blur-md">
+        {text}
+      </div>
+    </Html>
+  )
+}
 
 // ── garden.glb → a Memorial Stone (foreground, human height) ──
 function GardenModel({ onSelect }: Clickable) {
@@ -94,11 +113,32 @@ function AirbusModel({ onSelect }: Clickable) {
 // ── The grave — foreground, beside the memorial stone ──
 function GraveModel({ onSelect }: Clickable) {
   const { object, scale, offset } = useNormalizedModel(GRAVE, GRAVE_SIZE, true)
+  const [hovered, setHovered] = useState(false)
   return (
     <group position={[-2, 0, 3]}>
       <primitive object={object} scale={scale} position={offset}
         onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
-        onPointerOver={overCursor} onPointerOut={outCursor} />
+        onPointerOver={(e: ThreeEvent<PointerEvent>) => { overCursor(e); setHovered(true) }}
+        onPointerOut={() => { outCursor(); setHovered(false) }} />
+      {hovered && <HoverLabel text={GRAVE_LABEL} y={GRAVE_SIZE + 0.4} />}
+    </group>
+  )
+}
+
+// ── Grandpa U Hlaing Bwa — a memorial statue standing just beside the tombstone.
+// The grave sits at x=-2; the statue stands slightly to its left and forward,
+// turned a touch toward the camera so it watches over the grave. Its hover caption
+// is distinct from the grave's. ──
+function GrandpaModel({ onSelect }: Clickable) {
+  const { object, scale, offset } = useNormalizedModel(GRANDPA, GRANDPA_SIZE, true)
+  const [hovered, setHovered] = useState(false)
+  return (
+    <group position={[-3.7, 0, 3.3]} rotation={[0, Math.PI * 0.08, 0]}>
+      <primitive object={object} scale={scale} position={offset}
+        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
+        onPointerOver={(e: ThreeEvent<PointerEvent>) => { overCursor(e); setHovered(true) }}
+        onPointerOut={() => { outCursor(); setHovered(false) }} />
+      {hovered && <HoverLabel text={GRANDPA_LABEL} y={GRANDPA_SIZE + 0.4} />}
     </group>
   )
 }
@@ -170,9 +210,11 @@ function LoadingLabel() {
  */
 export default function RemembranceScene({
   onMemorialClick,
+  onStatueClick,
   focused,
 }: {
   onMemorialClick: () => void
+  onStatueClick: () => void
   focused: boolean
 }) {
   const controls = useRef<CameraControls>(null)
@@ -224,6 +266,7 @@ export default function RemembranceScene({
         <Suspense fallback={<LoadingLabel />}>
           <AirbusModel onSelect={onMemorialClick} />
           <GraveModel onSelect={onMemorialClick} />
+          <GrandpaModel onSelect={onStatueClick} />
           <GardenModel onSelect={onMemorialClick} />
           {LANTERN_POSITIONS.map((p, i) => <Lantern key={i} position={p} />)}
           <ContactShadows position={[0, 0.02, 3]} opacity={0.55} scale={12} blur={2.6} far={5} color="#000000" />

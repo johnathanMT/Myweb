@@ -43,7 +43,7 @@ const SCENE_LAYOUT: Record<string, SceneConfig> = {
   torii:         { url: 'torigate.glb',      position: [0, G, 14],    rotation: [0, Math.PI, 0],           size: 5.5 },
   // ── CITY DISTRICT ──
   london_university: { url: 'london_university.glb', position: [-26, G, -62], rotation: faceCenter([-70, G, -48]), size: 12, heavy: true },
-  hospital:          { url: 'hospital.glb',          position: [26, G, -58],  rotation: faceCenter([5, G, -370]),  size: 9, heavy: true },
+  hospital:          { url: 'Hirashima_hospital_building.glb', position: [26, G, -58],  rotation: faceCenter([5, G, -370]),  size: 9, heavy: true },
   // ── SPACIOUS RING ──
   plaza_night:   { url: 'plaza_night.glb',   position: [15, G, 26],   rotation: faceCenter([15, G, 26]),   size: 16, fit: 'footprint', city: true, heavy: true },
   village:       { url: 'village.glb',       position: [-15, G, 26],  rotation: faceCenter([-15, G, 26]),  size: 6 },
@@ -67,7 +67,8 @@ const showOnDevice = (cfg: SceneConfig): boolean => !(IS_MOBILE && cfg.heavy)
 
 // Preload ONLY the models this device will actually render.
 const ALL_URLS = Object.values(SCENE_LAYOUT).filter(showOnDevice).map((m) => u(m.url))
-ALL_URLS.forEach((url) => useGLTF.preload(url))
+// `true` → enable Draco + Meshopt decoding for the optimized .glb files.
+ALL_URLS.forEach((url) => useGLTF.preload(url, true))
 
 const BUILDING_LABEL: Record<string, string> = {
   sakura: 'Sakura Tree', torii: 'Torii Gate', ship: "Ship's Deck", village: 'Village',
@@ -141,7 +142,7 @@ const MOCK_TAGS: Tag[] = [
 
 /* ───────── bbox auto-fit + auto-ground ───────── */
 function useFitted(cfg: FitConfig): FittedModel {
-  const { scene } = useGLTF(u(cfg.url))
+  const { scene } = useGLTF(u(cfg.url), true) // `true` → decode Draco-compressed geometry
   return useMemo(() => {
     const obj = scene.clone(true)
     if (cfg.rotation) obj.rotation.set(cfg.rotation[0] || 0, cfg.rotation[1] || 0, cfg.rotation[2] || 0)

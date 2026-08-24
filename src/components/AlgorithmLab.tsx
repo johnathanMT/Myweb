@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+  import { useEffect, useMemo, useRef, useState } from 'react'
 import { Cpu, Play, Shuffle, RotateCcw, Route, BarChart3, Binary, Plus, Swords, Gauge, type LucideIcon } from 'lucide-react'
 import { useInView } from '../hooks/useInView'
 
