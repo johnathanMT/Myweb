@@ -7,14 +7,12 @@ import {
 } from '@react-three/drei'
 import type { Sky as SkyImpl } from 'three-stdlib'
 
-// Vite serves /public at BASE_URL (base = "/Myweb/"), so every model URL MUST be
-// prefixed — otherwise the .glb files 404 in production (and the scene stays blank).
-const BASE = import.meta.env.BASE_URL || '/'
-const u = (f: string): string => `${BASE}${f}`
-
-const GARDEN = u('garden.glb')
-const GRAVE = u('grave.glb')
-const GRANDPA = u('grandpa_statue.glb')   // Draco-compressed statue of Grandpa U Hlaing Bwa
+// All Remembrance models are served directly from Cloudinary (full https URLs),
+// so there's no BASE_URL/public-path helper here anymore.
+// Foreground memorial assets:
+const GARDEN = 'https://res.cloudinary.com/dhlhzmmtt/image/upload/v1787586676/garden_y1rpnc.glb'
+const GRAVE = 'https://res.cloudinary.com/dhlhzmmtt/image/upload/v1787586700/grave_b0dolk.glb'
+const GRANDPA = 'https://res.cloudinary.com/dhlhzmmtt/image/upload/v1787587200/grandpa_statue_bcyymt.glb'  // Draco-compressed statue of Grandpa U Hlaing Bwa
 
 // Background architecture — served directly from Cloudinary (full URLs, so they
 // are NOT passed through the BASE_URL helper). The YAECO hangar anchors the left
