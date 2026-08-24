@@ -72,7 +72,7 @@ export default function About({ lang = 'en' }: AboutProps) {
                     src={PERSONAL.photo}
                     alt={PERSONAL.name}
                     width="256" height="256"
-                    className="relative w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="relative w-full h-full object-cover object-[center_80%] transition-transform duration-700 group-hover:scale-105"
                     loading="eager" decoding="async" fetchPriority="high"
                     onError={(e) => { e.currentTarget.style.visibility = 'hidden' }}
                   />
