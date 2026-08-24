@@ -120,186 +120,76 @@ function HangarModel({ onSelect }: Clickable) {
   )
 }
 
-/* ════════════ Air Bagan — smooth, true-to-life looping flight ════════════ */
-// A full loop = idle on the ground (IDLE_SECONDS), then one continuous flight
-// (FLIGHT_SECONDS) along a CENTRIPETAL Catmull-Rom path (no overshoot/cusps):
-// takeoff roll → climb over the hangar → wide high right-hand turn → glide-slope
-// approach → gentle flare → smooth stop back at the start. Attitude (pitch/roll)
-// is damped so the airframe eases into every change like a real aircraft.
-const IDLE_SECONDS = 10
-const FLIGHT_SECONDS = 34
-const FLIGHT_CYCLE = IDLE_SECONDS + FLIGHT_SECONDS
-const MAX_BANK = 0.55       // ~31° max wing roll in a turn
-const BANK_GAIN = 7         // heading-change → target roll
-const BANK_DAMP = 1.8       // how fast roll eases in/out (lower = smoother/laggier)
-const ATT_DAMP = 4.5        // attitude (heading+pitch) slerp responsiveness
-
-// Corrects the model so its nose aligns with the group's -Z (its travel dir).
-// If the nose ends up pointing the wrong way, adjust this Y rotation by ±Math.PI/2.
-const NOSE_FIX: [number, number, number] = [0, Math.PI, 0]
-
-// Flight plan (world space). Runway heading is -Z at x≈15: it departs -Z and lands
-// -Z, so takeoff and touchdown attitudes match (seamless loop). The circuit climbs
-// LEFT over the hangar roof (x-24,z-34), sweeps a wide RIGHT-hand turn high in the
-// sky (y≈48–56, well above the camera at [0,2,8] and the memorial at z≈3), then
-// rejoins final approach lined up on x≈15.
-const FLIGHT_POINTS: [number, number, number][] = [
-  [15, 0, -30],     // P0 — park / touchdown (ground)
-  [15, 0, -45],     // takeoff roll — straight, building speed (still on ground)
-  [12, 7, -58],     // rotate & initial climb, easing left
-  [-2, 20, -66],    // climbing, turning left
-  [-24, 33, -52],   // HIGH over the back of the YAECO hangar roof
-  [-44, 44, -22],   // climb-out left, entering the big right turn
-  [-50, 50, 14],    // wide right sweep — high, left/front
-  [-26, 55, 40],    // high, front-left
-  [10, 56, 44],     // across the front, very high (far above camera)
-  [44, 53, 30],     // high, front-right
-  [58, 47, -6],     // right side of the circuit
-  [50, 37, -34],    // descending on the right, curving toward approach
-  [30, 24, -30],    // turning onto final, lining up to x≈15
-  [15, 14, -16],    // established on final approach (heading -Z)
-  [15, 6, -22],     // steady glide slope
-  [15, 1.6, -27],   // gentle flare
-  [15, 0, -30],     // smooth touchdown & roll to a stop at P0
-]
-
-// Perlin smootherstep: zero velocity AND zero acceleration at both ends, so the
-// takeoff accelerates and the landing decelerates with no jerk (C2 continuity).
-const smootherstep = (t: number): number => t * t * t * (t * (t * 6 - 15) + 10)
-
-/** Blinking nav/beacon lights so the aircraft reads as alive. Children of the
- *  aircraft group, so they bank with it. Positions scale with the model size. */
-function NavLights({ size }: { size: number }) {
-  const span = size * 0.42   // wing half-span (X)
-  const wingY = size * 0.12
-  const tailZ = size * 0.4   // tail is behind → +Z (forward is -Z)
-  const strobe = useRef<THREE.MeshStandardMaterial>(null)
-  const beacon = useRef<THREE.MeshStandardMaterial>(null)
-
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime
-    // white tail strobe: a quick double-flash each ~1.3 s
-    const p = t % 1.3
-    const on = p < 0.05 || (p > 0.15 && p < 0.2)
-    if (strobe.current) strobe.current.emissiveIntensity = on ? 12 : 0
-    // red anti-collision beacon: slow smooth pulse
-    if (beacon.current) beacon.current.emissiveIntensity = 2 + 4 * (0.5 + 0.5 * Math.sin(t * 4))
-  })
-
+// ── Air Bagan aircraft — a static, parked aircraft holding the RIGHT background
+// and balancing the hangar on the left. Clickable to open the memorial card,
+// exactly like the hangar. (The flight animation was intentionally removed to
+// keep the scene peaceful and still.) ──
+function AirBaganModel({ onSelect }: Clickable) {
+  const { object, scale, offset } = useNormalizedModel(AIRBAGAN, AIRBAGAN_SIZE, true)
   return (
-    <group>
-      {/* port wingtip = red, starboard wingtip = green (steady) */}
-      <mesh position={[-span, wingY, 0]}>
-        <sphereGeometry args={[0.35, 8, 8]} />
-        <meshStandardMaterial color="#ff2a2a" emissive="#ff2a2a" emissiveIntensity={4} toneMapped={false} />
-      </mesh>
-      <mesh position={[span, wingY, 0]}>
-        <sphereGeometry args={[0.35, 8, 8]} />
-        <meshStandardMaterial color="#22ff55" emissive="#22ff55" emissiveIntensity={4} toneMapped={false} />
-      </mesh>
-      {/* white tail strobe */}
-      <mesh position={[0, wingY + 1.2, tailZ]}>
-        <sphereGeometry args={[0.3, 8, 8]} />
-        <meshStandardMaterial ref={strobe} color="#ffffff" emissive="#ffffff" emissiveIntensity={0} toneMapped={false} />
-      </mesh>
-      {/* red anti-collision beacon on top */}
-      <mesh position={[0, size * 0.22, -tailZ * 0.1]}>
-        <sphereGeometry args={[0.28, 8, 8]} />
-        <meshStandardMaterial ref={beacon} color="#ff0000" emissive="#ff0000" emissiveIntensity={3} toneMapped={false} />
-      </mesh>
+    <group position={[15, 0, -30]} rotation={[0, -Math.PI * 0.16, 0]}>
+      <primitive object={object} scale={scale} position={offset}
+        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
+        onPointerOver={overCursor} onPointerOut={outCursor} />
     </group>
   )
 }
 
-// ── Air Bagan aircraft — a continuous, respectful background flight. ──
-function AnimatedAirBagan({ onSelect }: Clickable) {
-  const { object, scale, offset } = useNormalizedModel(AIRBAGAN, AIRBAGAN_SIZE, true)
-  const group = useRef<THREE.Group>(null)
-  const bankRef = useRef(0)
+/* ════════════ Falling stars — quiet sorrow far behind the sky ════════════ */
+// A slow, gentle rain of distant stars drifting down across the far backdrop,
+// well behind everything (z ≪ 0, high up). Points fall softly and wrap back to
+// the top, looping forever. Kept subtle so it reads as mournful, not busy.
+const STAR_COUNT = IS_MOBILE ? 70 : 130
 
-  // Don't cast a shadow: with BakeShadows the map is frozen, so a moving caster
-  // would otherwise leave a stale shadow blob on the ground.
-  useMemo(() => {
-    object.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh) m.castShadow = false })
-  }, [object])
+function FallingStars() {
+  const ref = useRef<THREE.Points>(null)
 
-  // Build the smooth centripetal flight path + the parked pose once.
-  const { curve, startPos, parkQuat } = useMemo(() => {
-    const pts = FLIGHT_POINTS.map(([x, y, z]) => new THREE.Vector3(x, y, z))
-    const c = new THREE.CatmullRomCurve3(pts, false, 'centripetal')
-    const start = pts[0].clone()
-    const t0 = c.getTangentAt(0, new THREE.Vector3()).normalize()
-    const d = new THREE.Object3D()
-    d.position.copy(start)
-    d.lookAt(start.clone().add(t0)) // parked level, aligned to takeoff heading
-    return { curve: c, startPos: start, parkQuat: d.quaternion.clone() }
+  const { positions, speeds } = useMemo(() => {
+    const positions = new Float32Array(STAR_COUNT * 3)
+    const speeds = new Float32Array(STAR_COUNT)
+    for (let i = 0; i < STAR_COUNT; i++) {
+      positions[i * 3 + 0] = (Math.random() - 0.5) * 220 // wide x spread
+      positions[i * 3 + 1] = Math.random() * 90 + 6      // height
+      positions[i * 3 + 2] = -70 - Math.random() * 90    // far behind the scene
+      speeds[i] = 1.5 + Math.random() * 4                // gentle fall speed
+    }
+    return { positions, speeds }
   }, [])
 
-  // Scratch objects reused each frame (no per-frame allocation).
-  const dummy = useMemo(() => new THREE.Object3D(), [])
-  const pos = useMemo(() => new THREE.Vector3(), [])
-  const tan = useMemo(() => new THREE.Vector3(), [])
-  const tanAhead = useMemo(() => new THREE.Vector3(), [])
-  const ahead = useMemo(() => new THREE.Vector3(), [])
-  const vibQ = useMemo(() => new THREE.Quaternion(), [])
-  const vibE = useMemo(() => new THREE.Euler(), [])
-
-  useFrame(({ clock }, delta) => {
-    const g = group.current
-    if (!g) return
-    const dt = Math.min(delta, 0.05) // clamp so a refocus spike can't jolt the sim
-    const time = clock.elapsedTime
-    const tCycle = time % FLIGHT_CYCLE
-
-    // ── Idle: parked, with a gentle engine "bob" + micro-vibration ──
-    if (tCycle < IDLE_SECONDS) {
-      const bob = (0.5 + 0.5 * Math.sin(time * 9)) * 0.05
-      g.position.set(startPos.x, startPos.y + bob, startPos.z)
-      vibE.set(Math.sin(time * 13) * 0.004, 0, Math.sin(time * 17) * 0.006)
-      vibQ.setFromEuler(vibE)
-      g.quaternion.copy(parkQuat).multiply(vibQ)
-      bankRef.current = 0
-      return
+  useFrame((_, delta) => {
+    const pts = ref.current
+    if (!pts) return
+    const dt = Math.min(delta, 0.05)
+    const arr = pts.geometry.attributes.position.array as Float32Array
+    for (let i = 0; i < STAR_COUNT; i++) {
+      arr[i * 3 + 1] -= speeds[i] * dt          // fall
+      arr[i * 3 + 0] -= speeds[i] * dt * 0.25   // slight diagonal drift
+      if (arr[i * 3 + 1] < -4) {                // wrap back to the top
+        arr[i * 3 + 1] = 92 + Math.random() * 10
+        arr[i * 3 + 0] = (Math.random() - 0.5) * 220
+        arr[i * 3 + 2] = -70 - Math.random() * 90
+      }
     }
-
-    // ── Flight: smootherstep → accelerate off takeoff, decelerate to touchdown ──
-    const t = THREE.MathUtils.clamp((tCycle - IDLE_SECONDS) / FLIGHT_SECONDS, 0, 1)
-    const u = smootherstep(t)
-
-    curve.getPointAt(u, pos)
-    curve.getTangentAt(u, tan).normalize()
-
-    // Heading + natural pitch: look along the tangent (climb → nose up, etc.).
-    dummy.position.copy(pos)
-    ahead.copy(pos).add(tan)
-    dummy.lookAt(ahead)
-
-    // Target bank from the rate of heading change, then damp it so the roll eases
-    // smoothly into and out of the turn (an aircraft can't snap-roll).
-    curve.getTangentAt(THREE.MathUtils.clamp(u + 0.008, 0, 1), tanAhead).normalize()
-    let dHead = Math.atan2(tanAhead.x, tanAhead.z) - Math.atan2(tan.x, tan.z)
-    dHead = Math.atan2(Math.sin(dHead), Math.cos(dHead)) // wrap to [-π, π]
-    const targetBank = THREE.MathUtils.clamp(-dHead * BANK_GAIN, -MAX_BANK, MAX_BANK)
-    bankRef.current = THREE.MathUtils.damp(bankRef.current, targetBank, BANK_DAMP, dt)
-    dummy.rotateZ(bankRef.current)
-
-    // Position rides the (already smooth) path exactly; attitude is slerp-damped
-    // toward the target so pitch/heading/roll transitions feel aerodynamic.
-    g.position.copy(pos)
-    g.quaternion.slerp(dummy.quaternion, 1 - Math.exp(-ATT_DAMP * dt))
+    pts.geometry.attributes.position.needsUpdate = true
   })
 
   return (
-    <group ref={group}>
-      {/* inner group corrects the model's forward axis to the group's -Z */}
-      <group rotation={NOSE_FIX}>
-        <primitive object={object} scale={scale} position={offset}
-          onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
-          onPointerOver={overCursor} onPointerOut={outCursor} />
-      </group>
-      {/* blinking nav / beacon lights (bank with the aircraft) */}
-      <NavLights size={AIRBAGAN_SIZE} />
-    </group>
+    <points ref={ref} frustumCulled={false}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.7}
+        sizeAttenuation
+        color="#dfe8ff"
+        transparent
+        opacity={0.85}
+        depthWrite={false}
+        fog={false}
+        blending={THREE.AdditiveBlending}
+        toneMapped={false}
+      />
+    </points>
   )
 }
 
@@ -526,6 +416,9 @@ export default function RemembranceScene({
       {/* Magical floating fireflies — visible on both mobile and desktop */}
       <Sparkles count={150} scale={20} size={3} speed={0.4} opacity={0.6} color="#ffb77a" position={[0, 2, 0]} />
 
+      {/* Quiet falling stars far behind the sky — a note of sorrow */}
+      <FallingStars />
+
       {/* Dark ground so shadows have a place to land */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[100, 100]} />
@@ -536,7 +429,7 @@ export default function RemembranceScene({
       <ModelBoundary>
         <Suspense fallback={<LoadingLabel />}>
           <HangarModel onSelect={onMemorialClick} />
-          <AnimatedAirBagan onSelect={onMemorialClick} />
+          <AirBaganModel onSelect={onMemorialClick} />
           <GraveModel onSelect={onMemorialClick} />
           <GrandpaModel onSelect={onStatueClick} />
           <GardenModel onSelect={onMemorialClick} />
