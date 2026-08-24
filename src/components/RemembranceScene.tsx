@@ -13,13 +13,18 @@ const BASE = import.meta.env.BASE_URL || '/'
 const u = (f: string): string => `${BASE}${f}`
 
 const GARDEN = u('garden.glb')
-const AIRBUS = u('airbus.glb')
 const GRAVE = u('grave.glb')
 const GRANDPA = u('grandpa_statue.glb')   // Draco-compressed statue of Grandpa U Hlaing Bwa
 
+// Background architecture — served directly from Cloudinary (full URLs, so they
+// are NOT passed through the BASE_URL helper). The YAECO hangar anchors the left
+// of the composition; the Air Bagan aircraft holds the right.
+const HANGAR = 'https://res.cloudinary.com/dhlhzmmtt/image/upload/v1787587801/yaeco_hangar_bvoch3.glb'
+const AIRBAGAN = 'https://res.cloudinary.com/dhlhzmmtt/image/upload/v1787587806/air_bagan_aircraft_clv3xw.glb'
+
 // The `true` flag turns on Draco + Meshopt decoding (drei wires up DRACOLoader
 // with the gstatic decoder automatically), so the optimized .glb files load fine.
-;[GARDEN, AIRBUS, GRAVE, GRANDPA].forEach((url) => useGLTF.preload(url, true))
+;[GARDEN, GRAVE, GRANDPA, HANGAR, AIRBAGAN].forEach((url) => useGLTF.preload(url, true))
 
 const IS_MOBILE = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
 
@@ -27,7 +32,8 @@ const IS_MOBILE = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|
 // garden.glb is NOT a ground plane — it is a memorial stone / urn monument, so it
 // is sized human-scale, and a real floor is added below for shadows.
 const GARDEN_STONE_SIZE = 2.5   // garden.glb = a memorial stone, human height
-const AIRBUS_SIZE = 35          // a full-sized, majestic aircraft in the distance
+const HANGAR_SIZE = 36          // YAECO hangar — a massive backdrop anchoring the left
+const AIRBAGAN_SIZE = 30        // Air Bagan aircraft — balances the hangar on the right
 const GRAVE_SIZE = 1.8          // a human-readable headstone
 const GRANDPA_SIZE = 2.0        // a life-scale memorial statue beside the tombstone
 
@@ -99,11 +105,28 @@ function GardenModel({ onSelect }: Clickable) {
   )
 }
 
-// ── The Airbus — full-sized, resting peacefully on the ground in the background ──
-function AirbusModel({ onSelect }: Clickable) {
-  const { object, scale, offset } = useNormalizedModel(AIRBUS, AIRBUS_SIZE, true)
+// ── YAECO hangar — the heavier mass, anchoring the LEFT background. Pushed far
+// out and back, turned to a 3/4 diagonal so we read its depth and volume (never
+// flat-on), with its opening angled back toward the memorial at centre. ──
+function HangarModel({ onSelect }: Clickable) {
+  const { object, scale, offset } = useNormalizedModel(HANGAR, HANGAR_SIZE, true)
   return (
-    <group position={[0, 0, -25]} rotation={[0, Math.PI * 0.12, 0]}>
+    <group position={[-24, 0, -34]} rotation={[0, Math.PI * 0.22, 0]}>
+      <primitive object={object} scale={scale} position={offset}
+        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
+        onPointerOver={overCursor} onPointerOut={outCursor} />
+    </group>
+  )
+}
+
+// ── Air Bagan aircraft — occupies the RIGHT background where the old airbus was
+// parked. A touch more forward and inboard than the hangar, nose angled toward
+// centre, so its lighter mass counterbalances the hangar's heavier volume and
+// the pair frames the foreground without crowding it. ──
+function AirBaganModel({ onSelect }: Clickable) {
+  const { object, scale, offset } = useNormalizedModel(AIRBAGAN, AIRBAGAN_SIZE, true)
+  return (
+    <group position={[15, 0, -30]} rotation={[0, -Math.PI * 0.16, 0]}>
       <primitive object={object} scale={scale} position={offset}
         onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
         onPointerOver={overCursor} onPointerOut={outCursor} />
@@ -342,7 +365,8 @@ export default function RemembranceScene({
       {/* The composition — own Suspense + error boundary so a slow/bad .glb never blanks the page */}
       <ModelBoundary>
         <Suspense fallback={<LoadingLabel />}>
-          <AirbusModel onSelect={onMemorialClick} />
+          <HangarModel onSelect={onMemorialClick} />
+          <AirBaganModel onSelect={onMemorialClick} />
           <GraveModel onSelect={onMemorialClick} />
           <GrandpaModel onSelect={onStatueClick} />
           <GardenModel onSelect={onMemorialClick} />
