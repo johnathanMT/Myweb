@@ -126,15 +126,14 @@ function GraveModel({ onSelect }: Clickable) {
   )
 }
 
-// ── Grandpa U Hlaing Bwa — a memorial statue standing beside the Garden (the
-// flower pedestal / urn at x=+2), so the foreground doesn't crowd the tombstone.
-// It stands just to the garden's right and turns back toward the centre & grave,
-// as if watching over them. Its hover caption is distinct from the grave's. ──
+// ── Grandpa U Hlaing Bwa — a memorial statue standing centred between the grave
+// (x=-2) and the garden urn (x=+2), i.e. at x=0, facing straight toward the
+// camera/front view. Its hover caption is distinct from the grave's. ──
 function GrandpaModel({ onSelect }: Clickable) {
   const { object, scale, offset } = useNormalizedModel(GRANDPA, GRANDPA_SIZE, true)
   const [hovered, setHovered] = useState(false)
   return (
-    <group position={[4.2, 0, 3.4]} rotation={[0, -Math.PI * 0.32, 0]}>
+    <group position={[0, 0, 3]} rotation={[0, 0, 0]}>
       <primitive object={object} scale={scale} position={offset}
         onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
         onPointerOver={(e: ThreeEvent<PointerEvent>) => { overCursor(e); setHovered(true) }}
@@ -222,16 +221,28 @@ function DayNightCycle({
   hemisphere,
   directional,
   sky,
+  paused,
 }: {
   ambient: RefObject<THREE.AmbientLight | null>
   hemisphere: RefObject<THREE.HemisphereLight | null>
   directional: RefObject<THREE.DirectionalLight | null>
   sky: RefObject<SkyImpl | null>
+  paused: boolean
 }) {
   const { scene } = useThree()
   const lerp = THREE.MathUtils.lerp
-  useFrame(({ clock }) => {
-    const day = 0.5 + 0.5 * Math.sin((clock.elapsedTime / CYCLE_SECONDS) * Math.PI * 2 + Math.PI / 2)
+  const phase = useRef(0)   // cycle time; advances only while running, frozen when paused
+  const dayVal = useRef(1)  // eased day factor (0 night → 1 day); opens in daylight
+  useFrame((_, delta) => {
+    const dt = Math.min(delta, 0.1) // clamp so a tab-refocus spike can't jump the cycle
+    if (!paused) phase.current += dt * ((Math.PI * 2) / CYCLE_SECONDS)
+
+    // Natural cycle value; when a card is open we hold at full day (1) and freeze
+    // `phase`, so on close it eases back to exactly where the cycle left off.
+    const cycleDay = 0.5 + 0.5 * Math.sin(phase.current + Math.PI / 2)
+    const target = paused ? 1 : cycleDay
+    dayVal.current = THREE.MathUtils.damp(dayVal.current, target, 1.4, dt)
+    const day = dayVal.current
 
     if (ambient.current) {
       ambient.current.intensity = lerp(0.28, 0.95, day)
@@ -314,8 +325,10 @@ export default function RemembranceScene({
         <orthographicCamera attach="shadow-camera" args={[-40, 40, 40, -40, 0.1, 120]} />
       </directionalLight>
 
-      {/* Smooth automatic day ⇄ night transition (candles keep their warm glow). */}
-      <DayNightCycle ambient={ambientRef} hemisphere={hemiRef} directional={dirRef} sky={skyRef} />
+      {/* Smooth automatic day ⇄ night transition (candles keep their warm glow).
+          `paused={focused}` → holds bright daytime while a tribute card is open,
+          then resumes the cycle smoothly once it closes. */}
+      <DayNightCycle ambient={ambientRef} hemisphere={hemiRef} directional={dirRef} sky={skyRef} paused={focused} />
 
       {/* Magical floating fireflies — visible on both mobile and desktop */}
       <Sparkles count={150} scale={20} size={3} speed={0.4} opacity={0.6} color="#ffb77a" position={[0, 2, 0]} />
