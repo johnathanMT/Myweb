@@ -50,7 +50,10 @@ const LANTERN_POSITIONS: [number, number, number][] = [
 
 // Camera framing presets: [posX, posY, posZ, targetX, targetY, targetZ].
 const OVERVIEW: [number, number, number, number, number, number] = [0, 2, 8, 0, 0.9, 3]   // eye-level, on the memorial
-const AIRBUS_GAZE: [number, number, number, number, number, number] = [0, 4, -6, 0, 4, -25]
+// When a card opens: lift up and pull back to a wide establishing shot that frames
+// the whole majestic backdrop — YAECO hangar (left) + Air Bagan aircraft (right) —
+// while keeping the centred memorial respectfully in the lower foreground.
+const SCENE_GAZE: [number, number, number, number, number, number] = [0, 7, 16, 0, 2.5, -13]
 
 /** Loads a GLTF (Draco/Meshopt-aware), enables shadows, and normalises it to `targetSize`. */
 function useNormalizedModel(url: string, targetSize: number, groundAlign = true) {
@@ -294,7 +297,8 @@ function DayNightCycle({
  * RemembranceScene — the serene memorial (everything inside <Canvas>) with an
  * automatic day ⇄ night cycle. Clicking the Airbus, grave, or memorial stone
  * calls onMemorialClick, the statue calls onStatueClick; when `focused` the
- * camera glides to gaze at the Airbus, else the overview. Wrapped in
+ * camera glides to a wide SCENE_GAZE framing the whole backdrop, else the
+ * eye-level OVERVIEW. Wrapped in
  * PerformanceMonitor + AdaptiveDpr so lower-end phones stay smooth.
  */
 export default function RemembranceScene({
@@ -317,7 +321,7 @@ export default function RemembranceScene({
   useEffect(() => {
     const c = controls.current
     if (!c) return
-    const [px, py, pz, tx, ty, tz] = focused ? AIRBUS_GAZE : OVERVIEW
+    const [px, py, pz, tx, ty, tz] = focused ? SCENE_GAZE : OVERVIEW
     c.setLookAt(px, py, pz, tx, ty, tz, true)
   }, [focused])
 
