@@ -120,17 +120,113 @@ function HangarModel({ onSelect }: Clickable) {
   )
 }
 
+/* ════════════ Air Bagan — realistic looping flight cycle ════════════ */
+// A full loop = idle on the ground (IDLE_SECONDS), then a single eased pass along
+// a Catmull-Rom flight path (FLIGHT_SECONDS): takeoff & climb → a majestic high
+// circle well above/behind the scene → descent & smooth touchdown back at start.
+const IDLE_SECONDS = 10
+const FLIGHT_SECONDS = 30
+const FLIGHT_CYCLE = IDLE_SECONDS + FLIGHT_SECONDS
+const MAX_BANK = 0.5   // ~28° max wing roll into a turn
+const BANK_GAIN = 6    // how sharply heading-change maps to roll
+
+// Corrects the model so its nose aligns with the group's -Z (its travel dir).
+// If the nose ends up pointing the wrong way, adjust this Y rotation by ±Math.PI/2.
+const NOSE_FIX: [number, number, number] = [0, Math.PI, 0]
+
+// Flight waypoints (world space). The circle stays high (y≈40–55) and to the
+// back/sides so the aircraft never passes close over the camera ([0,2,8]) or the
+// memorial (centre, z≈3). First and last points are the shared park/touchdown spot.
+const FLIGHT_POINTS: [number, number, number][] = [
+  [15, 0, -30],    // P0 — parked / touchdown (ground)
+  [22, 1, -42],    // takeoff roll + first lift
+  [27, 11, -56],   // climbing out
+  [20, 30, -74],   // climbing into the back sky
+  [-10, 46, -86],  // enter the circle (far back)
+  [-56, 51, -36],  // circle — left
+  [-34, 54, 16],   // high overhead, front-left
+  [8, 55, 30],     // high in front (far above camera)
+  [52, 51, -8],    // circle — right
+  [40, 40, -66],   // begin descent (back-right)
+  [32, 20, -66],   // descending approach
+  [24, 6, -48],    // short final / flare
+  [15, 0, -30],    // touchdown, back at P0
+]
+
+const easeInOutSine = (t: number): number => -(Math.cos(Math.PI * t) - 1) / 2
+
 // ── Air Bagan aircraft — occupies the RIGHT background where the old airbus was
-// parked. A touch more forward and inboard than the hangar, nose angled toward
-// centre, so its lighter mass counterbalances the hangar's heavier volume and
-// the pair frames the foreground without crowding it. ──
-function AirBaganModel({ onSelect }: Clickable) {
+// parked, now flying a continuous, respectful background circuit. ──
+function AnimatedAirBagan({ onSelect }: Clickable) {
   const { object, scale, offset } = useNormalizedModel(AIRBAGAN, AIRBAGAN_SIZE, true)
+  const group = useRef<THREE.Group>(null)
+
+  // Don't cast a shadow: with BakeShadows the map is frozen, so a moving caster
+  // would otherwise leave a stale shadow blob on the ground.
+  useMemo(() => {
+    object.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh) m.castShadow = false })
+  }, [object])
+
+  // Build the flight path + the parked pose once.
+  const { curve, startPos, parkQuat } = useMemo(() => {
+    const pts = FLIGHT_POINTS.map(([x, y, z]) => new THREE.Vector3(x, y, z))
+    const c = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5)
+    const start = pts[0].clone()
+    const t0 = c.getTangentAt(0, new THREE.Vector3()).normalize()
+    const dummy = new THREE.Object3D()
+    dummy.position.copy(start)
+    dummy.lookAt(start.clone().add(t0)) // park aligned to takeoff heading → no snap
+    return { curve: c, startPos: start, parkQuat: dummy.quaternion.clone() }
+  }, [])
+
+  // Scratch objects reused each frame (no per-frame allocation).
+  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const pos = useMemo(() => new THREE.Vector3(), [])
+  const tan = useMemo(() => new THREE.Vector3(), [])
+  const tanAhead = useMemo(() => new THREE.Vector3(), [])
+
+  useFrame(({ clock }) => {
+    const g = group.current
+    if (!g) return
+    const tCycle = clock.elapsedTime % FLIGHT_CYCLE
+
+    // ── Idle: rest on the ground in the parked pose ──
+    if (tCycle < IDLE_SECONDS) {
+      g.position.copy(startPos)
+      g.quaternion.copy(parkQuat)
+      return
+    }
+
+    // ── Flight: eased 0→1 so it accelerates off takeoff and decelerates to land ──
+    const t = THREE.MathUtils.clamp((tCycle - IDLE_SECONDS) / FLIGHT_SECONDS, 0, 1)
+    const u = easeInOutSine(t)
+
+    curve.getPointAt(u, pos)
+    curve.getTangentAt(u, tan).normalize()
+
+    // Heading: face along the tangent — this alone gives natural climb/dive pitch.
+    dummy.position.copy(pos)
+    dummy.lookAt(pos.clone().add(tan))
+
+    // Bank (roll) into the turn, proportional to the rate of heading change.
+    curve.getTangentAt(THREE.MathUtils.clamp(u + 0.01, 0, 1), tanAhead).normalize()
+    let dHead = Math.atan2(tanAhead.x, tanAhead.z) - Math.atan2(tan.x, tan.z)
+    dHead = Math.atan2(Math.sin(dHead), Math.cos(dHead)) // wrap to [-π, π]
+    const bank = THREE.MathUtils.clamp(-dHead * BANK_GAIN, -MAX_BANK, MAX_BANK)
+    dummy.rotateZ(bank)
+
+    g.position.copy(pos)
+    g.quaternion.copy(dummy.quaternion)
+  })
+
   return (
-    <group position={[15, 0, -30]} rotation={[0, -Math.PI * 0.16, 0]}>
-      <primitive object={object} scale={scale} position={offset}
-        onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
-        onPointerOver={overCursor} onPointerOut={outCursor} />
+    <group ref={group}>
+      {/* inner group corrects the model's forward axis to the group's -Z */}
+      <group rotation={NOSE_FIX}>
+        <primitive object={object} scale={scale} position={offset}
+          onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
+          onPointerOver={overCursor} onPointerOut={outCursor} />
+      </group>
     </group>
   )
 }
@@ -368,7 +464,7 @@ export default function RemembranceScene({
       <ModelBoundary>
         <Suspense fallback={<LoadingLabel />}>
           <HangarModel onSelect={onMemorialClick} />
-          <AirBaganModel onSelect={onMemorialClick} />
+          <AnimatedAirBagan onSelect={onMemorialClick} />
           <GraveModel onSelect={onMemorialClick} />
           <GrandpaModel onSelect={onStatueClick} />
           <GardenModel onSelect={onMemorialClick} />
