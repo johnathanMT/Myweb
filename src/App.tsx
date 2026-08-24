@@ -18,6 +18,7 @@ import SeasonalGallery  from './components/SeasonalGallery'
 import TravelChronicles from './components/TravelChronicles'
 import Exploring        from './components/Exploring'
 import AILineBot        from './components/AILineBot'      // "Talk to my AI agent" promo
+import DiscoveryPortal  from './components/DiscoveryPortal' // octagonal portal → myothantnaing.com
 import Footer           from './components/MegaFooter'   // SaaS-style mega footer
 import BootScreen       from './components/BootScreen'      // "System Booting…" loader
 import HudFrame         from './components/HudFrame'        // HUD corner overlay
@@ -105,6 +106,7 @@ export default function App() {
         <TravelChronicles lang={lang} setLang={setLang} />
         <Exploring />
         <AILineBot        lang={lang} />
+        <DiscoveryPortal />
       </main>
       <div className="relative z-10"><Footer lang={lang} /></div>
 

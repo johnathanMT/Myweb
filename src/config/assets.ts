@@ -22,9 +22,11 @@
 //  never hard-code an image path again.
 // ============================================================================
 
-// —— 1) BUNDLED imports (hashed + domain-proof) ——————————————————————————————
-import profile from '../assets/images/profile.jpg'
-import profileWebp from '../assets/images/profile.webp' // lighter sibling (browsers pick this first)
+// —— 1) REMOTE profile (Cloudinary — swapped in place of the bundled asset) ————
+// Was a bundled src/assets import; now served from Cloudinary. To localise again,
+// drop the file in src/assets/images/, `import` it, and swap this value back.
+const profile = 'https://res.cloudinary.com/dhlhzmmtt/image/upload/v1787551848/mtn_suit_o1jmma.jpg'
+const profileWebp = '' // no webp sibling for the remote image → <picture> falls back to `profile`
 
 // —— 2) BUNDLED imports ——————————————————————————————————————————————
 import tokyo from '../assets/images/tokyo_night.jpg' // For Travel Chronic Section.
