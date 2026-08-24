@@ -1,61 +1,6 @@
-import { motion, type MotionProps, type Variants } from 'framer-motion'
+import { motion, type MotionProps } from 'framer-motion'
 import { ArrowRight, Mail, ArrowDown } from 'lucide-react'
 import { PERSONAL, SOCIAL } from '../data/content'
-
-// ── Heart Sutra cascade ──────────────────────────────────────────────────────
-// The chant "摩訶般若波羅蜜多" (Maka Hannya Haramita) falls vertically as a mystical
-// backdrop. Each character fades in, drifts down, and fades out; staggerChildren
-// offsets each one so the column cascades top→bottom, looping forever.
-const SUTRA = '摩訶般若波羅蜜多'
-const SUTRA_COLORS = ['#bf953f', '#e0e0e0', '#6b0f1a'] // gold · silver · dark crimson
-const MINCHO =
-  '"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP","Songti SC","Shippori Mincho",serif'
-
-const columnVariants: Variants = {
-  // Parent only orchestrates the cascade; each child loops on its own timeline.
-  animate: { transition: { staggerChildren: 0.28 } },
-}
-const charVariants: Variants = {
-  initial: { opacity: 0, y: 0 },
-  animate: {
-    opacity: [0, 1, 1, 0],
-    y: [0, 12, 22, 36],
-    transition: {
-      duration: 3.4,
-      times: [0, 0.25, 0.7, 1],
-      ease: 'easeInOut',
-      repeat: Infinity,
-      repeatType: 'loop',
-    },
-  },
-}
-
-/** One vertical, infinitely-cascading column of the sutra. `delay` phases the two
- *  columns so left and right don't pulse in lockstep. */
-function SutraColumn({ className = '', delay = 0 }: { className?: string; delay?: number }) {
-  return (
-    <motion.div
-      aria-hidden
-      variants={columnVariants}
-      initial="initial"
-      animate="animate"
-      transition={{ delayChildren: delay }}
-      className={`pointer-events-none absolute z-10 select-none ${className}`}
-      style={{ writingMode: 'vertical-rl', fontFamily: MINCHO }}
-    >
-      {SUTRA.split('').map((ch, i) => (
-        <motion.span
-          key={i}
-          variants={charVariants}
-          className="block text-[clamp(1.4rem,3vw,2.75rem)] font-semibold leading-[1.5]"
-          style={{ color: SUTRA_COLORS[i % SUTRA_COLORS.length], textShadow: '0 2px 12px rgba(0,0,0,0.65)' }}
-        >
-          {ch}
-        </motion.span>
-      ))}
-    </motion.div>
-  )
-}
 
 /**
  * Gateway — clean, minimalist hero.
@@ -81,11 +26,7 @@ export default function Gateway() {
       <div className="hero-gradient pointer-events-none absolute inset-0 -z-10" aria-hidden />
       <div className="hero-grid pointer-events-none absolute inset-0 -z-10" aria-hidden />
 
-      {/* Mystical Heart Sutra cascade — floats over the backdrop, behind the title. */}
-      <SutraColumn className="left-4 top-1/2 -translate-y-1/2 sm:left-10 lg:left-24" delay={0} />
-      <SutraColumn className="right-4 top-1/2 -translate-y-1/2 sm:right-10 lg:right-24" delay={1.4} />
-
-      <div className="relative z-20 mx-auto flex w-full max-w-3xl flex-col items-center px-6 text-center">
+      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center px-6 text-center">
         {/* availability pill */}
         <motion.span {...fade(0)}
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-jade/30 bg-jade/10 px-4 py-1.5 text-xs font-medium tracking-wide text-jade">
