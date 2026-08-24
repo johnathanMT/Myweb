@@ -1,10 +1,11 @@
-import { Suspense, useEffect, useMemo, useRef, useState, Component, type ReactNode } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState, Component, type ReactNode, type RefObject } from 'react'
 import * as THREE from 'three'
-import { useFrame, type ThreeEvent } from '@react-three/fiber'
+import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import {
   useGLTF, Sky, Sparkles, CameraControls, ContactShadows, Html,
   PerformanceMonitor, AdaptiveDpr, BakeShadows,
 } from '@react-three/drei'
+import type { Sky as SkyImpl } from 'three-stdlib'
 
 // Vite serves /public at BASE_URL (base = "/Myweb/"), so every model URL MUST be
 // prefixed — otherwise the .glb files 404 in production (and the scene stays blank).
@@ -125,15 +126,15 @@ function GraveModel({ onSelect }: Clickable) {
   )
 }
 
-// ── Grandpa U Hlaing Bwa — a memorial statue standing just beside the tombstone.
-// The grave sits at x=-2; the statue stands slightly to its left and forward,
-// turned a touch toward the camera so it watches over the grave. Its hover caption
-// is distinct from the grave's. ──
+// ── Grandpa U Hlaing Bwa — a memorial statue standing beside the Garden (the
+// flower pedestal / urn at x=+2), so the foreground doesn't crowd the tombstone.
+// It stands just to the garden's right and turns back toward the centre & grave,
+// as if watching over them. Its hover caption is distinct from the grave's. ──
 function GrandpaModel({ onSelect }: Clickable) {
   const { object, scale, offset } = useNormalizedModel(GRANDPA, GRANDPA_SIZE, true)
   const [hovered, setHovered] = useState(false)
   return (
-    <group position={[-3.7, 0, 3.3]} rotation={[0, Math.PI * 0.08, 0]}>
+    <group position={[4.2, 0, 3.4]} rotation={[0, -Math.PI * 0.32, 0]}>
       <primitive object={object} scale={scale} position={offset}
         onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect() }}
         onPointerOver={(e: ThreeEvent<PointerEvent>) => { overCursor(e); setHovered(true) }}
@@ -202,11 +203,65 @@ function LoadingLabel() {
   )
 }
 
+/* ════════════ Automatic day ⇄ night lighting cycle ════════════ */
+// A full loop takes CYCLE_SECONDS; `day` runs 0 (deep night) → 1 (bright noon),
+// starting at 1 so the scene opens in clear daylight (statue fully visible). Only
+// the sky, ambient/hemisphere/sun lights, and fog are animated — the candle
+// point-lights keep their own warm flicker, so they glow beautifully at night.
+const CYCLE_SECONDS = 60
+
+const DAY_AMBIENT = new THREE.Color('#fff1dd')
+const NIGHT_AMBIENT = new THREE.Color('#ffb77a')
+const DAY_SUN = new THREE.Color('#fff3e0')
+const NIGHT_SUN = new THREE.Color('#ff9e5e')
+const DAY_FOG = new THREE.Color('#cbbfa6')
+const NIGHT_FOG = new THREE.Color('#241a33')
+
+function DayNightCycle({
+  ambient,
+  hemisphere,
+  directional,
+  sky,
+}: {
+  ambient: RefObject<THREE.AmbientLight | null>
+  hemisphere: RefObject<THREE.HemisphereLight | null>
+  directional: RefObject<THREE.DirectionalLight | null>
+  sky: RefObject<SkyImpl | null>
+}) {
+  const { scene } = useThree()
+  const lerp = THREE.MathUtils.lerp
+  useFrame(({ clock }) => {
+    const day = 0.5 + 0.5 * Math.sin((clock.elapsedTime / CYCLE_SECONDS) * Math.PI * 2 + Math.PI / 2)
+
+    if (ambient.current) {
+      ambient.current.intensity = lerp(0.28, 0.95, day)
+      ambient.current.color.lerpColors(NIGHT_AMBIENT, DAY_AMBIENT, day)
+    }
+    if (hemisphere.current) hemisphere.current.intensity = lerp(0.18, 0.6, day)
+    if (directional.current) {
+      directional.current.intensity = lerp(0.3, 1.6, day)
+      directional.current.color.lerpColors(NIGHT_SUN, DAY_SUN, day)
+    }
+    if (scene.fog instanceof THREE.Fog) scene.fog.color.lerpColors(NIGHT_FOG, DAY_FOG, day)
+
+    const s = sky.current
+    if (s) {
+      const u = (s.material as THREE.ShaderMaterial).uniforms
+      if (u?.sunPosition) (u.sunPosition.value as THREE.Vector3).set(0, lerp(-0.28, 0.4, day), -1)
+      if (u?.rayleigh) u.rayleigh.value = lerp(0.5, 2.4, day)
+      if (u?.turbidity) u.turbidity.value = lerp(6, 10, day)
+      if (u?.mieCoefficient) u.mieCoefficient.value = lerp(0.004, 0.02, day)
+    }
+  })
+  return null
+}
+
 /**
- * RemembranceScene — the serene sunset memorial (everything inside <Canvas>).
- * Clicking the Airbus, grave, or memorial stone calls onMemorialClick; when
- * `focused` the camera glides to gaze at the Airbus, else the overview.
- * Wrapped in PerformanceMonitor + AdaptiveDpr so lower-end phones stay smooth.
+ * RemembranceScene — the serene memorial (everything inside <Canvas>) with an
+ * automatic day ⇄ night cycle. Clicking the Airbus, grave, or memorial stone
+ * calls onMemorialClick, the statue calls onStatueClick; when `focused` the
+ * camera glides to gaze at the Airbus, else the overview. Wrapped in
+ * PerformanceMonitor + AdaptiveDpr so lower-end phones stay smooth.
  */
 export default function RemembranceScene({
   onMemorialClick,
@@ -218,6 +273,12 @@ export default function RemembranceScene({
   focused: boolean
 }) {
   const controls = useRef<CameraControls>(null)
+
+  // Lights + sky animated by the day/night cycle.
+  const ambientRef = useRef<THREE.AmbientLight>(null)
+  const hemiRef = useRef<THREE.HemisphereLight>(null)
+  const dirRef = useRef<THREE.DirectionalLight>(null)
+  const skyRef = useRef<SkyImpl>(null)
 
   useEffect(() => {
     const c = controls.current
@@ -233,24 +294,28 @@ export default function RemembranceScene({
 
   return (
     <PerformanceMonitor>
-      {/* Warm, vibrant sunset — sun lifted just above the horizon for a glowing
-          golden-hour backdrop. */}
-      <Sky sunPosition={[0, -0.05, -1]} turbidity={10} rayleigh={1.3} mieCoefficient={0.02} mieDirectionalG={0.9} />
-      <fog attach="fog" args={['#e0966b', 26, 90]} />
+      {/* Sky + lights: initial values are a warm golden hour; the DayNightCycle
+          below drives them smoothly between bright day and serene night. */}
+      <Sky ref={skyRef} sunPosition={[0, 0.35, -1]} turbidity={10} rayleigh={2.4} mieCoefficient={0.02} mieDirectionalG={0.9} />
+      <fog attach="fog" args={['#cbbfa6', 26, 90]} />
 
-      {/* ── Lighting — warm golden dusk ── */}
-      <ambientLight intensity={0.4} color="#ffb77a" />
-      <hemisphereLight args={['#e8b483', '#2e2018', 0.3]} />
+      {/* ── Lighting (animated) ── */}
+      <ambientLight ref={ambientRef} intensity={0.95} color="#fff1dd" />
+      <hemisphereLight ref={hemiRef} args={['#e8b483', '#2e2018', 0.6]} />
       <directionalLight
+        ref={dirRef}
         position={[8, 9, -6]}
-        intensity={0.8}
-        color="#ff9e5e"
+        intensity={1.6}
+        color="#fff3e0"
         castShadow
         shadow-mapSize={IS_MOBILE ? [1024, 1024] : [2048, 2048]}
         shadow-bias={-0.0004}
       >
         <orthographicCamera attach="shadow-camera" args={[-40, 40, 40, -40, 0.1, 120]} />
       </directionalLight>
+
+      {/* Smooth automatic day ⇄ night transition (candles keep their warm glow). */}
+      <DayNightCycle ambient={ambientRef} hemisphere={hemiRef} directional={dirRef} sky={skyRef} />
 
       {/* Magical floating fireflies — visible on both mobile and desktop */}
       <Sparkles count={150} scale={20} size={3} speed={0.4} opacity={0.6} color="#ffb77a" position={[0, 2, 0]} />
