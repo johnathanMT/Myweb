@@ -46,7 +46,7 @@ export default function PageShell({
   return (
     <div
       className="relative min-h-screen overflow-x-hidden text-fg"
-      style={{ background: 'rgb(var(--space, 14 20 17))' }}
+      style={{ background: 'transparent' }}
     >
       <AmbientBackground />
 

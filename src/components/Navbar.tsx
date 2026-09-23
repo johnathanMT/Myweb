@@ -161,10 +161,10 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
           href="/"
           onClick={goHome}
           aria-label="Back to top / Home"
-          className="flex items-center gap-2 font-mono font-semibold text-white hover:text-accent-light transition-colors cursor-pointer"
+          className="flex items-center gap-2 font-mono font-semibold text-[#C5D4E8] hover:text-[#E4EEF8] transition-colors cursor-pointer"
         >
-          <span className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-xs font-groovy text-white">M</span>
-          <span className="hidden sm:inline text-sm font-groovy tracking-wide">{PERSONAL.handle}</span>
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#163A66] text-xs font-groovy text-white shadow-[0_0_16px_rgba(22,58,102,0.65)]">M</span>
+          <span className="hidden sm:inline text-sm font-groovy tracking-wide text-[#9BB6D6]">{PERSONAL.handle}</span>
         </a>
 
         {/* Desktop nav links — now appear at lg (>=1024px) */}
@@ -263,9 +263,9 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
             to="/remembrance"
             aria-label="In Memoriam"
             title="In Memoriam — a 3D remembrance world"
-            className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-200 shadow-sm transition-colors hover:border-amber-300/60 hover:bg-amber-500/20 hover:text-amber-100"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-xs font-semibold text-zinc-200 shadow-sm transition-colors hover:border-white/35 hover:bg-white/10 hover:text-white"
           >
-            <Flame size={14} className="text-amber-300" />
+            <Flame size={14} className="text-zinc-300" />
             <span className="hidden sm:inline">In Memoriam</span>
           </Link>
 
@@ -333,9 +333,9 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
             <Link
               to="/remembrance"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-2.5 rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-2.5 text-sm font-semibold font-groovy tracking-wide text-amber-200 transition-colors hover:border-amber-300/60 hover:bg-amber-500/20 hover:text-amber-100"
+              className="flex items-center gap-2.5 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-semibold font-groovy tracking-wide text-zinc-200 transition-colors hover:border-white/35 hover:bg-white/10 hover:text-white"
             >
-              <Flame size={15} className="text-amber-300" /> In Memoriam
+              <Flame size={15} className="text-zinc-300" /> In Memoriam
             </Link>
           </li>
 

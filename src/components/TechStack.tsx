@@ -140,8 +140,8 @@ export default function TechStack({ lang = 'en' }: TechStackProps) {
   return (
     <section id="stack" ref={ref} className="relative overflow-hidden py-24 text-legible">
       {/* calm gold + maroon ambient glows */}
-      <div className="pointer-events-none absolute -top-10 left-1/4 h-80 w-80 rounded-full bg-accent/8 blur-[150px]" />
-      <div className="pointer-events-none absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-maroon/25 blur-[150px]" />
+      <div className="pointer-events-none absolute -top-10 left-1/4 h-80 w-80 rounded-full blur-[150px]" style={{ background: 'rgb(16 52 110 / 0.45)' }} />
+      <div className="pointer-events-none absolute bottom-0 right-1/4 h-72 w-72 rounded-full blur-[150px]" style={{ background: 'rgb(12 40 90 / 0.4)' }} />
 
       <div className="relative z-10 mx-auto grid max-w-6xl items-start gap-12 px-6 lg:grid-cols-2 lg:gap-16">
         {/* ── LEFT: journey narrative ── */}

@@ -178,7 +178,7 @@ export default function StudyingLibrary() {
     <section
       id="studying"
       className="relative overflow-hidden py-16 sm:py-24"
-      style={{ background: 'radial-gradient(70% 60% at 50% 0%, rgba(40,30,60,0.5), transparent 70%), #0c0a10' }}
+      style={{ background: 'transparent' }}
     >
       <div className="pointer-events-none absolute inset-0"
            style={{ background: 'radial-gradient(120% 90% at 50% 120%, rgba(120,80,40,0.10), transparent 60%)' }} />

@@ -45,7 +45,8 @@ export default function Gateway() {
 
         {/* name */}
         <motion.h1 {...fade(0.1)}
-          className="font-groovy neon-glow text-[clamp(2rem,6.5vw,5rem)] uppercase leading-[1.05] tracking-wide text-fg">
+          className="font-groovy neon-glow text-[clamp(2rem,6.5vw,5rem)] uppercase leading-[1.05] tracking-wide text-[#E4EEF8]"
+          style={{ textShadow: '0 0 28px rgba(30, 70, 130, 0.45)' }}>
           Myo Thant Naing
         </motion.h1>
 

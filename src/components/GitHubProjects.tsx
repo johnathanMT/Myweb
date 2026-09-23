@@ -317,7 +317,7 @@ export default function GitHubProjects() {
     <section
       id="github-projects"
       className="relative overflow-hidden py-16 sm:py-24"
-      style={{ background: 'radial-gradient(70% 55% at 50% 0%, rgba(15,20,28,0.9), transparent 70%), #07090d' }}
+      style={{ background: 'transparent' }}
     >
       {/* Subtle grid backdrop */}
       <div

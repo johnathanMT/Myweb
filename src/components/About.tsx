@@ -37,13 +37,12 @@ export default function About({ lang = 'en' }: AboutProps) {
           Readability comes from .text-legible (inherited dark text-shadow). */}
       <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* ambient glows */}
-      <div className="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl pointer-events-none opacity-20"
-        style={{ background: 'radial-gradient(circle, rgb(var(--accent)), transparent 70%)' }} />
-      <div className="absolute bottom-0 right-1/4 w-[360px] h-[360px] rounded-full blur-3xl pointer-events-none opacity-15"
-        style={{ background: 'radial-gradient(circle, rgb(var(--accent)), transparent 70%)' }} />
-      {/* deep muted crimson accent — subtle psychological depth */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[300px] rounded-full blur-3xl pointer-events-none opacity-[0.08]"
-        style={{ background: 'radial-gradient(ellipse, rgb(var(--maroon)), transparent 70%)' }} />
+      <div className="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl pointer-events-none opacity-40"
+        style={{ background: 'radial-gradient(circle, rgb(16 52 110), transparent 70%)' }} />
+      <div className="absolute bottom-0 right-1/4 w-[360px] h-[360px] rounded-full blur-3xl pointer-events-none opacity-30"
+        style={{ background: 'radial-gradient(circle, rgb(12 40 90), transparent 70%)' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[300px] rounded-full blur-3xl pointer-events-none opacity-25"
+        style={{ background: 'radial-gradient(ellipse, rgb(20 64 128), transparent 70%)' }} />
 
       <div className="section-container relative z-10">
         {/* Header */}
