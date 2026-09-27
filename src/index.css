@@ -2370,10 +2370,227 @@ html[data-theme="light"] .tech-decor {
   color: rgb(var(--mesh) / 0.35);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   AI ROBOT DOCK — floating glass quick-jump bar (AiRobotDock.tsx)
+   ══════════════════════════════════════════════════════════════════ */
+:root {
+  /* room reserved under the footer so the dock never covers content */
+  --dock-space: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+.ai-dock {
+  position: fixed;
+  left: 50%;
+  bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  z-index: 45;
+  transform: translateX(-50%);
+  transition: transform 0.35s cubic-bezier(0.22, 0.8, 0.24, 1), opacity 0.25s ease;
+}
+
+.ai-dock.is-hidden {
+  transform: translate(-50%, calc(100% + 1.5rem));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ai-dock-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem;
+  border-radius: 1.35rem;
+  border: 1px solid rgb(var(--accent) / 0.2);
+  background: linear-gradient(180deg, rgb(var(--surface) / 0.78), rgb(var(--space) / 0.82));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    0 0 0 1px rgb(var(--cyan) / 0.05),
+    0 18px 40px -16px rgb(0 0 0 / 0.8),
+    0 0 36px -12px rgb(var(--accent) / 0.45);
+}
+
+.ai-dock-item {
+  position: relative;
+  display: flex;
+  height: 2.9rem;
+  width: 2.9rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  color: rgb(var(--muted));
+  transition: transform 0.25s cubic-bezier(0.22, 0.8, 0.24, 1), color 0.2s ease, background-color 0.2s ease, box-shadow 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ai-dock-item:hover,
+.ai-dock-item:focus-visible {
+  transform: translateY(-5px);
+  color: rgb(var(--accent-light));
+  background: rgb(var(--accent) / 0.1);
+}
+
+.ai-dock-item:focus-visible {
+  outline: 2px solid rgb(var(--accent-light));
+  outline-offset: 2px;
+}
+
+.ai-dock-item.is-active {
+  color: rgb(var(--fg));
+  background: radial-gradient(circle at 50% 35%, rgb(var(--cyan) / 0.22), rgb(var(--accent) / 0.12) 70%);
+  box-shadow: inset 0 0 0 1px rgb(var(--cyan) / 0.35), 0 0 18px -4px rgb(var(--cyan) / 0.55);
+}
+
+/* active indicator: a small glowing node under the avatar */
+.ai-dock-item.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.2rem;
+  height: 0.28rem;
+  width: 0.28rem;
+  border-radius: 999px;
+  background: rgb(var(--cyan));
+  box-shadow: 0 0 8px rgb(var(--cyan));
+}
+
+/* robot parts */
+.bot-svg { overflow: visible; }
+.bot-shell { fill: rgb(var(--accent) / 0.08); transition: fill 0.25s ease; }
+.bot-eye { fill: currentColor; stroke: none; transform-box: fill-box; transform-origin: center; transition: fill 0.2s ease, filter 0.2s ease; }
+.bot-eye-line { transition: stroke 0.2s ease, filter 0.2s ease; }
+
+.ai-dock-item:hover .bot-shell,
+.ai-dock-item.is-active .bot-shell { fill: rgb(var(--accent) / 0.18); }
+
+.ai-dock-item:hover .bot-eye,
+.ai-dock-item:focus-visible .bot-eye,
+.ai-dock-item.is-active .bot-eye {
+  fill: rgb(var(--cyan));
+  filter: drop-shadow(0 0 3px rgb(var(--cyan)));
+}
+
+.ai-dock-item:hover .bot-eye-line,
+.ai-dock-item:focus-visible .bot-eye-line,
+.ai-dock-item.is-active .bot-eye-line {
+  stroke: rgb(var(--cyan));
+  filter: drop-shadow(0 0 3px rgb(var(--cyan)));
+}
+
+/* hover: a quick blink, and the scout bot sweeps its scanner */
+.ai-dock-item:hover .bot-eye { animation: bot-blink 0.45s ease 0.1s 1; }
+.ai-dock-item:hover .bot-scan { stroke-dasharray: 4 7; animation: bot-scan 0.9s linear infinite; }
+
+@keyframes bot-blink {
+  0%, 100% { transform: scaleY(1); }
+  50%      { transform: scaleY(0.15); }
+}
+
+@keyframes bot-scan {
+  to { stroke-dashoffset: -22; }
+}
+
+/* tooltip label */
+.ai-dock-tip {
+  position: absolute;
+  bottom: calc(100% + 0.6rem);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  white-space: nowrap;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(var(--accent) / 0.25);
+  background: rgb(var(--space) / 0.92);
+  color: rgb(var(--fg));
+  font-family: "Fira Code", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  box-shadow: 0 6px 18px -8px rgb(0 0 0 / 0.7);
+}
+
+.ai-dock-item:hover .ai-dock-tip,
+.ai-dock-item:focus-visible .ai-dock-tip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* touch screens have no hover → label the current page instead */
+@media (hover: none) {
+  .ai-dock-item.is-active .ai-dock-tip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .ai-dock-item:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .ai-dock-bar { gap: 0.1rem; padding: 0.3rem; }
+  .ai-dock-item { height: 2.55rem; width: 2.55rem; border-radius: 0.85rem; }
+  .ai-dock-item .bot-svg { width: 25px; height: 25px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-dock,
+  .ai-dock-item,
+  .ai-dock-tip { transition: none; }
+  .ai-dock-item:hover,
+  .ai-dock-item:focus-visible { transform: none; }
+  .ai-dock-item:hover .bot-eye,
+  .ai-dock-item:hover .bot-scan { animation: none; }
+}
+
+/* light mode: frosted white bar, sapphire eyes, no neon */
+html[data-theme="light"] .ai-dock-bar {
+  background: rgb(255 255 255 / 0.82);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 1px 2px rgb(15 23 42 / 0.05),
+    0 16px 36px -14px rgb(30 64 175 / 0.3);
+}
+
+html[data-theme="light"] .ai-dock-item.is-active {
+  background: rgb(var(--accent) / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(var(--accent) / 0.3);
+}
+
+html[data-theme="light"] .ai-dock-item:hover .bot-eye,
+html[data-theme="light"] .ai-dock-item:focus-visible .bot-eye,
+html[data-theme="light"] .ai-dock-item.is-active .bot-eye {
+  fill: rgb(var(--accent));
+  filter: none;
+}
+
+html[data-theme="light"] .ai-dock-item:hover .bot-eye-line,
+html[data-theme="light"] .ai-dock-item:focus-visible .bot-eye-line,
+html[data-theme="light"] .ai-dock-item.is-active .bot-eye-line {
+  stroke: rgb(var(--accent));
+  filter: none;
+}
+
+html[data-theme="light"] .ai-dock-item.is-active::after {
+  background: rgb(var(--accent));
+  box-shadow: none;
+}
+
+html[data-theme="light"] .ai-dock-tip {
+  background: rgb(255 255 255 / 0.95);
+  box-shadow: 0 6px 18px -8px rgb(30 64 175 / 0.35);
+}
+
 /* ── Print / PDF export — hide chrome, force a clean light page. The Jyotish
    page also switches to the light theme before printing so token colours stay
    readable on paper. ── */
 @media print {
+  .ai-dock {
+    display: none !important;
+  }
+
 
   header,
   footer,

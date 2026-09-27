@@ -10,6 +10,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/MegaFooter'
 import HudFrame from '../components/HudFrame'
 import BootScreen from '../components/BootScreen'
+import AiRobotDock from '../components/AiRobotDock'
 import PageSkeleton from '../components/PageSkeleton'
 
 /**
@@ -19,7 +20,7 @@ import PageSkeleton from '../components/PageSkeleton'
  * That keeps navigation snappy (no re-painting the backdrop, no Navbar flicker)
  * and lets AnimatePresence cross-fade pages.
  *
- * z-index stack: backdrop (0) → main + footer (10) → Navbar (50) → overlays.
+ * z-index stack: backdrop (0) → main + footer (10) → HUD (40) → dock (45) → Navbar (50).
  */
 export default function SiteLayout() {
   const { lang, setLang } = useLang()
@@ -71,9 +72,12 @@ export default function SiteLayout() {
         </AnimatePresence>
       </main>
 
-      <div className="relative z-10" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      {/* --dock-space keeps the footer's last line clear of the floating dock */}
+      <div className="relative z-10" style={{ paddingBottom: 'var(--dock-space)' }}>
         <Footer lang={lang} />
       </div>
+
+      <AiRobotDock />
 
       <HudFrame />
       <BootScreen />
