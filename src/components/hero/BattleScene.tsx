@@ -9,6 +9,8 @@ import { createBattle } from './battleEngine'
  * Lifecycle: pauses off-screen / in a hidden tab, freezes to a single frame
  * for prefers-reduced-motion, and tears down cleanly on route change.
  *
+ * It sits out the intro (`html.intro-active`) and erupts on its `mtn:impact`.
+ *
  * While the battle is on screen it sets `html.hero-live`, which swaps the
  * fixed chrome's backdrop blur (dock, navbar buttons) for solid tints — a blur
  * over a canvas that repaints every frame would be re-computed every frame.
@@ -28,12 +30,16 @@ export default function BattleScene() {
     let inView = true
     const root = document.documentElement
     const sync = () => {
-      battle.setActive(inView && document.visibilityState === 'visible')
+      const intro = root.classList.contains('intro-active')
+      battle.setActive(inView && !intro && document.visibilityState === 'visible')
       root.classList.toggle('hero-live', inView)
     }
     const io = new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync() }, { threshold: 0.02 })
     io.observe(fx)
     document.addEventListener('visibilitychange', sync)
+    const onImpact = () => { sync(); battle.impact() }
+    window.addEventListener('mtn:impact', onImpact)
+    window.addEventListener('mtn:intro-skipped', sync)
 
     const host = fx.closest('section')
     // Depth parallax follows a fine pointer only (no gyro/touch jitter).
@@ -53,6 +59,8 @@ export default function BattleScene() {
       io.disconnect()
       root.classList.remove('hero-live')
       document.removeEventListener('visibilitychange', sync)
+      window.removeEventListener('mtn:impact', onImpact)
+      window.removeEventListener('mtn:intro-skipped', sync)
       window.removeEventListener('pointermove', onMove)
       host?.removeEventListener('pointerdown', onDown)
     }

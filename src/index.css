@@ -1481,87 +1481,128 @@ body::before {
 ══════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════
-   ELITE 2 — "System Booting" hacker loader
+   ELITE 2 — Warp intro (BootScreen + intro/warpIntro)
 ══════════════════════════════════════════ */
-.boot-screen {
+.intro {
   position: fixed;
   inset: 0;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.25rem;
-  background: #0e0e0e;
-  font-family: "Fira Code", monospace;
-  transition: opacity 0.6s ease, visibility 0.6s ease;
-}
-
-.boot-screen.done {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.boot-log {
-  width: min(620px, 88vw);
-  min-height: 168px;
-  font-size: 13px;
-  line-height: 1.9;
-  color: #7ef9c5;
-  text-shadow: 0 0 8px rgba(57, 255, 150, 0.5);
-  white-space: pre-wrap;
-  /* Per-glyph fallback: Latin uses Fira Code; Burmese glyphs fall through to the
-     first Myanmar-capable font available — web-loaded Padauk / Noto Sans Myanmar,
-     then common system Burmese fonts (Windows · macOS/iOS · Android/Linux). */
-  font-family: "Fira Code", "Padauk", "Noto Sans Myanmar", "Myanmar Text",
-    "Pyidaungsu", "Myanmar Sangam MN", "Noto Sans Myanmar UI", monospace;
-}
-
-.boot-log .ok {
-  color: rgb(var(--accent));
-}
-
-.boot-bar {
-  width: min(620px, 88vw);
-  height: 4px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  z-index: 200;
   overflow: hidden;
+  background: #02050F;
+  color: rgb(240 244 255);
+  transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.boot-bar>i {
-  display: block;
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, rgb(var(--accent)), rgb(var(--accent)));
-  box-shadow: 0 0 12px rgb(var(--accent));
+/* landing: the overlay bursts outward and dissolves into the site */
+.intro.is-landing {
+  opacity: 0;
+  transform: scale(1.18);
+  pointer-events: none;
 }
 
-.boot-title {
-  font-size: clamp(1.5rem, 6vw, 3rem);
-  font-weight: 900;
-  letter-spacing: 0.2em;
-  color: #fff;
-  text-shadow: 0 0 24px rgb(var(--accent) / 0.8);
-}
-
-.boot-skip {
+.intro-canvas {
   position: absolute;
-  bottom: 24px;
-  right: 24px;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.intro-hud {
+  position: absolute;
+  inset: calc(1rem + env(safe-area-inset-top, 0px)) 1.25rem auto;
+  display: flex;
+  justify-content: space-between;
+  font-family: "Fira Code", monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: rgb(34 211 238 / 0.75);
+}
+
+.intro-brand {
+  position: absolute;
+  inset: auto 0 calc(12vh + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  pointer-events: none;
+}
+
+.intro-logo {
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  letter-spacing: 0.35em;
+  padding-left: 0.35em;
+  background: linear-gradient(180deg, #FFFFFF, #C9D5EE);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgb(34 211 238 / 0.55));
+}
+
+.intro-status {
+  margin-top: 0.75rem;
+  min-height: 1.2em;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: rgb(165 214 255 / 0.85);
+}
+
+.intro-skip {
+  position: absolute;
+  right: 1.25rem;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(34 211 238 / 0.4);
+  background: rgb(4 9 26 / 0.6);
+  color: rgb(240 244 255);
+  font-family: "Fira Code", monospace;
   font-size: 11px;
   letter-spacing: 0.2em;
-  color: #6b7280;
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  padding: 6px 12px;
   cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-.boot-skip:hover {
-  color: #fff;
-  border-color: rgb(var(--accent));
+.intro-skip:hover,
+.intro-skip:focus-visible {
+  border-color: rgb(34 211 238);
+  background: rgb(34 211 238 / 0.12);
+  box-shadow: 0 0 18px -2px rgb(34 211 238 / 0.6);
+  outline: none;
+}
+
+/* ── landing impact: shake the page layers. Uses the `translate` property so it
+   composes with each element's own transform (dock centring, etc.) and never
+   turns <body> into a containing block for position:fixed chrome. ── */
+.impact-shake main,
+.impact-shake .nav-bar,
+.impact-shake .ai-dock,
+.impact-shake .hud {
+  animation: impact-shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes impact-shake {
+  0%   { translate: 0 0; }
+  10%  { translate: -9px 6px; }
+  20%  { translate: 8px -7px; }
+  30%  { translate: -7px -4px; }
+  42%  { translate: 6px 5px; }
+  55%  { translate: -4px 3px; }
+  68%  { translate: 3px -2px; }
+  82%  { translate: -1px 1px; }
+  100% { translate: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  .intro.is-landing {
+    transition: opacity 0.3s ease;
+    transform: none;
+  }
+
+  .impact-shake main,
+  .impact-shake .nav-bar,
+  .impact-shake .ai-dock,
+  .impact-shake .hud {
+    animation: none;
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -1647,12 +1688,6 @@ body::before {
   .hud .tr,
   .hud .bl {
     display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .boot-bar>i {
-    transition: none;
   }
 }
 
@@ -2726,6 +2761,100 @@ html[data-theme="light"] .dark-scope .btn-primary {
 html[data-theme="light"] .dark-scope .btn-glass {
   background: rgb(var(--surface) / 0.6);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CLIENT WORK — browser-framed preview cards (ClientProjects.tsx)
+   ══════════════════════════════════════════════════════════════════ */
+.client-preview {
+  border-bottom: 1px solid rgb(var(--accent) / 0.14);
+}
+
+.client-chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  background: rgb(var(--surface) / 0.85);
+  border-bottom: 1px solid rgb(var(--accent) / 0.1);
+}
+
+.client-dots {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.client-dots i {
+  height: 0.55rem;
+  width: 0.55rem;
+  border-radius: 999px;
+  background: rgb(var(--muted) / 0.35);
+}
+
+.client-url {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: rgb(var(--space) / 0.6);
+  font-family: "Fira Code", monospace;
+  font-size: 11px;
+  color: rgb(var(--muted));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.client-live {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgb(4 9 26 / 0.78);
+  border: 1px solid rgb(34 211 238 / 0.35);
+  color: #E8F1FF;
+  font-family: "Fira Code", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.client-live-dot {
+  height: 0.45rem;
+  width: 0.45rem;
+  border-radius: 999px;
+  background: #22D3EE;
+  box-shadow: 0 0 8px #22D3EE;
+  animation: node-pulse 2.2s ease-in-out infinite;
+}
+
+.tech-tag {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--accent) / 0.22);
+  background: rgb(var(--accent) / 0.08);
+  color: rgb(var(--accent-light));
+  font-family: "Fira Code", monospace;
+  font-size: 11px;
+}
+
+html[data-theme="light"] .client-chrome {
+  background: rgb(241 245 251);
+}
+
+html[data-theme="light"] .client-url {
+  background: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .client-live-dot { animation: none; }
 }
 
 /* ── Print / PDF export — hide chrome, force a clean light page. The Jyotish

@@ -201,7 +201,7 @@ export interface BattleOptions { static?: boolean }
 export function createBattle(bg: HTMLCanvasElement, fx: HTMLCanvasElement, opts: BattleOptions = {}) {
   const bctx = bg.getContext('2d')
   const ctx = fx.getContext('2d')
-  if (!bctx || !ctx) return { destroy() {}, surge() {}, setParallax() {}, setActive() {} }
+  if (!bctx || !ctx) return { destroy() {}, surge() {}, impact() {}, setParallax() {}, setActive() {} }
 
   const pearlGlow = glowSprite(PEARL_RGB, '#FFFFFF')
   const redGlow = glowSprite(CRIMSON_RGB, '#FFD6DC')
@@ -631,6 +631,14 @@ export function createBattle(bg: HTMLCanvasElement, fx: HTMLCanvasElement, opts:
   return {
     /** Everyone fires now and the champions lock beams (tap / click). */
     surge,
+    /** Intro landing: a shockwave from the centre, a jolt, then a surge. */
+    impact() {
+      rings.push({ x: W / 2, y: H * 0.46, r: 10, life: 0.9, max: 0.9 })
+      burst(W / 2, H * 0.46, 'bot', mobile ? 18 : 36, 1.8)
+      shake = 1.4
+      for (const u of units) u.flash = 1
+      surge()
+    },
     /** Pointer position in [-1, 1] for the subtle depth parallax. */
     setParallax(x: number, y: number) { tpx = clamp(x, -1, 1); tpy = clamp(y, -1, 1) },
     /** Pause/resume (off-screen, hidden tab). */
