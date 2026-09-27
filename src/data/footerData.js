@@ -32,8 +32,8 @@ export const footerData = {
     {
       title: 'Product',
       links: [
-        { label: 'Projects',     href: '#projects' },
-        { label: 'Gallery',      href: '#gallery' },
+        { label: 'Projects',     href: '/projects' },
+        { label: 'Gallery',      href: '/gallery' },
         { label: 'Immersive 3D', href: 'https://immersive.myothant.dev', icon: '🌌', external: true },
         { label: 'Blog',         href: `${SITE.url}/blog.html`, external: true },
       ],
@@ -41,18 +41,18 @@ export const footerData = {
     {
       title: 'Solutions',
       links: [
-        { label: 'Web Apps',        href: '#projects' },
-        { label: 'AI & Automation', href: '#projects', icon: '🤖' },
-        { label: 'IoT (M5Stack)',   href: '#projects' },
-        { label: 'UI / UX Design',  href: '#projects' },
+        { label: 'Web Apps',        href: '/projects' },
+        { label: 'AI & Automation', href: '/lab#agent' },
+        { label: 'IoT (M5Stack)',   href: '/projects' },
+        { label: 'UI / UX Design',  href: '/projects' },
       ],
     },
     {
       title: 'Company',
       links: [
-        { label: 'About',     href: '#about' },
-        { label: 'Story',     href: '#about' },
-        { label: 'Exploring', href: '#exploring' },
+        { label: 'About',     href: '/about' },
+        { label: 'Stack',     href: '/stack' },
+        { label: 'Exploring', href: '/exploring' },
         { label: 'Contact',   href: SITE.mailto },
       ],
     },

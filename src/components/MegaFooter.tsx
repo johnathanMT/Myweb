@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { footerData, techStack, techLogo } from '../data/footerData'
 
 // ============================================================================
@@ -20,9 +21,18 @@ const FT: Record<string, Record<string, string>> = {
 // Shape of a footer link (footerData is still JS; this mirrors it).
 interface FooterLinkData { href: string; label: string; external?: boolean; icon?: ReactNode }
 
-// Anchor that auto-handles internal (#hash) vs external (new tab) links.
+// Internal routes ("/about") use the router; everything else is a real anchor.
 function FooterLink({ link }: { link: FooterLinkData }) {
   const ext = link.external
+  const cls = 'inline-flex items-center gap-1.5 text-sm text-gray-400 transition-colors duration-200 hover:text-accent-light'
+  if (!ext && link.href.startsWith('/')) {
+    return (
+      <Link to={link.href} className={cls}>
+        {link.icon && <span aria-hidden>{link.icon}</span>}
+        {link.label}
+      </Link>
+    )
+  }
   return (
     <a
       href={link.href}
@@ -62,9 +72,9 @@ export default function MegaFooter({ lang = 'en' }: { lang?: string }) {
         <div className="grid gap-14 lg:grid-cols-[1.2fr_2fr] lg:gap-20">
           {/* LEFT */}
           <div>
-            <a href="#home" className="font-mono text-2xl font-bold text-white">
+            <Link to="/" className="font-mono text-2xl font-bold text-white">
               {brand.name}
-            </a>
+            </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-gray-400">{brand.tagline}</p>
 
             <div className="mt-7 flex items-center gap-3">

@@ -12,7 +12,7 @@ import { useInView } from '../hooks/useInView'
 
 const JADE = 'rgb(var(--jade))'
 const JADE_L = 'rgb(var(--jade-light))'
-const MAROON = 'rgb(var(--accent-light))'
+const HOT = 'rgb(var(--cyan))'
 const GOLD = '#d4af37'
 
 // Shared grid-search maze shape (cells are flat indices into a ROWS×COLS grid).
@@ -125,16 +125,16 @@ function SortingViz({ speed = 1, active = true }: VizProps) {
         {frame.arr.map((v, i) => {
           const isActive = frame.active.includes(i)
           const isDone = frame.done.includes(i)
-          const color = isDone ? GOLD : isActive ? MAROON : JADE
+          const color = isDone ? GOLD : isActive ? HOT : JADE
           return (
             <div key={i} className="w-full rounded-t-sm transition-[height] duration-75"
-              style={{ height: `${(v / max) * 100}%`, background: color, boxShadow: isActive ? `0 0 10px ${MAROON}` : isDone ? `0 0 8px ${GOLD}66` : 'none' }} />
+              style={{ height: `${(v / max) * 100}%`, background: color, boxShadow: isActive ? `0 0 10px ${HOT}` : isDone ? `0 0 8px ${GOLD}66` : 'none' }} />
           )
         })}
       </div>
       <div className="mt-3 flex flex-wrap gap-4 font-mono text-[10px] text-gray-400">
         <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: JADE }} /> idle</span>
-        <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: MAROON }} /> comparing / swapping</span>
+        <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: HOT }} /> comparing / swapping</span>
         <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: GOLD }} /> sorted</span>
       </div>
     </div>
@@ -254,14 +254,14 @@ function PathViz({ speed = 1, active = true }: VizProps) {
             if (isWall) bg = 'rgb(255 255 255 / 0.10)'
             if (seen) { bg = `rgb(var(--jade) / 0.30)` }
             if (inPath) { bg = GOLD; glow = `0 0 8px ${GOLD}` }
-            if (isStart) { bg = MAROON; glow = `0 0 8px ${MAROON}` }
+            if (isStart) { bg = HOT; glow = `0 0 8px ${HOT}` }
             if (isEnd) { bg = JADE_L; glow = `0 0 8px ${JADE_L}` }
             return <div key={i} className="aspect-square rounded-[2px] transition-colors duration-150" style={{ background: bg, boxShadow: glow }} />
           })}
         </div>
       </div>
       <div className="mt-3 flex flex-wrap gap-4 font-mono text-[10px] text-gray-400">
-        <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: MAROON }} /> start</span>
+        <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: HOT }} /> start</span>
         <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: JADE_L }} /> goal</span>
         <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: 'rgba(26,200,132,0.4)' }} /> explored</span>
         <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: GOLD }} /> shortest path</span>
@@ -362,10 +362,10 @@ function BSTViz({ speed = 1, active = true }: VizProps) {
           {nodes.map((n) => {
             const onPath = path.includes(n.val)
             const isHot = hot === n.val
-            const fill = isHot ? GOLD : onPath ? MAROON : 'rgb(var(--card))'
-            const stroke = isHot ? GOLD : onPath ? MAROON : JADE
+            const fill = isHot ? GOLD : onPath ? HOT : 'rgb(var(--card))'
+            const stroke = isHot ? GOLD : onPath ? HOT : JADE
             return (
-              <g key={n.val} style={{ filter: isHot ? `drop-shadow(0 0 8px ${GOLD})` : onPath ? `drop-shadow(0 0 6px ${MAROON})` : 'none' }}>
+              <g key={n.val} style={{ filter: isHot ? `drop-shadow(0 0 8px ${GOLD})` : onPath ? `drop-shadow(0 0 6px ${HOT})` : 'none' }}>
                 <circle cx={px(n.x)} cy={py(n.depth)} r="17" fill={fill} stroke={stroke} strokeWidth="1.6" />
                 <text x={px(n.x)} y={py(n.depth) + 4} textAnchor="middle" className="font-mono" fontSize="12"
                   fill={isHot || onPath ? '#0a0a0a' : '#e5e7eb'} fontWeight="700">{n.val}</text>
@@ -375,7 +375,7 @@ function BSTViz({ speed = 1, active = true }: VizProps) {
         </svg>
       </div>
       <div className="mt-3 flex flex-wrap gap-4 font-mono text-[10px] text-gray-400">
-        <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: MAROON }} /> compare path</span>
+        <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: HOT }} /> compare path</span>
         <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: GOLD }} /> just inserted</span>
         <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full" style={{ background: JADE }} /> node</span>
       </div>
@@ -436,7 +436,7 @@ function RaceGrid({ maze, visited, path, tint }: { maze: Maze; visited: Set<numb
         if (isWall) bg = 'rgb(255 255 255 / 0.10)'
         if (visited.has(i)) bg = tint
         if (path.has(i)) { bg = GOLD; glow = `0 0 7px ${GOLD}` }
-        if (isStart) { bg = MAROON; glow = `0 0 7px ${MAROON}` }
+        if (isStart) { bg = HOT; glow = `0 0 7px ${HOT}` }
         if (isEnd) { bg = JADE_L; glow = `0 0 7px ${JADE_L}` }
         return <div key={i} className="aspect-square rounded-[2px] transition-colors duration-150" style={{ background: bg, boxShadow: glow }} />
       })}
@@ -491,7 +491,7 @@ function RaceViz({ speed = 1, active = true }: VizProps) {
   const saved = stats && stats.d > 0 ? Math.round((1 - stats.a / stats.d) * 100) : 0
 
   const panels = [
-    { title: 'Dijkstra', sub: 'no heuristic — explores everywhere', v: vD, p: pD, tint: 'rgb(var(--accent) / 0.22)', color: MAROON },
+    { title: 'Dijkstra', sub: 'no heuristic — explores everywhere', v: vD, p: pD, tint: 'rgb(var(--accent) / 0.22)', color: HOT },
     { title: 'A*', sub: 'Manhattan heuristic — heads for the goal', v: vA, p: pA, tint: 'rgb(var(--jade) / 0.26)', color: JADE_L },
   ]
 

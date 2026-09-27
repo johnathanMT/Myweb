@@ -1,4 +1,5 @@
 import { useGallery } from '../hooks/useGallery'
+import { useLang } from '../context/LangContext'
 
 /**
  * GalleryPage — the dedicated /gallery route (rendered inside <PageShell>).
@@ -17,8 +18,7 @@ const T: Record<string, SectionText> = {
 }
 
 export default function GalleryPage() {
-  let lang = 'en'
-  try { lang = localStorage.getItem('mtn_lang') || 'en' } catch { /* ignore */ }
+  const { lang } = useLang()
   const t = T[lang] || T.en
 
   const { sections, captionOf, altOf } = useGallery(lang)

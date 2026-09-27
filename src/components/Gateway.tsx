@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { motion, type MotionProps } from 'framer-motion'
 import { ArrowRight, Mail, ArrowDown } from 'lucide-react'
 import { PERSONAL, SOCIAL } from '../data/content'
@@ -18,8 +19,6 @@ const fade = (delay = 0): MotionProps => ({
 })
 
 export default function Gateway() {
-  const scrollTo = (sel: string) => document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' })
-
   return (
     <section id="home" className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden">
       {/* Adaptive gradient + masked grid backdrop (opaque → covers page backdrop). */}
@@ -29,10 +28,10 @@ export default function Gateway() {
       <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center px-6 text-center">
         {/* availability pill */}
         <motion.span {...fade(0)}
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-jade/30 bg-jade/10 px-4 py-1.5 text-xs font-medium tracking-wide text-jade">
+          className="mb-8 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium tracking-wide text-accent-light backdrop-blur-md">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-jade/60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-jade" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan/60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan" />
           </span>
           Open to opportunities
         </motion.span>
@@ -45,8 +44,7 @@ export default function Gateway() {
 
         {/* name */}
         <motion.h1 {...fade(0.1)}
-          className="font-groovy neon-glow text-[clamp(2rem,6.5vw,5rem)] uppercase leading-[1.05] tracking-wide text-[#E4EEF8]"
-          style={{ textShadow: '0 0 28px rgba(30, 70, 130, 0.45)' }}>
+          className="hero-name font-groovy text-[clamp(2rem,6.5vw,5rem)] uppercase leading-[1.05] tracking-wide">
           Myo Thant Naing
         </motion.h1>
 
@@ -66,19 +64,12 @@ export default function Gateway() {
         {/* CTAs */}
         <motion.div {...fade(0.34)}
           className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
-          <button
-            type="button"
-            onClick={() => scrollTo('#projects')}
-            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition hover:brightness-110 sm:w-auto"
-          >
+          <Link to="/projects" className="btn-primary group w-full sm:w-auto">
             View Projects
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-          </button>
-          <a
-            href={`mailto:${PERSONAL.email}`}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-fg/15 px-7 py-3 text-sm font-semibold text-fg transition hover:border-fg/35 hover:bg-fg/5 sm:w-auto"
-          >
-            <Mail size={15} className="text-jade" />
+          </Link>
+          <a href={`mailto:${PERSONAL.email}`} className="btn-glass w-full sm:w-auto">
+            <Mail size={15} className="text-accent" />
             Get in touch
           </a>
         </motion.div>
@@ -103,15 +94,15 @@ export default function Gateway() {
       </div>
 
       {/* scroll cue */}
-      <button
-        type="button"
-        onClick={() => scrollTo('#about')}
-        aria-label="Scroll down"
+      <a
+        href="#explore"
+        onClick={(e) => { e.preventDefault(); document.getElementById('explore')?.scrollIntoView({ behavior: 'smooth' }) }}
+        aria-label="Scroll to explore"
         className="absolute bottom-8 left-1/2 -translate-x-1/2 text-muted/70 transition hover:text-accent"
         style={{ bottom: 'max(2rem, env(safe-area-inset-bottom))' }}
       >
         <ArrowDown size={20} className="animate-bounce" />
-      </button>
+      </a>
     </section>
   )
 }

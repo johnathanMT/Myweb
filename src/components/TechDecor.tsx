@@ -1,9 +1,9 @@
 /**
  * TechDecor — faint CS / AI wireframes pinned to the screen edges.
- * Painted deep navy so the computer-science and AI marks read on the field.
+ * Stroked in `currentColor`; `.tech-decor` sets it per theme (index.css).
  */
 
-const NAVY = 'rgb(61 122 196)'
+const INK = 'currentColor'
 
 /* ── Design 1: isometric wireframe cube / tesseract (data node / server) ── */
 function WireCube({ color }: { color: string }) {
@@ -78,25 +78,25 @@ function PerspectiveGrid({ color }: { color: string }) {
 
 export default function TechDecor() {
   return (
-    <div className="pointer-events-none fixed inset-0 z-[1] hidden overflow-hidden md:block" aria-hidden="true">
+    <div className="tech-decor pointer-events-none fixed inset-0 z-[1] hidden overflow-hidden md:block" aria-hidden="true">
       {/* top-left — data-node cube */}
-      <div className="absolute -left-6 top-24 w-40 opacity-[0.55] lg:w-56" style={{ color: NAVY }}>
-        <WireCube color={NAVY} />
+      <div className="absolute -left-6 top-24 w-40 opacity-[0.55] lg:w-56">
+        <WireCube color={INK} />
       </div>
 
       {/* middle-right — perspective data grid */}
-      <div className="absolute right-0 top-1/2 w-52 -translate-y-1/2 opacity-[0.42] lg:w-72" style={{ color: NAVY }}>
-        <PerspectiveGrid color={NAVY} />
+      <div className="absolute right-0 top-1/2 w-52 -translate-y-1/2 opacity-[0.42] lg:w-72">
+        <PerspectiveGrid color={INK} />
       </div>
 
       {/* bottom-right — neural network (AI) */}
-      <div className="absolute -right-4 bottom-16 w-44 opacity-[0.55] lg:w-60" style={{ color: NAVY }}>
-        <NeuralNet color={NAVY} />
+      <div className="absolute -right-4 bottom-16 w-44 opacity-[0.55] lg:w-60">
+        <NeuralNet color={INK} />
       </div>
 
       {/* bottom-left — computer-science cube echo */}
-      <div className="absolute bottom-24 left-4 hidden w-32 opacity-[0.4] xl:block" style={{ color: NAVY }}>
-        <WireCube color={NAVY} />
+      <div className="absolute bottom-24 left-4 hidden w-32 opacity-[0.4] xl:block">
+        <WireCube color={INK} />
       </div>
     </div>
   )

@@ -31,6 +31,12 @@ const EXCLUDE = new Set(['admin.html'])
 // behind the hash (/#/python) and uncrawlable; list the PUBLIC ones here.
 // Excluded on purpose: /sanctuary-admin (admin) and /farewell (private invite).
 const SPA_ROUTES = [
+  { path: '/about', priority: '0.9' },
+  { path: '/projects', priority: '0.9' },
+  { path: '/stack', priority: '0.8' },
+  { path: '/lab', priority: '0.8' },
+  { path: '/exploring', priority: '0.7' },
+  { path: '/github', priority: '0.7' },
   { path: '/python', priority: '0.8' },
   { path: '/studying', priority: '0.8' },
   { path: '/bibliography', priority: '0.6' },

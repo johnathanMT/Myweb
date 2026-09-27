@@ -13,7 +13,7 @@ import {
  *  Left  : professional narrative (transition into IT / software engineering in JP).
  *  Right : the real senior-level stack in glassmorphism category cards, gold accents.
  *  Data-driven: edit STACK / T below — no JSX surgery needed. Theme-token colours
- *  (text-accent etc.) so it follows .theme-batman automatically.
+ *  (text-accent etc.) so it follows the theme palette automatically.
  */
 
 const GOLD = '#c9a13b'

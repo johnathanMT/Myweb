@@ -62,7 +62,7 @@ export default function About({ lang = 'en' }: AboutProps) {
             <div className="group relative">
               {/* rotating gradient halo */}
               <div className="absolute -inset-1 rounded-[28px] opacity-70 blur-md transition-opacity duration-500 group-hover:opacity-100"
-                style={{ background: 'conic-gradient(from 0deg, rgb(var(--accent)), rgb(var(--accent)), #ff1e3c, rgb(var(--accent)))' }} />
+                style={{ background: 'conic-gradient(from 0deg, rgb(var(--accent)), rgb(var(--accent)), rgb(var(--cyan)), rgb(var(--accent)))' }} />
               <div className="relative w-64 h-64 rounded-3xl overflow-hidden bg-card flex items-center justify-center ring-1 ring-white/10">
                 <span className="absolute text-5xl font-bold text-accent/30 select-none">MTN</span>
                 <picture>

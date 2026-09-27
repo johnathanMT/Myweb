@@ -1,43 +1,73 @@
 /**
- * AmbientBackground — deep navy field.
- * Silver stays on buttons. Navy is the atmosphere and the CS / AI marks.
+ * AmbientBackground — the fixed, theme-aware backdrop behind every page.
+ *
+ * Layers (all CSS/SVG, no canvas or WebGL, so it costs nothing per frame):
+ *   base gradient → drifting aurora glows → neural-network mesh → CS/AI marks → vignette.
+ * Colours come from `.ambient-*` rules in index.css, so light/dark reskin it
+ * without re-rendering. The mesh is generated once at module load.
  */
+
+// Deterministic PRNG so the constellation is identical on every visit.
+function mulberry32(seed: number) {
+  return () => {
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+const W = 1600
+const H = 1000
+const rand = mulberry32(20260928)
+// Jittered grid → even coverage without clumps.
+const NODES: [number, number][] = []
+for (let gy = 0; gy < 5; gy++) {
+  for (let gx = 0; gx < 8; gx++) {
+    NODES.push([(gx + 0.15 + rand() * 0.7) * (W / 8), (gy + 0.15 + rand() * 0.7) * (H / 5)])
+  }
+}
+const EDGES: [number, number][] = []
+NODES.forEach(([x1, y1], i) => {
+  NODES.forEach(([x2, y2], j) => {
+    if (j > i && Math.hypot(x2 - x1, y2 - y1) < 250) EDGES.push([i, j])
+  })
+})
+const PULSES = [3, 9, 14, 20, 27, 33, 38]
+
 export default function AmbientBackground() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(180deg, #0B1C38 0%, #081428 28%, #06101E 62%, #040814 100%)',
-        }}
-      />
+      <div className="ambient-base" />
+      <div className="ambient-aurora" />
 
-      <div
-        className="absolute inset-x-0 top-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, rgb(90 140 196 / 0.7), transparent)' }}
-      />
-
-      <div
-        className="absolute inset-0"
-        style={{
-          background: [
-            'radial-gradient(70% 55% at 15% 0%, rgb(16 48 102 / 0.72), transparent 72%)',
-            'radial-gradient(55% 48% at 100% 85%, rgb(12 40 88 / 0.55), transparent 74%)',
-            'radial-gradient(40% 32% at 50% 40%, rgb(20 56 112 / 0.28), transparent 70%)',
-          ].join(', '),
-        }}
-      />
+      <svg className="ambient-mesh" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice">
+        <g>
+          {EDGES.map(([a, b]) => (
+            <line key={`${a}-${b}`} x1={NODES[a][0]} y1={NODES[a][1]} x2={NODES[b][0]} y2={NODES[b][1]} />
+          ))}
+        </g>
+        <g>
+          {NODES.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={2.2} />)}
+        </g>
+        <g>
+          {PULSES.map((i, k) => (
+            <circle key={i} className="pulse" cx={NODES[i][0]} cy={NODES[i][1]} r={3.2} style={{ animationDelay: `${k * 0.65}s` }} />
+          ))}
+        </g>
+      </svg>
 
       <AiWatermarks />
+      <div className="ambient-vignette" />
     </div>
   )
 }
 
-/** CS neural net, quantum orbit, and code brackets, painted deep navy. */
+/** Neural net, quantum orbit and code brackets — stroked in currentColor. */
 function AiWatermarks() {
-  const ink = 'rgba(74, 128, 196, 0.72)'
+  const ink = 'currentColor'
   return (
-    <div className="absolute inset-0">
+    <div className="ambient-ink absolute inset-0">
       <svg className="absolute -left-8 top-[10%] h-52 w-52 sm:h-64 sm:w-64" viewBox="0 0 220 220" fill="none" aria-hidden>
         <g stroke={ink} strokeWidth="1">
           <line x1="24" y1="40" x2="110" y2="28" /><line x1="24" y1="40" x2="110" y2="78" /><line x1="24" y1="40" x2="110" y2="128" />

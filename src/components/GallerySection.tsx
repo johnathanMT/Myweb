@@ -56,12 +56,12 @@ export default function GallerySection({ lang = 'en' }: { lang?: string }) {
             >
               {t.all} <span aria-hidden>→</span>
             </Link>
-            <a
-              href="#articles"
+            <Link
+              to="/exploring#articles"
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-accent/50 hover:bg-accent/10 hover:text-accent-light"
             >
               {t.cta} <span aria-hidden>→</span>
-            </a>
+            </Link>
           </div>
         </div>
 
