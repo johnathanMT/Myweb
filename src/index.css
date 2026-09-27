@@ -8,7 +8,8 @@
    Every component consumes these tokens, so the whole site skins from here.
    ══════════════════════════════════════════════════════════════════ */
 :root,
-.site-root {
+.site-root,
+.dark-scope {
   /* ════════ MIDNIGHT NAVY × ELECTRIC CYAN ════════
      Deep midnight field, sapphire surfaces, and one luminous blue→cyan accent
      family. No green, no crimson — every legacy token maps into the blue range. */
@@ -1734,27 +1735,6 @@ body::before {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   HERO — elegant, theme-aware gradient (replaces the video background).
-   Pure CSS, instant paint, adapts to light/dark via the palette tokens.
-   ══════════════════════════════════════════════════════════════════ */
-.hero-gradient {
-  /* Transparent so the global midnight aura + network mesh show through.
-     The engineering grid sits on top of that aura. */
-  background: transparent;
-}
-
-/* faint engineering grid, masked to a soft vignette so it never feels busy */
-.hero-grid {
-  background-image:
-    linear-gradient(rgb(var(--accent) / 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--accent) / 0.07) 1px, transparent 1px);
-  background-size: 72px 72px;
-  opacity: 0.6;
-  -webkit-mask-image: radial-gradient(70% 60% at 50% 38%, #000 0%, transparent 78%);
-  mask-image: radial-gradient(70% 60% at 50% 38%, #000 0%, transparent 78%);
-}
-
-/* ══════════════════════════════════════════════════════════════════
    LIGHT — "Tokyo Day": clean bright surfaces, neon accents darkened for
    AA contrast, and NO neon glow. Enabled by <html data-theme="light">.
    ══════════════════════════════════════════════════════════════════ */
@@ -2278,8 +2258,11 @@ html[data-theme="light"] .section-subtitle {
 }
 
 /* ── Light-mode refinements for the chrome ── */
-html[data-theme="light"] .nav-bar.is-scrolled {
+html[data-theme="light"] .nav-bar {
   background: rgb(255 255 255 / 0.78);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-bottom-color: rgb(var(--accent) / 0.1);
   box-shadow: 0 1px 0 rgb(15 23 42 / 0.04), 0 10px 30px -18px rgb(30 64 175 / 0.25);
 }
 
@@ -2581,6 +2564,168 @@ html[data-theme="light"] .ai-dock-item.is-active::after {
 html[data-theme="light"] .ai-dock-tip {
   background: rgb(255 255 255 / 0.95);
   box-shadow: 0 6px 18px -8px rgb(30 64 175 / 0.35);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   HERO BATTLE STAGE — pearl-white AI robots vs crimson creatures
+   (Gateway.tsx + hero/BattleScene). A permanent night stage in both themes;
+   `.dark-scope` re-applies the dark palette tokens to everything inside.
+   ══════════════════════════════════════════════════════════════════ */
+.hero-stage {
+  background:
+    radial-gradient(90% 60% at 50% 0%, #0E1D44 0%, transparent 70%),
+    linear-gradient(180deg, #060E26 0%, #04091A 55%, #02040C 100%);
+}
+
+.battle-scene,
+.battle-layer {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* oversized so the parallax shift never reveals an edge */
+.battle-bg {
+  inset: -12px;
+  height: calc(100% + 24px);
+  width: calc(100% + 24px);
+  will-change: transform;
+}
+
+.battle-scene {
+  animation: battle-in 1.2s ease both;
+}
+
+@keyframes battle-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* darkens the centre so the copy always reads over the fight */
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgb(2 5 15 / 0.55) 0%, transparent 18%),
+    radial-gradient(60% 52% at 50% 48%, rgb(3 7 20 / 0.62) 0%, rgb(3 7 20 / 0.28) 62%, transparent 88%);
+}
+
+/* melts the stage into whatever page colour follows */
+.hero-fade {
+  height: 14vh;
+  background: linear-gradient(180deg, transparent, #04091A);
+}
+
+/* light: a longer eased ramp so night → daylight doesn't band */
+html[data-theme="light"] .hero-fade {
+  height: 22vh;
+  background: linear-gradient(180deg,
+    rgb(246 248 252 / 0) 0%, rgb(246 248 252 / 0.08) 25%, rgb(246 248 252 / 0.3) 50%,
+    rgb(246 248 252 / 0.65) 75%, #F6F8FC 100%);
+}
+
+.hero-glass {
+  position: relative;
+  border-radius: 1.75rem;
+  border: 1px solid rgb(240 244 255 / 0.12);
+  background: linear-gradient(180deg, rgb(10 18 42 / 0.34), rgb(4 9 26 / 0.18));
+  backdrop-filter: blur(6px) saturate(140%);
+  -webkit-backdrop-filter: blur(6px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 30px 80px -30px rgb(0 0 0 / 0.85);
+}
+
+/* the panel's top edge carries both factions' light */
+.hero-glass::before {
+  content: '';
+  position: absolute;
+  inset: -1px 12% auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(247 245 239 / 0.9) 30%, rgb(160 180 255 / 0.4) 50%, rgb(255 30 60 / 0.85) 70%, transparent);
+  pointer-events: none;
+}
+
+/* No backdrop blur over the live canvas: it would re-blur every frame. The
+   scrim does the dimming; denser tints keep the glass look. */
+.hero-battle .hero-glass,
+.hero-battle .btn-glass,
+.hero-battle [class*="backdrop-blur"] {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.hero-battle .btn-glass {
+  background: rgb(var(--surface) / 0.6);
+}
+
+@media (max-width: 640px) {
+  .hero-glass {
+    background: linear-gradient(180deg, rgb(8 15 36 / 0.5), rgb(4 9 26 / 0.34));
+  }
+}
+
+/* html.hero-live (set by BattleScene while it's on screen): fixed chrome that
+   floats over the canvas trades blur for a solid tint until you scroll past. */
+.hero-live .ai-dock-bar,
+.hero-live .icon-btn,
+.hero-live .nav-bar {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.hero-live .ai-dock-bar {
+  background: linear-gradient(180deg, rgb(12 22 48 / 0.94), rgb(5 10 26 / 0.96));
+}
+
+.hero-live .icon-btn {
+  background: rgb(8 18 42 / 0.85);
+}
+
+html[data-theme="light"].hero-live .ai-dock-bar {
+  background: rgb(255 255 255 / 0.96);
+}
+
+html[data-theme="light"].hero-live .icon-btn {
+  background: rgb(255 255 255 / 0.95);
+}
+
+html[data-theme="light"].hero-live .nav-bar {
+  background: rgb(255 255 255 / 0.95);
+}
+
+/* pearl name with a faint iridescent sheen */
+.hero-battle .hero-name,
+html[data-theme="light"] .hero-battle .hero-name {
+  background: linear-gradient(180deg, #FFFFFF 15%, #F2EFE8 55%, #C9D5EE 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 22px rgb(240 244 255 / 0.35));
+}
+
+.hero-hint {
+  color: rgb(var(--muted) / 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-scene { animation: none; }
+  .hero-hint { display: none; }
+}
+
+/* light mode: the hero stays a night stage, so keep dark-variant controls */
+html[data-theme="light"] .dark-scope .btn-primary {
+  color: #031126;
+  background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--cyan)));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    0 10px 30px -10px rgb(var(--accent) / 0.75);
+}
+
+html[data-theme="light"] .dark-scope .btn-glass {
+  background: rgb(var(--surface) / 0.6);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
 }
 
 /* ── Print / PDF export — hide chrome, force a clean light page. The Jyotish
