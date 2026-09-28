@@ -51,6 +51,13 @@
   --mesh: 96 165 250;
   --glow-1: 37 99 235;
   --glow-2: 6 182 212;
+
+  /* Exalted Mars — crimson SECONDARY accent. Hidden energy only: thin lines,
+     faint under-glows, active markers. Never a fill or a dominant colour. */
+  --mars: 220 38 38;
+  /* #DC2626 */
+  --mars-glow: 255 46 77;
+  /* #FF2E4D */
   color-scheme: dark;
 }
 
@@ -1803,6 +1810,9 @@ html[data-theme="light"] .site-root {
   --mesh: 37 99 235;
   --glow-1: 96 165 250;
   --glow-2: 34 211 238;
+  --mars: 185 28 28;
+  /* #B91C1C — AA on white */
+  --mars-glow: 220 38 38;
   color-scheme: light;
 }
 
@@ -2132,20 +2142,22 @@ html[data-theme="light"] .section-subtitle {
 }
 
 .btn-primary {
-  color: #031126;
-  background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--cyan)));
+  color: #fff;
+  background: linear-gradient(135deg, #1E40AF, #2563EB 50%, #0E7490);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
     0 10px 30px -10px rgb(var(--accent) / 0.75);
 }
 
+/* hover: blue lift + a faint crimson under-glow — the "hidden energy" */
 .btn-primary:hover {
   transform: translateY(-1px);
-  filter: brightness(1.07);
+  filter: brightness(1.08);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
     0 0 0 4px rgb(var(--accent) / 0.14),
-    0 14px 36px -10px rgb(var(--cyan) / 0.7);
+    0 14px 36px -10px rgb(var(--cyan) / 0.6),
+    0 10px 22px -14px rgb(var(--mars-glow) / 0.55);
 }
 
 .btn-glass {
@@ -2181,13 +2193,53 @@ html[data-theme="light"] .section-subtitle {
   box-shadow: 0 0 18px -2px rgb(var(--cyan) / 0.5);
 }
 
-/* ── Hero name: moonlit gradient ink ── */
+/* ── Hero name: icy moonlit ink + a hidden crimson under-glow ──
+   Letters stay crisp white→ice-blue. The halo breathes in blue; crimson only
+   appears as a faint shadow *beneath* the glyphs and as a thin scan line under
+   the name (::after — its own background, so the text clip doesn't touch it). */
 .hero-name {
-  background: linear-gradient(180deg, #F4F8FF 10%, #BFDBFE 60%, #67E8F9 115%);
+  position: relative;
+  background: linear-gradient(180deg, #FFFFFF 5%, #DCEBFF 55%, #A5E8F7 115%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 28px rgb(var(--accent) / 0.35));
+  animation: hero-breathe 4.8s ease-in-out infinite;
+}
+
+.hero-name::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -0.32em;
+  height: 1px;
+  width: min(62%, 22rem);
+  transform: translateX(-50%);
+  background:
+    linear-gradient(90deg, transparent, rgb(var(--mars-glow) / 0.95), transparent) 0 0 / 30% 100% no-repeat,
+    linear-gradient(90deg, transparent, rgb(var(--mars) / 0.45) 20%, rgb(var(--mars) / 0.45) 80%, transparent);
+  box-shadow: 0 0 10px rgb(var(--mars-glow) / 0.35);
+  animation: mars-scan 5.5s cubic-bezier(0.5, 0, 0.3, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes hero-breathe {
+  0%, 100% {
+    filter: drop-shadow(0 0 18px rgb(var(--accent) / 0.3)) drop-shadow(0 5px 10px rgb(var(--mars) / 0.18));
+  }
+  50% {
+    filter: drop-shadow(0 0 30px rgb(var(--cyan) / 0.42)) drop-shadow(0 6px 14px rgb(var(--mars) / 0.3));
+  }
+}
+
+/* a bright crimson spark travels along the thin line, then rests */
+@keyframes mars-scan {
+  0%        { background-position: -40% 0, 0 0; }
+  55%, 100% { background-position: 140% 0, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-name { animation: none; filter: drop-shadow(0 0 24px rgb(var(--accent) / 0.35)) drop-shadow(0 5px 12px rgb(var(--mars) / 0.22)); }
+  .hero-name::after { animation: none; background-position: 50% 0, 0 0; }
 }
 
 /* ── Backdrop: midnight field + aurora + neural mesh ── */
@@ -2229,6 +2281,15 @@ html[data-theme="light"] .section-subtitle {
 
 .ambient-mesh circle {
   fill: rgb(var(--mesh) / 0.5);
+}
+
+.ambient-mesh line.mars {
+  stroke: rgb(var(--mars) / 0.22);
+}
+
+.ambient-mesh .pulse.mars {
+  fill: rgb(var(--mars-glow));
+  filter: drop-shadow(0 0 4px rgb(var(--mars-glow)));
 }
 
 .ambient-mesh .pulse {
@@ -2346,13 +2407,6 @@ html[data-theme="light"] .btn-glass {
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
 }
 
-html[data-theme="light"] .hero-name {
-  background: linear-gradient(180deg, #0B1220 20%, #1E3A8A 70%, #1D4ED8 110%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  filter: none;
-}
-
 html[data-theme="light"] .ambient-base {
   background: linear-gradient(180deg, #F8FAFF 0%, #F3F6FC 45%, #EEF3FB 100%);
 }
@@ -2374,6 +2428,10 @@ html[data-theme="light"] .ambient-mesh circle {
 html[data-theme="light"] .ambient-mesh .pulse {
   fill: rgb(var(--accent));
   filter: none;
+}
+
+html[data-theme="light"] .ambient-mesh .pulse.mars {
+  fill: rgb(var(--mars));
 }
 
 html[data-theme="light"] .ambient-ink {
@@ -2436,7 +2494,8 @@ html[data-theme="light"] .tech-decor {
   align-items: center;
   justify-content: center;
   border-radius: 1rem;
-  color: rgb(var(--muted));
+  /* a touch brighter than --muted so the line-art reads on the dark glass */
+  color: rgb(var(--fg) / 0.78);
   transition: transform 0.25s cubic-bezier(0.22, 0.8, 0.24, 1), color 0.2s ease, background-color 0.2s ease, box-shadow 0.25s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -2446,6 +2505,8 @@ html[data-theme="light"] .tech-decor {
   transform: translateY(-5px);
   color: rgb(var(--accent-light));
   background: rgb(var(--accent) / 0.1);
+  /* thin crimson ring — the only red on hover */
+  box-shadow: inset 0 0 0 1px rgb(var(--mars) / 0.4);
 }
 
 .ai-dock-item:focus-visible {
@@ -2456,7 +2517,7 @@ html[data-theme="light"] .tech-decor {
 .ai-dock-item.is-active {
   color: rgb(var(--fg));
   background: radial-gradient(circle at 50% 35%, rgb(var(--cyan) / 0.22), rgb(var(--accent) / 0.12) 70%);
-  box-shadow: inset 0 0 0 1px rgb(var(--cyan) / 0.35), 0 0 18px -4px rgb(var(--cyan) / 0.55);
+  box-shadow: inset 0 0 0 1px rgb(var(--mars) / 0.5), 0 0 18px -4px rgb(var(--cyan) / 0.55);
 }
 
 /* active indicator: a small glowing node under the avatar */
@@ -2467,8 +2528,9 @@ html[data-theme="light"] .tech-decor {
   height: 0.28rem;
   width: 0.28rem;
   border-radius: 999px;
-  background: rgb(var(--cyan));
-  box-shadow: 0 0 8px rgb(var(--cyan));
+  /* crimson "Mars" node under the active robot */
+  background: rgb(var(--mars-glow));
+  box-shadow: 0 0 8px rgb(var(--mars-glow)), 0 0 2px rgb(var(--mars-glow));
 }
 
 /* robot parts */
@@ -2572,9 +2634,13 @@ html[data-theme="light"] .ai-dock-bar {
     0 16px 36px -14px rgb(30 64 175 / 0.3);
 }
 
+html[data-theme="light"] .ai-dock-item {
+  color: rgb(var(--fg) / 0.72);
+}
+
 html[data-theme="light"] .ai-dock-item.is-active {
   background: rgb(var(--accent) / 0.1);
-  box-shadow: inset 0 0 0 1px rgb(var(--accent) / 0.3);
+  box-shadow: inset 0 0 0 1px rgb(var(--mars) / 0.35);
 }
 
 html[data-theme="light"] .ai-dock-item:hover .bot-eye,
@@ -2592,7 +2658,7 @@ html[data-theme="light"] .ai-dock-item.is-active .bot-eye-line {
 }
 
 html[data-theme="light"] .ai-dock-item.is-active::after {
-  background: rgb(var(--accent));
+  background: rgb(var(--mars));
   box-shadow: none;
 }
 
@@ -2751,10 +2817,10 @@ html[data-theme="light"] .hero-battle .hero-name {
 
 /* light mode: the hero stays a night stage, so keep dark-variant controls */
 html[data-theme="light"] .dark-scope .btn-primary {
-  color: #031126;
-  background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--cyan)));
+  color: #fff;
+  background: linear-gradient(135deg, #1E40AF, #2563EB 50%, #0E7490);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
     0 10px 30px -10px rgb(var(--accent) / 0.75);
 }
 

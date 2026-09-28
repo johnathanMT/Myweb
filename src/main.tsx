@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { getInitialTheme, applyTheme } from './hooks/useTheme'
 import { LangProvider } from './context/LangContext'
@@ -67,6 +67,11 @@ ReactDOM.createRoot(rootEl).render(
             <Route path="studying" element={<><Seo title="Studying Library" path="/studying" description="My self-taught Computer Science journey — notes, resources, and study tracks across CS, AI, and software engineering." /><PageShell journeyHub="studying"><StudyingLibrary /></PageShell></>} />
             <Route path="bibliography" element={<><Seo title="Bibliography" path="/bibliography" description="Books, papers, and references that shaped my path from caregiving to coding and AI engineering." /><PageShell journeyHub="bibliography"><Bibliography /></PageShell></>} />
             <Route path="github" element={<><Seo title="GitHub Projects" path="/github" description="Open-source projects by Myo Thant Naing — AI bots, IoT hardware, full-stack web apps, and Python automation scripts." /><PageShell><GitHubProjects /></PageShell></>} />
+            {/* The static interest pages (public/*.html) used to link back with a relative
+                "index.html", which resolves to /index.html — not a route, so it hit the 404.
+                Redirect it (and any /explore/* alias) instead of losing the visitor. */}
+            <Route path="index.html" element={<Navigate to="/" replace />} />
+            <Route path="explore/*" element={<Navigate to="/exploring" replace />} />
             {/* unknown paths → on-brand 404 inside the chrome, not indexed */}
             <Route path="*" element={<><Seo noindex /><NotFoundPage /></>} />
           </Route>

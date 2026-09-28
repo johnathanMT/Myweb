@@ -34,6 +34,9 @@ NODES.forEach(([x1, y1], i) => {
   })
 })
 const PULSES = [3, 9, 14, 20, 27, 33, 38]
+// "Exalted Mars" — a few crimson threads/nodes hidden in the blue network.
+const MARS_EDGE_EVERY = 11
+const MARS_PULSES = new Set([14, 33])
 
 export default function AmbientBackground() {
   return (
@@ -43,8 +46,8 @@ export default function AmbientBackground() {
 
       <svg className="ambient-mesh" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice">
         <g>
-          {EDGES.map(([a, b]) => (
-            <line key={`${a}-${b}`} x1={NODES[a][0]} y1={NODES[a][1]} x2={NODES[b][0]} y2={NODES[b][1]} />
+          {EDGES.map(([a, b], k) => (
+            <line key={`${a}-${b}`} className={k % MARS_EDGE_EVERY === 5 ? 'mars' : undefined} x1={NODES[a][0]} y1={NODES[a][1]} x2={NODES[b][0]} y2={NODES[b][1]} />
           ))}
         </g>
         <g>
@@ -52,7 +55,7 @@ export default function AmbientBackground() {
         </g>
         <g>
           {PULSES.map((i, k) => (
-            <circle key={i} className="pulse" cx={NODES[i][0]} cy={NODES[i][1]} r={3.2} style={{ animationDelay: `${k * 0.65}s` }} />
+            <circle key={i} className={MARS_PULSES.has(i) ? 'pulse mars' : 'pulse'} cx={NODES[i][0]} cy={NODES[i][1]} r={3.2} style={{ animationDelay: `${k * 0.65}s` }} />
           ))}
         </g>
       </svg>

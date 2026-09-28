@@ -123,7 +123,7 @@ export default function Exploring() {
       style={{ '--c': 'rgb(var(--accent))' } as CSSVars}>
       <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, rgba(20, 20, 20,0.5) 0%, transparent 40%, transparent 60%, rgba(20, 20, 20,0.5) 100%)' }} />
+        style={{ background: 'linear-gradient(180deg, rgb(var(--space) / 0.5) 0%, transparent 40%, transparent 60%, rgb(var(--space) / 0.5) 100%)' }} />
       <div className="absolute left-1/2 top-1/3 -translate-x-1/2 w-[600px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-10"
         style={{ background: 'radial-gradient(ellipse, rgb(var(--accent)), rgb(var(--coral)), transparent)' }} />
 
