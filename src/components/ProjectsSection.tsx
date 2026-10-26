@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ExternalLink, ArrowRight } from 'lucide-react'
 import { PROJECTS } from '../data/content'
+import { SITE } from '../config/site'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 
 interface SectionText { title: string; sub: string }
@@ -19,6 +20,8 @@ interface Project {
   title: string
   desc: string
   icon: string
+  /** Optional brand image (public/ path) shown instead of the icon font glyph. */
+  logo?: string
   color: string
   url: string
   ext: boolean
@@ -88,11 +91,22 @@ function ProjectLogo({ project }: { project: Project }) {
           style={{ background: `radial-gradient(circle, ${c}77 0%, transparent 70%)` }}
         />
         <span className="absolute inset-2 rounded-full bg-white/[0.05] backdrop-blur-md" />
-        <i
-          className={`${project.icon} relative text-5xl transition-transform duration-300 group-hover:scale-110 sm:text-6xl`}
-          style={{ color: c, filter: `drop-shadow(0 0 14px ${c}bb)` }}
-          aria-hidden
-        />
+        {project.logo ? (
+          <img
+            src={SITE.asset(project.logo)}
+            alt=""
+            width="96" height="96"
+            className="relative h-20 w-20 rounded-full object-cover ring-1 ring-white/15 transition-transform duration-300 group-hover:scale-110 sm:h-24 sm:w-24"
+            style={{ boxShadow: `0 0 18px ${c}88` }}
+            loading="lazy" decoding="async"
+          />
+        ) : (
+          <i
+            className={`${project.icon} relative text-5xl transition-transform duration-300 group-hover:scale-110 sm:text-6xl`}
+            style={{ color: c, filter: `drop-shadow(0 0 14px ${c}bb)` }}
+            aria-hidden
+          />
+        )}
         {project.featured && (
           <span
             className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full"

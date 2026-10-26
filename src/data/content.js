@@ -80,12 +80,6 @@ export const PROJECTS = [
     url: '/bibliography', ext: false,       // journey hub — React route
   },
   {
-    id: 'coffee', title: 'Bean Boutique Coffee Shop',
-    desc: 'A modern website showcasing premium coffee beans and brewing equipment.',
-    icon: 'fas fa-coffee', color: '#f59e0b',
-    url: SITE.coffeeUrl, ext: true, featured: true,
-  },
-  {
     id: 'github', title: 'GitHub Projects',
     desc: 'AI bots, IoT, full-stack web apps, and automation scripts — all repositories in one place.',
     icon: 'fab fa-github', color: '#e2e2f0',
@@ -94,7 +88,8 @@ export const PROJECTS = [
   {
     id: 'jyotish', title: 'Vedin — Vedic Astrology',
     desc: 'A sidereal Jyotish portal — Rasi & Navamsa charts, Vimshottari dasha, a whole-life timeline and Shadbala strengths.',
-    icon: 'fas fa-star-and-crescent', color: '#eab308',
+    icon: 'fas fa-dharmachakra', color: '#d4af37',
+    logo: 'projects/vedin-logo.webp',   // Vedin's own zodiac-wheel mark (cropped from vedin-logo.png)
     url: 'https://vedin.myothant.dev', ext: true, sameTab: true,   // external Vedin app — same-tab navigation (no new window)
   },
 ]

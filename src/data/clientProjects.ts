@@ -41,4 +41,26 @@ export const CLIENT_PROJECTS: ClientProject[] = [
     highlights: ['Bilingual Myanmar / English', 'Light & dark mode', 'Click-to-call quotes'],
     stack: ['React', 'Vite', 'Tailwind CSS', 'i18n', 'Lucide'],
   },
+  {
+    id: 'beanboutique',
+    name: 'Bean Boutique Coffee Shop',
+    url: 'https://johnathanmt.github.io/bean-boutique-coffee-shop/',
+    thumb: 'projects/bean-boutique-coffee.webp',
+    kind: 'Coffee shop · Caribbean café',
+    description:
+      'Shop site for a Caribbean-style coffee house — premium beans, brewing equipment, events and special offers, with a cart and a newsletter sign-up.',
+    highlights: ['Hero image carousel', 'Shopping cart', 'Newsletter discount pop-up'],
+    stack: ['React', 'Vite', 'Framer Motion', 'Font Awesome'],
+  },
+  {
+    id: 'official',
+    name: 'The Mysterious Odyssey of Ko Myo Thant',
+    url: 'https://myothantnaing.com',
+    thumb: 'projects/myothantnaing-official.webp',
+    kind: 'Personal site · Photo journey',
+    description:
+      'My official website — a life told in photographs across four chapters: Adventure, Art, Tech and Fortune, opened from an interactive leather-bound book.',
+    highlights: ['Interactive book-cover intro', 'English / Myanmar', 'Four photo chapters'],
+    stack: ['Next.js', 'React'],
+  },
 ]
