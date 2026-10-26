@@ -39,10 +39,10 @@ const CURRICULUM: Curriculum[] = [
     school: 'Strategy First International College · NCC Education (UK)',
     accent: '#a855f7',
     modules: [
-      { name: 'Agile Development', status: 'active' },
-      { name: 'Mobile App Development', status: 'active' },
-      { name: 'Computing Project', status: 'active' },
-      { name: 'Artificial Intelligence', status: 'active' },
+      { name: 'Agile Development', status: 'active', handsOn: true },
+      { name: 'Mobile App Development', status: 'active', handsOn: true },
+      { name: 'Computing Project', status: 'active', handsOn: true },
+      { name: 'Artificial Intelligence', status: 'active', handsOn: true },
       { name: 'Backend Web Development', status: 'active', handsOn: true },
       { name: 'Network Security', status: 'active', handsOn: true },
     ],
@@ -52,14 +52,14 @@ const CURRICULUM: Curriculum[] = [
     school: 'Strategy First International College · NCC Education (UK)',
     progress: 100, accent: '#3b82f6',
     modules: [
-      { name: 'Computer Systems', status: 'done' },
-      { name: 'Computer Networks', status: 'done' },
-      { name: 'Databases', status: 'done' },
-      { name: 'Front-End Web Development', status: 'done' },
-      { name: 'Object-Oriented Systems Analysis and Design', status: 'done' },
-      { name: 'Algorithms and Mathematical Concepts for Computing', status: 'done' },
-      { name: 'Designing and Developing Object-Oriented Computer Programs', status: 'done' },
-      { name: 'Software Engineering', status: 'done' },
+      { name: 'Computer Systems', status: 'done', handsOn: true },
+      { name: 'Computer Networks', status: 'done', handsOn: true },
+      { name: 'Databases', status: 'done', handsOn: true },
+      { name: 'Front-End Web Development', status: 'done', handsOn: true },
+      { name: 'Object-Oriented Systems Analysis and Design', status: 'done', handsOn: true },
+      { name: 'Algorithms and Mathematical Concepts for Computing', status: 'done', handsOn: true },
+      { name: 'Designing and Developing Object-Oriented Computer Programs', status: 'done', handsOn: true },
+      { name: 'Software Engineering', status: 'done', handsOn: true },
     ],
   },
   {
@@ -171,11 +171,11 @@ function CurriculumCard({ item, i, wide = false }: { item: Curriculum; i: number
 
       <ul className="mb-5 space-y-2">
         {item.modules.map((m) => (
-          <li key={m.name} className="flex items-center gap-2 text-sm text-[#cfc4ad]/80">
+          <li key={m.name} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[#cfc4ad]/80">
             <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[m.status]}`} />
             {m.name}
             {m.handsOn && (
-              <span className="rounded-full border px-2 py-px text-[10px] uppercase tracking-wider"
+              <span className="whitespace-nowrap rounded-full border px-2 py-px text-[10px] uppercase tracking-wider"
                 style={{ borderColor: `${item.accent}66`, color: item.accent }}>
                 Hands-on project
               </span>
