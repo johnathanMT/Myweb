@@ -40,9 +40,8 @@ export default function ProfileSummary({ lang = 'en' }: ProfileSummaryProps) {
               <div className="relative h-48 w-48 overflow-hidden rounded-3xl bg-card ring-1 ring-white/10 sm:h-56 sm:w-56">
                 <span className="absolute inset-0 flex items-center justify-center text-4xl font-bold text-accent/30 select-none" aria-hidden>MTN</span>
                 <picture>
-                  {PERSONAL.photoWebp && <source srcSet={PERSONAL.photoWebp} type="image/webp" />}
                   <img
-                    src={PERSONAL.photo}
+                    src={PERSONAL.homePhoto}
                     alt={PERSONAL.name}
                     width="224" height="224"
                     className="relative h-full w-full object-cover object-[center_80%]"

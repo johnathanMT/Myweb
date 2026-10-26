@@ -25,8 +25,10 @@
 // —— 1) REMOTE profile (Cloudinary — swapped in place of the bundled asset) ————
 // Was a bundled src/assets import; now served from Cloudinary. To localise again,
 // drop the file in src/assets/images/, `import` it, and swap this value back.
-const profile = 'https://res.cloudinary.com/dhlhzmmtt/image/upload/v1787551848/mtn_suit_o1jmma.jpg'
+const profile = 'https://res.cloudinary.com/dhlhzmmtt/image/upload/v1793016416/mtn_suitpp_a2xcwt.jpg'
 const profileWebp = '' // no webp sibling for the remote image → <picture> falls back to `profile`
+// Landing-page profile photo (HomePage → ProfileSummary) — separate from the About photo.
+const homeProfile = 'https://res.cloudinary.com/dhlhzmmtt/image/upload/v1787551848/mtn_suit_o1jmma.jpg'
 
 // —— 2) BUNDLED imports ——————————————————————————————————————————————
 import tokyo from '../assets/images/tokyo_night.jpg' // For Travel Chronic Section.
@@ -47,6 +49,7 @@ const unsplash = (id: string, w = 1200): string => `https://images.unsplash.com/
 export interface AssetRegistry {
   profile: string
   profileWebp: string
+  homeProfile: string
   profilePublic: string
   fallback: string
   months: Record<string, string>
@@ -57,6 +60,7 @@ export const ASSETS: AssetRegistry = {
   // Profile: bundled (used by the React About section — domain-proof, no 404).
   profile,
   profileWebp,
+  homeProfile,
   // Same photo as a stable PUBLIC url (used by blog.html's OG/share tag).
   profilePublic: publicAsset('Myweb_photo/My_profile2_for_myweb.jpg'),
 
