@@ -6,13 +6,13 @@ import { useCyberReveal } from '../hooks/useCyberReveal'
 
 interface SectionText { title: string; sub: string }
 const T: Record<string, SectionText> = {
-  en: { title: 'My Projects', sub: "Things I've built and continue to build." },
-  mm: { title: 'ကျွန်တော်၏ ပရောဂျက်များ', sub: 'တည်ဆောက်ထားသောနှင့် တည်ဆောက်ဆဲ ပရောဂျက်များ' },
-  jp: { title: '私のプロジェクト', sub: '作ったものと作り続けているもの。' },
-  vn: { title: 'Dự án của tôi', sub: 'Những gì tôi đã và đang xây dựng.' },
-  ne: { title: 'मेरा परियोजनाहरू', sub: 'मैले बनाएका र बनाउँदै गरेका कुराहरू।' },
-  id: { title: 'Proyek Saya', sub: 'Hal-hal yang telah dan sedang saya bangun.' },
-  zh: { title: '我的项目', sub: '我已构建并持续打造的作品。' },
+  en: { title: 'Personal Projects & Learning', sub: 'Side projects, study tracks and the journey behind my work.' },
+  mm: { title: 'ကိုယ်ပိုင် ပရောဂျက်များနှင့် လေ့လာမှုများ', sub: 'ဘေးထွက် ပရောဂျက်များ၊ လေ့လာမှုလမ်းကြောင်းများနှင့် ကျွန်တော့်အလုပ်၏ နောက်ကွယ်မှ ခရီးစဉ်။' },
+  jp: { title: '個人プロジェクトと学び', sub: 'サイドプロジェクト、学習の記録、そして私の歩み。' },
+  vn: { title: 'Dự án cá nhân & Học tập', sub: 'Dự án phụ, lộ trình học tập và hành trình phía sau công việc của tôi.' },
+  ne: { title: 'व्यक्तिगत परियोजना र सिकाइ', sub: 'साइड परियोजनाहरू, अध्ययन यात्रा र मेरो कामपछाडिको यात्रा।' },
+  id: { title: 'Proyek Pribadi & Pembelajaran', sub: 'Proyek sampingan, jalur belajar, dan perjalanan di balik karya saya.' },
+  zh: { title: '个人项目与学习', sub: '业余项目、学习路线，以及我工作背后的历程。' },
 }
 
 interface Project {

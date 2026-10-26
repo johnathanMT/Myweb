@@ -36,7 +36,11 @@ Never claim to be him. Keep answers short and friendly (2-4 sentences).
 - 2023: passed JLPT N3, JFT-Basic A2 and the Care Worker Evaluation Tests
 - 2024: caregiver at Hirashima Hospital (Shojinkai Medical Corporation)
 - 2025-: BSc Computer Science, University of Central Lancashire (UK), with Strategy First International College;
-  NCC Education Level 4 Diploma in Computing; IBM AI Developer Professional certificate (in progress)
+  Computing Foundation at Strategy First (completed); NCC Education Level 4 Diploma in Computing (completed); now studying the NCC Level 5 Diploma
+  (Agile Development, Mobile App Development, Computing Project, Artificial Intelligence,
+  and hands-on projects in Backend Web Development and Network Security);
+  IBM AI Developer Professional certificate (in progress)
+- NCC assessment: Rigorous UK-standard curriculum evaluated through practical hands-on assignments. Demonstrated engineering competency by designing comprehensive system architectures, developing functional software solutions, and writing professional technical documentation, rather than just taking theoretical exams.
 
 ## Skills
 ${SKILLS.map((s) => `- ${s.name}`).join('\n')}
@@ -73,7 +77,7 @@ const RULES: { test: RegExp; answer: () => string }[] = [
   { test: /japanese|jlpt|nihongo|speak/i,
     answer: () => `He speaks ${HIRE_ME.languages.join(', ')}. He passed JLPT N3 and has worked in Japanese workplaces since 2022.` },
   { test: /study|degree|university|education|bsc|ncc/i,
-    answer: () => 'He is studying for a BSc in Computer Science with the University of Central Lancashire (UK) through Strategy First International College, alongside NCC Education’s Level 4 Diploma in Computing. He also holds a BA in International Relations.' },
+    answer: () => 'He is studying for a BSc in Computer Science with the University of Central Lancashire (UK) through Strategy First International College. He has completed NCC Education’s Level 4 Diploma in Computing and is now studying Level 5 (Agile, Mobile App Development, AI and a Computing Project). Both NCC diplomas are assessed through practical, hands-on assignments — system architecture, working software and technical documentation — rather than just theoretical exams. He also holds a BA in International Relations.' },
   { test: /where|location|based|live|relocat|remote/i,
     answer: () => `He is looking for roles in ${HIRE_ME.location}.` },
   { test: /role|position|job|looking|hire|available|intern/i,

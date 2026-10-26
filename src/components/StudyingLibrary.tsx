@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   Landmark, BookOpen, Globe2, Feather, GraduationCap, ScrollText, Brain, Code2,
-  Network, Database, type LucideIcon,
+  Network, Database, ClipboardCheck, type LucideIcon,
 } from 'lucide-react'
 import JourneyCrosslink from './JourneyCrosslink'
 
@@ -15,28 +15,68 @@ const GOLD = '#c8a04a'
 
 interface Stat { value: string; label: string }
 const STATS: Stat[] = [
-  { value: 'L4', label: 'NCC Diploma Level' },
+  { value: 'L5', label: 'NCC Diploma (L4 complete)' },
   { value: '3+', label: 'Certificates Earned' },
   { value: '500+', label: 'Coding Hours' },
 ]
 
 type ModuleStatus = 'done' | 'active' | 'locked'
 
+/** How the NCC diplomas are assessed — shown under the NCC row for recruiters. */
+const NCC_ASSESSMENT = 'Rigorous UK-standard curriculum evaluated through practical hands-on assignments. Demonstrated engineering competency by designing comprehensive system architectures, developing functional software solutions, and writing professional technical documentation, rather than just taking theoretical exams.'
+
 interface Curriculum {
-  icon: LucideIcon; tag: string; title: string; school: string; progress: number
-  accent: string; modules: { name: string; status: ModuleStatus }[]
+  /** 0–100, or undefined for a course just under way (shows "Studying now" instead of a bar). */
+  icon: LucideIcon; tag: string; title: string; school: string; progress?: number
+  /** NCC diplomas render as their own row, followed by the assessment note. */
+  ncc?: boolean
+  accent: string; modules: { name: string; status: ModuleStatus; handsOn?: boolean }[]
 }
 
 const CURRICULUM: Curriculum[] = [
   {
-    icon: GraduationCap, tag: 'University', title: 'NCC L4 Diploma in Computing',
+    icon: GraduationCap, tag: 'University · Studying now', title: 'NCC L5 Diploma in Computing', ncc: true,
     school: 'Strategy First International College · NCC Education (UK)',
-    progress: 40, accent: '#3b82f6',
+    accent: '#a855f7',
     modules: [
-      { name: 'Skills for Computing', status: 'done' },
-      { name: 'Computer Networks', status: 'active' },
-      { name: 'Databases', status: 'active' },
-      { name: 'Web Design', status: 'locked' },
+      { name: 'Agile Development', status: 'active' },
+      { name: 'Mobile App Development', status: 'active' },
+      { name: 'Computing Project', status: 'active' },
+      { name: 'Artificial Intelligence', status: 'active' },
+      { name: 'Backend Web Development', status: 'active', handsOn: true },
+      { name: 'Network Security', status: 'active', handsOn: true },
+    ],
+  },
+  {
+    icon: GraduationCap, tag: 'University · Completed', title: 'NCC L4 Diploma in Computing', ncc: true,
+    school: 'Strategy First International College · NCC Education (UK)',
+    progress: 100, accent: '#3b82f6',
+    modules: [
+      { name: 'Computer Systems', status: 'done' },
+      { name: 'Computer Networks', status: 'done' },
+      { name: 'Databases', status: 'done' },
+      { name: 'Front-End Web Development', status: 'done' },
+      { name: 'Object-Oriented Systems Analysis and Design', status: 'done' },
+      { name: 'Algorithms and Mathematical Concepts for Computing', status: 'done' },
+      { name: 'Designing and Developing Object-Oriented Computer Programs', status: 'done' },
+      { name: 'Software Engineering', status: 'done' },
+    ],
+  },
+  {
+    icon: GraduationCap, tag: 'Foundation · Completed', title: 'Computing Foundation',
+    school: 'Strategy First International College',
+    progress: 100, accent: '#14b8a6',
+    modules: [
+      { name: 'Four Skills in English', status: 'done' },
+      { name: 'Learning Skills', status: 'done' },
+      { name: 'Operating System Fundamentals', status: 'done' },
+      { name: 'Introduction to IT', status: 'done' },
+      { name: 'System Flowcharts', status: 'done' },
+      { name: 'Programming Concepts', status: 'done' },
+      { name: 'Numerical Methods', status: 'done' },
+      { name: 'Professional and Ethical Issues', status: 'done' },
+      { name: 'Computer Hardware and Software', status: 'done' },
+      { name: 'Digital Logic and Design', status: 'done' },
     ],
   },
   {
@@ -62,6 +102,9 @@ const CURRICULUM: Curriculum[] = [
     ],
   },
 ]
+
+const NCC_TRACKS = CURRICULUM.filter((c) => c.ncc)
+const OTHER_TRACKS = CURRICULUM.filter((c) => !c.ncc)
 
 interface Assignment { icon: LucideIcon; title: string; desc: string; module: string }
 
@@ -101,7 +144,7 @@ const STATUS_DOT: Record<ModuleStatus, string> = {
   locked: 'bg-gray-500/60',
 }
 
-function CurriculumCard({ item, i }: { item: Curriculum; i: number }) {
+function CurriculumCard({ item, i, wide = false }: { item: Curriculum; i: number; wide?: boolean }) {
   const Icon = item.icon
   return (
     <motion.article
@@ -109,7 +152,7 @@ function CurriculumCard({ item, i }: { item: Curriculum; i: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.5, delay: i * 0.08 }}
-      className="flex flex-col rounded-2xl border p-6 backdrop-blur-md"
+      className={`flex flex-col rounded-2xl border p-6 backdrop-blur-md ${wide ? 'sm:col-span-2' : ''}`}
       style={{
         borderColor: `${item.accent}44`,
         background: 'linear-gradient(160deg, rgba(28,28,40,0.55), rgba(18,16,22,0.6))',
@@ -129,20 +172,35 @@ function CurriculumCard({ item, i }: { item: Curriculum; i: number }) {
       <ul className="mb-5 space-y-2">
         {item.modules.map((m) => (
           <li key={m.name} className="flex items-center gap-2 text-sm text-[#cfc4ad]/80">
-            <span className={`h-2 w-2 rounded-full ${STATUS_DOT[m.status]}`} />
+            <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[m.status]}`} />
             {m.name}
+            {m.handsOn && (
+              <span className="rounded-full border px-2 py-px text-[10px] uppercase tracking-wider"
+                style={{ borderColor: `${item.accent}66`, color: item.accent }}>
+                Hands-on project
+              </span>
+            )}
           </li>
         ))}
       </ul>
 
       <div className="mt-auto">
-        <div className="mb-1 flex justify-between text-xs text-[#cfc4ad]/70">
-          <span>Progress</span>
-          <span>{item.progress}%</span>
-        </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full rounded-full transition-all" style={{ width: `${item.progress}%`, background: item.accent }} />
-        </div>
+        {item.progress === undefined ? (
+          <p className="flex items-center gap-2 text-xs" style={{ color: item.accent }}>
+            <span className="h-2 w-2 animate-pulse rounded-full" style={{ background: item.accent }} />
+            Studying now · {item.modules.length} modules
+          </p>
+        ) : (
+          <>
+            <div className="mb-1 flex justify-between text-xs text-[#cfc4ad]/70">
+              <span>{item.progress === 100 ? 'Completed' : 'Progress'}</span>
+              <span>{item.progress}%</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full rounded-full transition-all" style={{ width: `${item.progress}%`, background: item.accent }} />
+            </div>
+          </>
+        )}
       </div>
     </motion.article>
   )
@@ -212,9 +270,34 @@ export default function StudyingLibrary() {
         </div>
 
         <h3 className="mb-5 text-center text-[11px] uppercase tracking-[0.25em] text-[#cfc4ad]/60 sm:mb-6 sm:text-sm">Current curriculum</h3>
-        {/* Single col on xs, 2-col on sm, 3-col on lg */}
-        <div className="mb-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {CURRICULUM.map((c, i) => <CurriculumCard key={c.title} item={c} i={i} />)}
+        {/* NCC diplomas first, with how they are assessed right beneath them */}
+        <div className="grid gap-5 sm:grid-cols-2">
+          {NCC_TRACKS.map((c, i) => <CurriculumCard key={c.title} item={c} i={i} />)}
+        </div>
+        <motion.aside
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.5 }}
+          aria-label="How the NCC diplomas are assessed"
+          className="my-5 flex gap-4 rounded-2xl border p-5 sm:p-6"
+          style={{ borderColor: `${GOLD}44`, background: 'linear-gradient(160deg, rgba(48,38,22,0.82), rgba(18,16,22,0.82))' }}
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl" style={{ border: `1px solid ${GOLD}66`, color: GOLD }}>
+            <ClipboardCheck size={20} strokeWidth={1.5} aria-hidden />
+          </span>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em]" style={{ color: GOLD }}>How NCC L4 &amp; L5 are assessed</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-[#f3ead6]/90">{NCC_ASSESSMENT}</p>
+          </div>
+        </motion.aside>
+
+        {/* Other tracks — 2-col from sm; an odd last track spans the full row */}
+        <div className="mb-14 grid gap-5 sm:grid-cols-2">
+          {OTHER_TRACKS.map((c, i) => (
+            <CurriculumCard key={c.title} item={c} i={i}
+              wide={OTHER_TRACKS.length % 2 === 1 && i === OTHER_TRACKS.length - 1} />
+          ))}
         </div>
 
         <h3 className="mb-5 text-center text-[11px] uppercase tracking-[0.25em] text-[#cfc4ad]/60 sm:mb-6 sm:text-sm">Reading room shelves</h3>

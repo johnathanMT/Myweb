@@ -89,7 +89,7 @@ export default function ClientProjects() {
     <section id="client-work" className="relative py-20 sm:py-24" aria-labelledby="client-work-title">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-accent">// Live in production</p>
-        <h2 id="client-work-title" className="section-title mt-3">Featured Websites</h2>
+        <h2 id="client-work-title" className="section-title mt-3">Featured Website Projects</h2>
         <p className="section-subtitle">Websites I designed and built — live and running today.</p>
 
         <div className="grid gap-6 lg:grid-cols-2">
