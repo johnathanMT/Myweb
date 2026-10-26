@@ -1,5 +1,20 @@
 import { SITE } from '../config/site'
 import { ASSETS } from '../config/assets'
+import { BrainCircuit, BrainCog, Cpu, HeartHandshake, IterationCcw, PenTool, Workflow } from 'lucide-react'
+import skillPython from '../assets/images/skill-python.svg'
+import skillCsharp from '../assets/images/skill-csharp.svg'
+import skillHtml5 from '../assets/images/skill-html5.svg'
+import skillCss3 from '../assets/images/skill-css3.svg'
+import skillJavascript from '../assets/images/skill-javascript.svg'
+import skillFlagJp from '../assets/images/skill-flag-jp.svg'
+import skillFlagGb from '../assets/images/skill-flag-gb.svg'
+import skillFlagMm from '../assets/images/skill-flag-mm.svg'
+import skillMysql from '../assets/images/skill-mysql.svg'
+import skillKotlin from '../assets/images/skill-kotlin.svg'
+import skillScikitlearn from '../assets/images/skill-scikitlearn.svg'
+import skillReact from '../assets/images/skill-react.svg'
+import skillVite from '../assets/images/skill-vite.svg'
+import skillTailwind from '../assets/images/skill-tailwindcss.svg'
 
 export const PERSONAL = {
   name: 'Myo Thant Naing',
@@ -45,19 +60,32 @@ export const SOCIAL = [
   { label: 'LinkedIn', icon: 'fab fa-linkedin-in', url: 'https://www.linkedin.com/in/myothantnaing' },
 ]
 
+// Core Competencies (About page). `logos` are official brand marks (Devicon, MIT;
+// flags from flag-icons, MIT) bundled from src/assets/images; skills without a
+// brand mark get a Lucide `Icon` on a gradient tile in `color`. `plate` puts a
+// dark-ink logo on a white plate so it stays legible on the dark theme.
+// `group` splits the grid: 'tech' (16 → a full 4×4) and 'human' (4 → one row of four).
 export const SKILLS = [
-  { name: 'AI & Agentic AI', icon: 'fas fa-brain', color: '#e84ad5' },      // neon magenta
-  { name: 'Python', icon: 'fab fa-python', color: '#22d3ee' },              // electric cyan
-  { name: 'C#', icon: 'fas fa-code', color: '#a855f7' },                    // neon violet
-  { name: 'HTML / CSS', icon: 'fab fa-html5', color: '#fb4158' },           // glowing red
-  { name: 'JavaScript', icon: 'fab fa-js', color: '#facc15' },              // bright yellow
-  { name: 'Japanese', icon: 'fas fa-language', color: '#f472e3' },          // neon pink
-  { name: 'Kaigo Care', icon: 'fas fa-hands-helping', color: '#38bdf8' },   // sky
-  { name: 'English', icon: 'fas fa-globe-americas', color: '#2dd4bf' },     // teal
-  { name: 'UI / UX', icon: 'fas fa-pen-nib', color: '#c084fc' },            // violet
-  { name: 'IoT (M5Stack)', icon: 'fas fa-microchip', color: '#34d399' },    // neon green
-  { name: 'Software Engineering', icon: 'fas fa-laptop-code', color: '#60a5fa' }, // blue
-
+  { name: 'AI & Agentic AI', group: 'tech', Icon: BrainCircuit, color: '#e84ad5' },
+  { name: 'Machine Learning', group: 'tech', Icon: BrainCog, color: '#f97316' },
+  { name: 'scikit-learn', group: 'tech', logos: [skillScikitlearn], plate: true, color: '#f89939' },
+  { name: 'Python', group: 'tech', logos: [skillPython], color: '#3776ab' },
+  { name: 'C#', group: 'tech', logos: [skillCsharp], color: '#9b4f96' },
+  { name: 'Kotlin', group: 'tech', logos: [skillKotlin], color: '#7f52ff' },
+  { name: 'JavaScript', group: 'tech', logos: [skillJavascript], color: '#f0db4f' },
+  { name: 'React', group: 'tech', logos: [skillReact], color: '#61dafb' },
+  { name: 'Vite', group: 'tech', logos: [skillVite], color: '#bd34fe' },
+  { name: 'Tailwind CSS', group: 'tech', logos: [skillTailwind], color: '#38bdf8' },
+  { name: 'HTML / CSS', group: 'tech', logos: [skillHtml5, skillCss3], color: '#e44d26' },
+  { name: 'MySQL', group: 'tech', logos: [skillMysql], plate: true, color: '#00758f' },
+  { name: 'UI / UX', group: 'tech', Icon: PenTool, color: '#a855f7' },
+  { name: 'IoT (M5Stack)', group: 'tech', Icon: Cpu, color: '#10b981' },
+  { name: 'Software Engineering', group: 'tech', Icon: Workflow, color: '#3b82f6' },
+  { name: 'Agile Development', group: 'tech', Icon: IterationCcw, color: '#14b8a6' },
+  { name: 'Burmese (Native)', group: 'human', logos: [skillFlagMm], color: '#fecb00' },
+  { name: 'Japanese', group: 'human', logos: [skillFlagJp], color: '#bc002d' },
+  { name: 'English', group: 'human', logos: [skillFlagGb], color: '#012169' },
+  { name: 'Kaigo Care', group: 'human', Icon: HeartHandshake, color: '#0ea5e9' },
 ]
 
 export const PROJECTS = [
