@@ -15,6 +15,15 @@ import skillScikitlearn from '../assets/images/skill-scikitlearn.svg'
 import skillReact from '../assets/images/skill-react.svg'
 import skillVite from '../assets/images/skill-vite.svg'
 import skillTailwind from '../assets/images/skill-tailwindcss.svg'
+import skillTypescript from '../assets/images/skill-typescript.svg'
+import skillDotnet from '../assets/images/skill-dotnet.svg'
+import skillNextjs from '../assets/images/skill-nextjs.svg'
+import skillDocker from '../assets/images/skill-docker.svg'
+import skillGit from '../assets/images/skill-git.svg'
+import skillGithubActions from '../assets/images/skill-githubactions.svg'
+import skillThreejs from '../assets/images/skill-threejs.svg'
+import skillFlask from '../assets/images/skill-flask.svg'
+import skillGemini from '../assets/images/skill-gemini.svg'
 
 export const PERSONAL = {
   name: 'Myo Thant Naing',
@@ -64,20 +73,30 @@ export const SOCIAL = [
 // flags from flag-icons, MIT) bundled from src/assets/images; skills without a
 // brand mark get a Lucide `Icon` on a gradient tile in `color`. `plate` puts a
 // dark-ink logo on a white plate so it stays legible on the dark theme.
-// `group` splits the grid: 'tech' (16 → a full 4×4) and 'human' (4 → one row of four).
+// `group` splits the grid: 'tech' (24 → a full 4×6) and 'human' (4 → one row of four).
+// `proof` links a skill to the case studies (/projects/:slug) where it ships.
+// Gemini mark: Simple Icons (CC0), tinted to its brand purple.
 export const SKILLS = [
   { name: 'AI & Agentic AI', group: 'tech', Icon: BrainCircuit, color: '#e84ad5' },
+  { name: 'LLM APIs (Gemini)', group: 'tech', logos: [skillGemini], color: '#8e75b2', proof: [['Vedin', 'vedin'], ['LINE Bot', 'ai-line-bot']] },
   { name: 'Machine Learning', group: 'tech', Icon: BrainCog, color: '#f97316' },
   { name: 'scikit-learn', group: 'tech', logos: [skillScikitlearn], plate: true, color: '#f89939' },
   { name: 'Python', group: 'tech', logos: [skillPython], color: '#3776ab' },
+  { name: 'Flask', group: 'tech', logos: [skillFlask], plate: true, color: '#3bb9c4', proof: [['LINE Bot', 'ai-line-bot']] },
   { name: 'C#', group: 'tech', logos: [skillCsharp], color: '#9b4f96' },
-  { name: 'Kotlin', group: 'tech', logos: [skillKotlin], color: '#7f52ff' },
+  { name: 'ASP.NET Core / .NET', group: 'tech', logos: [skillDotnet], color: '#512bd4', proof: [['Vedin', 'vedin']] },
+  { name: 'TypeScript', group: 'tech', logos: [skillTypescript], color: '#3178c6', proof: [['Vedin', 'vedin'], ['Odyssey', 'mysterious-odyssey']] },
   { name: 'JavaScript', group: 'tech', logos: [skillJavascript], color: '#f0db4f' },
   { name: 'React', group: 'tech', logos: [skillReact], color: '#61dafb' },
+  { name: 'Next.js', group: 'tech', logos: [skillNextjs], plate: true, color: '#94a3b8', proof: [['Odyssey', 'mysterious-odyssey']] },
   { name: 'Vite', group: 'tech', logos: [skillVite], color: '#bd34fe' },
   { name: 'Tailwind CSS', group: 'tech', logos: [skillTailwind], color: '#38bdf8' },
   { name: 'HTML / CSS', group: 'tech', logos: [skillHtml5, skillCss3], color: '#e44d26' },
+  { name: 'Three.js / React Three Fiber', group: 'tech', logos: [skillThreejs], plate: true, color: '#a3a3a3', proof: [['Odyssey', 'mysterious-odyssey']] },
+  { name: 'Kotlin', group: 'tech', logos: [skillKotlin], color: '#7f52ff' },
   { name: 'MySQL', group: 'tech', logos: [skillMysql], plate: true, color: '#00758f' },
+  { name: 'Docker', group: 'tech', logos: [skillDocker], color: '#2496ed', proof: [['Vedin', 'vedin']] },
+  { name: 'Git & GitHub Actions', group: 'tech', logos: [skillGit, skillGithubActions], color: '#f05032', proof: [['Bean Boutique', 'bean-boutique']] },
   { name: 'UI / UX', group: 'tech', Icon: PenTool, color: '#a855f7' },
   { name: 'IoT (M5Stack)', group: 'tech', Icon: Cpu, color: '#10b981' },
   { name: 'Software Engineering', group: 'tech', Icon: Workflow, color: '#3b82f6' },

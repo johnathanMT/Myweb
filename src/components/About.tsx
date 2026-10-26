@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { Link } from 'react-router-dom'
 import { PERSONAL, SKILLS } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 
@@ -34,6 +35,7 @@ function SkillTile({ skill }: { skill: Skill }) {
   const logos = 'logos' in skill ? skill.logos : undefined
   const Icon = 'Icon' in skill ? skill.Icon : undefined
   const plate = 'plate' in skill && skill.plate
+  const proof = 'proof' in skill ? skill.proof : undefined
   return (
     <li
       className="group flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-5 text-center backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
@@ -58,6 +60,16 @@ function SkillTile({ skill }: { skill: Skill }) {
         </span>
       ) : null}
       <span className="text-sm font-semibold leading-tight text-white">{name}</span>
+      {proof && (
+        // where the skill ships — each opens that project's case study
+        <span className="-mt-1 flex flex-wrap justify-center gap-x-2 gap-y-0.5 text-[11px]">
+          {proof.map(([label, slug]) => (
+            <Link key={slug} to={`/projects/${slug}`} className="text-accent-light underline-offset-2 hover:underline">
+              {label} →
+            </Link>
+          ))}
+        </span>
+      )}
     </li>
   )
 }
