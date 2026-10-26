@@ -80,17 +80,16 @@ export const PROJECTS = [
     url: '/bibliography', ext: false,       // journey hub — React route
   },
   {
+    id: 'linebot', title: 'AI LINE Bot',
+    desc: 'A multilingual Gemini assistant on LINE — read the case study.',
+    icon: 'fab fa-line', color: '#06c755',
+    url: '/projects/ai-line-bot', ext: false,  // internal case study page
+  },
+  {
     id: 'github', title: 'GitHub Projects',
     desc: 'AI bots, IoT, full-stack web apps, and automation scripts — all repositories in one place.',
     icon: 'fab fa-github', color: '#e2e2f0',
     url: '/github', ext: false,
-  },
-  {
-    id: 'jyotish', title: 'Vedin — Vedic Astrology',
-    desc: 'A sidereal Jyotish portal — Rasi & Navamsa charts, Vimshottari dasha, a whole-life timeline and Shadbala strengths.',
-    icon: 'fas fa-dharmachakra', color: '#d4af37',
-    logo: 'projects/vedin-logo.webp',   // Vedin's own zodiac-wheel mark (cropped from vedin-logo.png)
-    url: 'https://vedin.myothant.dev', ext: true, sameTab: true,   // external Vedin app — same-tab navigation (no new window)
   },
 ]
 

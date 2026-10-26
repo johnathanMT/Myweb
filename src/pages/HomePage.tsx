@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  ArrowUpRight, Boxes, Cpu, FlaskConical, Github, Images, Layers, Telescope, TreePine, UserRound,
+  ArrowUpRight, Boxes, Cpu, FlaskConical, Github, Images, Layers, Sparkles, Telescope, TreePine, UserRound,
   type LucideIcon,
 } from 'lucide-react'
 import { useLang } from '../context/LangContext'
@@ -11,6 +11,9 @@ import ProfileSummary from '../components/ProfileSummary'
 import GallerySection from '../components/GallerySection'
 import AILineBot from '../components/AILineBot'
 import DiscoveryPortal from '../components/DiscoveryPortal'
+import CaseStudiesGrid from '../components/CaseStudiesGrid'
+import HireMePanel from '../components/HireMePanel'
+import { exitRecruiterMode, isRecruiterMode } from '../lib/recruiterMode'
 
 interface Destination { to: string; title: string; blurb: string; Icon: LucideIcon }
 
@@ -25,17 +28,38 @@ const DESTINATIONS: Destination[] = [
   { to: '/sanctuary', title: 'Sanctuary',          blurb: 'An immersive 3D world of farewell memories.',                     Icon: TreePine },
 ]
 
-/** "/" — hero, profile summary, then a directory into every dedicated page. */
+/** "/" — hero, profile summary, then a directory into every dedicated page (or the recruiter fast track). */
 export default function HomePage() {
   const { lang } = useLang()
   const { hash } = useLocation()
   const navigate = useNavigate()
+  const [recruiter, setRecruiter] = useState(isRecruiterMode)
 
   // Legacy single-page links (/#projects, /#quantum…) → their new pages.
   useEffect(() => {
     const target = LEGACY_ANCHORS[hash.slice(1)]
     if (target) navigate(target, { replace: true })
   }, [hash, navigate])
+
+  // Recruiter fast track: no warp intro, no battle scene — just the facts.
+  if (recruiter) {
+    return (
+      <div style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))' }}>
+        <ProfileSummary lang={lang} />
+        <CaseStudiesGrid />
+        <HireMePanel />
+        <p className="pb-16 text-center">
+          <button
+            type="button"
+            onClick={() => { exitRecruiterMode(); setRecruiter(false); navigate('/', { replace: true }) }}
+            className="inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-accent-light"
+          >
+            <Sparkles size={14} aria-hidden /> View the full interactive experience
+          </button>
+        </p>
+      </div>
+    )
+  }
 
   return (
     <>

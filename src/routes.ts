@@ -36,6 +36,9 @@ export const Bibliography     = lazy(loaders['/bibliography'])
 export const GitHubProjects   = lazy(loaders['/github'])
 export const Sanctuary        = lazy(loaders['/sanctuary'])
 
+// /projects/:slug — dynamic, so it sits outside the prefetch map.
+export const CaseStudyPage    = lazy(() => import('./pages/CaseStudyPage'))
+
 const warmed = new Set<string>()
 
 /** Fire-and-forget chunk warm-up for a path (ignores hashes / unknown paths). */

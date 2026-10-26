@@ -11,9 +11,10 @@ import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
 import {
   AboutPage, ProjectsPage, StackPage, LabPage, GalleryRoute, ExploringPage,
-  PythonAutomation, StudyingLibrary, Bibliography, GitHubProjects, Sanctuary,
+  PythonAutomation, StudyingLibrary, Bibliography, GitHubProjects, Sanctuary, CaseStudyPage,
 } from './routes'
 import './index.css'
+import { initRecruiterMode } from './lib/recruiterMode'
 
 // Full-screen immersive worlds — rendered OUTSIDE SiteLayout (no Navbar/Footer).
 const Remembrance = lazy(() => import('./components/Remembrance'))
@@ -44,6 +45,9 @@ if (typeof window !== 'undefined' && window.location.hash.startsWith('#/')) {
   window.history.replaceState(null, '', target)
 }
 
+// ?mode=recruiter must be recorded before the first render so BootScreen skips the intro.
+initRecruiterMode()
+
 // #root is guaranteed by index.html; guard keeps TS strict-null happy without `!`.
 const rootEl = document.getElementById('root')
 if (!rootEl) throw new Error('Root element #root not found in index.html')
@@ -59,6 +63,8 @@ ReactDOM.createRoot(rootEl).render(
             <Route index element={<><Seo /><HomePage /></>} />
             <Route path="about" element={<><Seo title="About" path="/about" description="The story of Myo Thant Naing — from caregiving in Japan to Computer Science, software engineering and AI." /><AboutPage /></>} />
             <Route path="projects" element={<><Seo title="Projects" path="/projects" description="Featured projects — full-stack web apps, agentic AI, IoT builds and live code walkthroughs." /><ProjectsPage /></>} />
+            {/* Seo comes from the page itself — title/description vary per slug. */}
+            <Route path="projects/:slug" element={<CaseStudyPage />} />
             <Route path="stack" element={<><Seo title="Tech Stack" path="/stack" description="The architecture and tools I build with — C#/.NET, React, TypeScript, Three.js, Python and more." /><StackPage /></>} />
             <Route path="lab" element={<><Seo title="Techno Science Lab" path="/lab" description="Interactive computer-science simulations — sorting, pathfinding, agentic AI workflows, quantum circuits and antimatter." /><LabPage /></>} />
             <Route path="gallery" element={<><Seo title="Gallery" path="/gallery" description="A visual gallery of moments, projects, and life in Japan — from the lab to the everyday." /><GalleryRoute /></>} />

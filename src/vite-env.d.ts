@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_LINE_URL?: string
   readonly VITE_COFFEE_URL?: string
   readonly VITE_BASE?: string
+  /** Python webhook for the "Ask my Portfolio" chat; unset → local mock answers. */
+  readonly VITE_PORTFOLIO_CHAT_URL?: string
 }
 
 interface ImportMeta {

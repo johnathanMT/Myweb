@@ -11,6 +11,7 @@ import Footer from '../components/MegaFooter'
 import HudFrame from '../components/HudFrame'
 import BootScreen from '../components/BootScreen'
 import AiRobotDock from '../components/AiRobotDock'
+import PortfolioChat from '../components/PortfolioChat'
 import PageSkeleton from '../components/PageSkeleton'
 
 /**
@@ -78,6 +79,7 @@ export default function SiteLayout() {
       </div>
 
       <AiRobotDock />
+      <PortfolioChat />
 
       <HudFrame />
       <BootScreen />

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { Github, ExternalLink, Bot, Coffee, Globe, Cpu, Code2, Zap, Star, GitBranch, ArrowUpRight } from 'lucide-react'
 
 /**
@@ -28,6 +29,8 @@ interface Repo {
   langColor: string
   stack: { name: string; color: string }[]
   github: string | null
+  /** Slug of the /projects/:slug case study, when one exists. */
+  caseStudy?: string
   demo: string | null
   featured?: boolean
   stars?: number
@@ -79,6 +82,7 @@ const REPOS: Repo[] = [
     ],
     github: null,
     demo: 'https://lin.ee/s72ayHD',
+    caseStudy: 'ai-line-bot',
     featured: true,
   },
   {
@@ -269,6 +273,15 @@ function RepoCard({ repo, i }: { repo: Repo; i: number }) {
 
           {/* Action buttons */}
           <div className="flex items-center gap-2">
+            {repo.caseStudy && (
+              <Link
+                to={`/projects/${repo.caseStudy}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/70 transition-all hover:border-white/30 hover:bg-white/[0.08] hover:text-white"
+              >
+                <ArrowUpRight size={13} />
+                Case study
+              </Link>
+            )}
             {repo.github && (
               <a
                 href={repo.github}

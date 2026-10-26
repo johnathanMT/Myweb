@@ -1,4 +1,5 @@
-import { ExternalLink, Globe } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, ExternalLink, Globe } from 'lucide-react'
 import { SITE } from '../config/site'
 import { CLIENT_PROJECTS, type ClientProject } from '../data/clientProjects'
 
@@ -62,16 +63,21 @@ function ClientCard({ project }: { project: ClientProject }) {
         </ul>
 
         <div className="mt-auto flex flex-wrap items-center gap-3 pt-2">
+          {project.caseStudy && (
+            <Link to={`/projects/${project.caseStudy}`} className="btn-primary group">
+              Read case study <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden />
+            </Link>
+          )}
           <a
             href={project.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary"
+            className={project.caseStudy ? 'btn-glass' : 'btn-primary'}
             aria-label={`Visit ${project.name} live site (opens in a new tab)`}
           >
             Visit Live Site <ExternalLink size={15} aria-hidden />
           </a>
-          <span className="font-mono text-xs text-muted">{host}</span>
+          {!project.caseStudy && <span className="font-mono text-xs text-muted">{host}</span>}
         </div>
       </div>
     </article>
