@@ -74,7 +74,7 @@ export const PROJECTS = [
     url: '/studying', ext: false,           // journey hub — React route
   },
   {
-    id: 'bibliography', title: 'Bibliography',
+    id: 'bibliography', title: 'My Journey',
     desc: 'A chronological journey — from Myanmar to Japan, caregiving to Computer Science.',
     icon: 'fas fa-book', color: '#06b6d4',
     url: '/bibliography', ext: false,       // journey hub — React route

@@ -17,7 +17,7 @@ export const JOURNEY_HUB: JourneyHubItem[] = [
   {
     id: 'bibliography',
     path: '/bibliography',
-    label: 'Bibliography',
+    label: 'My Journey',
     short: 'Journey',
     icon: BookMarked,
     accent: '#06b6d4',

@@ -195,7 +195,7 @@ export default function StudyingLibrary() {
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#cfc4ad]/70 sm:text-base">
             The “what” in my story — NCC Diploma modules, IBM AI certifications, and self-study that
             followed the path laid out in my{' '}
-            <Link to="/bibliography" className="text-[#e8dcc0] underline-offset-2 hover:underline">Bibliography</Link>
+            <Link to="/bibliography" className="text-[#e8dcc0] underline-offset-2 hover:underline">My Journey</Link>
             {' '}and applied through{' '}
             <Link to="/python" className="text-[#e8dcc0] underline-offset-2 hover:underline">Python Automation</Link>.
           </p>

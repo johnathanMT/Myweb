@@ -221,7 +221,7 @@ export default function Bibliography({ embedded = false }: { embedded?: boolean 
     <section id="bibliography" className="relative overflow-hidden bg-transparent py-16 sm:py-24">
       <div className="mb-14 px-4 text-center sm:px-6">
         <p className="font-mono text-sm uppercase tracking-[0.3em] text-accent-light">// chronology</p>
-        <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Bibliography</h2>
+        <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl">My Journey</h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
           The "where" in my story — from International Relations in Myanmar to caregiving in Osaka,
           and now a BSc in Computer Science. This timeline connects to what I study in{' '}
