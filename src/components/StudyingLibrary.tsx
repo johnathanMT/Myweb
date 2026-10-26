@@ -30,7 +30,7 @@ interface Curriculum {
 const CURRICULUM: Curriculum[] = [
   {
     icon: GraduationCap, tag: 'University', title: 'NCC L4 Diploma in Computing',
-    school: 'Strategy First / NCC Education UK → University of Wolverhampton',
+    school: 'Strategy First International College · NCC Education (UK)',
     progress: 40, accent: '#3b82f6',
     modules: [
       { name: 'Skills for Computing', status: 'done' },
