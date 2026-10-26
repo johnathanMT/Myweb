@@ -5,6 +5,7 @@ import {
   Network, Database, ClipboardCheck, type LucideIcon,
 } from 'lucide-react'
 import JourneyCrosslink from './JourneyCrosslink'
+import { SITE } from '../config/site'
 
 /**
  * StudyingLibrary — Dark Academia reading room for NCC, IBM AI, and self-study tracks.
@@ -30,6 +31,8 @@ interface Curriculum {
   icon: LucideIcon; tag: string; title: string; school: string; progress?: number
   /** NCC diplomas render as their own row, followed by the assessment note. */
   ncc?: boolean
+  /** public/ path of an institution logo, shown on a white plate instead of the icon. */
+  logo?: string
   accent: string; modules: { name: string; status: ModuleStatus; handsOn?: boolean }[]
 }
 
@@ -60,6 +63,18 @@ const CURRICULUM: Curriculum[] = [
       { name: 'Algorithms and Mathematical Concepts for Computing', status: 'done', handsOn: true },
       { name: 'Designing and Developing Object-Oriented Computer Programs', status: 'done', handsOn: true },
       { name: 'Software Engineering', status: 'done', handsOn: true },
+    ],
+  },
+  {
+    icon: GraduationCap, tag: 'Bachelor’s Degree · Completed 2019', title: 'Bachelor of Arts in International Relations',
+    school: 'Dagon University · Yangon, Myanmar',
+    logo: 'Myweb_photo/timeline-dagon-university.webp',
+    progress: 100, accent: '#c8a04a',
+    modules: [
+      { name: 'International Politics', status: 'done' },
+      { name: 'Diplomacy', status: 'done' },
+      { name: 'Law', status: 'done' },
+      { name: 'Economics', status: 'done' },
     ],
   },
   {
@@ -164,9 +179,15 @@ function CurriculumCard({ item, i, wide = false }: { item: Curriculum; i: number
           <h3 className="mt-1 text-lg text-[#f3ead6]" style={{ fontFamily: 'Georgia, serif' }}>{item.title}</h3>
           <p className="mt-1 text-xs text-[#cfc4ad]/60">{item.school}</p>
         </div>
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ border: `1px solid ${item.accent}55`, color: item.accent }}>
-          <Icon size={22} strokeWidth={1.4} />
-        </span>
+        {item.logo ? (
+          <span className="flex h-12 shrink-0 items-center rounded-xl bg-white px-2.5 shadow-sm" style={{ border: `1px solid ${item.accent}55` }}>
+            <img src={SITE.asset(item.logo)} alt={item.school.split(' · ')[0]} className="h-8 w-auto max-w-[120px] object-contain" loading="lazy" decoding="async" />
+          </span>
+        ) : (
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ border: `1px solid ${item.accent}55`, color: item.accent }}>
+            <Icon size={22} strokeWidth={1.4} />
+          </span>
+        )}
       </div>
 
       <ul className="mb-5 space-y-2">
