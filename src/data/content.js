@@ -11,18 +11,23 @@ export const PERSONAL = {
   // code; languages missing here fall back to `en`. One string per paragraph.
   summary: {
     en: [
-      'I’m a Computer Science student in Japan with an unconventional path into tech. I studied international relations, then spent years as a caregiver (kaigo). That work taught me to stay calm under pressure, to communicate across languages and cultures, and to put real people’s needs first.',
-      'Today I bring the same mindset to software. I build full-stack applications with C#/.NET and React, experiment with agentic AI, and prototype IoT devices on M5Stack. My goal is to become an AI engineer who builds practical tools that solve real-world problems. After all, it’s better late than never.',
+      'I’m genuinely excited by technology. I love taking an idea apart, learning how it works, and building something useful from it, whether that’s a full-stack web app or a small IoT gadget.',
+      'AI is where my curiosity runs deepest. I spend my time exploring agentic AI and how intelligent tools can make everyday life easier, and I’m working toward a career as an AI engineer.',
     ],
     jp: [
-      '日本でコンピュータサイエンスを学んでいる学生です。国際関係学を学んだ後、介護職として長年働きました。その経験から、プレッシャーの中でも冷静さを保つこと、言語や文化を越えて伝え合うこと、そして目の前の人を第一に考えることを学びました。',
-      '今はその姿勢をソフトウェア開発に活かしています。C#/.NETとReactでフルスタックアプリを開発し、エージェント型AIに取り組み、M5StackでIoTデバイスを試作しています。目標は、現実の課題を解決する実用的なツールを作るAIエンジニアになることです。遅れても、やらないよりはずっといい。',
+      'テクノロジーが大好きです。アイデアを分解して仕組みを学び、フルスタックのWebアプリから小さなIoTガジェットまで、役に立つものを作ることにワクワクします。',
+      '一番の関心はAIです。エージェント型AIや、賢いツールで日常をもっと便利にする方法を探求しながら、AIエンジニアを目指しています。',
     ],
     mm: [
-      'ကျွန်တော်သည် ဂျပန်နိုင်ငံတွင် ကွန်ပျူတာသိပ္ပံ ပညာသင်ကြားနေသော ကျောင်းသားတစ်ဦး ဖြစ်ပါသည်။ နိုင်ငံတကာဆက်ဆံရေး ပညာရပ်ကို လေ့လာခဲ့ပြီးနောက် စောင့်ရှောက်မှုလုပ်ငန်း (Kaigo) တွင် နှစ်ပေါင်းများစွာ လုပ်ကိုင်ခဲ့ပါသည်။ ထိုအတွေ့အကြုံမှ ဖိအားများကြားတွင် တည်ငြိမ်စွာ နေတတ်ရန်၊ ဘာသာစကားနှင့် ယဉ်ကျေးမှု မတူသူများနှင့် ဆက်သွယ်ပြောဆိုတတ်ရန်နှင့် လူတို့၏ လိုအပ်ချက်ကို ဦးစားပေးတတ်ရန် သင်ယူခဲ့ပါသည်။',
-      'ယခုအခါ ထိုစိတ်ဓာတ်ကို ဆော့ဖ်ဝဲလ်ဖန်တီးမှုတွင် အသုံးချနေပါသည်။ C#/.NET နှင့် React ဖြင့် Full-stack application များ တည်ဆောက်ခြင်း၊ Agentic AI ကို စမ်းသပ်ခြင်းနှင့် M5Stack ဖြင့် IoT စက်ပစ္စည်းများ ဖန်တီးခြင်းတို့ ပြုလုပ်နေပါသည်။ လက်တွေ့ပြဿနာများကို ဖြေရှင်းပေးနိုင်သည့် အသုံးဝင်သော tools များ ဖန်တီးသည့် AI Engineer တစ်ဦး ဖြစ်လာရန် ရည်မှန်းထားပါသည်။ ဘယ်တော့မှ မစတင်ဖြစ်ခဲ့တာထက်စာရင် နောက်ကျတာက ပိုကောင်းပါတယ်။',
+      'နည်းပညာကို အလွန်စိတ်ဝင်စားပါသည်။ အိုင်ဒီယာတစ်ခုကို ခွဲခြမ်းလေ့လာပြီး ၎င်းအလုပ်လုပ်ပုံကို နားလည်ကာ Full-stack web app မှသည် IoT ပစ္စည်းငယ်များအထိ အသုံးဝင်သည့်အရာများ ဖန်တီးရခြင်းကို နှစ်သက်ပါသည်။',
+      'AI သည် ကျွန်တော် အစိတ်ဝင်စားဆုံး နယ်ပယ် ဖြစ်ပါသည်။ Agentic AI နှင့် စမတ်ကျသော tools များဖြင့် နေ့စဉ်ဘဝကို ပိုမိုလွယ်ကူစေနိုင်ပုံကို လေ့လာရင်း AI Engineer တစ်ဦး ဖြစ်လာရန် ကြိုးစားနေပါသည်။',
     ],
   },
+  // Full bio on the About page (English visitors; other languages keep their short bio).
+  aboutBio: [
+    'I’m Myo Thant Naing, a Computer Science student living in Japan. I started out in international relations and spent years as a caregiver (kaigo) before I moved into software. Caring for people taught me patience and empathy, and it taught me to build for the person on the other side of the screen.',
+    'These days I build full-stack apps with C#/.NET and React, try out agentic AI, and wire up IoT devices with M5Stack. I want to become an AI engineer who ships useful tools for real-world problems. I’m proof that it is better late than never.',
+  ],
   slogan: 'Better Late Than Never',
   email: SITE.email,
   // Bundled via src/assets (Vite hashes it + fixes the URL for any domain).
