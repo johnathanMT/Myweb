@@ -233,10 +233,11 @@ function VolumeCard({ item, i }: { item: Collection; i: number }) {
 
 export default function StudyingLibrary() {
   return (
+    // dark-scope + .studying-room: the reading room stays dark in light theme too,
+    // so the parchment text and dark glass cards keep their contrast.
     <section
       id="studying"
-      className="relative overflow-hidden py-16 sm:py-24"
-      style={{ background: 'transparent' }}
+      className="studying-room dark-scope relative overflow-hidden py-16 sm:py-24"
     >
       <div className="pointer-events-none absolute inset-0"
            style={{ background: 'radial-gradient(120% 90% at 50% 120%, rgba(120,80,40,0.10), transparent 60%)' }} />
