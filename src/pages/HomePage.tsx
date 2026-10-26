@@ -7,6 +7,7 @@ import {
 import { useLang } from '../context/LangContext'
 import { LEGACY_ANCHORS, prefetchRoute } from '../routes'
 import Gateway from '../components/Gateway'
+import ProfileSummary from '../components/ProfileSummary'
 import GallerySection from '../components/GallerySection'
 import AILineBot from '../components/AILineBot'
 import DiscoveryPortal from '../components/DiscoveryPortal'
@@ -24,7 +25,7 @@ const DESTINATIONS: Destination[] = [
   { to: '/sanctuary', title: 'Sanctuary',          blurb: 'An immersive 3D world of farewell memories.',                     Icon: TreePine },
 ]
 
-/** "/" — hero, then a directory into every dedicated page. */
+/** "/" — hero, profile summary, then a directory into every dedicated page. */
 export default function HomePage() {
   const { lang } = useLang()
   const { hash } = useLocation()
@@ -39,6 +40,7 @@ export default function HomePage() {
   return (
     <>
       <Gateway />
+      <ProfileSummary lang={lang} />
 
       <section id="explore" className="relative py-20 sm:py-24" aria-labelledby="explore-title">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">

@@ -7,6 +7,22 @@ export const PERSONAL = {
   tagline: 'From Caring to Coding in Japan 🇯🇵',
   subtitle: 'Computer Science Student · Care-giver · Aspiring AI Engineer',
   bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.',
+  // Landing-page profile summary (HomePage → ProfileSummary), keyed by LangContext
+  // code; languages missing here fall back to `en`. One string per paragraph.
+  summary: {
+    en: [
+      'I’m a Computer Science student in Japan with an unconventional path into tech. I studied international relations, then spent years as a caregiver (kaigo). That work taught me to stay calm under pressure, to communicate across languages and cultures, and to put real people’s needs first.',
+      'Today I bring the same mindset to software. I build full-stack applications with C#/.NET and React, experiment with agentic AI, and prototype IoT devices on M5Stack. My goal is to become an AI engineer who builds practical tools that solve real-world problems. After all, it’s better late than never.',
+    ],
+    jp: [
+      '日本でコンピュータサイエンスを学んでいる学生です。国際関係学を学んだ後、介護職として長年働きました。その経験から、プレッシャーの中でも冷静さを保つこと、言語や文化を越えて伝え合うこと、そして目の前の人を第一に考えることを学びました。',
+      '今はその姿勢をソフトウェア開発に活かしています。C#/.NETとReactでフルスタックアプリを開発し、エージェント型AIに取り組み、M5StackでIoTデバイスを試作しています。目標は、現実の課題を解決する実用的なツールを作るAIエンジニアになることです。遅れても、やらないよりはずっといい。',
+    ],
+    mm: [
+      'ကျွန်တော်သည် ဂျပန်နိုင်ငံတွင် ကွန်ပျူတာသိပ္ပံ ပညာသင်ကြားနေသော ကျောင်းသားတစ်ဦး ဖြစ်ပါသည်။ နိုင်ငံတကာဆက်ဆံရေး ပညာရပ်ကို လေ့လာခဲ့ပြီးနောက် စောင့်ရှောက်မှုလုပ်ငန်း (Kaigo) တွင် နှစ်ပေါင်းများစွာ လုပ်ကိုင်ခဲ့ပါသည်။ ထိုအတွေ့အကြုံမှ ဖိအားများကြားတွင် တည်ငြိမ်စွာ နေတတ်ရန်၊ ဘာသာစကားနှင့် ယဉ်ကျေးမှု မတူသူများနှင့် ဆက်သွယ်ပြောဆိုတတ်ရန်နှင့် လူတို့၏ လိုအပ်ချက်ကို ဦးစားပေးတတ်ရန် သင်ယူခဲ့ပါသည်။',
+      'ယခုအခါ ထိုစိတ်ဓာတ်ကို ဆော့ဖ်ဝဲလ်ဖန်တီးမှုတွင် အသုံးချနေပါသည်။ C#/.NET နှင့် React ဖြင့် Full-stack application များ တည်ဆောက်ခြင်း၊ Agentic AI ကို စမ်းသပ်ခြင်းနှင့် M5Stack ဖြင့် IoT စက်ပစ္စည်းများ ဖန်တီးခြင်းတို့ ပြုလုပ်နေပါသည်။ လက်တွေ့ပြဿနာများကို ဖြေရှင်းပေးနိုင်သည့် အသုံးဝင်သော tools များ ဖန်တီးသည့် AI Engineer တစ်ဦး ဖြစ်လာရန် ရည်မှန်းထားပါသည်။ ဘယ်တော့မှ မစတင်ဖြစ်ခဲ့တာထက်စာရင် နောက်ကျတာက ပိုကောင်းပါတယ်။',
+    ],
+  },
   slogan: 'Better Late Than Never',
   email: SITE.email,
   // Bundled via src/assets (Vite hashes it + fixes the URL for any domain).
