@@ -8,7 +8,7 @@ import { SKILLS, SKILL_SECTORS } from '../data/content'
  *
  * md+: a square stage. Six sectors radiate from a "Core Stack" hub, four skill
  * nodes each (two on an inner ring, two on an outer ring), tied together by the
- * web's spokes, rings and threads in one SVG (viewBox 0–100, so node positions
+ * sector's colourful threads in one SVG (viewBox 0–100, so node positions
  * are plain percentages). Hovering or focusing a node lights its sector and
  * shows the case studies that prove it.
  * Phones: the web would be too small to read, so each sector becomes a card.
@@ -18,7 +18,6 @@ type TechSkill = Extract<Skill, { sector: string }>
 
 const TECH = SKILLS.filter((s): s is TechSkill => 'sector' in s)
 
-const RING_RADII = [9, 18, 27, 36, 45]
 const INNER_R = 25
 const OUTER_R = 40
 const INNER_SPREAD = 15 // degrees either side of the sector's centre line
@@ -54,10 +53,6 @@ function layout(): { nodes: PlacedNode[]; threads: [PlacedNode | 'hub', PlacedNo
 }
 
 const { nodes: NODES, threads: THREADS } = layout()
-
-/** Polygon points for a web ring: one vertex per spoke (spokes sit between sectors). */
-const ringPoints = (r: number) =>
-  SKILL_SECTORS.map((_, k) => point(r, -120 + 60 * k)).map((p) => `${p.x},${p.y}`).join(' ')
 
 function NodeMark({ skill, size }: { skill: TechSkill; size: 'web' | 'chip' }) {
   const box = size === 'web' ? 'h-12 w-12' : 'h-9 w-9'
@@ -108,24 +103,6 @@ export default function SkillWeb() {
       {/* ── md+: the web ─────────────────────────────────────────────── */}
       <div className="relative mx-auto hidden aspect-square w-full max-w-[860px] md:block" onMouseLeave={() => setActive(null)}>
         <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
-          <defs>
-            <radialGradient id="web-glow">
-              <stop offset="0%" stopColor="rgb(var(--accent))" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="rgb(var(--accent))" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <circle cx="50" cy="50" r="48" fill="url(#web-glow)" />
-
-          {/* rings + spokes — the spider web itself */}
-          {RING_RADII.map((r) => (
-            <polygon key={r} points={ringPoints(r)} fill="none" stroke="rgb(var(--accent))" strokeOpacity="0.16"
-              strokeWidth="0.18" strokeDasharray={r === RING_RADII[RING_RADII.length - 1] ? '0.6 0.8' : undefined} />
-          ))}
-          {SKILL_SECTORS.map((_, k) => {
-            const p = point(RING_RADII[RING_RADII.length - 1], -120 + 60 * k)
-            return <line key={k} x1="50" y1="50" x2={p.x} y2={p.y} stroke="rgb(var(--accent))" strokeOpacity="0.16" strokeWidth="0.18" />
-          })}
-
           {/* threads tying each sector's nodes to the hub and to each other */}
           {THREADS.map(([from, to, k], i) => {
             const a = from === 'hub' ? { x: 50, y: 50 } : from
