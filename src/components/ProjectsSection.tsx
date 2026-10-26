@@ -159,7 +159,8 @@ export default function ProjectsSection({ lang = 'en' }: { lang?: string }) {
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+          {/* four tiles: 2×2 on phones/tablets, one row of four from md — no empty slots */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-4">
             {PROJECTS.map((p) => <ProjectLogo key={p.id} project={p} />)}
           </div>
         </div>

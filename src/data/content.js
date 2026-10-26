@@ -80,12 +80,6 @@ export const PROJECTS = [
     url: '/bibliography', ext: false,       // journey hub — React route
   },
   {
-    id: 'linebot', title: 'AI LINE Bot',
-    desc: 'A multilingual Gemini assistant on LINE — read the case study.',
-    icon: 'fab fa-line', color: '#06c755',
-    url: '/projects/ai-line-bot', ext: false,  // internal case study page
-  },
-  {
     id: 'github', title: 'GitHub Projects',
     desc: 'AI bots, IoT, full-stack web apps, and automation scripts — all repositories in one place.',
     icon: 'fab fa-github', color: '#e2e2f0',

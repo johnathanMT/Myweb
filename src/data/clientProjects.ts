@@ -81,4 +81,16 @@ export const CLIENT_PROJECTS: ClientProject[] = [
     stack: ['React 19', 'ASP.NET Core 8', 'MySQL', 'Google Gemini', 'Docker'],
     caseStudy: 'vedin',
   },
+  {
+    id: 'linebot',
+    name: 'Gemini AI LINE Bot',
+    url: 'https://lin.ee/s72ayHD',
+    thumb: 'projects/ai-line-bot.webp',
+    kind: 'AI assistant · LINE · Agentic AI',
+    description:
+      'A multilingual AI assistant on LINE that answers questions about my background and work, and can read images — scan the QR code to chat.',
+    highlights: ['Google Gemini + Vision', 'Flask webhook server', 'Replies in your language'],
+    stack: ['Python', 'Flask', 'Google Gemini', 'LINE Messaging API'],
+    caseStudy: 'ai-line-bot',
+  },
 ]

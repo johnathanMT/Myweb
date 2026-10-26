@@ -426,6 +426,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: 'ai-line-bot',
     name: 'Gemini AI LINE Bot',
     liveUrl: 'https://lin.ee/s72ayHD',
+    thumb: 'projects/ai-line-bot.webp',
     stack: ['Python', 'Flask', 'Google Gemini', 'Gemini Vision', 'LINE Messaging API'],
     architecture: ['LINE user', 'LINE Messaging API', 'Flask webhook (Python)', 'Google Gemini · text & vision', 'Reply to LINE'],
     copy: {
