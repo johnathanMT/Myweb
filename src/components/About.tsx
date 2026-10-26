@@ -1,11 +1,6 @@
-import type { CSSProperties } from 'react'
-import { Link } from 'react-router-dom'
 import { PERSONAL, SKILLS } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
-
-// Inline styles that set CSS custom properties (e.g. `--g`) — React's CSSProperties
-// doesn't allow arbitrary `--*` keys in an inline literal, so widen with this.
-type CSSVars = CSSProperties & Record<`--${string}`, string | number>
+import SkillWeb from './SkillWeb'
 
 interface AboutText { title: string; bio: string; slogan: string; skills: string; tech: string; human: string }
 const T: Record<string, AboutText> = {
@@ -29,47 +24,20 @@ const QUICK_FACTS: QuickFact[] = [
 
 type Skill = (typeof SKILLS)[number]
 
-/** One competency: the official logo(s) on a tinted plate, or a brand-coloured icon tile. */
-function SkillTile({ skill }: { skill: Skill }) {
+/** Languages & Care: a slim pill with a small flag or icon. */
+function HumanPill({ skill }: { skill: Skill }) {
   const { name, color } = skill
   const logos = 'logos' in skill ? skill.logos : undefined
   const Icon = 'Icon' in skill ? skill.Icon : undefined
-  const plate = 'plate' in skill && skill.plate
-  const proof = 'proof' in skill ? skill.proof : undefined
   return (
-    <li
-      className="group flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-5 text-center backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
-      style={{ '--g': color } as CSSVars}
-      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 14px 32px -14px ${color}`; e.currentTarget.style.borderColor = `${color}66` }}
-      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '' }}
-    >
+    <li className="flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] py-1.5 pl-1.5 pr-4 transition-colors hover:border-white/25"
+      style={{ boxShadow: `inset 0 0 0 1px ${color}22` }}>
       {logos ? (
-        <span className={`flex h-16 items-center justify-center gap-2 transition-transform duration-300 group-hover:scale-105 ${plate ? 'min-w-16 rounded-2xl bg-white px-2.5' : ''}`}
-          style={plate ? { boxShadow: `0 10px 24px -12px ${color}` } : undefined}>
-          {logos.map((src) => (
-            <img key={src} src={src} alt="" width={56} height={56} loading="lazy" decoding="async"
-              className={`${plate ? 'h-11' : logos.length > 1 ? 'h-12' : 'h-14'} w-auto max-w-[88px] rounded-md object-contain`}
-              style={{ filter: `drop-shadow(0 6px 14px ${color}55)` }} />
-          ))}
-        </span>
+        <img src={logos[0]} alt="" className="h-6 w-8 rounded-[5px] object-cover" loading="lazy" decoding="async" />
       ) : Icon ? (
-        <span className="grid h-16 w-16 place-items-center rounded-2xl transition-transform duration-300 group-hover:scale-105"
-          // inline colour: the light theme remaps text-white, but the glyph sits on a coloured tile in both themes
-          style={{ color: '#fff', background: `linear-gradient(135deg, ${color}, ${color}aa)`, boxShadow: `0 10px 24px -10px ${color}` }}>
-          <Icon size={30} strokeWidth={1.8} aria-hidden />
-        </span>
+        <span className="grid h-6 w-8 place-items-center rounded-[5px]" style={{ color: '#fff', background: color }}><Icon size={14} aria-hidden /></span>
       ) : null}
-      <span className="text-sm font-semibold leading-tight text-white">{name}</span>
-      {proof && (
-        // where the skill ships — each opens that project's case study
-        <span className="-mt-1 flex flex-wrap justify-center gap-x-2 gap-y-0.5 text-[11px]">
-          {proof.map(([label, slug]) => (
-            <Link key={slug} to={`/projects/${slug}`} className="text-accent-light underline-offset-2 hover:underline">
-              {label} →
-            </Link>
-          ))}
-        </span>
-      )}
+      <span className="text-sm font-medium text-white">{name}</span>
     </li>
   )
 }
@@ -179,14 +147,12 @@ export default function About({ lang = 'en' }: AboutProps) {
         {/* Skills — glowing glass chips */}
         <div data-reveal>
           <p className="text-accent-light text-sm font-semibold uppercase tracking-widest mb-6">{t.skills}</p>
-          {([['tech', t.tech, 'grid-cols-2 sm:grid-cols-4'], ['human', t.human, 'grid-cols-2 sm:grid-cols-4']] as const).map(([group, label, cols]) => (
-            <div key={group} className="mb-8 last:mb-0">
-              <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.25em] text-muted">{label}</p>
-              <ul className={`grid gap-3 sm:gap-4 ${cols}`}>
-                {SKILLS.filter((s) => s.group === group).map((skill) => <SkillTile key={skill.name} skill={skill} />)}
-              </ul>
-            </div>
-          ))}
+          <SkillWeb />
+
+          <p className="mb-3 mt-10 font-mono text-[11px] uppercase tracking-[0.25em] text-muted">{t.human}</p>
+          <ul className="flex flex-wrap gap-2.5">
+            {SKILLS.filter((s) => s.group === 'human').map((skill) => <HumanPill key={skill.name} skill={skill} />)}
+          </ul>
         </div>
       </div>
     </section>

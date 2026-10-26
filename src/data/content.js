@@ -73,38 +73,49 @@ export const SOCIAL = [
 // flags from flag-icons, MIT) bundled from src/assets/images; skills without a
 // brand mark get a Lucide `Icon` on a gradient tile in `color`. `plate` puts a
 // dark-ink logo on a white plate so it stays legible on the dark theme.
-// `group` splits the grid: 'tech' (24 → a full 4×6) and 'human' (4 → one row of four).
+// `group`: 'tech' skills form the skill web (4 per `sector`, labelled with `short`);
+// 'human' skills sit in the Languages & Care row beneath it.
 // `proof` links a skill to the case studies (/projects/:slug) where it ships.
 // Gemini mark: Simple Icons (CC0), tinted to its brand purple.
 export const SKILLS = [
-  { name: 'AI & Agentic AI', group: 'tech', Icon: BrainCircuit, color: '#e84ad5' },
-  { name: 'LLM APIs (Gemini)', group: 'tech', logos: [skillGemini], color: '#8e75b2', proof: [['Vedin', 'vedin'], ['LINE Bot', 'ai-line-bot']] },
-  { name: 'Machine Learning', group: 'tech', Icon: BrainCog, color: '#f97316' },
-  { name: 'scikit-learn', group: 'tech', logos: [skillScikitlearn], plate: true, color: '#f89939' },
-  { name: 'Python', group: 'tech', logos: [skillPython], color: '#3776ab' },
-  { name: 'Flask', group: 'tech', logos: [skillFlask], plate: true, color: '#3bb9c4', proof: [['LINE Bot', 'ai-line-bot']] },
-  { name: 'C#', group: 'tech', logos: [skillCsharp], color: '#9b4f96' },
-  { name: 'ASP.NET Core / .NET', group: 'tech', logos: [skillDotnet], color: '#512bd4', proof: [['Vedin', 'vedin']] },
-  { name: 'TypeScript', group: 'tech', logos: [skillTypescript], color: '#3178c6', proof: [['Vedin', 'vedin'], ['Odyssey', 'mysterious-odyssey']] },
-  { name: 'JavaScript', group: 'tech', logos: [skillJavascript], color: '#f0db4f' },
-  { name: 'React', group: 'tech', logos: [skillReact], color: '#61dafb' },
-  { name: 'Next.js', group: 'tech', logos: [skillNextjs], plate: true, color: '#94a3b8', proof: [['Odyssey', 'mysterious-odyssey']] },
-  { name: 'Vite', group: 'tech', logos: [skillVite], color: '#bd34fe' },
-  { name: 'Tailwind CSS', group: 'tech', logos: [skillTailwind], color: '#38bdf8' },
-  { name: 'HTML / CSS', group: 'tech', logos: [skillHtml5, skillCss3], color: '#e44d26' },
-  { name: 'Three.js / React Three Fiber', group: 'tech', logos: [skillThreejs], plate: true, color: '#a3a3a3', proof: [['Odyssey', 'mysterious-odyssey']] },
-  { name: 'Kotlin', group: 'tech', logos: [skillKotlin], color: '#7f52ff' },
-  { name: 'MySQL', group: 'tech', logos: [skillMysql], plate: true, color: '#00758f' },
-  { name: 'Docker', group: 'tech', logos: [skillDocker], color: '#2496ed', proof: [['Vedin', 'vedin']] },
-  { name: 'Git & GitHub Actions', group: 'tech', logos: [skillGit, skillGithubActions], color: '#f05032', proof: [['Bean Boutique', 'bean-boutique']] },
-  { name: 'UI / UX', group: 'tech', Icon: PenTool, color: '#a855f7' },
-  { name: 'IoT (M5Stack)', group: 'tech', Icon: Cpu, color: '#10b981' },
-  { name: 'Software Engineering', group: 'tech', Icon: Workflow, color: '#3b82f6' },
-  { name: 'Agile Development', group: 'tech', Icon: IterationCcw, color: '#14b8a6' },
+  { name: 'AI & Agentic AI', short: 'Agentic AI', sector: 'ai', group: 'tech', Icon: BrainCircuit, color: '#e84ad5' },
+  { name: 'LLM APIs (Gemini)', short: 'Gemini LLM', sector: 'ai', group: 'tech', logos: [skillGemini], color: '#8e75b2', proof: [['Vedin', 'vedin'], ['LINE Bot', 'ai-line-bot']] },
+  { name: 'Machine Learning', short: 'Machine Learning', sector: 'ai', group: 'tech', Icon: BrainCog, color: '#f97316' },
+  { name: 'scikit-learn', short: 'scikit-learn', sector: 'ai', group: 'tech', logos: [skillScikitlearn], plate: true, color: '#f89939' },
+  { name: 'Python', short: 'Python', sector: 'backend', group: 'tech', logos: [skillPython], color: '#3776ab' },
+  { name: 'Flask', short: 'Flask', sector: 'backend', group: 'tech', logos: [skillFlask], plate: true, color: '#3bb9c4', proof: [['LINE Bot', 'ai-line-bot']] },
+  { name: 'C#', short: 'C#', sector: 'backend', group: 'tech', logos: [skillCsharp], color: '#9b4f96' },
+  { name: 'ASP.NET Core / .NET', short: 'ASP.NET Core', sector: 'backend', group: 'tech', logos: [skillDotnet], color: '#512bd4', proof: [['Vedin', 'vedin']] },
+  { name: 'TypeScript', short: 'TypeScript', sector: 'frontend', group: 'tech', logos: [skillTypescript], color: '#3178c6', proof: [['Vedin', 'vedin'], ['Odyssey', 'mysterious-odyssey']] },
+  { name: 'JavaScript', short: 'JavaScript', sector: 'frontend', group: 'tech', logos: [skillJavascript], color: '#f0db4f' },
+  { name: 'React', short: 'React', sector: 'frontend', group: 'tech', logos: [skillReact], color: '#61dafb' },
+  { name: 'Next.js', short: 'Next.js', sector: 'frontend', group: 'tech', logos: [skillNextjs], plate: true, color: '#94a3b8', proof: [['Odyssey', 'mysterious-odyssey']] },
+  { name: 'Vite', short: 'Vite', sector: 'ui', group: 'tech', logos: [skillVite], color: '#bd34fe' },
+  { name: 'Tailwind CSS', short: 'Tailwind CSS', sector: 'ui', group: 'tech', logos: [skillTailwind], color: '#38bdf8' },
+  { name: 'HTML / CSS', short: 'HTML / CSS', sector: 'ui', group: 'tech', logos: [skillHtml5, skillCss3], color: '#e44d26' },
+  { name: 'Three.js / React Three Fiber', short: 'Three.js / R3F', sector: 'ui', group: 'tech', logos: [skillThreejs], plate: true, color: '#a3a3a3', proof: [['Odyssey', 'mysterious-odyssey']] },
+  { name: 'Kotlin', short: 'Kotlin', sector: 'practice', group: 'tech', logos: [skillKotlin], color: '#7f52ff' },
+  { name: 'MySQL', short: 'MySQL', sector: 'devops', group: 'tech', logos: [skillMysql], plate: true, color: '#00758f' },
+  { name: 'Docker', short: 'Docker', sector: 'devops', group: 'tech', logos: [skillDocker], color: '#2496ed', proof: [['Vedin', 'vedin']] },
+  { name: 'Git & GitHub Actions', short: 'Git & Actions', sector: 'devops', group: 'tech', logos: [skillGit, skillGithubActions], color: '#f05032', proof: [['Bean Boutique', 'bean-boutique']] },
+  { name: 'UI / UX', short: 'UI / UX', sector: 'practice', group: 'tech', Icon: PenTool, color: '#a855f7' },
+  { name: 'IoT (M5Stack)', short: 'IoT · M5Stack', sector: 'practice', group: 'tech', Icon: Cpu, color: '#10b981' },
+  { name: 'Software Engineering', short: 'Software Eng.', sector: 'devops', group: 'tech', Icon: Workflow, color: '#3b82f6' },
+  { name: 'Agile Development', short: 'Agile', sector: 'practice', group: 'tech', Icon: IterationCcw, color: '#14b8a6' },
   { name: 'Burmese (Native)', group: 'human', logos: [skillFlagMm], color: '#fecb00' },
   { name: 'Japanese', group: 'human', logos: [skillFlagJp], color: '#bc002d' },
   { name: 'English', group: 'human', logos: [skillFlagGb], color: '#012169' },
   { name: 'Kaigo Care', group: 'human', Icon: HeartHandshake, color: '#0ea5e9' },
+]
+
+// Sectors of the Core Competencies skill web (About page), clockwise from the top.
+export const SKILL_SECTORS = [
+  { id: 'ai', name: 'AI & ML', color: '#e84ad5' },
+  { id: 'backend', name: 'Backend', color: '#8b5cf6' },
+  { id: 'frontend', name: 'Frontend', color: '#38bdf8' },
+  { id: 'ui', name: 'UI & 3D', color: '#f59e0b' },
+  { id: 'devops', name: 'Data & DevOps', color: '#10b981' },
+  { id: 'practice', name: 'Practice & Mobile', color: '#f43f5e' },
 ]
 
 export const PROJECTS = [
