@@ -16,6 +16,8 @@ export interface ClientProject {
   stack: string[]
   /** Slug of the /projects/:slug case study, when one exists. */
   caseStudy?: string
+  /** Text for the outbound button; defaults to "Visit Live Site". */
+  liveLabel?: string
 }
 
 export const CLIENT_PROJECTS: ClientProject[] = [
@@ -92,5 +94,6 @@ export const CLIENT_PROJECTS: ClientProject[] = [
     highlights: ['Google Gemini + Vision', 'Flask webhook server', 'Replies in your language'],
     stack: ['Python', 'Flask', 'Google Gemini', 'LINE Messaging API'],
     caseStudy: 'ai-line-bot',
+    liveLabel: 'Chat on LINE',
   },
 ]

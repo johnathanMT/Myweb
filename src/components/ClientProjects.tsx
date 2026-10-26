@@ -73,9 +73,9 @@ function ClientCard({ project }: { project: ClientProject }) {
             target="_blank"
             rel="noopener noreferrer"
             className={project.caseStudy ? 'btn-glass' : 'btn-primary'}
-            aria-label={`Visit ${project.name} live site (opens in a new tab)`}
+            aria-label={`${project.liveLabel ?? 'Visit Live Site'}: ${project.name} (opens in a new tab)`}
           >
-            Visit Live Site <ExternalLink size={15} aria-hidden />
+            {project.liveLabel ?? 'Visit Live Site'} <ExternalLink size={15} aria-hidden />
           </a>
           {!project.caseStudy && <span className="font-mono text-xs text-muted">{host}</span>}
         </div>
