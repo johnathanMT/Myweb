@@ -110,12 +110,8 @@
     </noscript>
 
     <script type="module" src="/src/main.tsx"></script>
-    <!--
-      api.js: the static blog/admin PortfolioAPI client. Loaded with defer so it
-      never blocks the React bundle. Not type="module" so it exposes window.PortfolioAPI
-      for the legacy static pages (blog.html, admin.html) that rely on a global.
-    -->
-    <script defer src="/api.js"></script>
+    <!-- api.js (window.PortfolioAPI) is loaded only by the legacy blog.html / admin.html
+         pages that use it; the React app never touches it, so it isn't fetched here. -->
 
 </body>
 

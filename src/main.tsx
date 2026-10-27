@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
+import { MotionConfig } from 'framer-motion'
 import { getInitialTheme, applyTheme } from './hooks/useTheme'
 import { LangProvider } from './context/LangContext'
 import SiteLayout from './layouts/SiteLayout'
@@ -54,6 +55,8 @@ if (!rootEl) throw new Error('Root element #root not found in index.html')
 
 ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
+    {/* Honour the OS "reduce motion" setting for every framer-motion animation. */}
+    <MotionConfig reducedMotion="user">
     <HelmetProvider>
       <LangProvider>
       <BrowserRouter basename={BASENAME}>
@@ -92,6 +95,7 @@ ReactDOM.createRoot(rootEl).render(
       </BrowserRouter>
       </LangProvider>
     </HelmetProvider>
+    </MotionConfig>
   </React.StrictMode>,
 )
 

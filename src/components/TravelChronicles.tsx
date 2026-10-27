@@ -83,7 +83,7 @@ function Modal({ post, lang, setLang, onClose }: { post: BlogPost | null; lang: 
         <div className="relative h-60 overflow-hidden rounded-t-3xl">
           <img src={post.img} alt={title} className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #1a1414, transparent 60%)' }} />
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label="Close"
             className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 flex items-center justify-center text-white transition-all z-10">
             <i className="fas fa-times text-sm" />
           </button>
