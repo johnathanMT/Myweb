@@ -46,7 +46,7 @@ const LAB_LINKS = [
 // i18n labels for the nav (falls back to `en` for any missing language).
 const NAV_T: Record<string, Record<string, string>> = {
   en: { home: 'Home',      about: 'About',      projects: 'Projects',      stack: 'Stack',     labMenu: 'Techno Science Lab', lab: 'Algorithms', agent: 'Agentic AI', quantum: 'Quantum',   antimatter: 'Antimatter',  gallery: 'Gallery',  exploring: 'Exploring', jyotish: 'Vedin', sanctuary: 'Sanctuary', blog: 'Blog' },
-  mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာ',   labMenu: 'Techno Science Lab', quantum: 'ကွမ်တမ်', gallery: 'ပြခန်း',    exploring: 'လေ့လာရန်',  jyotish: 'ဗေဒင်', sanctuary: 'အောက်မေ့ပင်', blog: 'ဘလော့' },
+  mm: { home: 'ပင်မ',       about: 'အကြောင်း',     projects: 'ပရောဂျက်များ',    stack: 'နည်းပညာများ',   labMenu: 'Techno Science Lab', quantum: 'ကွမ်တမ်', gallery: 'ပြခန်း',    exploring: 'စူးစမ်းလေ့လာမှု',  jyotish: 'ဗေဒင်', sanctuary: 'အမှတ်တရပင်', blog: 'ဘလော့ဂ်' },
   jp: { home: 'ホーム',     about: '概要',        projects: 'プロジェクト',    stack: 'スタック',  labMenu: 'テクノサイエンス', quantum: '量子',      antimatter: '反物質',      gallery: 'ギャラリー', exploring: '探索',      sanctuary: '記憶の木',   blog: 'ブログ' },
   vn: { home: 'Trang chủ', about: 'Giới thiệu', projects: 'Dự án',         stack: 'Công nghệ', quantum: 'Lượng tử',  antimatter: 'Phản vật chất', gallery: 'Thư viện', exploring: 'Khám phá',  sanctuary: 'Cây Kỷ Niệm' },
   ne: { home: 'गृह',        about: 'परिचय',       projects: 'परियोजना',       stack: 'स्ट्याक',    quantum: 'क्वान्टम',  antimatter: 'प्रतिपदार्थ',   gallery: 'ग्यालरी',   exploring: 'अन्वेषण',    sanctuary: 'सम्झना रूख', blog: 'ब्लग' },

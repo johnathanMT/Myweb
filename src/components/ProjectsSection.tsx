@@ -7,7 +7,7 @@ import { useCyberReveal } from '../hooks/useCyberReveal'
 interface SectionText { title: string; sub: string }
 const T: Record<string, SectionText> = {
   en: { title: 'Personal Projects & Learning', sub: 'Side projects, study tracks and the journey behind my work.' },
-  mm: { title: 'ကိုယ်ပိုင် ပရောဂျက်များနှင့် လေ့လာမှုများ', sub: 'ဘေးထွက် ပရောဂျက်များ၊ လေ့လာမှုလမ်းကြောင်းများနှင့် ကျွန်တော့်အလုပ်၏ နောက်ကွယ်မှ ခရီးစဉ်။' },
+  mm: { title: 'ကိုယ်ပိုင် ပရောဂျက်များနှင့် လေ့လာမှုများ', sub: 'ဘေးထွက် ပရောဂျက်များ၊ လေ့လာမှု လမ်းကြောင်းများနှင့် ကျွန်တော့်အလုပ်များ၏ နောက်ကွယ်မှ ခရီးစဉ်။' },
   jp: { title: '個人プロジェクトと学び', sub: 'サイドプロジェクト、学習の記録、そして私の歩み。' },
   vn: { title: 'Dự án cá nhân & Học tập', sub: 'Dự án phụ, lộ trình học tập và hành trình phía sau công việc của tôi.' },
   ne: { title: 'व्यक्तिगत परियोजना र सिकाइ', sub: 'साइड परियोजनाहरू, अध्ययन यात्रा र मेरो कामपछाडिको यात्रा।' },

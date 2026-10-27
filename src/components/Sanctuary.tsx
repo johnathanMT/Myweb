@@ -81,7 +81,7 @@ const PLACE_KEYS = ['sakura', 'torii', 'ship', 'village', 'bagan', 'ferris_wheel
 const WELCOME: Record<string, string> = {
   en: 'Welcome to the Memory World. You can choose your favorite spot to leave a message for Ko Myo Thant Naing.',
   jp: 'メモリーワールドへようこそ。ナインへのメッセージを、お好きな場所を選んで残すことができます。',
-  mm: 'Memory World မှ နွေးထွေးစွာ ကြိုဆိုပါတယ်။ Ko Myo Thant Ning အတွက် အမှတ်တရစကားလေးကို သင်နှစ်သက်ရာ နေရာလေးမှာ ရွေးချယ်ချိတ်ဆွဲခဲ့နိုင်ပါတယ်။',
+  mm: 'အမှတ်တရ ကမ္ဘာ (Memory World) မှ နွေးထွေးစွာ ကြိုဆိုပါတယ်။ ကိုမျိုးသန့်နိုင်အတွက် အမှတ်တရစကားလေးကို သင်နှစ်သက်ရာ နေရာတွင် ရွေးချယ် ချိတ်ဆွဲထားခဲ့နိုင်ပါတယ်။',
 }
 
 // Landmarks tags hang from — anchors derived from SCENE_LAYOUT positions.
@@ -103,17 +103,17 @@ const T: Record<string, TLang> = {
     placeHint: 'ステップ1 — 3Dの世界をクリックして場所を選んでください',
     steps: ['「場所を選ぶ」リストから場所を選びます。', 'お名前と思い出を書きます。', '下のボタンを押して残します。'],
     lm: { tree: '桜の木', ship: '船の甲板', village: '村の入口', castle: '城門', plaza: '夜の広場' } },
-  mm: { title: 'အမှတ်တရ ကမ္ဘာ', sub: 'ကြည့်ရန် ဖိဆွဲ · အပြင်ထွက်ရန် scroll · tag ကိုနှိပ်', day: 'နေ့', night: 'ည', leave: 'အမှတ်တရ ချန်ထားရန်', editMine: 'သင့်စာ ပြင်ရန်', from: 'အမှတ်တရ ပေးသူ', at: 'နေရာ —', place: 'နေရာ ရွေးပါ', name: 'သင့်အမည်', msg: 'စာ', hang: 'ချိတ်ဆွဲရန်', save: 'သိမ်းရန်', demo: 'တစ်ဦးလျှင် တစ်ခု · ပြင်နိုင်၊ ဖျက်၍မရ။', edit: 'ပြင်ရန်', namePh: 'သင့်အမည် ထည့်ပါ', msgPh: 'မှတ်မိစရာ စကားအနည်းငယ်…', home: 'ပင်မ',
-    placeHint: 'အဆင့် ၁ — နေရာရွေးရန် 3D ကမ္ဘာတွင် နှိပ်ပါ',
-    steps: ['“နေရာ ရွေးပါ” စာရင်းမှ နေရာတစ်ခု ရွေးပါ။', 'သင့်အမည်နှင့် အမှတ်တရစာ ရေးပါ။', 'အောက်ကခလုတ်ကိုနှိပ်၍ ချန်ထားပါ။'],
-    lm: { tree: 'ဆာကူရာပင်', ship: 'သင်္ဘောကုန်း', village: 'ရွာဝင်ပေါက်', castle: 'ရဲတိုက်တံခါး', plaza: 'ညဈေး' } },
+  mm: { title: 'အမှတ်တရ ကမ္ဘာ', sub: 'ဆွဲ၍ ကြည့်ပါ · scroll လုပ်၍ အဝေးမှ ကြည့်ပါ · tag ကို နှိပ်ပါ', day: 'နေ့', night: 'ည', leave: 'အမှတ်တရ ချန်ထားရန်', editMine: 'သင့်အမှတ်တရကို ပြင်ရန်', from: 'အမှတ်တရ ချန်ထားသူ', at: 'နေရာ —', place: 'နေရာ ရွေးပါ', name: 'သင့်အမည်', msg: 'စာသား', hang: 'ချိတ်ဆွဲရန်', save: 'ပြင်ဆင်မှု သိမ်းရန်', demo: 'တစ်ဦးလျှင် တစ်ခုသာ · ပြင်ဆင်နိုင်ပြီး ဖျက်၍ မရပါ။', edit: 'ပြင်ရန်', namePh: 'သင့်အမည် ထည့်ပါ', msgPh: 'မှတ်မိစရာ စကားအနည်းငယ်…', home: 'ပင်မ',
+    placeHint: 'အဆင့် ၁ — နေရာရွေးရန် 3D ကမ္ဘာထဲ မည်သည့်နေရာကိုမဆို နှိပ်ပါ',
+    steps: ['“နေရာ ရွေးပါ” စာရင်းမှ နေရာတစ်ခု ရွေးပါ။', 'သင့်အမည်နှင့် အမှတ်တရစာ ရေးပါ။', 'အောက်ရှိ ခလုတ်ကို နှိပ်၍ ချိတ်ဆွဲပါ။'],
+    lm: { tree: 'ဆာကူရာပင်', ship: 'သင်္ဘောကုန်းပတ်', village: 'ရွာဝင်ပေါက်', castle: 'ရဲတိုက်တံခါးဝ', plaza: 'ညရင်ပြင်' } },
 }
 const LANGS = [{ code: 'en', label: 'EN' }, { code: 'jp', label: '日本語' }, { code: 'mm', label: 'မြန်မာ' }]
 
 const API_MSG: Record<string, Record<string, string>> = {
   en: { offline: 'Server offline — showing sample memories.', save: 'Couldn’t save to the server — kept on this device.' },
   jp: { offline: 'サーバーオフライン — サンプルを表示中。', save: 'サーバーに保存できませんでした（端末に保存）。' },
-  mm: { offline: 'ဆာဗာ အော့ဖ်လိုင်း — နမူနာများ ပြသနေသည်။', save: 'ဆာဗာသို့ မသိမ်းနိုင်ပါ — စက်တွင်းသာ သိမ်းထားသည်။' },
+  mm: { offline: 'ဆာဗာ အော့ဖ်လိုင်း ဖြစ်နေသဖြင့် နမူနာများကို ပြသထားပါသည်။', save: 'ဆာဗာတွင် သိမ်း၍ မရပါ — ဤစက်ပေါ်တွင်သာ သိမ်းထားပါသည်။' },
 }
 const API = `${SITE.apiUrl}/api/sanctuary/memories`
 const FAREWELL_API = `${SITE.apiUrl}/api/farewell/plants`

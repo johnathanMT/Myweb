@@ -7,7 +7,7 @@ interface ProfileText { kicker: string; title: string; role: string; based: stri
 const T: Record<string, ProfileText> = {
   en: { kicker: 'Profile', title: 'Hello, I’m Myo Thant Naing', role: PERSONAL.subtitle, based: 'Based in Japan', cta: 'Read my full story' },
   jp: { kicker: 'プロフィール', title: 'こんにちは、ミョーです', role: 'コンピュータサイエンス学生 · 介護士 · AIエンジニア志望', based: '日本在住', cta: '私のストーリーを読む' },
-  mm: { kicker: 'ကိုယ်ရေးအကျဉ်း', title: 'မင်္ဂလာပါ၊ ကျွန်တော် မျိုးသန့်နိုင် ပါ', role: 'ကွန်ပျူတာသိပ္ပံ ကျောင်းသား · စောင့်ရှောက်သူ · AI Engineer ရည်မှန်းသူ', based: 'ဂျပန်နိုင်ငံတွင် နေထိုင်သည်', cta: 'ကျွန်တော့်ဇာတ်လမ်း အပြည့်အစုံ ဖတ်ရန်' },
+  mm: { kicker: 'ကိုယ်ရေးအကျဉ်း', title: 'မင်္ဂလာပါ၊ ကျွန်တော် မျိုးသန့်နိုင် ပါ', role: 'ကွန်ပျူတာသိပ္ပံ ကျောင်းသား · ပြုစုစောင့်ရှောက်သူ · AI Engineer ဖြစ်ရန် ရည်မှန်းထားသူ', based: 'ဂျပန်နိုင်ငံ အခြေစိုက်', cta: 'ကျွန်တော့်ဇာတ်လမ်း အပြည့်အစုံ ဖတ်ရန်' },
 }
 
 const SUMMARY: Record<string, string[]> = PERSONAL.summary

@@ -74,7 +74,7 @@ function readAccent(): Rgb {
 type Dict = Record<string, string>
 const T: Record<string, Dict> = {
   en: { badge: 'LIVE NETWORK', title: 'Visitors around the globe', sub: 'Every connection, mapped in real time.', ops: 'Total Operators', conn: 'Current Connection', locating: 'Locating…', unknown: 'Unknown location', byCountry: 'Operators by country' },
-  mm: { badge: 'တိုက်ရိုက်ကွန်ရက်', title: 'ကမ္ဘာတစ်ဝှမ်းမှ ဧည့်သည်များ', sub: 'ချိတ်ဆက်မှုတိုင်းကို အချိန်နှင့်တပြေးညီ ပြသထားသည်။', ops: 'စုစုပေါင်း ဧည့်သည်', conn: 'လက်ရှိ ချိတ်ဆက်မှု', locating: 'တည်နေရာရှာနေသည်…', unknown: 'တည်နေရာ မသိ', byCountry: 'နိုင်ငံအလိုက် ဧည့်သည်' },
+  mm: { badge: 'တိုက်ရိုက်ကွန်ရက်', title: 'ကမ္ဘာတစ်ဝှမ်းမှ ဧည့်သည်များ', sub: 'ချိတ်ဆက်မှုတိုင်းကို အချိန်နှင့်တပြေးညီ မြေပုံပေါ်တွင် ပြသထားသည်။', ops: 'စုစုပေါင်း ဧည့်သည်', conn: 'လက်ရှိ ချိတ်ဆက်ထားသူ', locating: 'တည်နေရာရှာနေသည်…', unknown: 'တည်နေရာ မသိ', byCountry: 'နိုင်ငံအလိုက် ဧည့်သည်' },
   jp: { badge: 'ライブネットワーク', title: '世界中からの訪問者', sub: 'すべての接続をリアルタイムで可視化。', ops: '総オペレーター数', conn: '現在の接続', locating: '位置情報を取得中…', unknown: '不明な場所', byCountry: '国別オペレーター' },
   vn: { badge: 'MẠNG TRỰC TIẾP', title: 'Khách truy cập toàn cầu', sub: 'Mọi kết nối, hiển thị theo thời gian thực.', ops: 'Tổng người dùng', conn: 'Kết nối hiện tại', locating: 'Đang định vị…', unknown: 'Vị trí không xác định', byCountry: 'Người dùng theo quốc gia' },
   ne: { badge: 'प्रत्यक्ष नेटवर्क', title: 'विश्वभरका आगन्तुकहरू', sub: 'प्रत्येक जडान, वास्तविक समयमा।', ops: 'कुल आगन्तुक', conn: 'हालको जडान', locating: 'स्थान खोज्दै…', unknown: 'अज्ञात स्थान', byCountry: 'देश अनुसार आगन्तुक' },
@@ -86,7 +86,7 @@ const T: Record<string, Dict> = {
 // render a meaningful state — loading / empty / offline — never just vanish).
 const STATUS_T: Record<string, Dict> = {
   en: { connecting: 'Connecting to network…', offline: 'Network unavailable — retrying shortly.', empty: 'No operators logged yet.' },
-  mm: { connecting: 'ကွန်ရက်နှင့် ချိတ်ဆက်နေသည်…', offline: 'ကွန်ရက် မရနိုင်ပါ — ပြန်ကြိုးစားနေသည်။', empty: 'ဧည့်သည် မှတ်တမ်းမရှိသေးပါ။' },
+  mm: { connecting: 'ကွန်ရက်နှင့် ချိတ်ဆက်နေသည်…', offline: 'ကွန်ရက် မရရှိနိုင်ပါ — မကြာမီ ပြန်လည်ကြိုးစားပါမည်။', empty: 'ဧည့်သည် မှတ်တမ်းမရှိသေးပါ။' },
   jp: { connecting: 'ネットワークに接続中…', offline: 'ネットワークに接続できません — まもなく再試行します。', empty: 'まだ訪問者の記録はありません。' },
   vn: { connecting: 'Đang kết nối mạng…', offline: 'Mạng không khả dụng — đang thử lại.', empty: 'Chưa có người dùng nào được ghi nhận.' },
   ne: { connecting: 'नेटवर्कमा जडान हुँदै…', offline: 'नेटवर्क उपलब्ध छैन — पुनः प्रयास गर्दै।', empty: 'अहिलेसम्म कुनै आगन्तुक छैन।' },

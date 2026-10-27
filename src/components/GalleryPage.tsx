@@ -9,7 +9,7 @@ import { useLang } from '../context/LangContext'
 interface SectionText { badge: string; title: string; sub: string }
 const T: Record<string, SectionText> = {
   en: { badge: 'GALLERY',   title: 'The full collection', sub: 'Every photo from the journey, grouped by year and chapter.' },
-  mm: { badge: 'ပြခန်း',     title: 'ဓာတ်ပုံအားလုံး',        sub: 'ခရီးတစ်လျှောက်မှ ဓာတ်ပုံအားလုံး — နှစ်နှင့် အခန်းကဏ္ဍအလိုက်။' },
+  mm: { badge: 'ပြခန်း',     title: 'ဓာတ်ပုံအားလုံး',        sub: 'ခရီးတစ်လျှောက်မှ ဓာတ်ပုံအားလုံး — နှစ်နှင့် အမျိုးအစားအလိုက်။' },
   jp: { badge: 'ギャラリー', title: '全コレクション',        sub: '旅のすべての写真を、年と章ごとに。' },
   vn: { badge: 'THƯ VIỆN',  title: 'Bộ sưu tập đầy đủ',   sub: 'Mọi bức ảnh trong hành trình, theo năm và chương.' },
   ne: { badge: 'ग्यालरी',    title: 'पूर्ण संग्रह',          sub: 'यात्राका सबै तस्बिरहरू, वर्ष र अध्याय अनुसार।' },

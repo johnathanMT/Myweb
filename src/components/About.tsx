@@ -10,7 +10,7 @@ const portrait = (url: string): string =>
 
 interface AboutText { title: string; bio: string; slogan: string; skills: string; tech: string; human: string }
 const T: Record<string, AboutText> = {
-  mm: { title: 'ကျတော့် အကြောင်း', bio: 'ဂျပန်တွင် နေထိုင်သည်။ တိုးတက်ပြောင်းလဲနေသော Ai ခေတ်သစ်ဆီသို့', slogan: 'ဘယ်တော့မှ မစတင်ဖြစ်ခဲ့တာထက်စာရင် နောက်ကျတာက ပိုကောင်းပါတယ်။', skills: 'အဓိက ကျွမ်းကျင်မှုများ', tech: 'အင်ဂျင်နီယာ', human: 'ဘာသာစကားနှင့် စောင့်ရှောက်မှု' },
+  mm: { title: 'ကျွန်တော့်အကြောင်း', bio: 'ဂျပန်နိုင်ငံတွင် နေထိုင်သည်။ တိုးတက်ပြောင်းလဲနေသော AI ခေတ်သစ်ဆီသို့ ချီတက်နေသည်။', slogan: 'နောက်ကျသော်လည်း မစတင်ခြင်းထက်တော့ သာပါသည်။', skills: 'အဓိက ကျွမ်းကျင်မှုများ', tech: 'အင်ဂျင်နီယာပညာ', human: 'ဘာသာစကားနှင့် ပြုစုစောင့်ရှောက်မှု' },
   en: { title: 'About Me', bio: 'Living in Japan. Advancing towards the evolving new era of AI.', slogan: 'Better late than never.', skills: 'Core Competencies', tech: 'Engineering', human: 'Languages & Care' },
   jp: { title: '私について', bio: '日本在住。進化し続ける新しいAI時代へ。', slogan: '遅れても、全くやらないよりはまし。', skills: 'コアスキル', tech: 'エンジニアリング', human: '語学・介護' },
   vn: { title: 'Về Tôi', bio: 'Sống ở Nhật Bản. Hướng tới kỷ nguyên AI mới đang không ngừng phát triển.', slogan: 'Thà muộn còn hơn không.', skills: 'Năng lực cốt lõi', tech: 'Kỹ thuật', human: 'Ngôn ngữ & Chăm sóc' },

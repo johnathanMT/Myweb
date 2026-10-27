@@ -14,7 +14,7 @@ import { footerData, techStack, techLogo } from '../data/footerData'
 const FT: Record<string, Record<string, string>> = {
   en: { Product: 'Product', Solutions: 'Solutions', Company: 'Company', Connect: 'Connect', powered: 'Powered by', status: 'System Operational', rights: 'All rights reserved.' },
   zh: { Product: '产品', Solutions: '解决方案', Company: '公司', Connect: '联系', powered: '技术驱动', status: '系统运行正常', rights: '版权所有。' },
-  mm: { Product: 'ထုတ်ကုန်', Solutions: 'ဖြေရှင်းချက်', Company: 'ကုမ္ပဏီ', Connect: 'ဆက်သွယ်ရန်', powered: 'အားဖြည့်သည်', status: 'စနစ် ပုံမှန်အလုပ်လုပ်နေသည်', rights: 'မူပိုင်ခွင့်အားလုံး။' },
+  mm: { Product: 'ထုတ်ကုန်များ', Solutions: 'ဖြေရှင်းချက်များ', Company: 'ကုမ္ပဏီ', Connect: 'ဆက်သွယ်ရန်', powered: 'အသုံးပြုထားသော နည်းပညာ', status: 'စနစ် ပုံမှန် လည်ပတ်နေပါသည်', rights: 'မူပိုင်ခွင့် အားလုံး ရယူထားသည်။' },
   jp: { Product: '製品', Solutions: 'ソリューション', Company: '会社', Connect: '連絡', powered: '使用技術', status: 'システム稼働中', rights: '無断転載禁止。' },
 }
 

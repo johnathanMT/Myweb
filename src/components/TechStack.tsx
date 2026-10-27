@@ -94,7 +94,7 @@ const EN: StackText = {
 
 const T: Record<string, Partial<StackText>> = {
   en: EN,
-  mm: { badge: 'ဗိသုကာနှင့် ခရီး', title: 'ပြုစုခြင်းမှ', accent: 'ကုဒ်ရေးခြင်းဆီ', stackHead: 'နည်းပညာများ' },
+  mm: { badge: 'ဗိသုကာနှင့် ခရီးစဉ်', title: 'ပြုစုစောင့်ရှောက်ခြင်းမှ', accent: 'ကုဒ်ရေးခြင်းဆီသို့', stackHead: 'နည်းပညာများ' },
   jp: { badge: 'アーキテクチャと歩み', title: 'ケアからコードへ', accent: '私の道のり', stackHead: '技術スタック' },
   zh: { badge: '架构与历程', title: '从护理', accent: '到代码', stackHead: '技术栈' },
 }

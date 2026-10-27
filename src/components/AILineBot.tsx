@@ -29,11 +29,11 @@ const T: Record<string, BotText> = {
     badge: 'LINE で稼働中',
   },
   mm: {
-    kicker: 'AI အကူအညီ',
-    title: 'ကျွန်တော့် AI agent နှင့် စကားပြောကြမယ်',
-    sub: 'ကျွန်တော့် LINE AI bot က ကျွန်တော်၊ ကျွန်တော့်အလုပ်နှင့် ခရီးအကြောင်းကို အချိန်မရွေး ဖြေကြားပေးပါတယ်။',
-    cta: 'AI agent နှင့် စကားပြောရန် ဒီနေရာကို နှိပ်ပါ',
-    badge: 'LINE ဖြင့် လည်ပတ်သည်',
+    kicker: 'AI လက်ထောက်',
+    title: 'ကျွန်တော့် AI agent နှင့် စကားပြောကြည့်ပါ',
+    sub: 'ကျွန်တော့် LINE AI bot က ကျွန်တော့်အကြောင်း၊ အလုပ်နှင့် ဘဝခရီးအကြောင်းကို အချိန်မရွေး ဖြေကြားပေးပါသည်။',
+    cta: 'AI agent နှင့် စကားပြောရန် ဤနေရာကို နှိပ်ပါ',
+    badge: 'LINE ပေါ်တွင် လည်ပတ်နေသည်',
   },
   vn: {
     kicker: 'TRỢ LÝ AI',
@@ -62,7 +62,7 @@ const T: Record<string, BotText> = {
 const DISCLAIMER: Record<string, string> = {
   en: 'Heads up: this is an automated AI assistant trained on my background — not me personally. To reach me directly, use LinkedIn or email.',
   jp: 'ご注意：これは私の経歴を学習した自動AIアシスタントで、本人ではありません。直接のご連絡はLinkedInまたはメールへ。',
-  mm: 'သတိပြုရန် — ၎င်းသည် ကျွန်တော့်အကြောင်း လေ့ကျင့်ထားသော အလိုအလျောက် AI အကူအညီဖြစ်ပြီး ကျွန်တော်ကိုယ်တိုင် မဟုတ်ပါ။ တိုက်ရိုက်ဆက်သွယ်ရန် LinkedIn သို့မဟုတ် အီးမေးလ်ကို သုံးပါ။',
+  mm: 'သတိပြုရန် — ဤသည်မှာ ကျွန်တော့်နောက်ခံအကြောင်း သင်ကြားထားသော အလိုအလျောက် AI လက်ထောက် ဖြစ်ပြီး ကျွန်တော်ကိုယ်တိုင် မဟုတ်ပါ။ တိုက်ရိုက်ဆက်သွယ်လိုပါက LinkedIn သို့မဟုတ် အီးမေးလ်မှတစ်ဆင့် ဆက်သွယ်ပါ။',
   vn: 'Lưu ý: đây là trợ lý AI tự động được huấn luyện về tôi — không phải tôi. Để liên hệ trực tiếp, hãy dùng LinkedIn hoặc email.',
   ne: 'सूचना: यो मेरो बारेमा तालिम प्राप्त स्वचालित AI सहायक हो — म आफैं होइन। प्रत्यक्ष सम्पर्कका लागि LinkedIn वा इमेल प्रयोग गर्नुहोस्।',
   id: 'Catatan: ini asisten AI otomatis yang dilatih tentang saya — bukan saya pribadi. Untuk menghubungi saya langsung, gunakan LinkedIn atau email.',

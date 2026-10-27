@@ -20,7 +20,7 @@ interface SectionText { badge: string; title: string; accent: string; sub: strin
 // Section copy (i18n). Per-photo captions come from galleryData.js (optional).
 const T: Record<string, SectionText> = {
   en: { badge: 'GALLERY',   title: 'A collection of', accent: 'moments & memories', sub: 'Photos from the journey — places, projects, and people along the way.', cta: 'Read the blog', all: 'See all photos' },
-  mm: { badge: 'ပြခန်း',     title: 'စုဆောင်းထားသော', accent: 'အမှတ်တရ ခဏများ',     sub: 'ခရီးတစ်လျှောက်မှ ဓာတ်ပုံများ — နေရာများ၊ ပရောဂျက်များနှင့် လူများ။',        cta: 'ဘလော့ဖတ်ရန်', all: 'ဓာတ်ပုံအားလုံး' },
+  mm: { badge: 'ပြခန်း',     title: 'စုဆောင်းထားသော', accent: 'အမှတ်တရ အခိုက်အတန့်များ',     sub: 'ခရီးတစ်လျှောက်မှ ဓာတ်ပုံများ — နေရာများ၊ ပရောဂျက်များနှင့် လူများ။',        cta: 'ဘလော့ဂ် ဖတ်ရန်', all: 'ဓာတ်ပုံအားလုံး' },
   jp: { badge: 'ギャラリー', title: '集めた',          accent: '瞬間と思い出',       sub: '旅の写真 — 場所、プロジェクト、出会った人々。',                                cta: 'ブログを読む', all: 'すべて見る' },
   vn: { badge: 'THƯ VIỆN',  title: 'Bộ sưu tập',     accent: 'khoảnh khắc & kỷ niệm', sub: 'Ảnh từ hành trình — địa điểm, dự án và những con người.',                  cta: 'Đọc blog', all: 'Xem tất cả ảnh' },
   ne: { badge: 'ग्यालरी',    title: 'संग्रह',          accent: 'क्षण र सम्झनाहरू',    sub: 'यात्राका तस्बिरहरू — ठाउँ, परियोजना र मानिसहरू।',                            cta: 'ब्लग पढ्नुहोस्', all: 'सबै तस्बिर हेर्नुहोस्' },

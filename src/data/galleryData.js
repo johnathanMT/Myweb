@@ -54,7 +54,7 @@ export const GALLERY = [
     date: '2024-06-10',
     moment: 'Work Life',
     alt: { en: 'At my workstation' },
-    caption: { en: 'My Workstation', mm: 'ကျွန်ုပ်၏ အလုပ်ခုံ', jp: '僕のワークステーション' },
+    caption: { en: 'My Workstation', mm: 'ကျွန်တော့် အလုပ်စားပွဲ', jp: '僕のワークステーション' },
   },
   {
     id: 'mtn-namba',
@@ -62,7 +62,7 @@ export const GALLERY = [
     date: '2024-09-05',
     moment: 'Work Life',
     alt: { en: 'Namba district, Osaka' },
-    caption: { en: 'Namba, Osaka', mm: 'နန်ဘ၊ အိုဆာကာ', jp: '難波・大阪' },
+    caption: { en: 'Namba, Osaka', mm: 'နမ်ဘ၊ အိုဆာကာ', jp: '難波・大阪' },
   },
   {
     id: 'osaka-ai',
@@ -70,7 +70,7 @@ export const GALLERY = [
     date: '2025-04-12',
     moment: 'Travel',
     alt: { en: 'Osaka' },
-    caption: { en: 'Osaka Vibes', mm: 'အိုဆာကာ', jp: '大阪の風景' },
+    caption: { en: 'Osaka Vibes', mm: 'အိုဆာကာ၏ အငွေ့အသက်', jp: '大阪の風景' },
   },
   // NOTE: no 'mtn_zoo.webp' file exists in gallery/ yet — entry disabled to
   // avoid dead metadata. Drop the file in and uncomment to restore it.
@@ -88,7 +88,7 @@ export const GALLERY = [
     date: '2024-11-22',
     moment: 'Work Life',
     alt: { en: 'Tarot and fortune' },
-    caption: { en: 'Tarot & Fortune', mm: 'တာရော့ဟောကိန်း', jp: 'タロット占い' },
+    caption: { en: 'Tarot & Fortune', mm: 'တားရော့နှင့် ဗေဒင်', jp: 'タロット占い' },
   },
   {
     id: 'mtn-longhair',
@@ -96,7 +96,7 @@ export const GALLERY = [
     date: '2021-08-01',
     moment: 'Throwback',
     alt: { en: 'Throwback portrait' },
-    caption: { en: 'Throwback', mm: 'အတိတ်အမှတ်တရ', jp: '思い出の一枚' },
+    caption: { en: 'Throwback', mm: 'အတိတ်က အမှတ်တရ', jp: '思い出の一枚' },
   },
   {
     id: 'zawgyi',

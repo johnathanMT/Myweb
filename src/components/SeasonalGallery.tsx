@@ -27,7 +27,7 @@ const imgForFile = (file: string | undefined): string | null => {
 interface SectionText { badge: string; title: string; sub: string }
 const T: Record<string, SectionText> = {
   en: { badge: 'Year in Focus', title: 'Myanmar · 12 Months of Festivals', sub: 'One celebration for every month — hover to pause and focus a card.' },
-  mm: { badge: 'တစ်နှစ်တာ', title: 'မြန်မာ့ ၁၂ လ ပွဲတော်များ', sub: 'လတိုင်းအတွက် ပွဲတော်တစ်ခု — ရပ်တန့်ကြည့်ရန် mouse တင်ပါ။' },
+  mm: { badge: 'တစ်နှစ်တာ', title: 'မြန်မာ့ ဆယ့်နှစ်လရာသီ ပွဲတော်များ', sub: 'လတိုင်းအတွက် ပွဲတော်တစ်ခုစီ — ကတ်ကို ရပ်၍ ကြည့်ရန် mouse ကို တင်ထားပါ။' },
   jp: { badge: '一年の歩み', title: 'ミャンマー · 12ヶ月の祭り', sub: '毎月ひとつのお祭り — ホバーで一時停止。' },
   vn: { badge: 'Một năm', title: 'Myanmar · 12 Tháng Lễ Hội', sub: 'Mỗi tháng một lễ hội — di chuột để tạm dừng.' },
   ne: { badge: 'वर्ष', title: 'म्यानमार · १२ महिने चाडपर्व', sub: 'हरेक महिना एउटा चाड — होभरमा रोकिन्छ।' },

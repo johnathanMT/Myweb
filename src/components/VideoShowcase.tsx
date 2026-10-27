@@ -24,10 +24,10 @@ interface Reel { id: string; accent: string; caption: I18nText; desc: I18nText }
 const REELS: Reel[] = [
   {
     id: 'reel-1', accent: '#b8860b',
-    caption: { en: 'The Journey', mm: 'ခရီး', jp: '旅', zh: '旅程', vn: 'Hành trình', ne: 'यात्रा', id: 'Perjalanan' },
+    caption: { en: 'The Journey', mm: 'ခရီးစဉ်', jp: '旅', zh: '旅程', vn: 'Hành trình', ne: 'यात्रा', id: 'Perjalanan' },
     desc: {
       en: 'Where it begins — the first step into the unknown.',
-      mm: 'အစ — အမည်မသိရာဆီသို့ ပထမခြေလှမ်း။',
+      mm: 'အစ — မသိသေးသော ကမ္ဘာဆီသို့ ပထမဆုံး ခြေလှမ်း။',
       jp: '始まり — 未知への最初の一歩。',
       zh: '起点 —— 迈向未知的第一步。',
       vn: 'Nơi bắt đầu — bước đầu tiên vào điều chưa biết.',
@@ -40,7 +40,7 @@ const REELS: Reel[] = [
     caption: { en: 'Discipline', mm: 'စည်းကမ်း', jp: '規律', zh: '自律', vn: 'Kỷ luật', ne: 'अनुशासन', id: 'Disiplin' },
     desc: {
       en: 'Built quietly, day after day, when no one is watching.',
-      mm: 'မည်သူမျှ မမြင်သည့်အခါ နေ့စဉ် တိတ်တဆိတ် တည်ဆောက်ခြင်း။',
+      mm: 'မည်သူမျှ မမြင်သည့်အချိန်တွင် နေ့စဉ် တိတ်တဆိတ် တည်ဆောက်ခဲ့ခြင်း။',
       jp: '誰も見ていない時に、日々静かに積み上げる。',
       zh: '无人注视时，日复一日，默默筑成。',
       vn: 'Xây dựng lặng lẽ, mỗi ngày, khi không ai nhìn.',
@@ -50,10 +50,10 @@ const REELS: Reel[] = [
   },
   {
     id: 'reel-3', accent: '#cda434',
-    caption: { en: 'Breakthrough', mm: 'အောင်မြင်မှု', jp: '突破', zh: '突破', vn: 'Bứt phá', ne: 'सफलता', id: 'Terobosan' },
+    caption: { en: 'Breakthrough', mm: 'ထိုးဖောက်အောင်မြင်မှု', jp: '突破', zh: '突破', vn: 'Bứt phá', ne: 'सफलता', id: 'Terobosan' },
     desc: {
       en: 'The moment the work finally answers back.',
-      mm: 'ကြိုးစားမှုက နောက်ဆုံး ပြန်တုံ့ပြန်လာသည့် အခိုက်အတန့်။',
+      mm: 'ကြိုးစားအားထုတ်မှုများ နောက်ဆုံးတွင် အသီးအပွင့် ဖြစ်လာသည့် အခိုက်အတန့်။',
       jp: '努力がついに応えてくれる瞬間。',
       zh: '努力终于有了回响的那一刻。',
       vn: 'Khoảnh khắc nỗ lực cuối cùng đáp lại.',
@@ -66,7 +66,7 @@ const REELS: Reel[] = [
     caption: { en: 'To the Victory', mm: 'အောင်ပွဲဆီ', jp: '勝利へ', zh: '通往胜利', vn: 'Đến vinh quang', ne: 'विजयतर्फ', id: 'Menuju Kemenangan' },
     desc: {
       en: 'Not the finish line — the proof that the path was real.',
-      mm: 'ပန်းတိုင်မဟုတ် — လမ်းကြောင်း မှန်ကန်ခဲ့ကြောင်း သက်သေ။',
+      mm: 'ပန်းတိုင် မဟုတ်သေးပါ — လျှောက်ခဲ့သော လမ်းသည် အစစ်အမှန် ဖြစ်ကြောင်း သက်သေ။',
       jp: 'ゴールではなく、その道が本物だった証。',
       zh: '不是终点 —— 而是这条路真实存在的证明。',
       vn: 'Không phải vạch đích — mà là minh chứng con đường có thật.',
@@ -79,7 +79,7 @@ const REELS: Reel[] = [
 interface SectionText { badge: string; title: string; sub: string }
 const T: Record<string, SectionText> = {
   en: { badge: 'Showreel', title: 'Highlights in Motion', sub: 'A cinematic look — A 10-second glimpse of life in motion' },
-  mm: { badge: 'ရှိုးရီး', title: 'လှုပ်ရှားသော မှတ်တိုင်များ', sub: 'ရုပ်ရှင်ဆန်သော မြင်ကွင်း — အောက်မှ ရွေးပြီး ကြည့်ပါ။' },
+  mm: { badge: 'Showreel', title: 'လှုပ်ရှားနေသော မှတ်တိုင်များ', sub: 'ရုပ်ရှင်ဆန်သော မြင်ကွင်းများ — ဘဝ၏ ၁၀ စက္ကန့်စာ အခိုက်အတန့်။' },
   jp: { badge: 'ショーリール', title: '動きで見るハイライト', sub: '下のリールを選んで再生。' },
   zh: { badge: '短片集', title: '动态精选', sub: '电影般的呈现 —— 选择下方短片播放。' },
   vn: { badge: 'Showreel', title: 'Khoảnh khắc nổi bật', sub: 'Chọn một đoạn bên dưới để phát.' },

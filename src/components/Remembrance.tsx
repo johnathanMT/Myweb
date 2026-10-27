@@ -36,7 +36,7 @@ const MEMORIAL_DATA: TributeData = {
     en: 'Aba U Hlaing Bwa (1945 - 2026)',
   },
   tags: {
-    mm: ['ဆရာသမား', 'အဘ', 'လေယာဥ်အင်ဂျင်နီယာ'],
+    mm: ['ဆရာသမား', 'အဘ', 'လေယာဉ်အင်ဂျင်နီယာ'],
     en: ['Mentor', 'Grandfather Figure', 'Aircraft Engineer'],
   },
   storyLabel: { mm: 'အမှတ်တရ', en: 'The Story' },
@@ -44,7 +44,7 @@ const MEMORIAL_DATA: TributeData = {
   story: {
     mm: [
       'သားတို့ ပြန်တွေ့နိုင်အုံးမယ် ထင်ခဲ့ပေမယ့် မတွေ့နိုင်တော့ဘူး အဘရယ်၊ တောင်ဥက္ကမှာ မွေးတဲ့အချိန်ထဲကနေ အခုအချိန်ထိ ကူညီစောင့်ရှောက်ပေးခဲ့တဲ့ အတွက် အထူးကျေးဇူးတင်ပါတယ်။',
-      'မကြာမကြာ ဆုံးမစကားတွေပြော၊ စာတွေပို့ပို့ပြီး ဆုံးမပေးခဲ့တာတွေကိုလဲ နားထောင်ပါ့မယ်။ နောက်ဆုံးခရီးကို လိုက်မပို့နိုင်ခဲ့တာ ခွင့်လွှတ်ပါ ။ အထူးဝမ်းနည်းကြေကွဲရပါတယ်။',
+      'မကြာမကြာ ဆုံးမစကားတွေပြော၊ စာတွေပို့ပို့ပြီး ဆုံးမပေးခဲ့တာတွေကိုလဲ နားထောင်ပါ့မယ်။ နောက်ဆုံးခရီးကို လိုက်မပို့နိုင်ခဲ့တာ ခွင့်လွှတ်ပါ။ အထူးဝမ်းနည်းကြေကွဲရပါတယ်။',
     ],
     en: [
       "I thought we would meet again, but we can't anymore, Grandpa. Thank you so much for helping and looking after me from the time I was born in South Okkalapa until now.",
@@ -74,7 +74,7 @@ const STATUE_DATA: TributeData = {
     en: 'Statue of Grandpa U Hlaing Bwa',
   },
   tags: {
-    mm: ['လေယာဥ်အင်ဂျင်နီယာ', 'ဆရာ', 'လမ်းပြမီး'],
+    mm: ['လေယာဉ်အင်ဂျင်နီယာ', 'ဆရာ', 'လမ်းပြမီး'],
     en: ['Aerospace Engineer', 'Teacher', 'Guiding Light'],
   },
   storyLabel: { mm: 'အမွေအနှစ်', en: 'His Legacy' },
