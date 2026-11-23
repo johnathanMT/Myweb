@@ -36,7 +36,7 @@ export default function MegaFooter({ lang = 'en' }: { lang?: string }) {
 
   const item = ({ key, label, to, href }: FooterLink) => {
     const text = label ?? t[key ?? '']
-    const cls = 'inline-block py-1 text-sm text-muted transition-colors duration-200 hover:text-fg focus-visible:text-fg'
+    const cls = 'inline-block py-1 site-footer-link text-sm'
     if (to) return <Link to={to} className={cls} onMouseEnter={() => prefetchRoute(to)} onFocus={() => prefetchRoute(to)}>{text}</Link>
     const web = href?.startsWith('http')
     return <a href={href} className={cls} {...(web ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{text}</a>
@@ -50,9 +50,9 @@ export default function MegaFooter({ lang = 'en' }: { lang?: string }) {
     </nav>
   )
 
-  // hairlines: .site-footer in index.css (white/10 dark, slate-900/10 light)
+  // .site-footer (index.css) sets its own surface and re-scopes --fg / --muted for it
   return (
-    <footer className="site-footer relative z-10 border-t">
+    <footer className="site-footer relative z-10">
       <div className="mx-auto max-w-6xl px-5 pb-10 pt-16 sm:px-6 lg:pt-24">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.8fr_1fr_1fr] lg:gap-16">
           <div className="sm:col-span-2 lg:col-span-1">

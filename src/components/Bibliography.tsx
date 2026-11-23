@@ -2,11 +2,13 @@ import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import {
-  GraduationCap, Building2, PlaneTakeoff, School, AwardIcon, Briefcase, Hotel, Utensils, University, Handshake,
+  GraduationCap, Building2, PlaneTakeoff, School, AwardIcon, Briefcase, Hotel, Utensils, University, Handshake, BrainCircuit,
   type LucideIcon,
 } from 'lucide-react'
 import JourneyCrosslink from './JourneyCrosslink'
 import { SITE } from '../config/site'
+import { useLang } from '../context/LangContext'
+import './Bibliography.css'
 
 /**
  * Bibliography — a vertical chronological timeline of the journey, whose visual
@@ -21,7 +23,9 @@ type Era = 'vintage' | 'transition' | 'cyber'
 /** `photo` — faded card background; `logo` — small badge (for places with only a logo). Files live in public/Myweb_photo/. */
 /** `partners` — two institutions shown side by side with a handshake badge (joint programmes). */
 interface Partner { name: string; photo: string; credit?: string }
-interface TimelineEntry { year: string; era: Era; icon: LucideIcon; title: string; text: string; photo?: string; logo?: string; partners?: [Partner, Partner] }
+/** `org` — employer line under the title; `i18n` — translated copy by LangContext code (English otherwise). */
+interface EntryText { year: string; title: string; text: string; org?: string }
+interface TimelineEntry extends EntryText { era: Era; icon: LucideIcon; i18n?: Record<string, EntryText>; photo?: string; logo?: string; partners?: [Partner, Partner] }
 
 const img = (name: string): string => SITE.asset(`Myweb_photo/timeline-${name}.webp`)
 
@@ -79,32 +83,42 @@ const TIMELINE: TimelineEntry[] = [
       { name: 'Strategy First International College', photo: img('strategy-first-campus') },
     ]
   },
+  {
+    // Employer is confidential (NDA): never name it here or in any translation.
+    year: '2026, November – Present', era: 'cyber', icon: BrainCircuit, title: 'AI Research & Development Engineer Intern', org: 'Tokyo-based tech company',
+    text: 'Engaging in applied AI research, verification, and practical software/system development within an engineering environment in Tokyo.',
+    i18n: {
+      jp: { year: '2026年11月 – 現在', title: 'AI研究開発エンジニア インターン', org: '東京のテック企業', text: '東京のエンジニアリング環境で、応用AIの研究・検証と、実践的なソフトウェア／システム開発に取り組んでいます。' },
+      mm: { year: '၂၀၂၆၊ နိုဝင်ဘာ – လက်ရှိ', title: 'AI Research & Development Engineer Intern', org: 'တိုကျိုရှိ နည်းပညာကုမ္ပဏီတစ်ခု', text: 'တိုကျိုရှိ အင်ဂျင်နီယာ လုပ်ငန်းခွင်တွင် လက်တွေ့အသုံးချ AI သုတေသန၊ စမ်းသပ်အတည်ပြုခြင်းနှင့် ဆော့ဖ်ဝဲ/စနစ် ဖွံ့ဖြိုးတည်ဆောက်ခြင်းတို့တွင် ပါဝင်လုပ်ဆောင်နေပါသည်။' },
+      vn: { year: 'Tháng 11, 2026 – Hiện tại', title: 'Thực tập sinh Kỹ sư Nghiên cứu & Phát triển AI', org: 'Công ty công nghệ tại Tokyo', text: 'Tham gia nghiên cứu AI ứng dụng, kiểm chứng và phát triển phần mềm/hệ thống thực tiễn trong môi trường kỹ thuật tại Tokyo.' },
+      ne: { year: '२०२६, नोभेम्बर – हालसम्म', title: 'AI अनुसन्धान तथा विकास इन्जिनियर इन्टर्न', org: 'टोकियोस्थित प्रविधि कम्पनी', text: 'टोकियोको इन्जिनियरिङ वातावरणमा व्यावहारिक AI अनुसन्धान, प्रमाणीकरण तथा सफ्टवेयर/प्रणाली विकासमा संलग्न।' },
+      id: { year: 'November 2026 – Sekarang', title: 'Magang Insinyur Riset & Pengembangan AI', org: 'Perusahaan teknologi di Tokyo', text: 'Terlibat dalam riset AI terapan, verifikasi, dan pengembangan perangkat lunak/sistem praktis di lingkungan rekayasa di Tokyo.' },
+      zh: { year: '2026年11月 – 至今', title: 'AI 研发工程师实习生', org: '东京某科技公司', text: '在东京的工程环境中参与应用型 AI 研究、验证以及实用的软件与系统开发。' },
+    },
+  },
 ]
 
-interface EraStyle { accent: string; ring: string; card: string; border: string; font: string; filter: string; glow: string }
+/** Spine dots and type per era; card colours (both themes) are in Bibliography.css. */
+interface EraStyle { accent: string; ring: string; font: string; filter: string; glow: string }
 const ERA: Record<Era, EraStyle> = {
   vintage: {
-    accent: '#c8a04a', ring: 'rgba(200,160,74,0.5)',
-    card: 'linear-gradient(160deg, rgba(40,34,24,0.6), rgba(24,20,14,0.7))',
-    border: 'rgba(200,160,74,0.28)', font: 'Georgia, "Times New Roman", serif',
+    accent: '#c8a04a', ring: 'rgba(200,160,74,0.5)', font: 'Georgia, "Times New Roman", serif',
     filter: 'sepia(0.35) saturate(0.9)', glow: 'none',
   },
   transition: {
-    accent: '#9d8bd8', ring: 'rgba(157,139,216,0.55)',
-    card: 'linear-gradient(160deg, rgba(34,30,46,0.6), rgba(18,16,26,0.7))',
-    border: 'rgba(157,139,216,0.3)', font: 'system-ui, sans-serif',
+    accent: '#9d8bd8', ring: 'rgba(157,139,216,0.55)', font: 'system-ui, sans-serif',
     filter: 'none', glow: '0 0 18px rgba(157,139,216,0.25)',
   },
   cyber: {
-    accent: '#d4af37', ring: 'rgba(212,175,55,0.6)',
-    card: 'linear-gradient(160deg, rgba(10,22,30,0.6), rgba(6,12,18,0.72))',
-    border: 'rgba(212,175,55,0.32)', font: '"Fira Code", ui-monospace, monospace',
+    accent: '#d4af37', ring: 'rgba(212,175,55,0.6)', font: '"Fira Code", ui-monospace, monospace',
     filter: 'none', glow: '0 0 22px rgba(212,175,55,0.35)',
   },
 }
 
 function Entry({ item, i }: { item: TimelineEntry; i: number }) {
   const e = ERA[item.era]
+  const { lang } = useLang()
+  const copy = item.i18n?.[lang] ?? item
   const Icon = item.icon
   const left = i % 2 === 0
 
@@ -145,23 +159,16 @@ function Entry({ item, i }: { item: TimelineEntry; i: number }) {
           'ml-12',                                               // mobile: card to the right of icon
           'md:ml-0 md:w-[44%] md:p-6',                         // md: constrained width
           left ? 'md:mr-auto md:pr-8' : 'md:ml-auto md:pl-8', // md: alternate sides
+          `tl-card tl-${item.era}`,
+          item.photo ? 'is-photo' : '',
         ].join(' ')}
-        style={{
-          background: e.card,
-          borderColor: e.border,
-          boxShadow:
-            e.glow === 'none'
-              ? '0 12px 32px rgba(0,0,0,0.4)'
-              : `0 12px 32px rgba(0,0,0,0.4), ${e.glow}`,
-        }}
       >
         {item.photo && (
           <>
             <img src={item.photo} alt="" aria-hidden loading="lazy" decoding="async"
               className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-70" />
             {/* scrim keeps the copy legible over the photo */}
-            <span aria-hidden className="pointer-events-none absolute inset-0"
-              style={{ background: 'linear-gradient(100deg, rgba(6,8,14,0.88) 0%, rgba(6,8,14,0.6) 55%, rgba(6,8,14,0.15) 100%)' }} />
+            <span aria-hidden className="tl-scrim pointer-events-none absolute inset-0" />
           </>
         )}
         {item.partners && (
@@ -190,19 +197,20 @@ function Entry({ item, i }: { item: TimelineEntry; i: number }) {
           </span>
         )}
         <span
-          className="relative mb-2 inline-block rounded px-2 py-0.5 text-[11px] font-semibold tracking-widest"
-          style={{ color: e.accent, border: `1px solid ${e.border}`, fontFamily: e.font, filter: e.filter }}
+          className="tl-date relative mb-2 inline-block rounded px-2 py-0.5 text-[11px] font-semibold tracking-widest"
+          style={{ fontFamily: e.font, filter: e.filter }}
         >
-          {item.year}
+          {copy.year}
         </span>
-        <h3 className={`relative mb-1.5 text-base font-semibold leading-snug text-white sm:text-lg ${item.logo ? 'pr-24' : ''}`} style={{ fontFamily: e.font, ...(item.photo && { color: '#fff', textShadow: '0 1px 8px rgba(0,0,0,0.6)' }) }}>
-          {item.title}
+        <h3 className={`tl-title relative mb-1.5 text-base font-semibold leading-snug sm:text-lg ${item.logo ? 'pr-24' : ''}`} style={{ fontFamily: e.font }}>
+          {copy.title}
         </h3>
-        <p className="relative text-sm leading-relaxed text-gray-300/80" style={{ filter: e.filter }}>
-          {item.text}
+        {copy.org && <p className="tl-org relative mb-1.5 text-sm font-medium">{copy.org}</p>}
+        <p className="tl-text relative text-sm leading-relaxed" style={{ filter: e.filter }}>
+          {copy.text}
         </p>
         {item.partners?.some((pt) => pt.credit) && (
-          <p className="relative mt-2 text-[10px] text-gray-400/70">
+          <p className="tl-credit relative mt-2 text-[10px]">
             {item.partners.filter((pt) => pt.credit).map((pt) => pt.credit).join(' · ')}
           </p>
         )}

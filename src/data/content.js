@@ -45,21 +45,37 @@ export const PERSONAL = {
   summary: {
     en: [
       'I’m genuinely excited by technology. I love taking an idea apart, learning how it works, and building something useful from it, whether that’s a full-stack web app or a small IoT gadget.',
-      'AI is where my curiosity runs deepest. I spend my time exploring agentic AI and how intelligent tools can make everyday life easier, and as an AI engineer I turn that into tools people can use.',
+      'AI is where my curiosity runs deepest. I build practical AI and full-stack systems while working toward becoming a specialized AI & Agentic AI Engineer, with a focus on autonomous agents, intelligent orchestration and resilient system architecture.',
     ],
     jp: [
       'テクノロジーが大好きです。アイデアを分解して仕組みを学び、フルスタックのWebアプリから小さなIoTガジェットまで、役に立つものを作ることにワクワクします。',
-      '一番の関心はAIです。エージェント型AIや、賢いツールで日常をもっと便利にする方法を探求しながら、AIエンジニアとして開発に取り組んでいます。',
+      '一番の関心はAIです。実践的なAIシステムとフルスタック開発に取り組みながら、自律型AIエージェント、インテリジェントなオーケストレーション、堅牢なシステム設計を専門とするAI・Agentic AIエンジニアを目指しています。',
     ],
     mm: [
       'နည်းပညာကို စိတ်အားထက်သန်စွာ စိတ်ဝင်စားပါသည်။ အိုင်ဒီယာတစ်ခုကို အသေးစိတ် ခွဲခြမ်းလေ့လာကာ ၎င်း၏ အလုပ်လုပ်ပုံကို နားလည်ပြီး Full-stack web app များမှသည် IoT ကိရိယာငယ်များအထိ လက်တွေ့အသုံးဝင်သည့် အရာများကို ဖန်တီးရခြင်းကို နှစ်သက်ပါသည်။',
-      'ကျွန်တော် အစိတ်ဝင်စားဆုံး နယ်ပယ်မှာ AI ဖြစ်ပါသည်။ Agentic AI နှင့် ဉာဏ်ရည်ထက်မြက်သော tool များက နေ့စဉ်ဘဝကို မည်သို့ ပိုမိုလွယ်ကူစေနိုင်သည်ကို လေ့လာရင်း AI Engineer တစ်ဦးအဖြစ် ဖန်တီးတည်ဆောက်နေပါသည်။',
+      'ကျွန်တော် အစိတ်ဝင်စားဆုံး နယ်ပယ်မှာ AI ဖြစ်ပါသည်။ လက်တွေ့အသုံးချ AI စနစ်များနှင့် Full-Stack Engineering ကို တည်ဆောက်ရင်း autonomous AI agent များ၊ intelligent orchestration နှင့် ခိုင်ခံ့သော system architecture တို့ကို အထူးပြုသည့် AI & Agentic AI Engineer တစ်ဦးဖြစ်လာစေရန် ရည်မှန်းလျှောက်လှမ်းနေပါသည်။',
+    ],
+    vn: [
+      'Tôi thực sự say mê công nghệ. Tôi thích mổ xẻ một ý tưởng, tìm hiểu cách nó hoạt động và biến nó thành thứ hữu ích, dù là ứng dụng web full-stack hay một thiết bị IoT nhỏ.',
+      'AI là lĩnh vực tôi quan tâm nhất. Tôi xây dựng các hệ thống AI và full-stack thực tiễn, hướng tới trở thành Kỹ sư AI & Agentic AI chuyên sâu về tác tử AI tự chủ, điều phối thông minh và kiến trúc hệ thống bền vững.',
+    ],
+    ne: [
+      'प्रविधिप्रति म साँच्चै उत्साहित छु। कुनै विचारलाई केलाएर त्यसले कसरी काम गर्छ भनेर बुझ्न र फुल-स्ट्याक वेब एपदेखि सानो IoT उपकरणसम्म उपयोगी चीज बनाउन मलाई मन पर्छ।',
+      'मेरो सबैभन्दा गहिरो रुचि AI मा छ। व्यावहारिक AI र फुल-स्ट्याक प्रणाली निर्माण गर्दै म स्वायत्त AI एजेन्ट, बौद्धिक अर्केस्ट्रेसन र भरपर्दो प्रणाली संरचनामा विशेषज्ञ AI तथा Agentic AI इन्जिनियर बन्ने दिशामा अघि बढिरहेको छु।',
+    ],
+    id: [
+      'Saya sangat antusias dengan teknologi. Saya suka membedah sebuah ide, memahami cara kerjanya, lalu membuat sesuatu yang berguna, baik aplikasi web full-stack maupun perangkat IoT kecil.',
+      'AI adalah bidang yang paling menarik bagi saya. Saya membangun sistem AI dan full-stack yang praktis sambil melangkah menjadi AI & Agentic AI Engineer yang mendalami agen AI otonom, orkestrasi cerdas, dan arsitektur sistem yang tangguh.',
+    ],
+    zh: [
+      '我对技术充满热情，喜欢拆解一个想法、弄懂它的原理，再做出有用的东西，无论是全栈 Web 应用还是小型 IoT 设备。',
+      'AI 是我最感兴趣的领域。我在构建实用的 AI 与全栈系统的同时，正朝着专业的 AI 与 Agentic AI 工程师迈进，专注于自主 AI 智能体、智能编排与稳健的系统架构。',
     ],
   },
   // Full bio on the About page (English visitors; other languages keep their short bio).
   aboutBio: [
     'I’m Myo Thant Naing, an AI & full-stack engineer in Japan, studying for a BSc in Computer Science. I started out in international relations and spent years as a caregiver (kaigo) before I moved into software. Caring for people taught me patience and empathy, and it taught me to build for the person on the other side of the screen.',
-    'These days I build full-stack apps with C#/.NET and React, try out agentic AI, and wire up IoT devices with M5Stack. As an AI engineer, I want to ship useful tools for real-world problems. I’m proof that it is better late than never.',
+    'These days I build full-stack apps with C#/.NET and React, develop practical AI systems, and wire up IoT devices with M5Stack. I’m working toward becoming a specialized AI & Agentic AI Engineer, focused on autonomous AI agents, intelligent orchestration and resilient system architecture. I’m proof that it is better late than never.',
   ],
   slogan: 'Better Late Than Never',
   email: SITE.email,

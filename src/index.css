@@ -2497,17 +2497,39 @@ html[data-theme="light"] .ai-dock-tip {
    SITE FOOTER (MegaFooter.tsx)
    ══════════════════════════════════════════════════════════════════ */
 .site-footer {
-  background: rgb(var(--space) / 0.9);
+  /* re-scoped for everything inside: the surface is dark in both themes */
+  --fg: 244 240 250;
+  --muted: 184 180 208;
+  --foot-accent: 196 181 253;
+  position: relative;
+  padding-bottom: var(--dock-space);   /* keeps the last line clear of the floating dock */
+  background: linear-gradient(180deg, #221c3c, #181430);
+  box-shadow: 0 -26px 60px -18px rgb(124 108 230 / 0.28), 0 -1px 0 rgb(0 0 0 / 0.6);
+  color: rgb(var(--fg));
+  color-scheme: dark;
 }
 
-.site-footer,
-.site-footer-legal {
-  border-color: rgb(255 255 255 / 0.1);
+/* luminous top hairline */
+.site-footer::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, rgb(var(--foot-accent) / 0.15), rgb(var(--foot-accent) / 0.95) 50%, rgb(var(--foot-accent) / 0.15));
 }
 
-html[data-theme="light"] .site-footer,
-html[data-theme="light"] .site-footer-legal {
-  border-color: rgb(15 23 42 / 0.1);
+.site-footer-legal { border-color: rgb(var(--foot-accent) / 0.22); }
+.site-footer-link { color: rgb(var(--muted)); transition: color 0.2s ease; }
+.site-footer-link:hover,
+.site-footer-link:focus-visible { color: rgb(var(--foot-accent)); }
+
+/* light: imperial plum, ivory text, muted-gold accents */
+html[data-theme="light"] .site-footer {
+  --fg: 250 245 234;
+  --muted: 203 191 220;
+  --foot-accent: 222 190 128;
+  background: linear-gradient(180deg, #241236, #1B0D2B);
+  box-shadow: 0 -18px 46px -22px rgb(36 18 54 / 0.5);
 }
 
 /* html.hero-live (set by NeuralAttentionHero while it's on screen): fixed chrome

@@ -15,7 +15,6 @@ import {
   PythonAutomation, StudyingLibrary, Bibliography, GitHubProjects, Sanctuary, CaseStudyPage,
 } from './routes'
 import './index.css'
-import { initRecruiterMode } from './lib/recruiterMode'
 
 // Full-screen immersive worlds — rendered OUTSIDE SiteLayout (no Navbar/Footer).
 const Remembrance = lazy(() => import('./components/Remembrance'))
@@ -45,9 +44,6 @@ if (typeof window !== 'undefined' && window.location.hash.startsWith('#/')) {
   const target = base + window.location.hash.slice(1) + window.location.search
   window.history.replaceState(null, '', target)
 }
-
-// ?mode=recruiter must be recorded before the first render so Home opens in the right mode.
-initRecruiterMode()
 
 // #root is guaranteed by index.html; guard keeps TS strict-null happy without `!`.
 const rootEl = document.getElementById('root')

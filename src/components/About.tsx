@@ -10,12 +10,13 @@ const portrait = (url: string): string =>
 
 interface AboutText { title: string; bio: string; slogan: string; skills: string; tech: string; human: string }
 const T: Record<string, AboutText> = {
-  mm: { title: 'ကျွန်တော့်အကြောင်း', bio: 'ဂျပန်နိုင်ငံတွင် နေထိုင်သည်။ တိုးတက်ပြောင်းလဲနေသော AI ခေတ်သစ်ဆီသို့ ချီတက်နေသည်။', slogan: 'နောက်ကျသော်လည်း မစတင်ခြင်းထက်တော့ သာပါသည်။', skills: 'အဓိက ကျွမ်းကျင်မှုများ', tech: 'အင်ဂျင်နီယာပညာ', human: 'ဘာသာစကားနှင့် ပြုစုစောင့်ရှောက်မှု' },
-  en: { title: 'About Me', bio: 'Living in Japan. Advancing towards the evolving new era of AI.', slogan: 'Better late than never.', skills: 'Core Competencies', tech: 'Engineering', human: 'Languages & Care' },
-  jp: { title: '私について', bio: '日本在住。進化し続ける新しいAI時代へ。', slogan: '遅れても、全くやらないよりはまし。', skills: 'コアスキル', tech: 'エンジニアリング', human: '語学・介護' },
-  vn: { title: 'Về Tôi', bio: 'Sống ở Nhật Bản. Hướng tới kỷ nguyên AI mới đang không ngừng phát triển.', slogan: 'Thà muộn còn hơn không.', skills: 'Năng lực cốt lõi', tech: 'Kỹ thuật', human: 'Ngôn ngữ & Chăm sóc' },
-  ne: { title: 'मेरो बारेमा', bio: 'जापानमा बसोबास। विकासशील नयाँ एआई (AI) युगको तर्फ।', slogan: 'कहिल्यै सुरु नगर्नुभन्दा ढिलो सुरु गर्नु राम्रो हो।', skills: 'मुख्य दक्षताहरू', tech: 'इन्जिनियरिङ', human: 'भाषा र हेरचाह' },
-  id: { title: 'Tentang Saya', bio: 'Tinggal di Jepang. Melangkah menuju era baru AI yang terus berkembang.', slogan: 'Lebih baik terlambat daripada tidak sama sekali.', skills: 'Kompetensi Inti', tech: 'Rekayasa', human: 'Bahasa & Perawatan' },
+  mm: { title: 'ကျွန်တော့်အကြောင်း', bio: 'ဂျပန်နိုင်ငံတွင် နေထိုင်သည်။ လက်တွေ့အသုံးချ AI စနစ်များနှင့် Full-Stack Engineering ကို တည်ဆောက်ရင်း AI & Agentic AI Engineer တစ်ဦးဖြစ်လာစေရန် ရည်မှန်းလျှောက်လှမ်းနေပါသည်။', slogan: 'နောက်ကျသော်လည်း မစတင်ခြင်းထက်တော့ သာပါသည်။', skills: 'အဓိက ကျွမ်းကျင်မှုများ', tech: 'အင်ဂျင်နီယာပညာ', human: 'ဘာသာစကားနှင့် ပြုစုစောင့်ရှောက်မှု' },
+  en: { title: 'About Me', bio: 'Living in Japan. Building practical AI and full-stack systems, with a focus on advancing as an AI & Agentic AI Engineer.', slogan: 'Better late than never.', skills: 'Core Competencies', tech: 'Engineering', human: 'Languages & Care' },
+  jp: { title: '私について', bio: '日本在住。実践的なAIシステムとフルスタック開発に取り組みながら、AI・Agentic AIエンジニアを目指しています。', slogan: '遅れても、全くやらないよりはまし。', skills: 'コアスキル', tech: 'エンジニアリング', human: '語学・介護' },
+  vn: { title: 'Về Tôi', bio: 'Sống ở Nhật Bản. Xây dựng các hệ thống AI và full-stack thực tiễn, hướng tới trở thành Kỹ sư AI & Agentic AI.', slogan: 'Thà muộn còn hơn không.', skills: 'Năng lực cốt lõi', tech: 'Kỹ thuật', human: 'Ngôn ngữ & Chăm sóc' },
+  ne: { title: 'मेरो बारेमा', bio: 'जापानमा बसोबास। व्यावहारिक AI र फुल-स्ट्याक प्रणाली निर्माण गर्दै AI तथा Agentic AI इन्जिनियर बन्ने दिशामा अघि बढिरहेको छु।', slogan: 'कहिल्यै सुरु नगर्नुभन्दा ढिलो सुरु गर्नु राम्रो हो।', skills: 'मुख्य दक्षताहरू', tech: 'इन्जिनियरिङ', human: 'भाषा र हेरचाह' },
+  id: { title: 'Tentang Saya', bio: 'Tinggal di Jepang. Membangun sistem AI dan full-stack yang praktis sambil melangkah menjadi AI & Agentic AI Engineer.', slogan: 'Lebih baik terlambat daripada tidak sama sekali.', skills: 'Kompetensi Inti', tech: 'Rekayasa', human: 'Bahasa & Perawatan' },
+  zh: { title: '关于我', bio: '现居日本。在构建实用的 AI 与全栈系统的同时，正朝着 AI 与 Agentic AI 工程师的方向不断精进。', slogan: '迟到总比不到好。', skills: '核心能力', tech: '工程', human: '语言与护理' },
 }
 
 interface AboutProps { lang?: string }

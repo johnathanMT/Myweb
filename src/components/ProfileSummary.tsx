@@ -8,6 +8,10 @@ const T: Record<string, ProfileText> = {
   en: { kicker: 'Profile', title: 'Hello, I’m Myo Thant Naing', based: 'Based in Japan', cta: 'Read my full story' },
   jp: { kicker: 'プロフィール', title: 'こんにちは、ミョーです', based: '日本在住', cta: '私のストーリーを読む' },
   mm: { kicker: 'ကိုယ်ရေးအကျဉ်း', title: 'မင်္ဂလာပါ၊ ကျွန်တော် မျိုးသန့်နိုင် ပါ', based: 'ဂျပန်နိုင်ငံ အခြေစိုက်', cta: 'ကျွန်တော့်ဇာတ်လမ်း အပြည့်အစုံ ဖတ်ရန်' },
+  vn: { kicker: 'Hồ sơ', title: 'Xin chào, tôi là Myo Thant Naing', based: 'Sống tại Nhật Bản', cta: 'Đọc câu chuyện của tôi' },
+  ne: { kicker: 'परिचय', title: 'नमस्ते, म Myo Thant Naing', based: 'जापानमा बसोबास', cta: 'मेरो पूरा कथा पढ्नुहोस्' },
+  id: { kicker: 'Profil', title: 'Halo, saya Myo Thant Naing', based: 'Tinggal di Jepang', cta: 'Baca kisah lengkap saya' },
+  zh: { kicker: '简介', title: '你好，我是 Myo Thant Naing', based: '现居日本', cta: '阅读我的完整故事' },
 }
 
 const TITLES: Record<string, string> = PERSONAL.titles
@@ -18,7 +22,7 @@ interface ProfileSummaryProps { lang?: string }
 /**
  * ProfileSummary — the landing page's "who am I" block, right under the hero.
  * Photo + name + a short summary bio, with a hand-off to the full /about page.
- * Copy follows the visitor's language (en / jp / mm), falling back to English.
+ * Copy follows the visitor's language, falling back to English.
  */
 export default function ProfileSummary({ lang = 'en' }: ProfileSummaryProps) {
   const t = T[lang] || T.en

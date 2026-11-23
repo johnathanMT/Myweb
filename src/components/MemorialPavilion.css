@@ -1,0 +1,105 @@
+/* MEMORIAL PAVILION — bronze and gold on warm dark; antique bronze on parchment in light. */
+.pv-card {
+  --pv-roof-a: #6b4d22;
+  --pv-roof-b: #2f2010;
+  --pv-hall: #1d140b;
+  --pv-niche: #0d0805;
+  --pv-stone-a: #3d3122;
+  --pv-stone-b: #211910;
+  --pv-line: #cfa458;
+  --pv-gold: #d9b066;
+  --pv-ink: #f6ead2;
+  --pv-soft: #cdbb9a;
+  --pv-accent: #e3bd74;
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden;
+  padding: 2rem 1.25rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgb(207 164 88 / 0.34);
+  background:
+    radial-gradient(70% 70% at 30% 78%, rgb(214 146 52 / 0.2), transparent 70%),
+    linear-gradient(170deg, #1c140d, #100b08 70%);
+  box-shadow: inset 0 1px 0 rgb(255 232 186 / 0.1), 0 30px 70px -36px rgb(0 0 0 / 0.9);
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+html[data-theme="light"] .pv-card {
+  --pv-roof-a: #a3763a;
+  --pv-roof-b: #6d4a1f;
+  --pv-hall: #7d5a2c;
+  --pv-niche: #2c1c0c;
+  --pv-stone-a: #cdb88f;
+  --pv-stone-b: #a88f62;
+  --pv-line: #5c3d16;
+  --pv-gold: #c8963e;
+  --pv-ink: #33220d;
+  --pv-soft: #644b2a;
+  --pv-accent: #79500f;
+  border-color: rgb(121 80 15 / 0.3);
+  background:
+    radial-gradient(70% 70% at 30% 78%, rgb(255 206 120 / 0.45), transparent 70%),
+    linear-gradient(170deg, #fbf4e2, #f1e3c4);
+  box-shadow: inset 0 1px 0 #fff, 0 26px 60px -36px rgb(92 61 22 / 0.6);
+}
+
+.pv-card:hover,
+.pv-card:focus-visible { border-color: var(--pv-accent); box-shadow: inset 0 1px 0 rgb(255 232 186 / 0.16), 0 0 60px -18px rgb(226 166 72 / 0.55); }
+.pv-card:focus-visible { outline: 2px solid var(--pv-accent); outline-offset: 4px; }
+
+.pv-svg { display: block; margin: 0 auto; width: 100%; max-width: 24rem; height: auto; overflow: visible; }
+
+.pv-roof { fill: url(#pv-roof); stroke: var(--pv-line); stroke-width: 1.3; stroke-linejoin: round; }
+.pv-wall { fill: var(--pv-roof-b); stroke: var(--pv-line); stroke-width: 0.9; }
+.pv-hall { fill: var(--pv-hall); }
+.pv-niche { fill: var(--pv-niche); }
+.pv-arch { fill: none; stroke: var(--pv-gold); stroke-width: 2.4; stroke-linejoin: round; }
+.pv-pillar { fill: url(#pv-pillar); stroke: var(--pv-line); stroke-width: 0.9; }
+.pv-gold { fill: var(--pv-gold); stroke: none; }
+.pv-gable { fill: var(--pv-roof-b); stroke: var(--pv-gold); stroke-width: 1.1; }
+.pv-line { fill: none; stroke: var(--pv-line); stroke-width: 1.5; stroke-linecap: round; }
+.pv-fine { fill: none; stroke: var(--pv-line); stroke-width: 0.6; opacity: 0.55; }
+.pv-stone { fill: url(#pv-stone); stroke: var(--pv-line); stroke-width: 0.9; }
+.pv-stair { fill: var(--pv-stone-a); stroke: var(--pv-line); stroke-width: 0.9; }
+.pv-spill { opacity: 0.35; pointer-events: none; }
+
+.pv-copy { text-align: center; }
+
+.pv-kicker { font-size: 0.85rem; letter-spacing: 0.06em; color: var(--pv-accent); }
+
+.pv-title {
+  margin-top: 0.75rem;
+  font-family: Georgia, "Times New Roman", "Noto Serif JP", "Hiragino Mincho ProN", "Padauk", "Noto Sans Myanmar", serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.25;
+  color: var(--pv-ink);
+}
+
+.pv-body { margin: 1.1rem auto 0; max-width: 30rem; line-height: 1.8; color: var(--pv-soft); }
+
+.pv-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.75rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--pv-accent) 60%, transparent);
+  font-weight: 600;
+  color: var(--pv-accent);
+}
+
+.pv-title:lang(my), .pv-body:lang(my) { line-height: 1.95; }
+.pv-kicker:lang(my), .pv-kicker:lang(ne) { letter-spacing: 0; }
+
+@media (min-width: 768px) {
+  .pv-card { grid-template-columns: 1fr 1fr; gap: 3rem; padding: 3rem; }
+  .pv-copy { text-align: left; }
+  .pv-body { margin-inline: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-card { transition: none; }
+}

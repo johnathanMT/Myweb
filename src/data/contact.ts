@@ -1,23 +1,21 @@
 /**
- * Hiring facts — one source for the Hire Me panel (recruiter mode) and the
- * "Ask my Portfolio" chat's system prompt. Edit here and both stay in sync.
+ * Contact and availability facts — one source for the footer and the
+ * "Ask my Portfolio" chat. Edit here and both stay in sync.
  */
-export interface HireMe {
+export interface Contact {
   roles: string[]
   location: string
   visa: string
-  japanese: string
   languages: string[]
-  /** public/ path or full URL of a downloadable CV; leave empty to hide the button. */
+  /** public/ path or full URL of a downloadable CV; while empty the footer offers "Request CV". */
   cvUrl: string
   linkedin: string
 }
 
-export const HIRE_ME: HireMe = {
+export const CONTACT: Contact = {
   roles: ['Junior Software Engineer', 'AI / ML Engineer (Junior)', 'Web / Frontend Developer', 'Internship'],
   location: 'Tokyo · Chiba, Japan',
   visa: 'Discussed on request',
-  japanese: 'JLPT N3',
   languages: ['Burmese (native)', 'English', 'Japanese (JLPT N3)'],
   cvUrl: '',
   linkedin: 'https://www.linkedin.com/in/myothantnaing',

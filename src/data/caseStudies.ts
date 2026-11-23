@@ -1,6 +1,6 @@
 /**
  * Case studies — the long-form write-ups behind /projects/:slug.
- * Rendered by components/CaseStudyLayout and listed by CaseStudiesGrid.
+ * Rendered by components/CaseStudyLayout; linked from ClientProjects.
  *
  * Shared facts (name, links, stack, architecture) sit on the study; everything
  * a visitor reads lives in `copy`, one entry per language (en / mm / jp, the

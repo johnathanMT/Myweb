@@ -74,10 +74,7 @@ export default function SiteLayout() {
         </AnimatePresence>
       </main>
 
-      {/* --dock-space keeps the footer's last line clear of the floating dock */}
-      <div className="relative z-10" style={{ paddingBottom: 'var(--dock-space)' }}>
-        <Footer lang={lang} />
-      </div>
+      <Footer lang={lang} />
 
       <AiRobotDock />
       <PortfolioChat />

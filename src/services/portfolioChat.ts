@@ -1,5 +1,5 @@
 import { PERSONAL, SKILLS } from '../data/content'
-import { HIRE_ME } from '../data/recruiter'
+import { CONTACT } from '../data/contact'
 import { CASE_STUDIES } from '../data/caseStudies'
 
 /**
@@ -17,16 +17,17 @@ const CHAT_URL = import.meta.env.VITE_PORTFOLIO_CHAT_URL
 
 /** CV briefing for the model. Built from the site's data files so it never drifts from the pages. */
 export const SYSTEM_PROMPT = `You are "Ask my Portfolio", an assistant on the portfolio website of ${PERSONAL.name}.
-Answer questions from recruiters and visitors about him, in the language they write in.
+Answer questions from visitors about him, in the language they write in.
 Only use the facts below. If something is not covered, say you don't know and suggest emailing him.
 Never claim to be him. Keep answers short and friendly (2-4 sentences).
 
 ## Profile
 - ${PERSONAL.titles.en}
-- Based in: ${HIRE_ME.location}
-- Looking for: ${HIRE_ME.roles.join(', ')}
-- Visa status: ${HIRE_ME.visa} — do not speculate about it.
-- Languages: ${HIRE_ME.languages.join(', ')}
+- Trajectory: building practical AI and full-stack systems while working toward becoming a specialized AI & Agentic AI Engineer (autonomous AI agents, intelligent orchestration, resilient system architecture). This is his aspiration, not a title he already holds.
+- Based in: ${CONTACT.location}
+- Looking for: ${CONTACT.roles.join(', ')}
+- Visa status: ${CONTACT.visa} — do not speculate about it.
+- Languages: ${CONTACT.languages.join(', ')}
 - Motto: "${PERSONAL.slogan}"
 
 ## Journey
@@ -40,6 +41,7 @@ Never claim to be him. Keep answers short and friendly (2-4 sentences).
   (Agile Development, Mobile App Development, Computing Project, Artificial Intelligence,
   and hands-on projects in Backend Web Development and Network Security);
   IBM AI Developer Professional certificate (in progress)
+- November 2026-present: AI Research & Development Engineer Intern at a Tokyo-based tech company. Engaging in applied AI research, verification, and practical software/system development. The employer is confidential: refer to it only as "a Tokyo-based tech company", and never name, guess or confirm it.
 - NCC assessment: Rigorous UK-standard curriculum evaluated through practical hands-on assignments. Demonstrated engineering competency by designing comprehensive system architectures, developing functional software solutions, and writing professional technical documentation, rather than just taking theoretical exams.
 
 ## Skills
@@ -51,7 +53,7 @@ ${CASE_STUDIES.map((c) => `- ${c.name} — ${c.copy.en.summary} Stack: ${c.stack
 
 ## Contact
 - Email: ${PERSONAL.email}
-- LinkedIn: ${HIRE_ME.linkedin}`
+- LinkedIn: ${CONTACT.linkedin}`
 
 /** Send the conversation to the backend, or fall back to the local mock. */
 export async function sendPortfolioMessage(messages: ChatMessage[], signal?: AbortSignal): Promise<string> {
@@ -73,15 +75,19 @@ const RULES: { test: RegExp; answer: () => string }[] = [
   { test: /\b(c#|c sharp|\.net|dotnet|asp)/i,
     answer: () => 'Yes — C# and .NET are core skills. He builds full-stack apps with C#/.NET back ends and React front ends; this portfolio’s own API is ASP.NET.' },
   { test: /visa|residence|work permit|sponsor/i,
-    answer: () => `His visa status is ${HIRE_ME.visa.toLowerCase()} — please email ${PERSONAL.email} and he’ll share the details.` },
+    answer: () => `His visa status is ${CONTACT.visa.toLowerCase()} — please email ${PERSONAL.email} and he’ll share the details.` },
   { test: /japanese|jlpt|nihongo|speak/i,
-    answer: () => `He speaks ${HIRE_ME.languages.join(', ')}. He passed JLPT N3 and has worked in Japanese workplaces since 2022.` },
+    answer: () => `He speaks ${CONTACT.languages.join(', ')}. He passed JLPT N3 and has worked in Japanese workplaces since 2022.` },
   { test: /study|degree|university|education|bsc|ncc/i,
     answer: () => 'He is studying for a BSc in Computer Science with the University of Central Lancashire (UK) through Strategy First International College. He has completed NCC Education’s Level 4 Diploma in Computing and is now studying Level 5 (Agile, Mobile App Development, AI and a Computing Project). Both NCC diplomas are assessed through practical, hands-on assignments — system architecture, working software and technical documentation — rather than just theoretical exams. He also holds a BA in International Relations.' },
+  { test: /\bintern(s|ships?)?\b|r&d|current(ly)?|employer|company|where .*work/i,
+    answer: () => 'Since November 2026 he has been an AI Research & Development Engineer Intern at a Tokyo-based tech company, working on applied AI research, verification and practical software/system development. He keeps further details confidential.' },
+  { test: /goal|aspir|future|become|trajectory/i,
+    answer: () => 'He builds practical AI and full-stack systems while working toward becoming a specialized AI & Agentic AI Engineer, focused on autonomous agents, intelligent orchestration and resilient system architecture.' },
   { test: /where|location|based|live|relocat|remote/i,
-    answer: () => `He is looking for roles in ${HIRE_ME.location}.` },
-  { test: /role|position|job|looking|hire|available|intern/i,
-    answer: () => `He is open to: ${HIRE_ME.roles.join(', ')}.` },
+    answer: () => `He is looking for roles in ${CONTACT.location}.` },
+  { test: /role|position|job|looking|hire|available/i,
+    answer: () => `He is open to: ${CONTACT.roles.join(', ')}.` },
   { test: /\bai\b|agentic|llm|gemini|machine learning|ml\b/i,
     answer: () => 'He works hands-on with agentic AI and LLM APIs — for example a multilingual Gemini assistant on LINE (see /projects/ai-line-bot) — and is completing the IBM AI Developer Professional certificate.' },
   { test: /react|frontend|front-end|typescript|javascript|web/i,
@@ -93,7 +99,7 @@ const RULES: { test: RegExp; answer: () => string }[] = [
   { test: /care|caregiv|kaigo|hospital|background/i,
     answer: () => 'Before tech he worked as a caregiver at Hirashima Hospital in Japan — experience that shaped how he builds for real people. He moved into software through his CS degree.' },
   { test: /contact|email|reach|linkedin|cv|resume/i,
-    answer: () => `Email ${PERSONAL.email} or connect on LinkedIn: ${HIRE_ME.linkedin}. His CV is available on request.` },
+    answer: () => `Email ${PERSONAL.email} or connect on LinkedIn: ${CONTACT.linkedin}. His CV is available on request.` },
 ]
 
 function mockReply(question: string): Promise<string> {

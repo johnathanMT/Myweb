@@ -1,0 +1,59 @@
+/* JOURNEY TIMELINE cards. Dark glass per era; in light mode plain cards turn to
+   paper with dark ink, while photo cards stay dark so copy reads over the image. */
+.tl-card {
+  --tl-title: #ffffff;
+  --tl-text: rgb(209 213 219 / 0.85);
+  --tl-scrim-end: 0.15;
+  background: var(--tl-bg);
+  border-color: var(--tl-border);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.4), var(--tl-glow, 0 0 #0000);
+}
+
+.tl-vintage {
+  --tl-accent: #c8a04a;
+  --tl-border: rgb(200 160 74 / 0.28);
+  --tl-bg: linear-gradient(160deg, rgb(40 34 24 / 0.6), rgb(24 20 14 / 0.7));
+}
+
+.tl-transition {
+  --tl-accent: #9d8bd8;
+  --tl-border: rgb(157 139 216 / 0.3);
+  --tl-bg: linear-gradient(160deg, rgb(34 30 46 / 0.6), rgb(18 16 26 / 0.7));
+  --tl-glow: 0 0 18px rgb(157 139 216 / 0.25);
+}
+
+.tl-cyber {
+  --tl-accent: #d4af37;
+  --tl-border: rgb(212 175 55 / 0.32);
+  --tl-bg: linear-gradient(160deg, rgb(10 22 30 / 0.6), rgb(6 12 18 / 0.72));
+  --tl-glow: 0 0 22px rgb(212 175 55 / 0.35);
+}
+
+.tl-date { color: var(--tl-accent); border: 1px solid var(--tl-border); }
+.tl-org { color: var(--tl-accent); }
+.tl-title { color: var(--tl-title); }
+.tl-text, .tl-credit { color: var(--tl-text); }
+.is-photo .tl-title { text-shadow: 0 1px 8px rgb(0 0 0 / 0.6); }
+
+.tl-scrim {
+  background: linear-gradient(100deg, rgb(6 8 14 / 0.88) 0%, rgb(6 8 14 / 0.6) 55%, rgb(6 8 14 / var(--tl-scrim-end)) 100%);
+}
+
+html[data-theme="light"] .tl-card:not(.is-photo) {
+  --tl-title: #14182a;
+  --tl-text: #3f475a;
+  background: linear-gradient(160deg, #ffffff, #faf7ef);
+  box-shadow: 0 14px 34px -16px rgb(30 41 80 / 0.35);
+}
+
+html[data-theme="light"] .tl-vintage:not(.is-photo) { --tl-accent: #7a5410; --tl-border: rgb(122 84 16 / 0.4); }
+html[data-theme="light"] .tl-transition:not(.is-photo) { --tl-accent: #5840ad; --tl-border: rgb(88 64 173 / 0.4); }
+html[data-theme="light"] .tl-cyber:not(.is-photo) { --tl-accent: #765500; --tl-border: rgb(118 85 0 / 0.4); }
+
+/* no dark page behind these in light mode, so they carry their own */
+html[data-theme="light"] .tl-card.is-photo {
+  --tl-text: rgb(238 241 246 / 0.95);
+  --tl-scrim-end: 0.55;
+  background: #0b0f1a;
+  box-shadow: 0 14px 34px -14px rgb(30 41 80 / 0.5);
+}

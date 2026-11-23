@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  Boxes, Cpu, FlaskConical, Github, Images, Layers, Orbit, Sparkles, Telescope, TreePine, UserRound,
+  Boxes, Cpu, FlaskConical, Github, Images, Layers, Orbit, Telescope, TreePine, UserRound,
 } from 'lucide-react'
 import { useLang } from '../context/LangContext'
 import { LEGACY_ANCHORS } from '../routes'
@@ -11,9 +11,6 @@ import ExploreWheel, { type Destination } from '../components/ExploreWheel'
 import GallerySection from '../components/GallerySection'
 import WalkingAgent from '../components/WalkingAgent'
 import DiscoveryPortal from '../components/DiscoveryPortal'
-import CaseStudiesGrid from '../components/CaseStudiesGrid'
-import HireMePanel from '../components/HireMePanel'
-import { exitRecruiterMode, initRecruiterMode, isRecruiterMode } from '../lib/recruiterMode'
 
 const DESTINATIONS: Destination[] = [
   { to: '/about',     title: 'About',              blurb: 'From caregiving to code — the story, the philosophy, the poems.', Icon: UserRound, tone: 'cyan' },
@@ -27,47 +24,17 @@ const DESTINATIONS: Destination[] = [
   { to: '/github',    title: 'GitHub',             blurb: 'Open-source repositories, pulled live.',                          Icon: Github, tone: 'silver' },
 ]
 
-/** "/" — hero, profile summary, then a directory into every dedicated page (or the recruiter fast track). */
+/** "/" — hero, profile summary, then a directory into every dedicated page. */
 export default function HomePage() {
   const { lang } = useLang()
-  const { pathname, hash, search, key } = useLocation()
+  const { hash } = useLocation()
   const navigate = useNavigate()
-  const [recruiter, setRecruiter] = useState(isRecruiterMode)
 
   // Legacy single-page links (/#projects, /#quantum…) → their new pages.
   useEffect(() => {
     const target = LEGACY_ANCHORS[hash.slice(1)]
     if (target) navigate(target, { replace: true })
   }, [hash, navigate])
-
-  // In-app ?mode=recruiter links (hero, footer) don't remount Home. Guarded on
-  // pathname: an exiting Home must not react to the next page's URL.
-  useEffect(() => {
-    if (pathname !== '/' || !new URLSearchParams(search).has('mode')) return
-    initRecruiterMode()
-    setRecruiter(isRecruiterMode())
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
-  }, [pathname, search, key])
-
-  // Recruiter fast track: no interactive hero — just the facts.
-  if (recruiter) {
-    return (
-      <div style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))' }}>
-        <ProfileSummary lang={lang} />
-        <CaseStudiesGrid />
-        <HireMePanel />
-        <p className="pb-16 text-center">
-          <button
-            type="button"
-            onClick={() => { exitRecruiterMode(); setRecruiter(false); navigate('/', { replace: true }); window.scrollTo({ top: 0, behavior: 'instant' }) }}
-            className="inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-accent-light"
-          >
-            <Sparkles size={14} aria-hidden /> View the full interactive experience
-          </button>
-        </p>
-      </div>
-    )
-  }
 
   return (
     <>

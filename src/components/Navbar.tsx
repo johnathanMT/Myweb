@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, Fragment } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { ChevronDown, Flame, Menu, X, ArrowUpRight } from 'lucide-react'
+import { ChevronDown, Menu, X, ArrowUpRight } from 'lucide-react'
 import { PERSONAL } from '../data/content'
 import { prefetchRoute } from '../routes'
 import ThemeToggle from './ThemeToggle'
@@ -231,11 +231,6 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
             </ul>
           </div>
 
-          {/* In Memoriam — candle link into the 3D remembrance world */}
-          <Link to="/remembrance" aria-label="In Memoriam" title="In Memoriam — a 3D remembrance world" className="icon-btn">
-            <Flame size={15} aria-hidden />
-          </Link>
-
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
 
           {/* Hamburger — below xl (the full link set needs ~1200px) */}
@@ -299,12 +294,6 @@ export default function Navbar({ lang, setLang, theme, toggleTheme }: NavbarProp
               )}
             </Fragment>
           ))}
-
-          <li className="drawer-item mt-1">
-            <Link to="/remembrance" onClick={() => setMenuOpen(false)} className="drawer-link gap-2.5">
-              <Flame size={15} aria-hidden /> In Memoriam
-            </Link>
-          </li>
 
           <li className="drawer-item mt-2 border-t border-accent/10 pt-3">
             <p className="px-4 pb-2 font-mono text-xs text-muted">Language</p>
