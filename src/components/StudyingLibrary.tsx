@@ -268,9 +268,9 @@ export default function StudyingLibrary() {
           <p className="text-xs uppercase tracking-[0.35em]" style={{ color: GOLD, fontFamily: 'Georgia, serif' }}>
             Bibliotheca · Studii
           </p>
-          <h2 className="mt-3 text-3xl text-[#f3ead6] sm:text-4xl" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+          <h1 className="signature-page-title mt-3 text-[#f3ead6]">
             The Personal Library
-          </h2>
+          </h1>
           <div className="mx-auto mt-4 h-px w-24" style={{ background: GOLD }} />
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#cfc4ad]/70 sm:text-base">
             The “what” in my story — NCC Diploma modules, IBM AI certifications, and self-study that

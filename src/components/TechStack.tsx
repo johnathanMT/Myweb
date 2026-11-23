@@ -147,9 +147,9 @@ export default function TechStack({ lang = 'en' }: TechStackProps) {
         {/* ── LEFT: journey narrative ── */}
         <div data-reveal>
           <p className="font-mono text-xs uppercase tracking-[0.35em] text-accent/90">// {t.badge}</p>
-          <h2 className="mt-4 text-3xl font-bold leading-[1.15] text-white sm:text-4xl">
+          <h1 className="signature-page-title mt-4 text-white">
             {t.title} <span className="text-accent">{t.accent}</span>
-          </h2>
+          </h1>
 
           <p className="mt-6 text-lg leading-relaxed text-gray-200">{t.intro}</p>
           {t.paras.map((p, i) => (

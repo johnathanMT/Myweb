@@ -59,7 +59,7 @@ export default function AgentFlow() {
     <section id="agent" ref={viewRef} className="relative py-24 sm:py-28">
       <div className="mx-auto max-w-5xl px-6">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-jade">// AGENTIC AI</p>
-        <h2 className="mt-4 flex items-center gap-3 text-3xl font-bold text-white sm:text-4xl">
+        <h2 className="signature-section-title mt-4 text-white">
           <Brain className="text-accent-light" size={30} /> How an <span className="text-accent-light">AI agent</span> thinks
         </h2>
         <p className="mt-4 max-w-2xl leading-relaxed text-gray-400">

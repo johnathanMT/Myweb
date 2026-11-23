@@ -1,27 +1,44 @@
 /**
- * neuralFieldEngine — a dependency-free Canvas 2D "latent space": nodes drift
- * along a smooth vector field, near neighbours share whisper-thin edges, and an
- * attention focus (the pointer, or a slow wander when there is none) lights the
- * nodes around it and sends occasional signals outward along their edges.
+ * neuralFieldEngine — a dependency-free Canvas 2D golden "latent space":
+ *  • neurons drift on a divergence-free current, so the lattice never clumps;
+ *  • near neighbours share gold edges, with signals gliding along them;
+ *  • harmonic filaments (long sine arcs) flow behind the lattice;
+ *  • an attention focus (the pointer, or a slow wander) lights what is near it;
+ *  • wide screens add a few faint technical glyphs anchored to neurons.
  *
  * Nothing touches window/document at import time, so it is safe to prerender.
  */
 export type FieldTheme = 'dark' | 'light'
 export interface FieldOptions { theme: FieldTheme; static?: boolean }
 
-interface Palette { node: string; node2: string; edge: string; path: string; signal: string; edgeA: number; nodeA: number; pathA: number }
+interface Palette {
+  node: string; node2: string; hot: string; edge: string; path: string; wave: string
+  edgeA: number; nodeA: number; pathA: number; waveA: number; glowA: number; glyphA: number
+}
 const PALETTES: Record<FieldTheme, Palette> = {
-  dark:  { node: '148,178,204', node2: '139,146,220', edge: '120,156,188', path: '214,232,248', signal: '240,248,255', edgeA: 0.34, nodeA: 0.65, pathA: 0.75 },
-  light: { node: '63,72,132',   node2: '38,116,122',  edge: '72,84,140',   path: '38,52,128',   signal: '15,104,112',  edgeA: 0.3,  nodeA: 0.6,  pathA: 0.7 },
+  dark: {
+    node: '245,208,97', node2: '229,184,75', hot: '255,242,178', edge: '212,175,55', path: '245,208,97', wave: '229,184,75',
+    edgeA: 0.62, nodeA: 0.92, pathA: 0.95, waveA: 0.34, glowA: 0.5, glyphA: 0.34,
+  },
+  light: {
+    node: '154,107,22', node2: '184,134,11', hot: '122,82,12', edge: '154,107,22', path: '140,94,14', wave: '201,151,44',
+    edgeA: 0.5, nodeA: 0.88, pathA: 0.85, waveA: 0.46, glowA: 0.3, glyphA: 0.42,
+  },
 }
 
-interface Node { x: number; y: number; vx: number; vy: number; r: number; alt: boolean; fade: number; lit: number }
+interface Node { x: number; y: number; r: number; alt: boolean; fade: number; lit: number; glyph: string }
 interface Signal { from: Node; to: Node; t: number; hops: number }
 
 const LEVELS = 6            // edges are batched into this many opacity steps
 const HEADS = 12            // attention pathways drawn at once
-const MAX_SIGNALS = 10
-const MARGIN = 70           // nodes wrap this far outside the canvas
+const MARGIN = 60           // nodes wrap this far outside the canvas
+const GLYPHS = ['attn(Q,K,V)', 'λ', '0x7F', '∇θ', 'softmax', 'h·W', 'λ₂', '0xA1']
+const WAVES = [
+  { y: 0.16, amp: 0.06, len: 1.25, speed: 0.16, phase: 0.4 },
+  { y: 0.36, amp: 0.09, len: 0.95, speed: -0.12, phase: 2.1 },
+  { y: 0.58, amp: 0.08, len: 1.4, speed: 0.1, phase: 4.0 },
+  { y: 0.8, amp: 0.07, len: 1.05, speed: -0.15, phase: 5.2 },
+]
 
 /** Small seeded PRNG, so the reduced-motion still is the same on every visit. */
 function seeded(seed: number) {
@@ -36,9 +53,12 @@ function seeded(seed: number) {
 export function createNeuralField(canvas: HTMLCanvasElement, opts: FieldOptions) {
   const ctx = canvas.getContext('2d')
   const rand = seeded(20260707)
-  let pal = PALETTES[opts.theme]
+  let theme = opts.theme
+  let pal = PALETTES[theme]
+  let halo: HTMLCanvasElement | null = null
   let w = 0
   let h = 0
+  let small = false
   let link = 130
   let reach = 220
   let nodes: Node[] = []
@@ -46,19 +66,47 @@ export function createNeuralField(canvas: HTMLCanvasElement, opts: FieldOptions)
   let raf = 0
   let last = 0
   let time = 40
-  let nextSignal = 1.2
+  let nextSignal = 0.4
   const pointer = { x: 0, y: 0, on: false }
-  const focus = { x: 0, y: 0, strength: 0.4 }
+  const focus = { x: 0, y: 0, strength: 0.6 }
+  const goal = { x: 0, y: 0 }
 
-  const makeNode = (): Node => ({
-    x: -MARGIN + rand() * (w + MARGIN * 2),
-    y: -MARGIN + rand() * (h + MARGIN * 2),
-    vx: 0, vy: 0,
-    r: 0.9 + rand() * 1.1,
-    alt: rand() < 0.35,
-    fade: 1,
-    lit: 0,
-  })
+  /** Soft glow drawn once and stamped: far cheaper per frame than shadowBlur. */
+  function makeHalo() {
+    halo = document.createElement('canvas')
+    halo.width = halo.height = 64
+    const g2 = halo.getContext('2d')
+    if (!g2) return
+    const g = g2.createRadialGradient(32, 32, 0, 32, 32, 32)
+    g.addColorStop(0, `rgba(${pal.hot},0.9)`)
+    g.addColorStop(0.25, `rgba(${pal.node},0.42)`)
+    g.addColorStop(1, `rgba(${pal.node2},0)`)
+    g2.fillStyle = g
+    g2.fillRect(0, 0, 64, 64)
+  }
+
+  /** Jittered grid: every part of the screen gets its share of neurons. */
+  function seedNodes(count: number) {
+    const W = w + MARGIN * 2
+    const H = h + MARGIN * 2
+    const cols = Math.max(3, Math.round(Math.sqrt((count * W) / H)))
+    const rows = Math.max(3, Math.ceil(count / cols))
+    nodes = []
+    signals = []
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < cols; i++) {
+        nodes.push({
+          x: -MARGIN + ((i + 0.5 + (rand() - 0.5) * 0.85) * W) / cols,
+          y: -MARGIN + ((j + 0.5 + (rand() - 0.5) * 0.85) * H) / rows,
+          r: (small ? 1.5 : 1.25) + rand() * (small ? 1.3 : 1.35),
+          alt: rand() < 0.4,
+          fade: 1,
+          lit: 0,
+          glyph: !small && rand() < 0.07 ? GLYPHS[Math.floor(rand() * GLYPHS.length)] : '',
+        })
+      }
+    }
+  }
 
   function resize() {
     if (!ctx) return
@@ -72,38 +120,33 @@ export function createNeuralField(canvas: HTMLCanvasElement, opts: FieldOptions)
     canvas.height = Math.round(h * dpr)
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-    const small = w < 700
-    link = small ? 104 : 138
-    reach = small ? 150 : 235
-    if (pw && ph) for (const n of nodes) { n.x *= w / pw; n.y *= h / ph }
-    const target = Math.round(Math.max(38, Math.min(small ? 84 : 250, (w * h) / (small ? 4600 : 5600))))
-    while (nodes.length < target) nodes.push(makeNode())
-    if (nodes.length > target) {
-      nodes.length = target
-      signals = []
+    const wasSmall = small
+    small = w < 700
+    link = small ? 112 : 142
+    reach = small ? 170 : 245
+    if (!pw || wasSmall !== small) {
+      seedNodes(Math.round(Math.max(46, Math.min(small ? 110 : 230, (w * h) / (small ? 4000 : 6600)))))
+    } else {
+      for (const n of nodes) { n.x *= w / pw; n.y *= h / ph }
     }
-    if (!pw) home(focus)
-    if (!raf) draw()
+    if (!pw) { home(goal); focus.x = goal.x; focus.y = goal.y }
+    if (!raf) settle()
   }
 
-  /** Where attention rests with no pointer: a slow loop, clear of the copy. */
+  /** Where attention rests with no pointer: a slow loop — down the whole phone, or clear of the desktop copy. */
   function home(out: { x: number; y: number }) {
     const wide = w >= 900
-    out.x = w * (wide ? 0.76 : 0.6) + Math.cos(time * 0.11) * w * (wide ? 0.11 : 0.22)
-    out.y = h * (wide ? 0.48 : 0.2) + Math.sin(time * 0.15) * h * (wide ? 0.2 : 0.06)
+    out.x = w * (wide ? 0.77 : 0.55) + Math.cos(time * 0.13) * w * (wide ? 0.12 : 0.3)
+    out.y = h * 0.48 + Math.sin(time * 0.17) * h * (wide ? 0.24 : 0.36)
   }
 
-  const goal = { x: 0, y: 0 }
   function step(dt: number) {
     time += dt
     for (const n of nodes) {
-      // two slow sine layers make a continuous, swirl-like current
-      const a = Math.sin(n.x * 0.0031 + time * 0.05) * 1.7 + Math.cos(n.y * 0.0037 - time * 0.04) * 1.7 + Math.sin((n.x + n.y) * 0.0017) * 1.2
-      const k = Math.min(1, dt * 0.8)
-      n.vx += (Math.cos(a) * 9 - n.vx) * k
-      n.vy += (Math.sin(a) * 9 - n.vy) * k
-      n.x += n.vx * dt
-      n.y += n.vy * dt
+      // velocity is the curl of a stream function, hence divergence-free
+      const shear = 4.5 * Math.sin((n.x + n.y) * 0.0032 + time * 0.03)
+      n.x += (7 * Math.sin(n.y * 0.0061 + time * 0.06) + shear) * dt
+      n.y += (7 * Math.sin(n.x * 0.0053 - time * 0.05) - shear) * dt
       let wrapped = false
       if (n.x < -MARGIN) { n.x = w + MARGIN; wrapped = true } else if (n.x > w + MARGIN) { n.x = -MARGIN; wrapped = true }
       if (n.y < -MARGIN) { n.y = h + MARGIN; wrapped = true } else if (n.y > h + MARGIN) { n.y = -MARGIN; wrapped = true }
@@ -111,57 +154,61 @@ export function createNeuralField(canvas: HTMLCanvasElement, opts: FieldOptions)
         n.fade = 0
         signals = signals.filter((s) => s.from !== n && s.to !== n)
       }
-      n.fade = Math.min(1, n.fade + dt * 0.5)
+      n.fade = Math.min(1, n.fade + dt * 0.6)
     }
 
     if (pointer.on) { goal.x = pointer.x; goal.y = pointer.y } else home(goal)
     const ease = 1 - Math.exp(-dt * (pointer.on ? 7 : 1.2))
     focus.x += (goal.x - focus.x) * ease
     focus.y += (goal.y - focus.y) * ease
-    focus.strength += ((pointer.on ? 1 : 0.45) - focus.strength) * (1 - Math.exp(-dt * 2.5))
+    focus.strength += ((pointer.on ? 1 : 0.6) - focus.strength) * (1 - Math.exp(-dt * 2.5))
 
     const glow = 1 - Math.exp(-dt * 5)
     for (const n of nodes) n.lit += (attention(n) - n.lit) * glow
 
     nextSignal -= dt
     if (nextSignal <= 0) {
-      nextSignal = (pointer.on ? 0.35 : 1.1) + Math.random() * 0.7
+      nextSignal = 0.16 + Math.random() * 0.3
       spawnSignal()
     }
-    for (const s of signals) s.t += dt / 1.15
+    for (const s of signals) s.t += dt / 1.1
     signals = signals.filter((s) => {
       if (s.t < 1) return true
-      const next = s.hops > 0 ? outward(s.to) : undefined
+      const next = s.hops > 0 ? neighbour(s.to, s.from) : undefined
       if (!next) return false
       s.from = s.to; s.to = next; s.t = 0; s.hops--
       return true
     })
   }
 
-  const fromFocus = (n: Node) => Math.hypot(n.x - focus.x, n.y - focus.y)
   function attention(n: Node) {
-    const d = fromFocus(n) / reach
+    const d = Math.hypot(n.x - focus.x, n.y - focus.y) / reach
     return d >= 1 ? 0 : (1 - d * d) ** 2 * focus.strength
   }
 
-  /** A linked neighbour further from the focus than `n`. */
-  function outward(n: Node): Node | undefined {
-    const d = fromFocus(n)
-    const options = nodes.filter((m) => m !== n && fromFocus(m) > d + 8 && Math.hypot(m.x - n.x, m.y - n.y) < link)
+  function neighbour(n: Node, not?: Node): Node | undefined {
+    const options = nodes.filter((m) => m !== n && m !== not && Math.hypot(m.x - n.x, m.y - n.y) < link * 0.85)
     return options[Math.floor(Math.random() * options.length)]
   }
   function spawnSignal() {
-    if (signals.length >= MAX_SIGNALS) return
+    if (signals.length >= (small ? 12 : 22)) return
+    // half start near the focus, half anywhere, so the whole lattice stays alive
     const lit = nodes.filter((n) => n.lit > 0.12)
-    const from = lit[Math.floor(Math.random() * lit.length)]
-    const to = from && outward(from)
-    if (to) signals.push({ from, to, t: 0, hops: 2 })
+    const pool = Math.random() < 0.5 && lit.length ? lit : nodes
+    const from = pool[Math.floor(Math.random() * pool.length)]
+    const to = from && neighbour(from)
+    if (to) signals.push({ from, to, t: 0, hops: 3 })
   }
 
   function draw() {
     if (!ctx || !w) return
+    ctx.globalCompositeOperation = 'source-over'
     ctx.clearRect(0, 0, w, h)
     ctx.lineCap = 'round'
+    const additive: GlobalCompositeOperation = theme === 'dark' ? 'lighter' : 'source-over'
+    ctx.globalCompositeOperation = additive
+
+    drawWaves()
 
     // synaptic edges, batched by opacity so each level is a single stroke
     const calm: number[][] = Array.from({ length: LEVELS }, () => [])
@@ -171,17 +218,21 @@ export function createNeuralField(canvas: HTMLCanvasElement, opts: FieldOptions)
       for (let j = i + 1; j < nodes.length; j++) {
         const b = nodes[j]
         const dx = a.x - b.x
+        if (dx > link || dx < -link) continue
         const dy = a.y - b.y
         const d2 = dx * dx + dy * dy
         if (d2 > link * link) continue
-        const fall = (1 - Math.sqrt(d2) / link) * Math.min(a.fade, b.fade)
+        // phones: a flatter falloff, so long edges stay visible across the screen
+        const near = 1 - Math.sqrt(d2) / link
+        const fall = (small ? near ** 0.6 : near ** 0.85) * Math.min(a.fade, b.fade)
         calm[Math.min(LEVELS - 1, Math.floor(fall * LEVELS))].push(a.x, a.y, b.x, b.y)
         const hot = Math.sqrt(fall) * Math.min(a.lit, b.lit) * 1.5
         if (hot > 0.04) active[Math.min(LEVELS - 1, Math.floor(hot * LEVELS))].push(a.x, a.y, b.x, b.y)
       }
     }
-    strokeLevels(calm, pal.edge, pal.edgeA, 0.7)
-    strokeLevels(active, pal.path, pal.pathA, 0.9)
+    strokeLevels(calm, pal.edge, pal.edgeA * (small ? 1.5 : 1), small ? 1.3 : 0.95)
+    strokeLevels(active, pal.path, pal.pathA * 0.16, 5)     // soft bloom under the lit edges
+    strokeLevels(active, pal.path, pal.pathA, small ? 1.4 : 1.25)
 
     // attention pathways: focus → its strongest nodes, gently bowed
     const heads = nodes.filter((n) => n.lit > 0.05).sort((p, q) => q.lit - p.lit).slice(0, HEADS)
@@ -192,7 +243,7 @@ export function createNeuralField(canvas: HTMLCanvasElement, opts: FieldOptions)
       g.addColorStop(0, `rgba(${pal.path},0)`)
       g.addColorStop(1, `rgba(${pal.path},${(n.lit * pal.pathA * n.fade).toFixed(3)})`)
       ctx.strokeStyle = g
-      ctx.lineWidth = 0.6 + n.lit * 0.7
+      ctx.lineWidth = 0.8 + n.lit * 0.9
       ctx.beginPath()
       ctx.moveTo(focus.x, focus.y)
       ctx.quadraticCurveTo(focus.x + dx * 0.5 - dy * 0.12, focus.y + dy * 0.5 + dx * 0.12, n.x, n.y)
@@ -200,24 +251,71 @@ export function createNeuralField(canvas: HTMLCanvasElement, opts: FieldOptions)
     }
 
     for (const n of nodes) {
-      const rgb = n.alt ? pal.node2 : pal.node
-      if (n.lit > 0.04) {
-        ctx.fillStyle = `rgba(${rgb},${(n.lit * 0.16 * n.fade).toFixed(3)})`
-        dot(n.x, n.y, n.r + 5.5 * n.lit)
-      }
-      ctx.fillStyle = `rgba(${n.lit > 0.35 ? pal.path : rgb},${((pal.nodeA + (1 - pal.nodeA) * n.lit) * n.fade).toFixed(3)})`
-      dot(n.x, n.y, n.r + n.lit * 0.9)
+      const size = (n.r * 6 + n.lit * 26) * (small ? 1.1 : 1)
+      stamp(n.x, n.y, size, (pal.glowA * 0.55 + n.lit * pal.glowA) * n.fade)
+      ctx.fillStyle = `rgba(${n.lit > 0.3 ? pal.hot : n.alt ? pal.node2 : pal.node},${((pal.nodeA + (1 - pal.nodeA) * n.lit) * n.fade).toFixed(3)})`
+      dot(n.x, n.y, n.r + n.lit * 1.1)
     }
 
     for (const s of signals) {
       const t = s.t * s.t * (3 - 2 * s.t)
-      const alpha = Math.sin(Math.PI * Math.min(1, s.t)) * 0.95
-      const x = s.from.x + (s.to.x - s.from.x) * t
-      const y = s.from.y + (s.to.y - s.from.y) * t
-      ctx.fillStyle = `rgba(${pal.signal},${(alpha * 0.2).toFixed(3)})`
-      dot(x, y, 4.5)
-      ctx.fillStyle = `rgba(${pal.signal},${alpha.toFixed(3)})`
-      dot(x, y, 1.5)
+      const alpha = Math.sin(Math.PI * Math.min(1, s.t))
+      const dx = s.to.x - s.from.x
+      const dy = s.to.y - s.from.y
+      const x = s.from.x + dx * t
+      const y = s.from.y + dy * t
+      const t0 = Math.max(0, t - 0.28)
+      ctx.strokeStyle = `rgba(${pal.hot},${(alpha * 0.8).toFixed(3)})`
+      ctx.lineWidth = small ? 1.9 : 1.7
+      ctx.beginPath()
+      ctx.moveTo(s.from.x + dx * t0, s.from.y + dy * t0)
+      ctx.lineTo(x, y)
+      ctx.stroke()
+      stamp(x, y, 20, alpha * 0.9)
+      ctx.fillStyle = `rgba(${pal.hot},${alpha.toFixed(3)})`
+      dot(x, y, 1.9)
+    }
+
+    if (w >= 1000) drawGlyphs()
+    ctx.globalCompositeOperation = 'source-over'
+  }
+
+  /** Long harmonic filaments: each is a pair of near-parallel sine arcs. */
+  function drawWaves() {
+    if (!ctx) return
+    const g = ctx.createLinearGradient(0, 0, w, 0)
+    g.addColorStop(0, `rgba(${pal.wave},${(pal.waveA * 0.35).toFixed(3)})`)
+    g.addColorStop(0.65, `rgba(${pal.wave},${pal.waveA})`)
+    g.addColorStop(1, `rgba(${pal.wave},${(pal.waveA * 0.5).toFixed(3)})`)
+    ctx.strokeStyle = g
+    const span = Math.max(w, 620)
+    for (const wave of WAVES) {
+      for (let strand = 0; strand < 2; strand++) {
+        ctx.lineWidth = strand ? 0.7 : small ? 1.3 : 1.1
+        ctx.beginPath()
+        for (let x = -10; x <= w + 10; x += 12) {
+          const k = (x / span) * Math.PI * 2 * wave.len
+          const y = h * wave.y
+            + Math.sin(k + wave.phase + time * wave.speed) * h * wave.amp
+            + Math.sin(k * 2.1 - time * wave.speed * 1.4 + strand * 0.9) * h * wave.amp * 0.32
+            + strand * 9
+          if (x < 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+        }
+        ctx.stroke()
+      }
+    }
+  }
+
+  /** Right-hand side only, easing in, so they never sit under the copy. */
+  function drawGlyphs() {
+    if (!ctx) return
+    ctx.font = '11px "Fira Code", ui-monospace, monospace'
+    for (const n of nodes) {
+      if (!n.glyph) continue
+      const side = Math.min(1, Math.max(0, (n.x / w - 0.62) / 0.1))
+      if (!side) continue
+      ctx.fillStyle = `rgba(${pal.node},${(pal.glyphA * side * n.fade).toFixed(3)})`
+      ctx.fillText(n.glyph, n.x + 9, n.y - 8)
     }
   }
 
@@ -226,17 +324,37 @@ export function createNeuralField(canvas: HTMLCanvasElement, opts: FieldOptions)
     ctx.lineWidth = width
     levels.forEach((pts, level) => {
       if (!pts.length) return
-      ctx.strokeStyle = `rgba(${rgb},${(((level + 0.5) / LEVELS) * peak).toFixed(3)})`
+      ctx.strokeStyle = `rgba(${rgb},${Math.min(1, ((level + 0.7) / LEVELS) * peak).toFixed(3)})`
       ctx.beginPath()
       for (let i = 0; i < pts.length; i += 4) { ctx.moveTo(pts[i], pts[i + 1]); ctx.lineTo(pts[i + 2], pts[i + 3]) }
       ctx.stroke()
     })
+  }
+  function stamp(x: number, y: number, size: number, alpha: number) {
+    if (!ctx || !halo || alpha < 0.02) return
+    ctx.globalAlpha = Math.min(1, alpha)
+    ctx.drawImage(halo, x - size / 2, y - size / 2, size, size)
+    ctx.globalAlpha = 1
   }
   function dot(x: number, y: number, r: number) {
     if (!ctx) return
     ctx.beginPath()
     ctx.arc(x, y, r, 0, Math.PI * 2)
     ctx.fill()
+  }
+
+  /** Compose a finished still: the first frame, or the only one. */
+  function settle() {
+    for (const n of nodes) n.lit = attention(n)
+    if (opts.static && !signals.length) {
+      // a fixed handful of mid-flight pulses, so the still reads as alive
+      for (let i = 3; i < nodes.length; i += 11) {
+        const from = nodes[i]
+        const to = nodes.find((m) => m !== from && Math.hypot(m.x - from.x, m.y - from.y) < link * 0.8)
+        if (to) signals.push({ from, to, t: 0.5, hops: 0 })
+      }
+    }
+    draw()
   }
 
   function frame(now: number) {
@@ -247,28 +365,27 @@ export function createNeuralField(canvas: HTMLCanvasElement, opts: FieldOptions)
     draw()
   }
 
-  function setActive(on: boolean) {
-    if (opts.static || on === !!raf) return
-    if (on) {
-      last = performance.now()
-      raf = requestAnimationFrame(frame)
-    } else {
-      cancelAnimationFrame(raf)
-      raf = 0
-    }
-  }
-
+  makeHalo()
   resize()
-  for (const n of nodes) n.lit = attention(n)   // the first (or only) frame is already composed
-  draw()
 
   return {
-    resize() {
-      resize()
-      if (opts.static) { home(focus); for (const n of nodes) n.lit = attention(n); draw() }
+    resize,
+    setActive(on: boolean) {
+      if (opts.static || on === !!raf) return
+      if (on) {
+        last = performance.now()
+        raf = requestAnimationFrame(frame)
+      } else {
+        cancelAnimationFrame(raf)
+        raf = 0
+      }
     },
-    setActive,
-    setTheme(theme: FieldTheme) { pal = PALETTES[theme]; if (!raf) draw() },
+    setTheme(next: FieldTheme) {
+      theme = next
+      pal = PALETTES[next]
+      makeHalo()
+      if (!raf) draw()
+    },
     /** Canvas-space pointer, or null to hand attention back to the idle wander. */
     attend(p: { x: number; y: number } | null) {
       pointer.on = !!p

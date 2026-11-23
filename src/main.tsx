@@ -15,6 +15,7 @@ import {
   PythonAutomation, StudyingLibrary, Bibliography, GitHubProjects, Sanctuary, CaseStudyPage,
 } from './routes'
 import './index.css'
+import './signature.css'
 
 // Full-screen immersive worlds — rendered OUTSIDE SiteLayout (no Navbar/Footer).
 const Remembrance = lazy(() => import('./components/Remembrance'))

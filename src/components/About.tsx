@@ -91,9 +91,9 @@ export default function About({ lang = 'en' }: AboutProps) {
           <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light mb-4">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-light" /> Who I Am
           </span>
-          <h2 className="section-title">
+          <h1 className="section-title signature-page-title">
             <span className="bg-gradient-to-r from-white via-accent-light to-cyan bg-clip-text text-transparent">{t.title}</span>
-          </h2>
+          </h1>
         </div>
 
         {/* Profile — Z layout: portrait → identity, a diagonal connector, then story → motto.

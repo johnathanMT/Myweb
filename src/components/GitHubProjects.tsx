@@ -349,7 +349,7 @@ export default function GitHubProjects() {
           <p className="font-mono text-sm uppercase tracking-[0.3em] text-accent-light">
             // open source
           </p>
-          <h1 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
+          <h1 className="signature-page-title mt-3 text-white">
             GitHub Projects
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/50 sm:text-base">

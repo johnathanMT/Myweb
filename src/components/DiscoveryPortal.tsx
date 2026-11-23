@@ -39,7 +39,7 @@ export default function DiscoveryPortal() {
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-light" /> Discovery Portal
           </span>
 
-          <h2 className="text-3xl font-bold leading-tight md:text-4xl">
+          <h2 className="signature-section-title">
             <span className="bg-gradient-to-r from-white via-accent-light to-cyan bg-clip-text text-transparent">
               A Journey of Discovery
             </span>

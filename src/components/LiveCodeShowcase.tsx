@@ -150,7 +150,7 @@ export default function LiveCodeShowcase() {
     <section id="livecode" ref={viewRef} className="relative py-24 sm:py-28">
       <div className="mx-auto max-w-5xl px-6">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-jade">// C# · .NET 8 — LIVE LESSONS</p>
-        <h2 className="mt-4 flex items-center gap-3 text-3xl font-bold text-white sm:text-4xl">
+        <h2 className="signature-section-title mt-4 text-white">
           <Terminal className="text-accent-light" size={30} /> Live from <span className="text-accent-light">the editor</span>
         </h2>
         <p className="mt-4 max-w-2xl leading-relaxed text-gray-400">

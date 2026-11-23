@@ -134,9 +134,9 @@ export default function PythonAutomation() {
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="mb-10 text-center font-mono">
           <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">// python.automation</p>
-          <h2 className="mt-2 text-3xl font-bold text-emerald-50 sm:text-4xl">
+          <h1 className="signature-page-title mt-2 text-emerald-50">
             <span className="text-emerald-400">&gt;_</span> Cyber Python Tools
-          </h2>
+          </h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-emerald-100/50" style={{ fontFamily: 'system-ui' }}>
             Scripts I built while working as a caregiver in Japan — automating the boring parts of
             hospital reports, shift emails, and study research. The practical “how” after the{' '}

@@ -43,7 +43,7 @@ export default function GallerySection({ lang = 'en' }: { lang?: string }) {
         {/* ── LEFT: copy ── */}
         <div data-reveal>
           <p className="font-mono text-xs uppercase tracking-[0.35em] text-accent/90">{t.badge}</p>
-          <h2 className="mt-4 text-3xl font-bold leading-[1.1] text-white sm:text-4xl lg:text-5xl">
+          <h2 className="signature-section-title mt-4 text-white">
             {t.title} <span className="text-accent">{t.accent}</span>
           </h2>
           <p className="mt-5 max-w-md leading-relaxed text-gray-400">{t.sub}</p>

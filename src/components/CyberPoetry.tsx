@@ -65,7 +65,7 @@ export default function CyberPoetry() {
     <section id="poetry" className="relative py-24 sm:py-28">
       <div className="mx-auto max-w-4xl px-6">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-jade">// DIGITAL POETRY</p>
-        <h2 className="mt-4 flex items-center gap-3 text-3xl font-bold text-white sm:text-4xl">
+        <h2 className="signature-section-title mt-4 text-white">
           <BookOpen className="text-accent-light" size={28} /> The <span className="text-accent-light">holographic grimoire</span>
         </h2>
         <p className="mt-4 max-w-2xl leading-relaxed text-gray-400">

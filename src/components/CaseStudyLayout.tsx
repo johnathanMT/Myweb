@@ -14,7 +14,7 @@ import { caseLabels } from '../data/caseStudyLabels'
 function Section({ icon: Icon, title, children }: { icon: LucideIcon; title: string; children: ReactNode }) {
   return (
     <section className="glass-card p-6 sm:p-8">
-      <h2 className="flex items-center gap-3 font-groovy text-lg font-semibold tracking-wide text-fg sm:text-xl">
+      <h2 className="flex items-center gap-3 font-signature text-xl font-bold text-fg sm:text-2xl">
         <span className="icon-chip"><Icon size={18} aria-hidden /></span>
         {title}
       </h2>
@@ -58,7 +58,7 @@ export default function CaseStudyLayout({ study, lang = 'en' }: { study: CaseStu
       {/* hero */}
       <header className="mt-6">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent">{t.caseStudy} · {copy.kind}</p>
-        <h1 className="section-title mt-3">{study.name}</h1>
+        <h1 className="section-title signature-page-title mt-3">{study.name}</h1>
         {study.localName && <p lang="my" className="mt-1 text-muted">{study.localName}</p>}
         <p className="mt-4 max-w-3xl text-lg leading-relaxed text-muted">{copy.summary}</p>
 

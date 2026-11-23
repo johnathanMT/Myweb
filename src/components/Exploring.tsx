@@ -143,9 +143,9 @@ export default function Exploring() {
       <div className="section-container relative z-10">
         <div data-reveal className="mb-8">
           <span className="section-badge">Polymath</span>
-          <h2 className="section-title">
-            Exploring the Infinite <span className="accent-gradient">🌌</span>
-          </h2>
+          <h1 className="section-title signature-page-title">
+            Exploring the Infinite <span aria-hidden>🌌</span>
+          </h1>
           <p className="text-xs uppercase tracking-widest text-gray-600 mb-4">The Master of Jack of All Trades</p>
         </div>
 

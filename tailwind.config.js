@@ -35,7 +35,9 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['"Fira Code"', 'monospace'],
-        // Futuristic display face — headings, logo, nav (see index.css / components).
+        // Signature display face for titles; the stack is --font-signature in signature.css.
+        signature: ['var(--font-signature)'],
+        // Futuristic face — logo, nav and small labels.
         groovy: ['Orbitron', 'sans-serif'],
       },
       animation: {

@@ -561,9 +561,9 @@ export default function AlgorithmLab() {
     <section id="lab" ref={viewRef} className="relative py-24 sm:py-28">
       <div className="mx-auto max-w-5xl px-6">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-jade">// ALGORITHM LAB</p>
-        <h2 className="mt-4 flex items-center gap-3 text-3xl font-bold text-white sm:text-4xl">
+        <h1 className="signature-page-title mt-4 text-white">
           <Cpu className="text-accent-light" size={30} /> Computer Science, <span className="text-accent-light">running live</span>
-        </h2>
+        </h1>
         <p className="mt-4 max-w-2xl leading-relaxed text-gray-400">
           Not screenshots — real algorithms executing in your browser, step by step. Watch classic sorts compete and
           A* search find the shortest path through a maze.

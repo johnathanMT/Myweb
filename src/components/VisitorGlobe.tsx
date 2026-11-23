@@ -278,7 +278,7 @@ export default function VisitorGlobe({ lang = 'en' }: VisitorGlobeProps) {
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 text-center">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-accent/90">{t.badge}</p>
-        <h2 className="mx-auto mt-4 max-w-2xl text-3xl font-bold leading-[1.1] text-white sm:text-4xl lg:text-5xl">
+        <h2 className="signature-section-title mx-auto mt-4 max-w-2xl text-white">
           {t.title}
         </h2>
         <p className="mx-auto mt-4 max-w-md leading-relaxed text-gray-400">{t.sub}</p>

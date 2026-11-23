@@ -1,0 +1,119 @@
+/* ══════════════════════════════════════════════════════════════════
+   SIGNATURE TYPOGRAPHY — the site's one display voice. Imported after
+   index.css in main.tsx, so these win over utility classes on a heading.
+
+     .signature-hero-title     Home headline
+     .signature-page-title     every page's <h1>
+     .signature-section-title  major <h2> (.section-title is an alias)
+
+   Syne is self-hosted (@fontsource), so it needs no CSP exception.
+   ══════════════════════════════════════════════════════════════════ */
+@import '@fontsource/syne/latin-600.css';
+@import '@fontsource/syne/latin-700.css';
+@import '@fontsource/syne/latin-800.css';
+@import '@fontsource/syne/latin-ext-600.css';
+@import '@fontsource/syne/latin-ext-700.css';
+@import '@fontsource/syne/latin-ext-800.css';
+
+:root {
+  --font-signature: 'Syne', 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', 'Noto Sans Myanmar', 'Padauk', system-ui, sans-serif;
+
+  --sig-hero: clamp(2.65rem, 6.2vw, 5.25rem);
+  --sig-page: clamp(2.25rem, 4.8vw, 3.85rem);
+  --sig-section: clamp(1.65rem, 3vw, 2.5rem);
+
+  --sig-hero-leading: 1.03;
+  --sig-page-leading: 1.08;
+  --sig-section-leading: 1.15;
+
+  /* 1 = as designed; scripts below relax it */
+  --sig-track: 1;
+}
+
+/* Syne is wide: on narrow phones the floors would push long words off-screen */
+@media (max-width: 479px) {
+  :root {
+    --sig-hero: clamp(1.9rem, 10vw, 2.65rem);
+    --sig-page: clamp(1.75rem, 9vw, 2.25rem);
+    --sig-section: clamp(1.45rem, 6.8vw, 1.65rem);
+  }
+}
+
+/* Tall diacritics and dense glyphs need air and no negative tracking */
+html:lang(my) {
+  --sig-hero: clamp(1.75rem, 4.4vw, 3.5rem);
+  --sig-page: clamp(1.7rem, 4vw, 3.1rem);
+  --sig-section: clamp(1.4rem, 2.6vw, 2.1rem);
+  --sig-hero-leading: 1.6;
+  --sig-page-leading: 1.55;
+  --sig-section-leading: 1.55;
+  --sig-track: 0;
+}
+
+html:lang(ne) {
+  --sig-hero: clamp(2rem, 4.8vw, 3.9rem);
+  --sig-page: clamp(1.8rem, 4.2vw, 3.3rem);
+  --sig-hero-leading: 1.35;
+  --sig-page-leading: 1.35;
+  --sig-section-leading: 1.4;
+  --sig-track: 0;
+}
+
+html:lang(ja),
+html:lang(zh) {
+  --sig-hero: clamp(2rem, 5vw, 4.1rem);
+  --sig-page: clamp(1.85rem, 4.2vw, 3.4rem);
+  --sig-hero-leading: 1.25;
+  --sig-page-leading: 1.25;
+  --sig-section-leading: 1.3;
+  --sig-track: 0.3;
+}
+
+/* Syne has no Vietnamese glyphs; one whole font beats a patchwork of two */
+html:lang(vn) { --font-signature: 'Inter', system-ui, sans-serif; }
+
+.signature-hero-title,
+.signature-page-title,
+.signature-section-title,
+.section-title {
+  font-family: var(--font-signature);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+.signature-hero-title {
+  font-size: var(--sig-hero);
+  font-weight: 800;
+  line-height: var(--sig-hero-leading);
+  letter-spacing: calc(-0.035em * var(--sig-track));
+}
+
+.signature-section-title,
+.section-title {
+  font-size: var(--sig-section);
+  font-weight: 700;
+  line-height: var(--sig-section-leading);
+  letter-spacing: calc(-0.025em * var(--sig-track));
+}
+
+/* after the section rule: a page title may also carry .section-title for its colour */
+.signature-page-title {
+  font-size: var(--sig-page);
+  font-weight: 700;
+  line-height: var(--sig-page-leading);
+  letter-spacing: calc(-0.03em * var(--sig-track));
+}
+
+/* a shadow paints over transparent, gradient-filled glyphs and muddies them */
+html .section-title:has(> .bg-clip-text),
+html .glow-heading:has(> .bg-clip-text) { text-shadow: none; }
+
+/* leading icon flows with the words, so a long title wraps like text */
+.signature-page-title > svg,
+.signature-section-title > svg {
+  display: inline-block;
+  height: 0.8em;
+  width: 0.8em;
+  margin-right: 0.3em;
+  vertical-align: -0.06em;
+}

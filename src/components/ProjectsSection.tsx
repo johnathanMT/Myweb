@@ -148,7 +148,7 @@ export default function ProjectsSection({ lang = 'en' }: { lang?: string }) {
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <div data-reveal className="mb-12 text-center">
           <p className="font-mono text-sm uppercase tracking-[0.25em] text-accent-light">// work</p>
-          <h2 className="glow-heading mt-2 text-3xl font-bold text-white sm:text-4xl">{t.title}</h2>
+          <h2 className="glow-heading signature-section-title mt-2 text-white">{t.title}</h2>
           <p className="mt-2 text-gray-300">{t.sub}</p>
         </div>
 

@@ -121,7 +121,7 @@ export default function SeasonalGallery({ lang = 'en' }: { lang?: string }) {
 
       <div className="relative z-10 mx-auto mb-10 max-w-6xl px-6">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-accent/90">// {t.badge}</p>
-        <h2 className="glow-heading mt-2 text-3xl font-bold text-white sm:text-4xl">{t.title}</h2>
+        <h2 className="glow-heading signature-section-title mt-2 text-white">{t.title}</h2>
         <p className="mt-2 max-w-lg text-gray-400">{t.sub}</p>
       </div>
 

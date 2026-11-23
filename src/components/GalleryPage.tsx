@@ -132,7 +132,7 @@ export default function GalleryPage() {
     <section className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <header className="max-w-2xl">
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-accent/90">{t.badge}</p>
-        <h1 className="mt-4 text-3xl font-bold leading-[1.1] text-white sm:text-4xl lg:text-5xl">
+        <h1 className="signature-page-title mt-4 text-white">
           {t.title}
         </h1>
         <p className="mt-4 leading-relaxed text-gray-400">{t.sub}</p>
