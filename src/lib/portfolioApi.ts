@@ -106,5 +106,5 @@ export const api = {
     }),
 
   // Wake the free-tier backend (cold start)
-  wake: (): Promise<void> => fetch(`${BASE_URL}/`).then(() => undefined).catch(() => undefined),
+  wake: (): Promise<void> => fetch(`${BASE_URL}/health`).then(() => undefined).catch(() => undefined),
 }

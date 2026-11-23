@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ExternalLink, ArrowRight } from 'lucide-react'
-import { PROJECTS } from '../data/content'
+import { PROJECTS, type ProjectItem } from '../data/content'
 import { SITE } from '../config/site'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 
@@ -15,20 +15,6 @@ const T: Record<string, SectionText> = {
   zh: { title: '个人项目与学习', sub: '业余项目、学习路线，以及我工作背后的历程。' },
 }
 
-interface Project {
-  id: string
-  title: string
-  desc: string
-  icon: string
-  /** Optional brand image (public/ path) shown instead of the icon font glyph. */
-  logo?: string
-  color: string
-  url: string
-  ext: boolean
-  featured?: boolean
-  sameTab?: boolean   // external link that should navigate in the SAME tab (no target=_blank)
-}
-
 /**
  * Resolve the correct link element for a project entry.
  *
@@ -39,7 +25,7 @@ interface Project {
  *
  * Crucially, SITE.asset() paths like '/Myweb/foo.html' also start with '/'
  * but are NOT React routes — they're static files.  All project URLs in
- * content.js have been migrated to either a React route ('/python', '/github', …)
+ * content.ts have been migrated to either a React route ('/python', '/github', …)
  * or marked ext:true, so this resolver is now unambiguous.
  */
 function ProjectLink({
@@ -47,7 +33,7 @@ function ProjectLink({
   className,
   children,
 }: {
-  project: Project
+  project: ProjectItem
   className: string
   children: React.ReactNode
 }) {
@@ -74,7 +60,7 @@ function ProjectLink({
  *   • Title + short description
  *   • A subtle arrow/external indicator so the user knows what clicking does
  */
-function ProjectLogo({ project }: { project: Project }) {
+function ProjectLogo({ project }: { project: ProjectItem }) {
   const c = project.color
   const isExternal = project.ext
   const tileClass =

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { GALLERY } from '../data/galleryData'
+import { GALLERY, type GalleryEntry } from '../data/galleryData'
+import { pickLang } from '../data/i18n'
 
 /**
  * useGallery — single source of truth for gallery data.
@@ -8,22 +9,14 @@ import { GALLERY } from '../data/galleryData'
  *    • src/assets/images/highlights/  → the HOMEPAGE HEXAGON grid.
  *    • src/assets/images/gallery/     → the dedicated /gallery PAGE.
  *
- *  galleryData.js is an OPTIONAL metadata layer matched by filename, adding
+ *  galleryData.ts is an OPTIONAL metadata layer matched by filename, adding
  *  i18n caption/alt plus the date / moment fields (used for sorting + grouping).
  */
-type I18nText = Record<string, string>
-interface GalleryMeta {
-  file: string
-  caption?: I18nText
-  alt?: I18nText
-  date?: string
-  moment?: string
-}
 export interface GalleryItem {
   id: string
   file: string
   url: string
-  meta: GalleryMeta | null
+  meta: GalleryEntry | null
 }
 export type GallerySection = [title: string, items: GalleryItem[]]
 
@@ -32,7 +25,7 @@ const HIGHLIGHT_IMAGES = import.meta.glob<string>('../assets/images/highlights/*
 const GALLERY_IMAGES   = import.meta.glob<string>('../assets/images/gallery/*.{jpg,jpeg,png,webp,avif}', { eager: true, import: 'default', query: '?url' })
 
 // Optional metadata, keyed by filename for quick lookup (shared by both folders).
-const META: Record<string, GalleryMeta> = Object.fromEntries((GALLERY as GalleryMeta[]).map((g) => [g.file, g]))
+const META: Record<string, GalleryEntry | undefined> = Object.fromEntries(GALLERY.map((g) => [g.file, g]))
 
 // Turn a filename into a clean label: 'new-photo_02.jpg' → 'New Photo 02'.
 const labelFromFile = (file: string): string =>
@@ -89,9 +82,8 @@ const SECTIONS: GallerySection[] = (() => {
 })()
 
 export function useGallery(lang = 'en') {
-  const pick = (obj: I18nText | undefined) => (obj && (obj[lang] || obj.en)) || ''
-  const captionOf = (it: GalleryItem): string => (it.meta && pick(it.meta.caption)) || labelFromFile(it.file)
-  const altOf = (it: GalleryItem): string => (it.meta && pick(it.meta.alt)) || captionOf(it)
+  const captionOf = (it: GalleryItem): string => (it.meta && pickLang(it.meta.caption, lang)) || labelFromFile(it.file)
+  const altOf = (it: GalleryItem): string => (it.meta && pickLang(it.meta.alt, lang)) || captionOf(it)
 
   const highlights = useMemo(() => HIGHLIGHTS, [])
   const sections = useMemo(() => SECTIONS, [])

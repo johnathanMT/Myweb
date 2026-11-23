@@ -1,14 +1,39 @@
 // ============================================================================
-//  footerData.js — links and copy for the site footer (MegaFooter.tsx).
+//  footerData.ts — links and copy for the site footer (MegaFooter.tsx).
 //  Labels fall back to `en` for any key a language leaves out.
 // ============================================================================
 import { SITE } from '../config/site'
 import { CONTACT } from './contact'
+import type { LangCode } from './i18n'
+
+export interface FooterCopy {
+  position: string
+  city: string
+  navTitle: string
+  accessTitle: string
+  about: string
+  projects: string
+  stack: string
+  lab: string
+  gallery: string
+  exploring: string
+  sanctuary: string
+  immersive: string
+  blog: string
+  cv: string
+  cvRequest: string
+  colophon: string
+}
+
+/** `key` is translated through FOOTER_T; `label` is shown as is. */
+type FooterText = { key: keyof FooterCopy; label?: undefined } | { label: string; key?: undefined }
+type FooterTarget = { to: string; href?: undefined } | { href: string; to?: undefined }
+export type FooterLink = FooterText & FooterTarget
 
 const cv = CONTACT.cvUrl
 
 /** Keys index FOOTER_T. */
-export const NAV = [
+export const NAV: FooterLink[] = [
   { key: 'about', to: '/about' },
   { key: 'projects', to: '/projects' },
   { key: 'stack', to: '/stack' },
@@ -20,7 +45,7 @@ export const NAV = [
   { key: 'blog', href: SITE.asset('blog.html') },
 ]
 
-export const ACCESS = [
+export const ACCESS: FooterLink[] = [
   { label: 'GitHub', href: 'https://github.com/johnathanMT' },
   { label: 'LinkedIn', href: CONTACT.linkedin },
   { label: SITE.email, href: SITE.mailto },
@@ -30,7 +55,7 @@ export const ACCESS = [
     : { key: 'cvRequest', href: `${SITE.mailto}?subject=${encodeURIComponent('CV request')}` },
 ]
 
-export const FOOTER_T = {
+export const FOOTER_T: { en: FooterCopy } & Partial<Record<LangCode, Partial<FooterCopy>>> = {
   en: { position: 'AI Research & Software Engineering · Tokyo, Japan', city: 'TOKYO', navTitle: 'Navigation', accessTitle: 'Direct access', about: 'About', projects: 'Projects', stack: 'Stack', lab: 'Techno Science Lab', gallery: 'Gallery', exploring: 'Exploring', sanctuary: 'Sanctuary', immersive: 'Immersive 3D', blog: 'Blog', cv: 'Download CV', cvRequest: 'Request CV', colophon: 'Engineered in Tokyo' },
   jp: { position: 'AI研究 & ソフトウェアエンジニアリング · 東京', city: '東京', navTitle: 'ナビゲーション', accessTitle: 'お問い合わせ', about: '概要', projects: 'プロジェクト', stack: 'スタック', lab: 'テクノサイエンス', gallery: 'ギャラリー', exploring: '探索', sanctuary: '記憶の木', blog: 'ブログ', cv: '履歴書をダウンロード', cvRequest: '履歴書を依頼する', colophon: '東京にて開発' },
   mm: { position: 'AI သုတေသနနှင့် ဆော့ဖ်ဝဲ အင်ဂျင်နီယာပညာ · တိုကျို၊ ဂျပန်', city: 'တိုကျို', navTitle: 'ကဏ္ဍများ', accessTitle: 'ဆက်သွယ်ရန်', about: 'အကြောင်း', projects: 'ပရောဂျက်များ', stack: 'နည်းပညာများ', gallery: 'ပြခန်း', exploring: 'စူးစမ်းလေ့လာမှု', sanctuary: 'အမှတ်တရပင်', blog: 'ဘလော့ဂ်', cv: 'CV ဒေါင်းလုဒ်ရယူရန်', cvRequest: 'CV တောင်းခံရန်', colophon: 'တိုကျိုတွင် တည်ဆောက်သည်' },

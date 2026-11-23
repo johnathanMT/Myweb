@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react'
 import { motion, useMotionValue, useMotionTemplate, useAnimationFrame } from 'framer-motion'
 import { useCyberReveal } from '../hooks/useCyberReveal'
-import { MONTHS } from '../data/content'
+import { MONTHS, type FestivalMonth } from '../data/content'
+import { pickLang } from '../data/i18n'
 
 /**
  * SeasonalGallery — "Year in Focus" → Myanmar's 12 Months of Festivals,
@@ -17,8 +18,7 @@ const MONTH_IMAGES = import.meta.glob<string>(
   '../assets/images/months/*.{webp,jpg,jpeg,png,avif}',
   { eager: true, import: 'default', query: '?url' },
 )
-const imgForFile = (file: string | undefined): string | null => {
-  if (!file) return null
+const imgForFile = (file: string): string | null => {
   const key = `/${file.toLowerCase()}.`
   const hit = Object.entries(MONTH_IMAGES).find(([path]) => path.toLowerCase().includes(key))
   return hit ? hit[1] : null
@@ -35,26 +35,11 @@ const T: Record<string, SectionText> = {
   zh: { badge: '年度回顾', title: '缅甸 · 十二个月的节日', sub: '每月一个庆典 —— 悬停可暂停并聚焦卡片。' },
 }
 
-// i18n field (en/mm/jp/…) and a month record from src/data/content (still JS).
-type I18nText = Record<string, string>
-interface Month {
-  name: string
-  mm?: string
-  greg?: string
-  region?: string
-  color: string
-  file?: string
-  img?: string
-  festival: I18nText
-  desc: I18nText
-}
-
-function MonthCard({ m, lang = 'en' }: { m: Month; lang?: string }) {
+function MonthCard({ m, lang = 'en' }: { m: FestivalMonth; lang?: string }) {
   const [imgOk, setImgOk] = useState(true)
   const abbr = m.name.slice(0, 3)
-  const pick = (o: I18nText) => (o && (o[lang] || o.en)) || ''
-  const festival = pick(m.festival)
-  const src = imgForFile(m.file) || m.img
+  const festival = pickLang(m.festival, lang)
+  const src = imgForFile(m.file)
 
   return (
     <figure
@@ -89,7 +74,7 @@ function MonthCard({ m, lang = 'en' }: { m: Month; lang?: string }) {
         <h3 className="mt-1 text-lg font-bold leading-snug text-white">{festival}</h3>
         <p className="mt-0.5 text-xs text-gray-300">{m.mm ? `${m.mm} · ` : ''}{m.region}</p>
         <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-gray-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          {pick(m.desc)}
+          {pickLang(m.desc, lang)}
         </p>
       </figcaption>
     </figure>

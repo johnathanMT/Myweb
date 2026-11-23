@@ -1,5 +1,6 @@
 import { useState, useEffect, type CSSProperties } from 'react'
-import { BLOG_POSTS } from '../data/content'
+import { BLOG_POSTS, type BlogPost } from '../data/content'
+import { pickLang } from '../data/i18n'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 
 // Inline style that sets a CSS custom property (--c).
@@ -17,22 +18,10 @@ const LANG_LABELS: Record<string, string> = {
   en: 'English', mm: 'မြန်မာ', jp: '日本語', vn: 'Tiếng Việt', ne: 'नेपाली', id: 'Bahasa',
 }
 
-// A blog post from src/data/content (still JS); this mirrors its shape.
-interface PostBody { excerpt: string; body: string }
-interface BlogPost {
-  id: string
-  size: string
-  date: string
-  tag: string
-  img: string
-  title: Record<string, string>
-  translations: Record<string, PostBody>
-}
-
 function BentoCard({ post, onClick, lang }: { post: BlogPost; onClick: (post: BlogPost) => void; lang: string }) {
   const sizeClass = SIZE_CLASS[post.size] || 'bento-medium'
-  const tr = post.translations[lang] || post.translations.en
-  const title = post.title[lang] || post.title.en
+  const tr = pickLang(post.translations, lang)
+  const title = pickLang(post.title, lang)
 
   return (
     <div className={`bento-card ${sizeClass} group`} onClick={() => onClick(post)}>
@@ -70,8 +59,8 @@ function Modal({ post, lang, setLang, onClose }: { post: BlogPost | null; lang: 
 
   if (!post) return null
 
-  const tr    = post.translations[lang] || post.translations.en
-  const title = post.title[lang] || post.title.en
+  const tr    = pickLang(post.translations, lang)
+  const title = pickLang(post.title, lang)
 
   return (
     <div

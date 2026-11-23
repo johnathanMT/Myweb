@@ -1,6 +1,7 @@
 import { SITE } from '../config/site'
 import { ASSETS } from '../config/assets'
-import { BrainCircuit, BrainCog, Cpu, HeartHandshake, IterationCcw, PenTool, Workflow } from 'lucide-react'
+import { BrainCircuit, BrainCog, Cpu, HeartHandshake, IterationCcw, PenTool, Workflow, type LucideIcon } from 'lucide-react'
+import type { AllLangs, Localized } from './i18n'
 import skillPython from '../assets/images/skill-python.svg'
 import skillCsharp from '../assets/images/skill-csharp.svg'
 import skillHtml5 from '../assets/images/skill-html5.svg'
@@ -25,7 +26,84 @@ import skillThreejs from '../assets/images/skill-threejs.svg'
 import skillFlask from '../assets/images/skill-flask.svg'
 import skillGemini from '../assets/images/skill-gemini.svg'
 
-export const PERSONAL = {
+export interface PersonalData {
+  name: string
+  handle: string
+  tagline: string
+  titles: AllLangs
+  bio: string
+  summary: AllLangs<string[]>
+  aboutBio: string[]
+  slogan: string
+  email: string
+  photo: string
+  photoWebp: string
+  homePhoto: string
+  quote: string
+  heinlein: string
+}
+
+export interface SocialLink { label: string; icon: string; url: string }
+
+export type SkillSectorId = 'ai' | 'backend' | 'frontend' | 'ui' | 'devops' | 'practice'
+export interface SkillSector { id: SkillSectorId; name: string; color: string }
+
+interface SkillBase {
+  name: string
+  color: string
+  logos?: string[]
+  Icon?: LucideIcon
+  plate?: boolean
+}
+export interface TechSkill extends SkillBase {
+  group: 'tech'
+  sector: SkillSectorId
+  short: string
+  proof?: [label: string, slug: string][]
+}
+export interface HumanSkill extends SkillBase { group: 'human' }
+export type SkillItem = TechSkill | HumanSkill
+
+export interface ProjectItem {
+  id: string
+  title: string
+  desc: string
+  icon: string
+  /** Optional brand image (public/ path) shown instead of the icon font glyph. */
+  logo?: string
+  color: string
+  url: string
+  ext: boolean
+  featured?: boolean
+  /** External link that should navigate in the same tab. */
+  sameTab?: boolean
+}
+
+export interface FestivalMonth {
+  name: string
+  mm: string
+  greg: string
+  region: string
+  color: string
+  file: string
+  festival: AllLangs
+  desc: AllLangs
+}
+
+export interface PostBody { excerpt: string; body: string }
+export interface BlogPost {
+  id: string
+  size: 'large' | 'medium' | 'wide'
+  date: string
+  tag: 'Travel' | 'Musings' | 'Care Giving'
+  img: string
+  title: Localized
+  translations: Localized<PostBody>
+}
+
+export interface Interest { title: string; desc: string; icon: string; color: string; page: string }
+
+export const PERSONAL: PersonalData = {
   name: 'Myo Thant Naing',
   handle: 'MTN.Digitosphere',
   tagline: 'From Caring to Coding in Japan 🇯🇵',
@@ -89,7 +167,7 @@ export const PERSONAL = {
 
 // Real, personal channels only. The LINE link is intentionally NOT here — it
 // reaches an automated AI assistant, not me personally (see the AI-agent section).
-export const SOCIAL = [
+export const SOCIAL: SocialLink[] = [
   { label: 'GitHub', icon: 'fab fa-github', url: 'https://github.com/johnathanMT' },
   { label: 'LinkedIn', icon: 'fab fa-linkedin-in', url: 'https://www.linkedin.com/in/myothantnaing' },
 ]
@@ -102,7 +180,7 @@ export const SOCIAL = [
 // 'human' skills sit in the Languages & Care row beneath it.
 // `proof` links a skill to the case studies (/projects/:slug) where it ships.
 // Gemini mark: Simple Icons (CC0), tinted to its brand purple.
-export const SKILLS = [
+export const SKILLS: SkillItem[] = [
   { name: 'AI & Agentic AI', short: 'Agentic AI', sector: 'ai', group: 'tech', Icon: BrainCircuit, color: '#e84ad5' },
   { name: 'LLM APIs (Gemini)', short: 'Gemini LLM', sector: 'ai', group: 'tech', logos: [skillGemini], color: '#8e75b2', proof: [['Vedin', 'vedin'], ['LINE Bot', 'ai-line-bot']] },
   { name: 'Machine Learning', short: 'Machine Learning', sector: 'ai', group: 'tech', Icon: BrainCog, color: '#f97316' },
@@ -134,7 +212,7 @@ export const SKILLS = [
 ]
 
 // Sectors of the Core Competencies skill web (About page), clockwise from the top.
-export const SKILL_SECTORS = [
+export const SKILL_SECTORS: SkillSector[] = [
   { id: 'ai', name: 'AI & ML', color: '#e84ad5' },
   { id: 'backend', name: 'Backend', color: '#8b5cf6' },
   { id: 'frontend', name: 'Frontend', color: '#38bdf8' },
@@ -143,7 +221,7 @@ export const SKILL_SECTORS = [
   { id: 'practice', name: 'Practice & Mobile', color: '#f43f5e' },
 ]
 
-export const PROJECTS = [
+export const PROJECTS: ProjectItem[] = [
   {
     id: 'python', title: 'Python Automation',
     desc: 'Tools created to help with daily tasks and workflows.',
@@ -176,7 +254,7 @@ export const PROJECTS = [
 // `greg` = approximate Gregorian span. Missing images fall back to a placeholder.
 //  `festival` and `desc` are i18n objects ({ en, mm, jp, zh, vn, ne, id }).
 //  SeasonalGallery picks the active language and falls back to `en` per key.
-export const MONTHS = [
+export const MONTHS: FestivalMonth[] = [
   {
     name: 'Tagu', mm: 'တန်ခူး', greg: 'Mar–Apr', region: 'Nationwide', color: '#bbf7d0', file: 'tangoo',
     festival: { en: 'Thingyan Water Festival', mm: 'သင်္ကြန် ရေသဘင်ပွဲတော်', jp: 'ティンジャン（水祭り）', zh: '泼水节（缅甸新年）', vn: 'Lễ hội té nước Thingyan', ne: 'थिङ्ग्यान जल महोत्सव', id: 'Festival Air Thingyan' },
@@ -336,7 +414,7 @@ export const MONTHS = [
 ]
 
 // ─── Multilingual blog translations ───────────────────────────────────────────
-const kyotoContent = {
+const kyotoContent: Localized<PostBody> = {
   en: {
     excerpt: 'Where tradition meets modern beauty.',
     body: `Kyoto in winter carries a stillness that no other season can replicate. The red and white camellia blossoms push through frosted soil beside ancient stone lanterns, a quiet defiance against the cold.
@@ -387,7 +465,7 @@ Bagi developer yang menghabiskan sebagian besar harinya menatap layar, momen kei
   },
 }
 
-const osakaContent = {
+const osakaContent: Localized<PostBody> = {
   en: {
     excerpt: 'Neon lights and street food beneath plum blossoms.',
     body: `Osaka is alive in a way few cities are. The street food stalls of Dotonbori, the crowd energy, the neon reflecting off wet pavement at 2am — it's a city that refuses to sleep.
@@ -439,7 +517,7 @@ Saya duduk di bangku taman dengan takoyaki di satu tangan, laptop di tangan lain
 }
 
 
-const tokyoContent = {
+const tokyoContent: Localized<PostBody> = {
   en: {
     excerpt: 'Neon dreams and the pulse of technology.',
     body: `Tokyo is the city where the future happens. From the intricate web of trains to the towering digital displays of Shibuya, it is a place where relentless ambition meets unparalleled efficiency. It is the global epicenter of technology and innovation.
@@ -494,7 +572,7 @@ Bagi seorang pengembang, Tokyo lebih dari sekadar kota; ini adalah kanvas kemung
 
 
 
-const thoughtsContent = {
+const thoughtsContent: Localized<PostBody> = {
   en: {
     excerpt: '"Sometimes, you just need to disconnect to reconnect."',
     body: `There's a forest trail I found outside of the city. No cell reception. No notifications. Just the sound of wind in cedar trees and the occasional crow.
@@ -545,7 +623,7 @@ Memutus sambungan bukan kegagalan. Itu adalah pemeliharaan. Disiplin yang sama y
   },
 }
 
-const kaigoContent = {
+const kaigoContent: Localized<PostBody> = {
   en: {
     excerpt: '"Life is not ever easy — keep patient and resilient."',
     body: `Before I wrote my first line of code professionally, I spent years as a care worker — Kaigo — in Japan. Early mornings, late nights, the weight of responsibility for another person's dignity.
@@ -598,7 +676,7 @@ Saya tidak menyesal dengan jalan itu. Saya membawanya ke setiap proyek, setiap i
   },
 }
 
-export const BLOG_POSTS = [
+export const BLOG_POSTS: BlogPost[] = [
   {
     id: 'kyoto', size: 'large',
     date: 'Jan 15, 2026', tag: 'Travel',
@@ -638,7 +716,7 @@ export const BLOG_POSTS = [
   },
 ]
 
-export const INTERESTS = [
+export const INTERESTS: Interest[] = [
   { title: 'Cosmology', desc: 'Unraveling the mysteries of the universe and celestial mechanics.', icon: 'fas fa-globe-asia', color: '#a855f7', page: 'cosmology.html' },
   { title: 'Quantum Theory', desc: 'Exploring the fundamental nature of reality and particles.', icon: 'fas fa-atom', color: '#22d3ee', page: 'quantum-theory.html' },
   { title: 'Linguistics', desc: 'Mastering Japanese (N3+) & English communication arts.', icon: 'fas fa-language', color: '#fb4158', page: 'linguistics.html' },

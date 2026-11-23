@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
-import { SKILLS, SKILL_SECTORS } from '../data/content'
+import { SKILLS, SKILL_SECTORS, type TechSkill } from '../data/content'
 
 /**
  * SkillWeb — Core Competencies as a spider web.
@@ -13,10 +13,7 @@ import { SKILLS, SKILL_SECTORS } from '../data/content'
  * shows the case studies that prove it.
  * Phones: the web would be too small to read, so each sector becomes a card.
  */
-type Skill = (typeof SKILLS)[number]
-type TechSkill = Extract<Skill, { sector: string }>
-
-const TECH = SKILLS.filter((s): s is TechSkill => 'sector' in s)
+const TECH = SKILLS.filter((s): s is TechSkill => s.group === 'tech')
 
 const INNER_R = 25
 const OUTER_R = 40
@@ -57,9 +54,8 @@ const { nodes: NODES, threads: THREADS } = layout()
 function NodeMark({ skill, size }: { skill: TechSkill; size: 'web' | 'chip' }) {
   const box = size === 'web' ? 'h-12 w-12' : 'h-9 w-9'
   const img = size === 'web' ? 'h-6 max-w-[34px]' : 'h-[18px] max-w-[26px]'
-  const plate = 'plate' in skill && skill.plate
-  if ('Icon' in skill && skill.Icon) {
-    const Icon = skill.Icon
+  const { Icon, logos = [], plate } = skill
+  if (Icon) {
     return (
       <span className={`grid ${box} place-items-center rounded-full`}
         style={{ color: '#fff', background: `linear-gradient(135deg, ${skill.color}, ${skill.color}b3)`, boxShadow: `0 6px 18px -6px ${skill.color}` }}>
@@ -67,7 +63,6 @@ function NodeMark({ skill, size }: { skill: TechSkill; size: 'web' | 'chip' }) {
       </span>
     )
   }
-  const logos = 'logos' in skill ? skill.logos : []
   return (
     <span className={`flex ${box} items-center justify-center gap-0.5 rounded-full border`}
       style={{
@@ -83,7 +78,7 @@ function NodeMark({ skill, size }: { skill: TechSkill; size: 'web' | 'chip' }) {
 }
 
 function ProofLinks({ skill }: { skill: TechSkill }) {
-  if (!('proof' in skill) || !skill.proof) return null
+  if (!skill.proof) return null
   return (
     <>
       {skill.proof.map(([label, slug]) => (
@@ -167,7 +162,7 @@ export default function SkillWeb() {
             <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-1 w-max max-w-[200px] -translate-x-1/2 rounded-lg border px-2.5 py-1.5 text-center text-[11px] opacity-0 shadow-lg transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
               style={{ borderColor: `${skill.color}66`, background: 'rgb(var(--surface) / 0.97)' }}>
               <p className="font-semibold text-fg">{skill.name}</p>
-              {'proof' in skill && skill.proof && (
+              {skill.proof && (
                 <p className="mt-0.5 flex flex-wrap justify-center gap-x-2"><span className="text-muted">Used in</span><ProofLinks skill={skill} /></p>
               )}
             </div>
@@ -186,7 +181,7 @@ export default function SkillWeb() {
                   <NodeMark skill={skill} size="chip" />
                   <span className="min-w-0">
                     <span className="block text-xs font-semibold leading-tight text-fg">{skill.short}</span>
-                    {'proof' in skill && skill.proof && (
+                    {skill.proof && (
                       <span className="flex flex-wrap gap-x-1.5 text-[10px]"><ProofLinks skill={skill} /></span>
                     )}
                   </span>

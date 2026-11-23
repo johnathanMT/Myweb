@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PERSONAL } from '../data/content'
-import { ACCESS, FOOTER_T, NAV } from '../data/footerData'
+import { ACCESS, FOOTER_T, NAV, type FooterCopy, type FooterLink } from '../data/footerData'
 import { prefetchRoute } from '../routes'
 
-// footerData is plain JS; these mirror its shapes.
-interface FooterLink { key?: string; label?: string; to?: string; href?: string }
-const COPY = FOOTER_T as Record<string, Record<string, string>>
+const COPY: Record<string, Partial<FooterCopy> | undefined> = FOOTER_T
 
 const tokyoTime = () =>
   new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date())
@@ -30,12 +28,12 @@ function TokyoClock({ city }: { city: string }) {
   )
 }
 
-/** Site footer, shared by every SiteLayout page. Content lives in data/footerData.js. */
+/** Site footer, shared by every SiteLayout page. Content lives in data/footerData.ts. */
 export default function MegaFooter({ lang = 'en' }: { lang?: string }) {
-  const t = { ...COPY.en, ...COPY[lang] }
+  const t: FooterCopy = { ...FOOTER_T.en, ...COPY[lang] }
 
   const item = ({ key, label, to, href }: FooterLink) => {
-    const text = label ?? t[key ?? '']
+    const text = key ? t[key] : label
     const cls = 'inline-block py-1 site-footer-link text-sm'
     if (to) return <Link to={to} className={cls} onMouseEnter={() => prefetchRoute(to)} onFocus={() => prefetchRoute(to)}>{text}</Link>
     const web = href?.startsWith('http')

@@ -32,7 +32,7 @@ const CLI = path.resolve('node_modules/.bin/gltf-transform')
 const TEXTURE_SIZE = 2048 // use 1024 for an even smaller build
 
 // Heavy models worth optimizing (skip tiny ones like sun/moon/sakura/torii).
-const DEFAULT = ['plaza_night', 'london_university', 'ferris_wheel', 'satellite',
+const DEFAULT = ['plaza_night', 'london_university', 'ferris_wheel',
   'bagan', 'jp_castle', 'castle_sakura', 'village', 'ship', 'hospital']
 
 const models = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT

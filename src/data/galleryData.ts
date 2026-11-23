@@ -1,8 +1,8 @@
 // ============================================================================
-//  galleryData.js — SINGLE SOURCE OF TRUTH for the Memory Gallery (metadata only).
+//  galleryData.ts — SINGLE SOURCE OF TRUTH for the Memory Gallery (metadata only).
 //
 //  Images live in  src/assets/images/gallery/  and are bundled + content-hashed
-//  by Vite via import.meta.glob in GallerySection.jsx (automatic cache-busting).
+//  by Vite via import.meta.glob in hooks/useGallery.ts (automatic cache-busting).
 //
 //  To add a photo:
 //    1. Drop the image into  src/assets/images/gallery/  (jpg/png/webp — NOT heic)
@@ -39,7 +39,19 @@
 //         }
 // ============================================================================
 
-export const GALLERY = [
+import type { Localized } from './i18n'
+
+export interface GalleryEntry {
+  id: string
+  file: string
+  /** 'YYYY-MM-DD', or '' while undated. */
+  date: string
+  moment: string
+  alt: Localized
+  caption: Localized
+}
+
+export const GALLERY: GalleryEntry[] = [
   {
     id: 'graduation',
     file: 'graduation.webp',

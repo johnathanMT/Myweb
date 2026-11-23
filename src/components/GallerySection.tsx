@@ -17,7 +17,7 @@ const HEX = 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
 
 interface SectionText { badge: string; title: string; accent: string; sub: string; cta: string; all: string }
 
-// Section copy (i18n). Per-photo captions come from galleryData.js (optional).
+// Section copy (i18n). Per-photo captions come from galleryData.ts (optional).
 const T: Record<string, SectionText> = {
   en: { badge: 'GALLERY',   title: 'A collection of', accent: 'moments & memories', sub: 'Photos from the journey — places, projects, and people along the way.', cta: 'Read the blog', all: 'See all photos' },
   mm: { badge: 'ပြခန်း',     title: 'စုဆောင်းထားသော', accent: 'အမှတ်တရ အခိုက်အတန့်များ',     sub: 'ခရီးတစ်လျှောက်မှ ဓာတ်ပုံများ — နေရာများ၊ ပရောဂျက်များနှင့် လူများ။',        cta: 'ဘလော့ဂ် ဖတ်ရန်', all: 'ဓာတ်ပုံအားလုံး' },

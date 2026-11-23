@@ -54,7 +54,6 @@ const SCENE_LAYOUT: Record<string, SceneConfig> = {
   // ── accent ──
   ship:          { url: 'ship.glb',          position: [27, G + 0.4, 20], rotation: faceCenter([27, G, 20]), size: 5, float: { amp: 0.18, speed: 1.1 } },
   // ── sky ──
-  satellite:     { url: 'satellite.glb',     position: [0, 30, 2],     rotation: [0.3, 0.6, 0],            size: 5.5, sky: true, float:  { amp: 0.3, speed: 0.8 } },
   sun:           { url: 'sun.glb',           position: [-26, 19, -34], rotation: [0, 0, 0],                size: 2.6, sky: true, celestial: 'sun' },
   moon:          { url: 'moon.glb',          position: [26, 19, -34],  rotation: [0, 0, 0],                size: 2.6, sky: true, celestial: 'moon' },
   glider:        { url: 'glider.glb',        position: [8, 12, 2],     rotation: [0, -0.6, 0],             size: 2.4, sky: true, float: { amp: 0.4, speed: 0.6 } },
@@ -248,19 +247,6 @@ function TagPlaque({ tag, index, paused, mine, onOpen }: { tag: Tag; index: numb
   )
 }
 
-function OrbitingSatellite() {
-  const fit = useFitted(SCENE_LAYOUT.satellite)
-  const ref = useRef<THREE.Group>(null)
-  useFrame((s) => {
-    const t = s.clock.elapsedTime * 0.12
-    if (ref.current) {
-      ref.current.position.set(Math.cos(t) * 36, 26 + Math.sin(t * 0.7) * 3, Math.sin(t) * 36)
-      ref.current.rotation.y = -t + Math.PI / 2
-    }
-  })
-  return <group ref={ref}><primitive object={fit.obj} scale={fit.scale} position={fit.offset} /></group>
-}
-
 /* ════════════ FAREWELL "living monument" plants ════════════ */
 function plantCfgFor(type: string): FitConfig {
   return { url: 'sakura.glb', rotation: [0, 0, 0], size: type === 'orchid' ? 1.9 : 3.4 }
@@ -386,8 +372,6 @@ function World({ night, tags, paused, operatorId, onOpen, plants = [], pendingId
 
   return (
     <>
-      <Safe><OrbitingSatellite /></Safe>
-
       <Safe><Asset cfg={SCENE_LAYOUT.sun} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.moon} night={night} /></Safe>
       <Safe><Asset cfg={SCENE_LAYOUT.glider} night={night} /></Safe>
