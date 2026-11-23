@@ -1,3 +1,4 @@
+import PageStage from './PageStage'
 import PageTitle from './PageTitle'
 import { Fragment, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
@@ -48,7 +49,10 @@ export default function CaseStudyLayout({ study, lang = 'en' }: { study: CaseStu
   const copyLang = lang === 'mm' ? 'my' : lang === 'jp' ? 'ja' : undefined
 
   return (
-    <article lang={copyLang} className="relative mx-auto max-w-4xl px-4 pb-24 pt-4 sm:px-6">
+    <PageStage
+      motif="projects"
+      header={(
+        <div lang={copyLang} className="mx-auto max-w-4xl px-4 sm:px-6">
       <Link
         to="/projects"
         className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted transition-colors hover:bg-accent/10 hover:text-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-light/60"
@@ -71,17 +75,20 @@ export default function CaseStudyLayout({ study, lang = 'en' }: { study: CaseStu
             {study.stack.map((tag) => <li key={tag} className="tech-tag">{tag}</li>)}
           </ul>
         </div>
-
+      </header>
+        </div>
+      )}
+    >
+    <article lang={copyLang} className="relative mx-auto max-w-4xl px-4 pb-24 pt-10 sm:px-6">
         {study.thumb && (
           <img
             src={SITE.asset(study.thumb)}
             alt={`${study.name} — homepage`}
             width={960} height={600}
-            className="mt-8 w-full rounded-2xl border border-white/10 object-cover object-top shadow-xl"
+            className="w-full rounded-2xl border border-white/10 object-cover object-top shadow-xl"
             decoding="async"
           />
         )}
-      </header>
 
       <div className="mt-10 space-y-6">
         <Section icon={Target} title={t.problem}>
@@ -119,5 +126,6 @@ export default function CaseStudyLayout({ study, lang = 'en' }: { study: CaseStu
         </Section>
       </div>
     </article>
+    </PageStage>
   )
 }

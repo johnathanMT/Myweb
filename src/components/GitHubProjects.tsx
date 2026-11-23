@@ -1,3 +1,4 @@
+import PageStage from './PageStage'
 import PageTitle from './PageTitle'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
@@ -328,25 +329,11 @@ export default function GitHubProjects() {
   const totalStack = [...new Set(REPOS.flatMap((r) => r.stack.map((s) => s.name)))].length
 
   return (
-    <section
-      id="github-projects"
-      className="relative overflow-hidden py-16 sm:py-24"
-      style={{ background: 'transparent' }}
-    >
-      {/* Subtle grid backdrop */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)',
-          backgroundSize: '48px 48px',
-          maskImage: 'radial-gradient(ellipse 80% 60% at 50% 30%, #000 20%, transparent 80%)',
-        }}
-        aria-hidden
-      />
-
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-        {/* Page header */}
-        <div className="mb-10 text-center sm:mb-14">
+    <PageStage
+      motif="projects"
+      soft
+      header={(
+        <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
           <p className="lux-eyebrow enter-eyebrow font-mono text-sm uppercase tracking-[0.3em]">
             // open source
           </p>
@@ -367,7 +354,25 @@ export default function GitHubProjects() {
             <ArrowUpRight size={14} className="opacity-60" />
           </a>
         </div>
+      )}
+    >
+    <section
+      id="github-projects"
+      className="relative overflow-hidden py-16 sm:py-24"
+      style={{ background: 'transparent' }}
+    >
+      {/* Subtle grid backdrop */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse 80% 60% at 50% 30%, #000 20%, transparent 80%)',
+        }}
+        aria-hidden
+      />
 
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         {/* Stats strip */}
         <div className="mb-10 grid grid-cols-3 gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 text-center backdrop-blur-sm sm:mb-14 sm:p-6">
           <div>
@@ -414,5 +419,6 @@ export default function GitHubProjects() {
         </div>
       </div>
     </section>
+    </PageStage>
   )
 }

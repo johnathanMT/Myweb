@@ -29,6 +29,7 @@ html[data-theme="light"] .lux-dark {
   --lux-1: 245 208 97;
   --lux-2: 229 184 75;
   --lux-3: 212 175 55;
+  --lux-ground: 7 7 10;
   --lux-ink: 250 247 240;
   --lux-grad: linear-gradient(100deg, #fff2b2, #f5d061 38%, #d4af37 78%, #e5b84b);
   --lux-shine: 255 252 235;
@@ -83,19 +84,64 @@ html[data-theme="light"] .dark-scope .lux-eyebrow { color: rgb(var(--lux-2)); }
 }
 
 /* ── page-header stage ── */
-.stage { position: relative; }
+.stage {
+  --travel: clamp(15rem, 46svh, 32rem);
+  --pin: calc(4rem + env(safe-area-inset-top, 0px));   /* below the navbar */
+  position: relative;
+}
+.stage.is-home { --pin: 0px; }
+
+.stage-track { position: relative; }
+/* a block, not padding: sticky can't travel into its container's padding */
+.stage-track::after { content: ''; display: block; height: var(--travel); }
+
+/* a header taller than the screen pins by its foot instead, so nothing is skipped */
+.stage-head {
+  position: sticky;
+  top: min(var(--pin), 100svh - var(--head-h, 0px));
+}
+.is-page .stage-head { display: flex; min-height: clamp(24rem, 58svh, 42rem); }
+
+.stage-copy { position: relative; width: 100%; will-change: transform, opacity; }
+.is-page .stage-copy { display: flex; flex-direction: column; transform-origin: 20% 50%; }
+.is-centred .stage-copy { transform-origin: 50% 50%; }
+.is-home .stage-copy { transform-origin: 25% 50%; }
+.stage-title { width: 100%; margin-block: auto; padding-block: 2.5rem; }
+.stage-backdrop { position: absolute; inset: 0; pointer-events: none; will-change: transform, opacity; }
+
+/* words ease apart: an editorial breath without reflowing letter-spacing */
+.is-page.is-projects .lux-title .gold-text {
+  display: inline-block;
+  margin-block: -0.4em;
+  transform: translateX(calc(var(--p, 0) * 0.28em));
+}
+
+/* ── curtain: solid where it passes over the header, then the page's own backdrop ── */
+.stage-curtain {
+  position: relative;
+  z-index: 10;
+  margin-top: calc(var(--travel) * -1);
+  min-height: var(--travel);
+  border-top: 1px solid rgb(166 124 46 / 0.75);
+  border-radius: 1.75rem 1.75rem 0 0;
+  background: linear-gradient(rgb(var(--space)) min(72svh, 100% - 13rem), transparent min(125svh, 100%));
+  box-shadow: 0 -22px 44px -22px rgb(0 0 0 / 0.8), inset 0 1px 0 rgb(var(--lux-1) / 0.16);
+}
+html[data-theme="light"] .stage-curtain { box-shadow: 0 -22px 44px -24px rgb(70 48 8 / 0.42), inset 0 1px 0 #fff; }
+html[data-theme="light"] .dark-scope .stage-curtain { box-shadow: 0 -22px 44px -22px rgb(0 0 0 / 0.8); }
+
+.stage-shift { position: absolute; inset: 0; }
 
 .stage-art {
   position: absolute;
-  inset: calc(-4rem - env(safe-area-inset-top, 0px)) 0 auto;   /* runs up beneath the navbar */
-  height: clamp(30rem, 42vw, 46rem);
+  inset: calc(-4rem - env(safe-area-inset-top, 0px)) 0 0;   /* runs up beneath the navbar */
   overflow: hidden;
   pointer-events: none;
   background:
     radial-gradient(60% 70% at 80% 40%, rgb(212 175 55 / 0.12), transparent 70%),
     rgb(var(--lux-ground) / 0.92);
-  -webkit-mask-image: linear-gradient(#000 70%, transparent);
-  mask-image: linear-gradient(#000 70%, transparent);
+  -webkit-mask-image: linear-gradient(#000 82%, transparent);
+  mask-image: linear-gradient(#000 82%, transparent);
   animation: stage-in 0.85s ease-out backwards;
 }
 @keyframes stage-in { from { opacity: 0; } }
@@ -158,13 +204,16 @@ html[data-theme="light"] .dark-scope .lux-eyebrow { color: rgb(var(--lux-2)); }
 .stage-art.is-soft .stage-box { opacity: 0.38; }
 
 @media (max-width: 767px) {
-  .stage-art { height: 31rem; }
+  .stage-curtain { border-radius: 1.25rem 1.25rem 0 0; }
   .stage-box { top: 1rem; right: -9.5rem; opacity: 0.8; }
   .stage-scrim { background: linear-gradient(90deg, rgb(var(--lux-ground) / 0.86), rgb(var(--lux-ground) / 0.6) 55%, rgb(var(--lux-ground) / 0.1)); }
   .stage-art.is-sanctuary .stage-box { width: 34rem; top: -2.6rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .stage { --travel: 0px; }
+  .stage-head { position: relative; top: 0; }
+  .stage-curtain { box-shadow: none; }
   .enter-eyebrow, .enter-title, .enter-sub, .enter-late, .enter-rule, .enter-title .gold-text,
   .stage-art, .stage-layer { animation: none !important; }
 }

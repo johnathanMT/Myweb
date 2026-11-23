@@ -1,3 +1,4 @@
+import PageStage from './PageStage'
 import PageTitle from './PageTitle'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
@@ -119,6 +120,23 @@ function ToolCard({ tool, i }: { tool: Tool; i: number }) {
 
 export default function PythonAutomation() {
   return (
+    <PageStage
+      motif="about"
+      soft
+      header={(
+        <div className="mx-auto max-w-6xl px-6 text-center font-mono">
+          <p className="lux-eyebrow enter-eyebrow text-sm uppercase tracking-[0.3em]">// python.automation</p>
+          <PageTitle className="mt-2">Cyber Python Tools</PageTitle>
+          <p className="enter-sub mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted" style={{ fontFamily: 'system-ui' }}>
+            Scripts I built while working as a caregiver in Japan — automating the boring parts of
+            hospital reports, shift emails, and study research. The practical “how” after the{' '}
+            <Link to="/bibliography" className="text-emerald-500 underline-offset-2 hover:underline">journey</Link>
+            {' '}and alongside my{' '}
+            <Link to="/studying" className="text-emerald-500 underline-offset-2 hover:underline">studying</Link>.
+          </p>
+        </div>
+      )}
+    >
     <section
       id="python-automation"
       className="relative overflow-hidden py-16 sm:py-24"
@@ -133,18 +151,6 @@ export default function PythonAutomation() {
         }}
       />
       <div className="relative mx-auto max-w-6xl px-6">
-        <div className="mb-10 text-center font-mono">
-          <p className="lux-eyebrow enter-eyebrow text-sm uppercase tracking-[0.3em]">// python.automation</p>
-          <PageTitle className="mt-2">Cyber Python Tools</PageTitle>
-          <p className="enter-sub mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted" style={{ fontFamily: 'system-ui' }}>
-            Scripts I built while working as a caregiver in Japan — automating the boring parts of
-            hospital reports, shift emails, and study research. The practical “how” after the{' '}
-            <Link to="/bibliography" className="text-emerald-500 underline-offset-2 hover:underline">journey</Link>
-            {' '}and alongside my{' '}
-            <Link to="/studying" className="text-emerald-500 underline-offset-2 hover:underline">studying</Link>.
-          </p>
-        </div>
-
         <div className="mb-10 flex flex-wrap justify-center gap-2">
           {STACK.map((lib) => (
             <span key={lib} className="rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-xs text-muted">
@@ -162,5 +168,6 @@ export default function PythonAutomation() {
         </div>
       </div>
     </section>
+    </PageStage>
   )
 }

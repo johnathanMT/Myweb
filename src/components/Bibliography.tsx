@@ -1,3 +1,4 @@
+import PageStage from './PageStage'
 import PageTitle from './PageTitle'
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
@@ -226,21 +227,25 @@ export default function Bibliography({ embedded = false }: { embedded?: boolean 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 80%', 'end 60%'] })
   const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1])
 
-  return (
+  const intro = (
+    <div className="px-4 text-center sm:px-6">
+      <p className="lux-eyebrow enter-eyebrow font-mono text-sm uppercase tracking-[0.3em]">// chronology</p>
+      {embedded
+        ? <h2 className="signature-section-title mt-2 text-white">My Journey</h2>
+        : <PageTitle className="mt-2">My Journey</PageTitle>}
+      <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
+        The "where" in my story — from International Relations in Myanmar to caregiving in Osaka,
+        and now a BSc in Computer Science. This timeline connects to what I study in{' '}
+        <Link to="/studying" className="text-accent-light underline-offset-2 hover:underline">Personal Studying</Link>
+        {' '}and the scripts I build in{' '}
+        <Link to="/python" className="text-accent-light underline-offset-2 hover:underline">Python Automation</Link>.
+      </p>
+    </div>
+  )
+
+  const timeline = (
     <section id="bibliography" className="relative overflow-hidden bg-transparent py-16 sm:py-24">
-      <div className="mb-14 px-4 text-center sm:px-6">
-        <p className="lux-eyebrow enter-eyebrow font-mono text-sm uppercase tracking-[0.3em]">// chronology</p>
-        {embedded
-          ? <h2 className="signature-section-title mt-2 text-white">My Journey</h2>
-          : <PageTitle className="mt-2">My Journey</PageTitle>}
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-          The "where" in my story — from International Relations in Myanmar to caregiving in Osaka,
-          and now a BSc in Computer Science. This timeline connects to what I study in{' '}
-          <Link to="/studying" className="text-accent-light underline-offset-2 hover:underline">Personal Studying</Link>
-          {' '}and the scripts I build in{' '}
-          <Link to="/python" className="text-accent-light underline-offset-2 hover:underline">Python Automation</Link>.
-        </p>
-      </div>
+      {embedded && <div className="mb-14">{intro}</div>}
 
       <div ref={ref} className="relative mx-auto max-w-5xl px-4 sm:px-6">
         {/* Static grey spine */}
@@ -270,4 +275,7 @@ export default function Bibliography({ embedded = false }: { embedded?: boolean 
       )}
     </section>
   )
+
+  if (embedded) return timeline
+  return <PageStage motif="exploring" soft header={intro}>{timeline}</PageStage>
 }

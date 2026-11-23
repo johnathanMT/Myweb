@@ -1,4 +1,3 @@
-import PageStage from '../components/PageStage'
 import { lazy, Suspense } from 'react'
 import SectionSkeleton from '../components/SectionSkeleton'
 
@@ -12,7 +11,7 @@ const AntimatterSim = lazy(() => import('../components/AntimatterSim'))
 export default function LabPage() {
   return (
     <>
-      <PageStage motif="lab"><Suspense fallback={<SectionSkeleton label="Algorithm Lab" />}><AlgorithmLab /></Suspense></PageStage>
+      <Suspense fallback={<SectionSkeleton label="Algorithm Lab" />}><AlgorithmLab /></Suspense>
       <Suspense fallback={<SectionSkeleton label="Agentic AI" />}><AgentFlow /></Suspense>
       <Suspense fallback={<SectionSkeleton label="Quantum Lab" />}><QuantumLab /></Suspense>
       <Suspense fallback={<SectionSkeleton label="Antimatter" />}><AntimatterSim /></Suspense>

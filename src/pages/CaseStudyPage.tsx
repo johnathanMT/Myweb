@@ -1,4 +1,3 @@
-import PageStage from '../components/PageStage'
 import { useParams } from 'react-router-dom'
 import Seo from '../components/Seo'
 import { useLang } from '../context/LangContext'
@@ -17,7 +16,7 @@ export default function CaseStudyPage() {
   return (
     <>
       <Seo title={`${study.name} — Case Study`} path={`/projects/${study.slug}`} description={caseCopy(study, lang).summary} />
-      <PageStage motif="projects"><CaseStudyLayout study={study} lang={lang} /></PageStage>
+      <CaseStudyLayout study={study} lang={lang} />
     </>
   )
 }

@@ -1,3 +1,4 @@
+import PageStage from './PageStage'
 import PageTitle from './PageTitle'
 import { useRef, useState, type CSSProperties } from 'react'
 import { INTERESTS, PERSONAL } from '../data/content'
@@ -120,7 +121,17 @@ export default function Exploring() {
   const sectionRef = useCyberReveal()
 
   return (
-    <section id="exploring" ref={sectionRef} className="relative py-24 border-t border-white/5 text-legible"
+    <PageStage
+      motif="exploring"
+      header={(
+        <div className="mx-auto max-w-6xl px-6">
+          <span className="lux-eyebrow enter-eyebrow mb-4 inline-block rounded-full border border-[rgb(var(--lux-2)/0.4)] bg-[rgb(var(--lux-2)/0.1)] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em]">Polymath</span>
+          <PageTitle className="mb-4">Exploring the Infinite</PageTitle>
+          <p className="enter-sub text-xs uppercase tracking-widest text-muted">The Master of Jack of All Trades</p>
+        </div>
+      )}
+    >
+    <section id="exploring" ref={sectionRef} className="relative text-legible"
       style={{ '--c': 'rgb(var(--accent))' } as CSSVars}>
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'linear-gradient(180deg, transparent 60%, rgb(var(--space) / 0.5) 100%)' }} />
@@ -141,12 +152,6 @@ export default function Exploring() {
       </div>
 
       <div className="section-container relative z-10">
-        <div data-reveal className="mb-8">
-          <span className="lux-eyebrow enter-eyebrow mb-4 inline-block rounded-full border border-[rgb(var(--lux-2)/0.4)] bg-[rgb(var(--lux-2)/0.1)] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em]">Polymath</span>
-          <PageTitle className="mb-4">Exploring the Infinite</PageTitle>
-          <p className="enter-sub text-xs uppercase tracking-widest text-muted mb-4">The Master of Jack of All Trades</p>
-        </div>
-
         {/* Heinlein quote */}
         <div data-reveal className="mb-14 max-w-3xl">
           <div className="relative p-6 rounded-2xl overflow-hidden"
@@ -164,5 +169,6 @@ export default function Exploring() {
         </div>
       </div>
     </section>
+    </PageStage>
   )
 }

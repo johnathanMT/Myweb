@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { createContext, useContext, type ReactNode } from 'react'
+import { motion, motionValue, useTransform, type MotionValue } from 'framer-motion'
 
 /**
  * Header line-art. Every motif is a stack of 800×600 layers filling one box.
@@ -7,16 +8,35 @@ import type { ReactNode } from 'react'
  */
 export type HeaderMotif = 'about' | 'projects' | 'stack' | 'lab' | 'gallery' | 'exploring' | 'sanctuary'
 
-interface LayerProps { children: ReactNode; move?: 'spin' | 'spin-back' | 'drift' | 'drift-b'; at?: [number, number]; secs?: number }
-function Layer({ children, move, at = [520, 290], secs }: LayerProps) {
+/** 0 → 1 as the header is scrolled through (ScrollStage); still elsewhere. */
+export const StageProgress = createContext<MotionValue<number>>(motionValue(0))
+
+interface LayerProps {
+  children: ReactNode
+  move?: 'spin' | 'spin-back' | 'drift' | 'drift-b'
+  at?: [number, number]
+  secs?: number
+  /** Where scrolling carries this layer: shift in viewBox units, end scale, degrees. */
+  to?: { x?: number; y?: number; scale?: number; turn?: number }
+}
+/** Two nested transforms: the outer one follows the scroll, the inner one idles. */
+function Layer({ children, move, at = [520, 290], secs, to = {} }: LayerProps) {
+  const p = useContext(StageProgress)
+  const x = useTransform(p, (v) => `${((to.x ?? 0) * v) / 8}%`)
+  const y = useTransform(p, (v) => `${((to.y ?? 0) * v) / 6}%`)
+  const scale = useTransform(p, (v) => 1 + ((to.scale ?? 1) - 1) * v)
+  const rotate = useTransform(p, (v) => (to.turn ?? 0) * v)
+  const transformOrigin = `${at[0] / 8}% ${at[1] / 6}%`
   return (
-    <svg
-      viewBox="0 0 800 600"
-      className={`stage-layer ${move ? `mv-${move}` : ''}`}
-      style={{ transformOrigin: `${at[0] / 8}% ${at[1] / 6}%`, animationDuration: secs ? `${secs}s` : undefined }}
-    >
-      {children}
-    </svg>
+    <motion.div className="stage-shift" style={{ x, y, scale, rotate, transformOrigin }}>
+      <svg
+        viewBox="0 0 800 600"
+        className={`stage-layer ${move ? `mv-${move}` : ''}`}
+        style={{ transformOrigin, animationDuration: secs ? `${secs}s` : undefined }}
+      >
+        {children}
+      </svg>
+    </motion.div>
   )
 }
 
@@ -50,7 +70,7 @@ const CHIP_PINS = range(7).map((i) => {
 function About() {
   return (
     <>
-      <Layer>
+      <Layer to={{ y: 34, scale: 0.95 }}>
         <path className="k1" d="M463 225H577a8 8 0 0 1 8 8V347a8 8 0 0 1-8 8H463a8 8 0 0 1-8-8V233a8 8 0 0 1 8-8Z" />
         <path className="k2" d="M475 245H565V335H475ZM475 260L490 245M550 335L565 320" />
         <path className="k1" d={CHIP_PINS} />
@@ -73,13 +93,13 @@ function About() {
         <path className="k2" d="M236 380H316V408H236ZM196 446H266V474H196ZM286 446H356V474H286ZM276 408V427H231V446M276 427H321V446" />
         <path className="k3" d="M231 474V500H321V474M276 500V520" />
       </Layer>
-      <Layer move="drift" secs={13}>
+      <Layer move="drift" secs={13} to={{ x: -26, y: -74 }}>
         <text x="330" y="112" className="tx">async def agent_step():</text>
         <text x="620" y="92" className="tx is-dim">0xA1</text>
         <text x="398" y="432" className="tx is-dim">await tools.call()</text>
         <text x="640" y="580" className="tx is-dim">0x3F</text>
       </Layer>
-      <Layer move="drift-b" secs={17}>
+      <Layer move="drift-b" secs={17} to={{ x: 30, y: -36 }}>
         <text x="612" y="164" className="tx">attn(Q, K, V)</text>
         <text x="372" y="540" className="tx">interface AgentPipeline</text>
         <text x="340" y="182" className="tx is-dim">softmax(QKᵀ/√d)</text>
@@ -94,7 +114,7 @@ const BLOCKS: [number, number, number][] = [[420, 376, 54], [512, 422, 34], [328
 function Projects() {
   return (
     <>
-      <Layer>
+      <Layer to={{ scale: 0.9, y: 10 }}>
         <path className="k3" d={range(14).map((i) => `M${260 + i * 40} 60V560`).join('') + range(13).map((i) => `M240 ${80 + i * 40}H800`).join('')} />
         {/* modular ERP blocks, back to front */}
         {BLOCKS.map(([x, y, h]) => (
@@ -122,11 +142,11 @@ function Projects() {
         <path className="k2" d="M528 236H712M541 190H699M541 282H699" />
         <Dots at={[[584, 190], [656, 236], [604, 282]]} r={4} />
       </Layer>
-      <Layer move="spin" at={[620, 236]} secs={80}>
+      <Layer move="spin" at={[620, 236]} secs={80} to={{ scale: 0.9, y: 10, x: -8 }}>
         <circle className="k1" cx="620" cy="236" r="116" strokeDasharray="120 26 8 26" />
         <Dots at={[[736, 236], [504, 236]]} r={4} />
       </Layer>
-      <Layer move="spin-back" at={[620, 236]} secs={120}>
+      <Layer move="spin-back" at={[620, 236]} secs={120} to={{ scale: 0.82, y: 10, x: -8, turn: -20 }}>
         <circle className="k3" cx="620" cy="236" r="136" strokeDasharray="3 9" />
       </Layer>
     </>
@@ -138,7 +158,7 @@ const PLATES: [string, number][] = [['DATA', 420], ['DOMAIN', 340], ['API', 260]
 function Stack() {
   return (
     <>
-      <Layer>
+      <Layer to={{ scale: 0.96 }}>
         {/* circuit pathways */}
         <path className="k2" d="M320 180H260L230 150H150M320 260H240L214 286H120M320 340H256L226 370H150M320 420H280L250 450H180" />
         <Dots at={[[150, 150], [120, 286], [150, 370], [180, 450]]} />
@@ -153,7 +173,7 @@ function Stack() {
         <path className="k3" d="M320 180V420M640 180V420M480 260V500" strokeDasharray="4 6" />
       </Layer>
       {PLATES.map(([label, y], i) => (
-        <Layer key={label} move={i % 2 ? 'drift-b' : 'drift'} secs={11 + i * 2}>
+        <Layer key={label} move={i % 2 ? 'drift-b' : 'drift'} secs={11 + i * 2} to={{ y: (300 - y) * 0.46 }}>
           <path className="k1 fillable" d={isoTop(480, y, 160)} />
           <path className="k2" d={isoSides(480, y, 160, 10)} />
           <path className="k3" d={isoTop(480, y, 118)} />
@@ -174,7 +194,7 @@ const wave = (y: number, amp: number, len: number, phase: number) =>
 function Lab() {
   return (
     <>
-      <Layer>
+      <Layer at={[540, 250]} to={{ turn: 8 }}>
         <path className="k3" d="M200 420H780M200 340H780M320 540V80M400 540V80M640 540V80M720 540V80" strokeDasharray="2 8" />
         <path className="k2" d="M240 540V80M232 92L240 80L248 92M200 500H780M768 492L780 500L768 508" />
         <text x="252" y="98" className="tx is-sm">Im ψ</text>
@@ -185,21 +205,21 @@ function Lab() {
         <path className="k2" d={ticks(540, 250, 184, 194, 72)} />
       </Layer>
       {[0, 60, 120].map((a, i) => (
-        <Layer key={a} move={i % 2 ? 'spin-back' : 'spin'} at={[540, 250]} secs={46 + i * 18}>
+        <Layer key={a} move={i % 2 ? 'spin-back' : 'spin'} at={[540, 250]} secs={46 + i * 18} to={{ turn: 26 - i * 22, scale: 1.1 }}>
           <g transform={`rotate(${a} 540 250)`}>
             <ellipse className="k1" cx="540" cy="250" rx="160" ry="54" />
             <circle className="dot" cx="700" cy="250" r="5" />
           </g>
         </Layer>
       ))}
-      <Layer move="drift" secs={12}>
+      <Layer move="drift" secs={12} to={{ x: -34, y: 22, turn: -4 }}>
         <path className="k1" d={wave(500, 34, 58, 0)} />
         <path className="k2" d={wave(500, 34, 66, 1.4)} />
         <path className="k3" d={wave(500, 52, 74, 2.6)} />
         <text x="288" y="172" className="tx is-xl">ψ</text>
         <text x="724" y="430" className="tx is-xl">∑</text>
       </Layer>
-      <Layer move="drift-b" secs={16}>
+      <Layer move="drift-b" secs={16} to={{ x: 24, y: -40, turn: 5 }}>
         <text x="738" y="120" className="tx is-xl">∇</text>
         <text x="290" y="380" className="tx is-xl">∫</text>
         <text x="256" y="262" className="tx">iħ ∂ψ/∂t = Ĥψ</text>
@@ -222,7 +242,7 @@ const IRIS = `${range(8).map((i) => {
 function Gallery() {
   return (
     <>
-      <Layer>
+      <Layer at={[540, 300]} to={{ scale: 1.13 }}>
         <path className="k1 is-heavy" d="M300 150V100H360M720 100H780V150M780 450V500H720M360 500H300V450" />
         <path className="k3" d="M460 100V500M620 100V500M300 233H780M300 367H780" />
         <path className="k2" d="M300 100H780V500H300Z" strokeDasharray="2 10" />
@@ -236,12 +256,12 @@ function Gallery() {
         <text x="780" y="528" className="tx is-sm" textAnchor="end">35 mm — FRAME 24A</text>
         <Dots at={[[762, 80]]} r={4} />
       </Layer>
-      <Layer move="spin" at={[540, 300]} secs={110}>
+      <Layer move="spin" at={[540, 300]} secs={110} to={{ turn: 48, scale: 0.94 }}>
         <path className="k2" d={ticks(540, 300, 160, 168, 60)} />
         <path className="k1" d={BLADES} />
         <path className="k1" d={IRIS} />
       </Layer>
-      <Layer move="spin-back" at={[540, 300]} secs={150}>
+      <Layer move="spin-back" at={[540, 300]} secs={150} to={{ turn: -30 }}>
         <circle className="k3" cx="540" cy="300" r="112" strokeDasharray="30 14 4 14" />
       </Layer>
     </>
@@ -253,7 +273,7 @@ const STARS = [[250, 120], [300, 210], [222, 300], [380, 90], [690, 70], [744, 1
 function Exploring() {
   return (
     <>
-      <Layer>
+      <Layer at={[540, 260]} to={{ y: 22 }}>
         {/* horizon */}
         <path className="k2" d="M120 470H800" />
         <path className="k3" d={range(13).map((i) => `M520 470L${-80 + i * 100} 600`).join('') + [484, 504, 532, 570].map((y) => `M120 ${y}H800`).join('')} />
@@ -270,19 +290,19 @@ function Exploring() {
         <circle className="k1" cx="540" cy="260" r="150" />
         <text x="540" y="140" className="tx is-sm" textAnchor="middle">N</text>
       </Layer>
-      <Layer move="spin" at={[540, 260]} secs={140}>
+      <Layer move="spin" at={[540, 260]} secs={140} to={{ y: 22, turn: 44 }}>
         <path className="k2" d={ticks(540, 260, 150, 160, 120, 5)} />
         <path className="k1" d={ticks(540, 260, 148, 166, 24)} />
         <circle className="k2" cx="540" cy="260" r="166" />
       </Layer>
-      <Layer move="spin-back" at={[540, 260]} secs={95}>
+      <Layer move="spin-back" at={[540, 260]} secs={95} to={{ y: 22, turn: -60 }}>
         {/* ecliptic ring, off centre like a real astrolabe rete */}
         <circle className="k1" cx="540" cy="226" r="84" />
         <circle className="k3" cx="540" cy="226" r="76" />
         <path className="k2" d="M624 226L680 246M456 226L400 206" />
         <Dots at={[[680, 246], [400, 206]]} r={4} />
       </Layer>
-      <Layer move="spin" at={[540, 260]} secs={200}>
+      <Layer move="spin" at={[540, 260]} secs={200} to={{ y: 22, turn: 30 }}>
         <ellipse className="k3" cx="540" cy="260" rx="200" ry="70" strokeDasharray="60 10 4 10" />
       </Layer>
     </>

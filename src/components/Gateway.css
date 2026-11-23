@@ -5,7 +5,6 @@
   --nah-soft: 196 189 175;
   --nah-mark: 229 184 75;
   --nah-line: 255 242 178;
-  position: relative;
   display: flex;
   min-height: 100svh;
   align-items: center;
@@ -23,7 +22,7 @@ html[data-theme="light"] .nah {
 /* the mask melts the stage into whatever page colour follows */
 .nah-stage {
   position: absolute;
-  inset: 0;
+  inset: -56px 0 0;   /* spare room above, for the scroll drift (Gateway's artDrift) */
   pointer-events: none;
   background:
     radial-gradient(70% 80% at 85% 30%, rgb(212 175 55 / 0.11), transparent 70%),

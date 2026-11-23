@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import { PERSONAL } from '../data/content'
 import { prefetchRoute } from '../routes'
+import { ScrollStage } from './PageStage'
 import NeuralAttentionHero from './hero/NeuralAttentionHero'
 import './Gateway.css'
 
@@ -65,13 +67,18 @@ const TITLES: Record<string, string> = PERSONAL.titles
 const warm = (to: string) => ({ onMouseEnter: () => prefetchRoute(to), onFocus: () => prefetchRoute(to) })
 
 /** Gateway — the homepage hero: vision statement first, authorship right beneath. */
-export default function Gateway({ lang = 'en' }: { lang?: string }) {
+export default function Gateway({ lang = 'en', children }: { lang?: string; children: ReactNode }) {
   const t = T[lang] || T.en
   const [before, mark, after] = t.title
 
   return (
-    <section id="home" className="nah">
-      <NeuralAttentionHero />
+    <ScrollStage
+      className="is-home"
+      headClass="nah"
+      artDrift={56}
+      headId="home"
+      art={<NeuralAttentionHero />}
+      header={(
       <div className="nah-copy">
         <p className="nah-eyebrow enter-eyebrow">{t.eyebrow}</p>
         <h1 className="signature-hero-title nah-title enter-title">{before}<em className="gold-text">{mark}</em>{after}</h1>
@@ -84,6 +91,9 @@ export default function Gateway({ lang = 'en' }: { lang?: string }) {
           <Link to="/about" className="nah-btn is-line" {...warm('/about')}>{t.about}</Link>
         </div>
       </div>
-    </section>
+      )}
+    >
+      {children}
+    </ScrollStage>
   )
 }

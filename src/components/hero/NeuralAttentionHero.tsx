@@ -4,7 +4,7 @@ import { createNeuralField, type FieldTheme } from './neuralFieldEngine'
 
 /**
  * NeuralAttentionHero — the hero's living backdrop (see neuralFieldEngine.ts).
- * Decorative: aria-hidden and pointer-transparent; the parent <section> hosts
+ * Decorative: aria-hidden and pointer-transparent; the pinned header hosts
  * the input so the copy above it stays clickable.
  *
  * Pauses off-screen and in hidden tabs, renders one still frame for
@@ -23,7 +23,7 @@ export default function NeuralAttentionHero() {
     const canvas = ref.current
     if (!canvas) return
     const root = document.documentElement
-    const host = canvas.closest('section')
+    const host = canvas.closest<HTMLElement>('.stage-head')
     const field = createNeuralField(canvas, { theme: currentTheme(), static: reduced })
 
     let inView = true

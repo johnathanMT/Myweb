@@ -2,27 +2,24 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import type { JourneyPage } from '../data/journeyHub'
-import PageStage from './PageStage'
-import type { HeaderMotif } from './headerMotifs'
+import { StageTop } from './PageStage'
 import JourneyHubNav from './JourneyHubNav'
 
 /**
- * PageShell — content header for the long-form sub-pages (/python, /studying,
+ * PageShell — links above the header of the long-form sub-pages (/python, /studying,
  * /bibliography, /github). The site chrome (background, Navbar, Footer, page
- * transition) now lives in SiteLayout, so this only adds the back link and the
- * optional Journey cross-navigation.
+ * transition) now lives in SiteLayout, so this only supplies the back link and
+ * the optional Journey cross-navigation; each page's PageStage renders them.
  */
 export default function PageShell({
   children,
   journeyHub,
-  motif,
 }: {
   children: ReactNode
   journeyHub?: JourneyPage
-  motif: HeaderMotif
 }) {
-  return (
-    <PageStage motif={motif} soft>
+  const top = (
+    <>
       <div className="relative mx-auto max-w-6xl px-4 pt-4 sm:px-6">
         <Link
           to="/"
@@ -38,8 +35,7 @@ export default function PageShell({
           <JourneyHubNav active={journeyHub} />
         </div>
       )}
-
-      {children}
-    </PageStage>
+    </>
   )
+  return <StageTop.Provider value={top}>{children}</StageTop.Provider>
 }

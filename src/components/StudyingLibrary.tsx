@@ -1,3 +1,4 @@
+import PageStage from './PageStage'
 import PageTitle from './PageTitle'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
@@ -257,15 +258,12 @@ export default function StudyingLibrary() {
   return (
     // dark-scope + .studying-room: the reading room stays dark in light theme too,
     // so the parchment text and dark glass cards keep their contrast.
-    <section
-      id="studying"
-      className="studying-room dark-scope relative overflow-hidden py-16 sm:py-24"
-    >
-      <div className="pointer-events-none absolute inset-0"
-           style={{ background: 'radial-gradient(120% 90% at 50% 120%, rgba(120,80,40,0.10), transparent 60%)' }} />
-
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mb-10 text-center sm:mb-12">
+    <PageStage
+      motif="stack"
+      soft
+      className="studying-room dark-scope"
+      header={(
+        <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
           <p className="enter-eyebrow text-xs uppercase tracking-[0.35em]" style={{ color: GOLD, fontFamily: 'Georgia, serif' }}>
             Bibliotheca · Studii
           </p>
@@ -279,7 +277,16 @@ export default function StudyingLibrary() {
             <Link to="/python" className="text-[#e8dcc0] underline-offset-2 hover:underline">Python Automation</Link>.
           </p>
         </div>
+      )}
+    >
+    <section
+      id="studying"
+      className="relative overflow-hidden py-16 sm:py-24"
+    >
+      <div className="pointer-events-none absolute inset-0"
+           style={{ background: 'radial-gradient(120% 90% at 50% 120%, rgba(120,80,40,0.10), transparent 60%)' }} />
 
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         {/* Stats bar: 3 equal columns, compressed on xs */}
         <div className="mb-12 grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center backdrop-blur-sm sm:gap-4 sm:p-6">
           {STATS.map((s) => (
@@ -351,5 +358,6 @@ export default function StudyingLibrary() {
         <JourneyCrosslink current="studying" />
       </div>
     </section>
+    </PageStage>
   )
 }

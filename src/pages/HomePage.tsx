@@ -37,8 +37,7 @@ export default function HomePage() {
   }, [hash, navigate])
 
   return (
-    <>
-      <Gateway lang={lang} />
+    <Gateway lang={lang}>
       <ProfileSummary lang={lang} />
 
       <section id="explore" className="relative py-20 sm:py-24" aria-labelledby="explore-title">
@@ -59,6 +58,6 @@ export default function HomePage() {
       <GallerySection lang={lang} />
       <WalkingAgent lang={lang} />
       <DiscoveryPortal />
-    </>
+    </Gateway>
   )
 }

@@ -1,3 +1,4 @@
+import PageStage from './PageStage'
   import { useEffect, useMemo, useRef, useState } from 'react'
 import PageTitle from './PageTitle'
 import { Cpu, Play, Shuffle, RotateCcw, Route, BarChart3, Binary, Plus, Swords, Gauge, type LucideIcon } from 'lucide-react'
@@ -559,16 +560,22 @@ export default function AlgorithmLab() {
   ]), [])
 
   return (
-    <section id="lab" ref={viewRef} className="relative py-24 sm:py-28">
+    <PageStage
+      motif="lab"
+      header={(
+        <div className="mx-auto max-w-5xl px-6">
+          <p className="font-mono text-xs uppercase tracking-[0.35em] lux-eyebrow enter-eyebrow">// ALGORITHM LAB</p>
+          <PageTitle className="mt-4 max-w-[10.3em]" icon={<Cpu aria-hidden />} accent="running live">Computer Science,</PageTitle>
+          <p className="enter-sub mt-4 max-w-2xl leading-relaxed text-gray-400">
+            Not screenshots — real algorithms executing in your browser, step by step. Watch classic sorts compete and
+            A* search find the shortest path through a maze.
+          </p>
+        </div>
+      )}
+    >
+    <section id="lab" ref={viewRef} className="relative py-16 sm:py-20">
       <div className="mx-auto max-w-5xl px-6">
-        <p className="font-mono text-xs uppercase tracking-[0.35em] lux-eyebrow enter-eyebrow">// ALGORITHM LAB</p>
-        <PageTitle className="mt-4 max-w-[10.3em]" icon={<Cpu aria-hidden />} accent="running live">Computer Science,</PageTitle>
-        <p className="enter-sub mt-4 max-w-2xl leading-relaxed text-gray-400">
-          Not screenshots — real algorithms executing in your browser, step by step. Watch classic sorts compete and
-          A* search find the shortest path through a maze.
-        </p>
-
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="inline-flex flex-wrap rounded-xl border border-white/10 bg-black/40 p-1">
             {tabs.map(({ id, label, Icon }) => (
               <button key={id} onClick={() => setTab(id)}
@@ -593,5 +600,6 @@ export default function AlgorithmLab() {
         </div>
       </div>
     </section>
+    </PageStage>
   )
 }

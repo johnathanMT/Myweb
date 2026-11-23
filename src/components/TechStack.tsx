@@ -1,3 +1,4 @@
+import PageStage from './PageStage'
 import PageTitle from './PageTitle'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 import { Database, ShieldCheck, type LucideIcon } from 'lucide-react'
@@ -139,21 +140,24 @@ export default function TechStack({ lang = 'en' }: TechStackProps) {
   const ref = useCyberReveal()
 
   return (
-    <section id="stack" ref={ref} className="relative overflow-hidden py-24 text-legible">
+    <PageStage
+      motif="stack"
+      header={(
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="lux-eyebrow enter-eyebrow font-mono text-xs uppercase tracking-[0.35em]">// {t.badge}</p>
+          <PageTitle className="mt-4 max-w-[11em]" accent={t.accent}>{t.title}</PageTitle>
+        </div>
+      )}
+    >
+    <section id="stack" ref={ref} className="relative overflow-hidden py-20 text-legible">
       {/* calm gold + maroon ambient glows */}
       <div className="pointer-events-none absolute -top-10 left-1/4 h-80 w-80 rounded-full blur-[150px]" style={{ background: 'rgb(184 134 11 / 0.1)' }} />
       <div className="pointer-events-none absolute bottom-0 right-1/4 h-72 w-72 rounded-full blur-[150px]" style={{ background: 'rgb(184 134 11 / 0.08)' }} />
 
       <div className="relative z-10 mx-auto grid max-w-6xl items-start gap-12 px-6 lg:grid-cols-2 lg:gap-16">
-        {/* spans both columns, so the header art shows beside it */}
-        <header className="lg:col-span-2 lg:max-w-[60%] lg:pb-10">
-          <p className="lux-eyebrow enter-eyebrow font-mono text-xs uppercase tracking-[0.35em]">// {t.badge}</p>
-          <PageTitle className="mt-4" accent={t.accent}>{t.title}</PageTitle>
-        </header>
-
         {/* ── LEFT: journey narrative ── */}
-        <div data-reveal className="enter-sub">
-          <p className=" text-lg leading-relaxed text-gray-200">{t.intro}</p>
+        <div data-reveal>
+          <p className="text-lg leading-relaxed text-gray-200">{t.intro}</p>
           {t.paras.map((p, i) => (
             <p key={i} className="mt-4 leading-relaxed text-gray-400">{p}</p>
           ))}
@@ -186,5 +190,6 @@ export default function TechStack({ lang = 'en' }: TechStackProps) {
         </div>
       </div>
     </section>
+    </PageStage>
   )
 }

@@ -1,3 +1,4 @@
+import PageStage from './PageStage'
 import PageTitle from './PageTitle'
 import { PERSONAL, SKILLS, type SkillItem } from '../data/content'
 import { pickLang } from '../data/i18n'
@@ -70,7 +71,18 @@ export default function About({ lang = 'en' }: AboutProps) {
   const sectionRef = useCyberReveal()
 
   return (
-    <section id="about" ref={sectionRef} className="relative py-28 border-t border-white/5 overflow-hidden text-legible">
+    <PageStage
+      motif="about"
+      header={(
+        <div className="mx-auto max-w-6xl px-6">
+          <span className="inline-flex items-center gap-2 lux-eyebrow enter-eyebrow rounded-full border border-[rgb(var(--lux-2)/0.4)] bg-[rgb(var(--lux-2)/0.1)] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em] mb-4">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[rgb(var(--lux-2))]" /> Who I Am
+          </span>
+          <PageTitle>{t.title}</PageTitle>
+        </div>
+      )}
+    >
+    <section id="about" ref={sectionRef} className="relative overflow-hidden text-legible">
       {/* ambient glows */}
       <div className="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl pointer-events-none opacity-40"
         style={{ background: 'radial-gradient(circle, rgb(184 134 11 / 0.12), transparent 70%)' }} />
@@ -80,14 +92,6 @@ export default function About({ lang = 'en' }: AboutProps) {
         style={{ background: 'radial-gradient(ellipse, rgb(184 134 11 / 0.12), transparent 70%)' }} />
 
       <div className="section-container relative z-10">
-
-        {/* Header */}
-        <div data-reveal className="mb-16">
-          <span className="inline-flex items-center gap-2 lux-eyebrow enter-eyebrow rounded-full border border-[rgb(var(--lux-2)/0.4)] bg-[rgb(var(--lux-2)/0.1)] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em] mb-4">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[rgb(var(--lux-2))]" /> Who I Am
-          </span>
-          <PageTitle className="mb-4">{t.title}</PageTitle>
-        </div>
 
         {/* Profile — Z layout: portrait → identity, a diagonal connector, then story → motto.
             Thin rules with nodes draw the Z's top and bottom strokes, like an architecture diagram. */}
@@ -206,5 +210,6 @@ export default function About({ lang = 'en' }: AboutProps) {
         </div>
       </div>
     </section>
+    </PageStage>
   )
 }
