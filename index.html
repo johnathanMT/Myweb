@@ -77,15 +77,13 @@
     </noscript>
     <script src="/css-swap.js" defer></script>
 
-    <!-- Instant boot-splash styles (inline <style> is allowed by style-src
-         'unsafe-inline'; contains NO inline JS, so it is CSP-safe). The splash is
-         faded out and removed by main.tsx once React has mounted. -->
+    <!-- First-paint colours only (CSP-safe inline style, no JS): the page background
+         and wordmark that stand in for the few frames before React renders. -->
     <style>
-        #boot-splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#04091A;transition:opacity .35s ease}
-        #boot-splash .bs-spin{width:38px;height:38px;border-radius:50%;border:3px solid rgba(233,237,245,.14);border-top-color:#22D3EE;box-shadow:0 0 16px rgba(34,211,238,.5);animation:bs-rot .8s linear infinite}
-        #boot-splash.bs-hide{opacity:0;pointer-events:none}
-        @keyframes bs-rot{to{transform:rotate(360deg)}}
-        @media (prefers-reduced-motion: reduce){#boot-splash .bs-spin{animation-duration:2.4s}}
+        html{background:#04091A}
+        #prepaint{padding:22px 24px;font:600 14px/1.4 system-ui,sans-serif;letter-spacing:.04em;color:#96AACA}
+        @media (prefers-color-scheme: light){html:not([data-theme="dark"]){background:#F6F8FC}#prepaint{color:#475569}}
+        html[data-theme="light"]{background:#F6F8FC}
     </style>
 </head>
 
@@ -98,16 +96,8 @@
         <p>Please enable JavaScript to view the full interactive portfolio.</p>
     </noscript>
 
-    <div id="root"></div>
-
-    <!-- Instant loading splash: paints immediately (pure CSS, no JS) so mobile
-         never shows a blank screen during the JS bootstrap. main.tsx fades and
-         removes it once React mounts. If JS is disabled, the <noscript> below
-         hides it so the crawler/no-JS fallback content stays visible. -->
-    <div id="boot-splash" aria-hidden="true"><div class="bs-spin"></div></div>
-    <noscript>
-        <style>#boot-splash{display:none !important}</style>
-    </noscript>
+    <!-- React replaces this wordmark on its first render. No overlay, no timers. -->
+    <div id="root"><div id="prepaint" aria-hidden="true">MTN.Digitosphere</div></div>
 
     <script type="module" src="/src/main.tsx"></script>
     <!-- api.js (window.PortfolioAPI) is loaded only by the legacy blog.html / admin.html

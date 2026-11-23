@@ -9,7 +9,6 @@ import TechDecor from '../components/TechDecor'
 import Navbar from '../components/Navbar'
 import Footer from '../components/MegaFooter'
 import HudFrame from '../components/HudFrame'
-import BootScreen from '../components/BootScreen'
 import AiRobotDock from '../components/AiRobotDock'
 import PortfolioChat from '../components/PortfolioChat'
 import PageSkeleton from '../components/PageSkeleton'
@@ -48,7 +47,9 @@ export default function SiteLayout() {
       }
 
   return (
-    <div className="site-root relative min-h-screen overflow-x-hidden text-fg">
+    // overflow-x: clip (not hidden) — hidden would make this a scroll container and
+    // break every position:sticky descendant (the /gallery card deck).
+    <div className="site-root relative min-h-screen overflow-x-clip text-fg">
       <AmbientBackground />
       <TechDecor />
 
@@ -82,7 +83,6 @@ export default function SiteLayout() {
       <PortfolioChat />
 
       <HudFrame />
-      <BootScreen />
     </div>
   )
 }

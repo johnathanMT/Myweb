@@ -46,7 +46,7 @@ if (typeof window !== 'undefined' && window.location.hash.startsWith('#/')) {
   window.history.replaceState(null, '', target)
 }
 
-// ?mode=recruiter must be recorded before the first render so BootScreen skips the intro.
+// ?mode=recruiter must be recorded before the first render so Home opens in the right mode.
 initRecruiterMode()
 
 // #root is guaranteed by index.html; guard keeps TS strict-null happy without `!`.
@@ -98,13 +98,3 @@ ReactDOM.createRoot(rootEl).render(
     </MotionConfig>
   </React.StrictMode>,
 )
-
-// Fade out and remove the instant boot splash now that React has mounted, so
-// mobile users see a spinner during the JS bootstrap instead of a blank screen.
-const bootSplash = document.getElementById('boot-splash')
-if (bootSplash) {
-  requestAnimationFrame(() => {
-    bootSplash.classList.add('bs-hide')
-    window.setTimeout(() => bootSplash.remove(), 400)
-  })
-}
