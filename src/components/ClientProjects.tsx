@@ -1,3 +1,4 @@
+import PageTitle from './PageTitle'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ExternalLink, Globe } from 'lucide-react'
 import { SITE } from '../config/site'
@@ -88,9 +89,9 @@ export default function ClientProjects() {
   return (
     <section id="client-work" className="relative py-20 sm:py-24" aria-labelledby="client-work-title">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-accent">// Live in production</p>
-        <h1 id="client-work-title" className="section-title signature-page-title mt-3">Featured Website Projects</h1>
-        <p className="section-subtitle">Websites I designed and built — live and running today.</p>
+        <p className="lux-eyebrow enter-eyebrow font-mono text-xs uppercase tracking-[0.35em]">// Live in production</p>
+        <PageTitle id="client-work-title" className="mb-4 mt-3 max-w-[10em]">Featured Website Projects</PageTitle>
+        <p className="section-subtitle enter-sub lg:!mb-28">Websites I designed and built — live and running today.</p>
 
         <div className="grid gap-6 lg:grid-cols-2">
           {CLIENT_PROJECTS.map((p) => <ClientCard key={p.id} project={p} />)}

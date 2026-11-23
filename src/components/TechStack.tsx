@@ -1,3 +1,4 @@
+import PageTitle from './PageTitle'
 import { useCyberReveal } from '../hooks/useCyberReveal'
 import { Database, ShieldCheck, type LucideIcon } from 'lucide-react'
 // Authentic CC0 brand icons, bundled locally from the `simple-icons` npm package
@@ -140,18 +141,19 @@ export default function TechStack({ lang = 'en' }: TechStackProps) {
   return (
     <section id="stack" ref={ref} className="relative overflow-hidden py-24 text-legible">
       {/* calm gold + maroon ambient glows */}
-      <div className="pointer-events-none absolute -top-10 left-1/4 h-80 w-80 rounded-full blur-[150px]" style={{ background: 'rgb(16 52 110 / 0.45)' }} />
-      <div className="pointer-events-none absolute bottom-0 right-1/4 h-72 w-72 rounded-full blur-[150px]" style={{ background: 'rgb(12 40 90 / 0.4)' }} />
+      <div className="pointer-events-none absolute -top-10 left-1/4 h-80 w-80 rounded-full blur-[150px]" style={{ background: 'rgb(184 134 11 / 0.1)' }} />
+      <div className="pointer-events-none absolute bottom-0 right-1/4 h-72 w-72 rounded-full blur-[150px]" style={{ background: 'rgb(184 134 11 / 0.08)' }} />
 
       <div className="relative z-10 mx-auto grid max-w-6xl items-start gap-12 px-6 lg:grid-cols-2 lg:gap-16">
-        {/* ── LEFT: journey narrative ── */}
-        <div data-reveal>
-          <p className="font-mono text-xs uppercase tracking-[0.35em] text-accent/90">// {t.badge}</p>
-          <h1 className="signature-page-title mt-4 text-white">
-            {t.title} <span className="text-accent">{t.accent}</span>
-          </h1>
+        {/* spans both columns, so the header art shows beside it */}
+        <header className="lg:col-span-2 lg:max-w-[60%] lg:pb-10">
+          <p className="lux-eyebrow enter-eyebrow font-mono text-xs uppercase tracking-[0.35em]">// {t.badge}</p>
+          <PageTitle className="mt-4" accent={t.accent}>{t.title}</PageTitle>
+        </header>
 
-          <p className="mt-6 text-lg leading-relaxed text-gray-200">{t.intro}</p>
+        {/* ── LEFT: journey narrative ── */}
+        <div data-reveal className="enter-sub">
+          <p className=" text-lg leading-relaxed text-gray-200">{t.intro}</p>
           {t.paras.map((p, i) => (
             <p key={i} className="mt-4 leading-relaxed text-gray-400">{p}</p>
           ))}

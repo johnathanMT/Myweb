@@ -16,6 +16,7 @@ import {
 } from './routes'
 import './index.css'
 import './signature.css'
+import './luxury.css'
 
 // Full-screen immersive worlds — rendered OUTSIDE SiteLayout (no Navbar/Footer).
 const Remembrance = lazy(() => import('./components/Remembrance'))
@@ -69,10 +70,10 @@ ReactDOM.createRoot(rootEl).render(
             <Route path="lab" element={<><Seo title="Techno Science Lab" path="/lab" description="Interactive computer-science simulations — sorting, pathfinding, agentic AI workflows, quantum circuits and antimatter." /><LabPage /></>} />
             <Route path="gallery" element={<><Seo title="Gallery" path="/gallery" description="A visual gallery of moments, projects, and life in Japan — from the lab to the everyday." /><GalleryRoute /></>} />
             <Route path="exploring" element={<><Seo title="Exploring" path="/exploring" description="Curiosities, articles, travel chronicles and a live visitor globe." /><ExploringPage /></>} />
-            <Route path="python" element={<><Seo title="Python Automation" path="/python" description="Python automation scripts and projects — practical tools, scrapers, and workflow automations by Myo Thant Naing." /><PageShell journeyHub="python"><PythonAutomation /></PageShell></>} />
-            <Route path="studying" element={<><Seo title="Studying Library" path="/studying" description="My self-taught Computer Science journey — notes, resources, and study tracks across CS, AI, and software engineering." /><PageShell journeyHub="studying"><StudyingLibrary /></PageShell></>} />
-            <Route path="bibliography" element={<><Seo title="My Journey" path="/bibliography" description="My journey from International Relations in Myanmar to caregiving in Japan and a BSc in Computer Science — a timeline of study and work." /><PageShell journeyHub="bibliography"><Bibliography /></PageShell></>} />
-            <Route path="github" element={<><Seo title="GitHub Projects" path="/github" description="Open-source projects by Myo Thant Naing — AI bots, IoT hardware, full-stack web apps, and Python automation scripts." /><PageShell><GitHubProjects /></PageShell></>} />
+            <Route path="python" element={<><Seo title="Python Automation" path="/python" description="Python automation scripts and projects — practical tools, scrapers, and workflow automations by Myo Thant Naing." /><PageShell journeyHub="python" motif="about"><PythonAutomation /></PageShell></>} />
+            <Route path="studying" element={<><Seo title="Studying Library" path="/studying" description="My self-taught Computer Science journey — notes, resources, and study tracks across CS, AI, and software engineering." /><PageShell journeyHub="studying" motif="stack"><StudyingLibrary /></PageShell></>} />
+            <Route path="bibliography" element={<><Seo title="My Journey" path="/bibliography" description="My journey from International Relations in Myanmar to caregiving in Japan and a BSc in Computer Science — a timeline of study and work." /><PageShell journeyHub="bibliography" motif="exploring"><Bibliography /></PageShell></>} />
+            <Route path="github" element={<><Seo title="GitHub Projects" path="/github" description="Open-source projects by Myo Thant Naing — AI bots, IoT hardware, full-stack web apps, and Python automation scripts." /><PageShell motif="projects"><GitHubProjects /></PageShell></>} />
             {/* The static interest pages (public/*.html) used to link back with a relative
                 "index.html", which resolves to /index.html — not a route, so it hit the 404.
                 Redirect it (and any /explore/* alias) instead of losing the visitor. */}
@@ -83,11 +84,11 @@ ReactDOM.createRoot(rootEl).render(
           </Route>
 
           {/* Sanctuary is full-screen immersive → no SiteLayout. */}
-          <Route path="/sanctuary" element={<><Seo title="Memory Sanctuary" path="/sanctuary" description="An interactive 3D Studio-Ghibli-inspired world where colleagues leave farewell memories." /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#04091A' }} />}><Sanctuary /></Suspense></>} />
+          <Route path="/sanctuary" element={<><Seo title="Memory Sanctuary" path="/sanctuary" description="An interactive 3D Studio-Ghibli-inspired world where colleagues leave farewell memories." /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#07070A' }} />}><Sanctuary /></Suspense></>} />
           <Route path="/remembrance" element={<><Seo title="In Loving Memory" path="/remembrance" description="A serene 3D sunset memorial honouring a beloved aerospace engineer and mentor." noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#1a1024' }} />}><Remembrance /></Suspense></>} />
           {/* private / admin → not indexed */}
-          <Route path="/farewell" element={<><Seo title="Farewell RSVP" path="/farewell" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#04091A' }} />}><FarewellRSVP /></Suspense></>} />
-          <Route path="/sanctuary-admin" element={<><Seo title="Admin" path="/sanctuary-admin" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#04091A' }} />}><SanctuaryAdmin /></Suspense></>} />
+          <Route path="/farewell" element={<><Seo title="Farewell RSVP" path="/farewell" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#07070A' }} />}><FarewellRSVP /></Suspense></>} />
+          <Route path="/sanctuary-admin" element={<><Seo title="Admin" path="/sanctuary-admin" noindex /><Suspense fallback={<div style={{ minHeight: '100vh', background: '#07070A' }} />}><SanctuaryAdmin /></Suspense></>} />
         </Routes>
       </BrowserRouter>
       </LangProvider>

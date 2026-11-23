@@ -1,3 +1,4 @@
+import PageTitle from './PageTitle'
 import { PERSONAL, SKILLS, type SkillItem } from '../data/content'
 import { pickLang } from '../data/i18n'
 import { useCyberReveal } from '../hooks/useCyberReveal'
@@ -70,27 +71,22 @@ export default function About({ lang = 'en' }: AboutProps) {
 
   return (
     <section id="about" ref={sectionRef} className="relative py-28 border-t border-white/5 overflow-hidden text-legible">
-      {/* crystal-clear: faint tint only, NO blur — the 3D city shows through.
-          Readability comes from .text-legible (inherited dark text-shadow). */}
-      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       {/* ambient glows */}
       <div className="absolute -top-20 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl pointer-events-none opacity-40"
-        style={{ background: 'radial-gradient(circle, rgb(16 52 110), transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, rgb(184 134 11 / 0.12), transparent 70%)' }} />
       <div className="absolute bottom-0 right-1/4 w-[360px] h-[360px] rounded-full blur-3xl pointer-events-none opacity-30"
-        style={{ background: 'radial-gradient(circle, rgb(12 40 90), transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, rgb(184 134 11 / 0.12), transparent 70%)' }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[300px] rounded-full blur-3xl pointer-events-none opacity-25"
-        style={{ background: 'radial-gradient(ellipse, rgb(20 64 128), transparent 70%)' }} />
+        style={{ background: 'radial-gradient(ellipse, rgb(184 134 11 / 0.12), transparent 70%)' }} />
 
       <div className="section-container relative z-10">
 
         {/* Header */}
         <div data-reveal className="mb-16">
-          <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em] text-accent-light mb-4">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-light" /> Who I Am
+          <span className="inline-flex items-center gap-2 lux-eyebrow enter-eyebrow rounded-full border border-[rgb(var(--lux-2)/0.4)] bg-[rgb(var(--lux-2)/0.1)] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em] mb-4">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[rgb(var(--lux-2))]" /> Who I Am
           </span>
-          <h1 className="section-title signature-page-title">
-            <span className="bg-gradient-to-r from-white via-accent-light to-cyan bg-clip-text text-transparent">{t.title}</span>
-          </h1>
+          <PageTitle className="mb-4">{t.title}</PageTitle>
         </div>
 
         {/* Profile — Z layout: portrait → identity, a diagonal connector, then story → motto.

@@ -1,3 +1,4 @@
+import PageTitle from './PageTitle'
 import { useRef, useState, type CSSProperties } from 'react'
 import { INTERESTS, PERSONAL } from '../data/content'
 import { useCyberReveal } from '../hooks/useCyberReveal'
@@ -121,9 +122,8 @@ export default function Exploring() {
   return (
     <section id="exploring" ref={sectionRef} className="relative py-24 border-t border-white/5 text-legible"
       style={{ '--c': 'rgb(var(--accent))' } as CSSVars}>
-      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, rgb(var(--space) / 0.5) 0%, transparent 40%, transparent 60%, rgb(var(--space) / 0.5) 100%)' }} />
+        style={{ background: 'linear-gradient(180deg, transparent 60%, rgb(var(--space) / 0.5) 100%)' }} />
       <div className="absolute left-1/2 top-1/3 -translate-x-1/2 w-[600px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-10"
         style={{ background: 'radial-gradient(ellipse, rgb(var(--accent)), rgb(var(--coral)), transparent)' }} />
 
@@ -142,11 +142,9 @@ export default function Exploring() {
 
       <div className="section-container relative z-10">
         <div data-reveal className="mb-8">
-          <span className="section-badge">Polymath</span>
-          <h1 className="section-title signature-page-title">
-            Exploring the Infinite <span aria-hidden>🌌</span>
-          </h1>
-          <p className="text-xs uppercase tracking-widest text-gray-600 mb-4">The Master of Jack of All Trades</p>
+          <span className="lux-eyebrow enter-eyebrow mb-4 inline-block rounded-full border border-[rgb(var(--lux-2)/0.4)] bg-[rgb(var(--lux-2)/0.1)] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.3em]">Polymath</span>
+          <PageTitle className="mb-4">Exploring the Infinite</PageTitle>
+          <p className="enter-sub text-xs uppercase tracking-widest text-muted mb-4">The Master of Jack of All Trades</p>
         </div>
 
         {/* Heinlein quote */}

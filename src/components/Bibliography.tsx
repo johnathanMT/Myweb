@@ -1,3 +1,4 @@
+import PageTitle from './PageTitle'
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
@@ -228,10 +229,10 @@ export default function Bibliography({ embedded = false }: { embedded?: boolean 
   return (
     <section id="bibliography" className="relative overflow-hidden bg-transparent py-16 sm:py-24">
       <div className="mb-14 px-4 text-center sm:px-6">
-        <p className="font-mono text-sm uppercase tracking-[0.3em] text-accent-light">// chronology</p>
+        <p className="lux-eyebrow enter-eyebrow font-mono text-sm uppercase tracking-[0.3em]">// chronology</p>
         {embedded
           ? <h2 className="signature-section-title mt-2 text-white">My Journey</h2>
-          : <h1 className="signature-page-title mt-2 text-white">My Journey</h1>}
+          : <PageTitle className="mt-2">My Journey</PageTitle>}
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
           The "where" in my story — from International Relations in Myanmar to caregiving in Osaka,
           and now a BSc in Computer Science. This timeline connects to what I study in{' '}

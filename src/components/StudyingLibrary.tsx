@@ -1,3 +1,4 @@
+import PageTitle from './PageTitle'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
@@ -265,14 +266,12 @@ export default function StudyingLibrary() {
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mb-10 text-center sm:mb-12">
-          <p className="text-xs uppercase tracking-[0.35em]" style={{ color: GOLD, fontFamily: 'Georgia, serif' }}>
+          <p className="enter-eyebrow text-xs uppercase tracking-[0.35em]" style={{ color: GOLD, fontFamily: 'Georgia, serif' }}>
             Bibliotheca · Studii
           </p>
-          <h1 className="signature-page-title mt-3 text-[#f3ead6]">
-            The Personal Library
-          </h1>
-          <div className="mx-auto mt-4 h-px w-24" style={{ background: GOLD }} />
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#cfc4ad]/70 sm:text-base">
+          <PageTitle className="mt-3">The Personal Library</PageTitle>
+          <div className="enter-rule !origin-center mx-auto mt-4 h-px w-24" style={{ background: GOLD }} />
+          <p className="enter-sub mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#cfc4ad]/70 sm:text-base">
             The “what” in my story — NCC Diploma modules, IBM AI certifications, and self-study that
             followed the path laid out in my{' '}
             <Link to="/bibliography" className="text-[#e8dcc0] underline-offset-2 hover:underline">My Journey</Link>

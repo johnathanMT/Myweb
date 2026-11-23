@@ -1,3 +1,4 @@
+import PageTitle from './PageTitle'
 import { Fragment, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, ExternalLink, Lightbulb, Network, Target, Trophy, UserRound, type LucideIcon } from 'lucide-react'
@@ -47,7 +48,7 @@ export default function CaseStudyLayout({ study, lang = 'en' }: { study: CaseStu
   const copyLang = lang === 'mm' ? 'my' : lang === 'jp' ? 'ja' : undefined
 
   return (
-    <article lang={copyLang} className="mx-auto max-w-4xl px-4 pb-24 pt-4 sm:px-6">
+    <article lang={copyLang} className="relative mx-auto max-w-4xl px-4 pb-24 pt-4 sm:px-6">
       <Link
         to="/projects"
         className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted transition-colors hover:bg-accent/10 hover:text-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-light/60"
@@ -57,10 +58,10 @@ export default function CaseStudyLayout({ study, lang = 'en' }: { study: CaseStu
 
       {/* hero */}
       <header className="mt-6">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent">{t.caseStudy} · {copy.kind}</p>
-        <h1 className="section-title signature-page-title mt-3">{study.name}</h1>
+        <p className="lux-eyebrow enter-eyebrow font-mono text-xs uppercase tracking-[0.3em]">{t.caseStudy} · {copy.kind}</p>
+        <PageTitle className="mb-4 mt-3">{study.name}</PageTitle>
         {study.localName && <p lang="my" className="mt-1 text-muted">{study.localName}</p>}
-        <p className="mt-4 max-w-3xl text-lg leading-relaxed text-muted">{copy.summary}</p>
+        <p className="enter-sub mt-4 max-w-3xl text-lg leading-relaxed text-muted">{copy.summary}</p>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <a href={study.liveUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">

@@ -191,7 +191,7 @@ function TributeCard({
             <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-amber-300/90">
               {data.eyebrow[lang]}
             </p>
-            <h2 className={`mt-1.5 text-xl font-bold leading-snug sm:text-2xl ${titleFont}`}>
+            <h2 className={`mt-1.5 text-xl font-bold leading-snug text-[#f0d9a0] sm:text-2xl ${titleFont}`}>
               {data.title[lang]}
             </h2>
 

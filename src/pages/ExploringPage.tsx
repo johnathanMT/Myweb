@@ -1,3 +1,4 @@
+import PageStage from '../components/PageStage'
 import { lazy, Suspense } from 'react'
 import { useLang } from '../context/LangContext'
 import Exploring from '../components/Exploring'
@@ -16,7 +17,7 @@ export default function ExploringPage() {
   const { lang, setLang } = useLang()
   return (
     <>
-      <Exploring />
+      <PageStage motif="exploring"><Exploring /></PageStage>
       <MemorialPavilion lang={lang} />
       <ArticlesSection />
       <TravelChronicles lang={lang} setLang={setLang} />

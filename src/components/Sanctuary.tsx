@@ -1,3 +1,5 @@
+import { HeaderArt } from './PageStage'
+import PageTitle from './PageTitle'
 import { Suspense, useEffect, useMemo, useRef, useState, Component, type ReactNode, type FormEvent } from 'react'
 import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -785,10 +787,11 @@ export default function Sanctuary() {
           </div>
         </div>
 
-        <div className="pointer-events-none absolute left-1/2 z-[44] w-[min(92vw,64rem)] -translate-x-1/2 text-center" style={{ top: 'calc(max(0.85rem, env(safe-area-inset-top)) + 3.3rem)' }}>
-          {/* inline colour: the world is dark in both themes, and light mode remaps text-white */}
-          <h1 className="signature-page-title drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" style={{ color: '#fff' }}>{t.title}</h1>
-          <p className="mt-1 hidden font-serif text-xs text-white/80 drop-shadow sm:block">{t.sub}</p>
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[43]"><HeaderArt motif="sanctuary" /></div>
+        {/* keyed so the entrance plays once the welcome card is dismissed */}
+        <div key={welcome ? 'behind' : 'entered'} className="lux-dark pointer-events-none absolute left-1/2 z-[44] w-[min(92vw,64rem)] -translate-x-1/2 text-center" style={{ top: 'calc(max(0.85rem, env(safe-area-inset-top)) + 3.3rem)' }}>
+          <PageTitle>{t.title}</PageTitle>
+          <p className="enter-sub mt-1 hidden font-serif text-xs text-white/80 drop-shadow sm:block">{t.sub}</p>
           {apiError && (
             <p className="mx-auto mt-2 w-fit rounded-full border border-amber-300/40 bg-black/55 px-3 py-1 font-mono text-[11px] text-amber-200/90 backdrop-blur-md">
               {(API_MSG[lang] || API_MSG.en)[apiError]}

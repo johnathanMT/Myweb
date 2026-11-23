@@ -1,3 +1,4 @@
+import PageTitle from './PageTitle'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Github, ExternalLink, Bot, Coffee, Globe, Cpu, Code2, Zap, Star, GitBranch, ArrowUpRight } from 'lucide-react'
@@ -346,13 +347,11 @@ export default function GitHubProjects() {
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         {/* Page header */}
         <div className="mb-10 text-center sm:mb-14">
-          <p className="font-mono text-sm uppercase tracking-[0.3em] text-accent-light">
+          <p className="lux-eyebrow enter-eyebrow font-mono text-sm uppercase tracking-[0.3em]">
             // open source
           </p>
-          <h1 className="signature-page-title mt-3 text-white">
-            GitHub Projects
-          </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/50 sm:text-base">
+          <PageTitle className="mt-3">GitHub Projects</PageTitle>
+          <p className="enter-sub mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/50 sm:text-base">
             A catalogue of repositories — from AI bots and IoT hardware to full-stack web apps and automation scripts.
           </p>
 

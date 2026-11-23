@@ -20,8 +20,8 @@ function TokyoClock({ city }: { city: string }) {
   return (
     <p className="mt-6 flex items-center gap-2.5 font-mono text-xs tracking-wider text-muted">
       <span className="relative flex h-1.5 w-1.5" aria-hidden>
-        <span className="absolute inset-0 rounded-full bg-emerald-500 opacity-50 motion-safe:animate-ping [animation-duration:2.8s]" />
-        <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        <span className="absolute inset-0 rounded-full site-footer-pulse opacity-50 motion-safe:animate-ping [animation-duration:2.8s]" />
+        <span className="relative h-1.5 w-1.5 rounded-full site-footer-pulse" />
       </span>
       <span className="tabular-nums">{city} · {time} JST</span>
     </p>
@@ -32,6 +32,8 @@ function TokyoClock({ city }: { city: string }) {
 export default function MegaFooter({ lang = 'en' }: { lang?: string }) {
   const t: FooterCopy = { ...FOOTER_T.en, ...COPY[lang] }
 
+  const [brand, world] = PERSONAL.handle.split('.')
+
   const item = ({ key, label, to, href }: FooterLink) => {
     const text = key ? t[key] : label
     const cls = 'inline-block py-1 site-footer-link text-sm'
@@ -41,7 +43,7 @@ export default function MegaFooter({ lang = 'en' }: { lang?: string }) {
   }
   const column = (title: string, links: FooterLink[]) => (
     <nav aria-label={title}>
-      <h2 className="mb-4 text-sm font-semibold text-fg">{title}</h2>
+      <h2 className="site-footer-head mb-4 text-sm font-semibold text-fg">{title}</h2>
       <ul className="space-y-1.5">
         {links.map((l) => <li key={l.key ?? l.label}>{item(l)}</li>)}
       </ul>
@@ -54,7 +56,7 @@ export default function MegaFooter({ lang = 'en' }: { lang?: string }) {
       <div className="mx-auto max-w-6xl px-5 pb-10 pt-16 sm:px-6 lg:pt-24">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.8fr_1fr_1fr] lg:gap-16">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="text-xl font-semibold tracking-tight text-fg">{PERSONAL.handle}</Link>
+            <Link to="/" className="text-xl font-semibold tracking-tight text-fg">{brand}.<span className="site-footer-mark">{world}</span></Link>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">{t.position}</p>
             <TokyoClock city={t.city} />
           </div>

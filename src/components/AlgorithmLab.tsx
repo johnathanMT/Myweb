@@ -1,4 +1,5 @@
   import { useEffect, useMemo, useRef, useState } from 'react'
+import PageTitle from './PageTitle'
 import { Cpu, Play, Shuffle, RotateCcw, Route, BarChart3, Binary, Plus, Swords, Gauge, type LucideIcon } from 'lucide-react'
 import { useInView } from '../hooks/useInView'
 
@@ -12,7 +13,7 @@ import { useInView } from '../hooks/useInView'
 
 const JADE = 'rgb(var(--jade))'
 const JADE_L = 'rgb(var(--jade-light))'
-const HOT = 'rgb(var(--cyan))'
+const HOT = 'rgb(var(--coral))'
 const GOLD = '#d4af37'
 
 // Shared grid-search maze shape (cells are flat indices into a ROWS×COLS grid).
@@ -560,11 +561,9 @@ export default function AlgorithmLab() {
   return (
     <section id="lab" ref={viewRef} className="relative py-24 sm:py-28">
       <div className="mx-auto max-w-5xl px-6">
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-jade">// ALGORITHM LAB</p>
-        <h1 className="signature-page-title mt-4 text-white">
-          <Cpu className="text-accent-light" size={30} /> Computer Science, <span className="text-accent-light">running live</span>
-        </h1>
-        <p className="mt-4 max-w-2xl leading-relaxed text-gray-400">
+        <p className="font-mono text-xs uppercase tracking-[0.35em] lux-eyebrow enter-eyebrow">// ALGORITHM LAB</p>
+        <PageTitle className="mt-4 max-w-[10.3em]" icon={<Cpu aria-hidden />} accent="running live">Computer Science,</PageTitle>
+        <p className="enter-sub mt-4 max-w-2xl leading-relaxed text-gray-400">
           Not screenshots — real algorithms executing in your browser, step by step. Watch classic sorts compete and
           A* search find the shortest path through a maze.
         </p>

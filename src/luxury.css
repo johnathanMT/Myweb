@@ -1,0 +1,170 @@
+/* ══════════════════════════════════════════════════════════════════
+   OBSIDIAN & GOLD — shared palette, golden titles, the one-time title
+   entrance and the page-header line-art.
+   ══════════════════════════════════════════════════════════════════ */
+:root {
+  --lux-1: 245 208 97;   /* champagne */
+  --lux-2: 229 184 75;
+  --lux-3: 212 175 55;   /* burnished */
+  --lux-ground: 7 7 10;
+  --lux-ink: 250 247 240;
+  --lux-grad: linear-gradient(100deg, #fff2b2, #f5d061 38%, #d4af37 78%, #e5b84b);
+  --lux-shine: 255 252 235;
+  --lux-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme="light"] {
+  --lux-1: 154 107 22;   /* antique bronze */
+  --lux-2: 168 120 20;
+  --lux-3: 184 134 11;
+  --lux-ground: 249 247 241;
+  --lux-ink: 24 20 14;
+  --lux-grad: linear-gradient(100deg, #8a5c10, #9a6b16 40%, #b8860b 85%, #9a6b16);
+  --lux-shine: 255 226 140;
+}
+
+/* rooms that stay dark in light mode */
+html[data-theme="light"] .dark-scope,
+html[data-theme="light"] .lux-dark {
+  --lux-1: 245 208 97;
+  --lux-2: 229 184 75;
+  --lux-3: 212 175 55;
+  --lux-ink: 250 247 240;
+  --lux-grad: linear-gradient(100deg, #fff2b2, #f5d061 38%, #d4af37 78%, #e5b84b);
+  --lux-shine: 255 252 235;
+}
+
+/* ── titles ── */
+html .lux-title { color: rgb(var(--lux-ink)); text-shadow: none; }
+.lux-title > svg { color: rgb(var(--lux-2)); }
+
+.gold-text {
+  padding-block: 0.4em;   /* background-clip would cut descenders and Burmese diacritics */
+  background-color: transparent;
+  background-image:
+    linear-gradient(105deg, transparent 42%, rgb(var(--lux-shine)) 50%, transparent 58%),
+    var(--lux-grad);
+  background-size: 260% 100%, 100% 100%;
+  background-position: -80% 0, 0 0;   /* the sweep rests off the glyphs */
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  text-shadow: none;
+}
+
+.lux-eyebrow { color: rgb(var(--lux-2)); text-shadow: none; }
+html[data-theme="light"] .lux-eyebrow { color: rgb(138 92 16); }
+html[data-theme="light"] .dark-scope .lux-eyebrow { color: rgb(var(--lux-2)); }
+
+/* ── entrance: the whole sequence is done at 0.85s ── */
+.enter-eyebrow { animation: lux-rise 0.65s var(--lux-ease) backwards; }
+.enter-title   { animation: lux-reveal 0.75s var(--lux-ease) 0.06s backwards; }
+.enter-sub     { animation: lux-rise 0.68s var(--lux-ease) 0.14s backwards; }
+.enter-late    { animation: lux-rise 0.65s var(--lux-ease) 0.2s backwards; }
+.enter-rule    { transform-origin: left; animation: lux-rule 0.65s var(--lux-ease) 0.2s backwards; }
+.enter-title .gold-text { animation: lux-sweep 0.55s ease-out 0.3s backwards; }
+
+/* clip-path unveils from the top edge down while the line rises into place */
+@keyframes lux-reveal {
+  from { opacity: 0; transform: translateY(28px); filter: blur(6px); clip-path: inset(-30% -5% 100% -5%); }
+  to   { opacity: 1; transform: none; filter: blur(0); clip-path: inset(-30% -5% -40% -5%); }
+}
+@keyframes lux-rise {
+  from { opacity: 0; transform: translateY(16px); filter: blur(3px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes lux-rule { from { opacity: 0; transform: scaleX(0); } }
+@keyframes lux-sweep {
+  from { background-position: 180% 0, 0 0; }
+  to   { background-position: -80% 0, 0 0; }
+}
+
+/* ── page-header stage ── */
+.stage { position: relative; }
+
+.stage-art {
+  position: absolute;
+  inset: calc(-4rem - env(safe-area-inset-top, 0px)) 0 auto;   /* runs up beneath the navbar */
+  height: clamp(30rem, 42vw, 46rem);
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 70% at 80% 40%, rgb(212 175 55 / 0.12), transparent 70%),
+    rgb(var(--lux-ground) / 0.92);
+  -webkit-mask-image: linear-gradient(#000 70%, transparent);
+  mask-image: linear-gradient(#000 70%, transparent);
+  animation: stage-in 0.85s ease-out backwards;
+}
+@keyframes stage-in { from { opacity: 0; } }
+
+.stage-box {
+  position: absolute;
+  top: 2rem;
+  bottom: 0;
+  right: max(-1rem, calc((100vw - 86rem) / 2));
+  aspect-ratio: 4 / 3;
+}
+
+.stage-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.stage-layer .k1 { stroke: rgb(var(--lux-1) / 0.85); stroke-width: 1.5; }
+.stage-layer .k2 { stroke: rgb(var(--lux-2) / 0.5); stroke-width: 1.1; }
+.stage-layer .k3 { stroke: rgb(var(--lux-3) / 0.22); stroke-width: 1; }
+.stage-layer .is-heavy { stroke-width: 2.4; }
+.stage-layer .fillable { fill: rgb(var(--lux-ground) / 0.8); }
+.stage-layer .dot { fill: rgb(var(--lux-1)); }
+.stage-layer .tx { fill: rgb(var(--lux-1) / 0.85); font: 500 15px "Fira Code", monospace; }
+.stage-layer .tx.is-sm { font-size: 12px; fill: rgb(var(--lux-2) / 0.75); }
+.stage-layer .tx.is-lg { font-size: 26px; font-weight: 600; }
+.stage-layer .tx.is-xl { font: italic 400 52px Georgia, serif; }
+.stage-layer .tx.is-dim { fill: rgb(var(--lux-3) / 0.5); }
+
+.mv-spin, .mv-spin-back { animation: stage-spin 90s linear infinite paused; }
+.mv-spin-back { animation-direction: reverse; }
+.mv-drift, .mv-drift-b { animation: stage-drift 13s ease-in-out infinite alternate paused; }
+.mv-drift-b { animation-direction: alternate-reverse; }
+.is-live .stage-layer { animation-play-state: running; }
+@keyframes stage-spin { to { transform: rotate(360deg); } }
+@keyframes stage-drift { from { transform: translateY(-5px); } to { transform: translateY(7px); } }
+
+/* protects the title; the art stays bright on the far side */
+.stage-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(var(--lux-ground) / 0.94) 24%, rgb(var(--lux-ground) / 0.72) 44%, transparent 72%);
+}
+
+/* centred mini-header over the Sanctuary's 3D world, which is dark in both themes */
+.stage-art.is-sanctuary {
+  inset: 0 0 auto;
+  height: 15rem;
+  background: linear-gradient(rgb(7 7 10 / 0.5), transparent);
+}
+.stage-art.is-sanctuary .stage-box { top: -5.8rem; right: auto; bottom: auto; left: 50%; width: 46rem; transform: translateX(-50%); opacity: 0.6; }
+.stage-art.is-sanctuary .stage-scrim { background: radial-gradient(22rem 5rem at 50% 6rem, rgb(7 7 10 / 0.45), transparent); }
+
+.stage-art.is-soft .stage-box { opacity: 0.38; }
+
+@media (max-width: 767px) {
+  .stage-art { height: 31rem; }
+  .stage-box { top: 1rem; right: -9.5rem; opacity: 0.8; }
+  .stage-scrim { background: linear-gradient(90deg, rgb(var(--lux-ground) / 0.86), rgb(var(--lux-ground) / 0.6) 55%, rgb(var(--lux-ground) / 0.1)); }
+  .stage-art.is-sanctuary .stage-box { width: 34rem; top: -2.6rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter-eyebrow, .enter-title, .enter-sub, .enter-late, .enter-rule, .enter-title .gold-text,
+  .stage-art, .stage-layer { animation: none !important; }
+}

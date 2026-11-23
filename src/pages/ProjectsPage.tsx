@@ -1,3 +1,4 @@
+import PageStage from '../components/PageStage'
 import { lazy, Suspense } from 'react'
 import { useLang } from '../context/LangContext'
 import ClientProjects from '../components/ClientProjects'
@@ -11,7 +12,7 @@ export default function ProjectsPage() {
   const { lang } = useLang()
   return (
     <>
-      <ClientProjects />
+      <PageStage motif="projects"><ClientProjects /></PageStage>
       <ProjectsSection lang={lang} />
       <Suspense fallback={<SectionSkeleton label="Live code" />}><LiveCodeShowcase /></Suspense>
     </>

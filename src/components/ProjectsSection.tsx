@@ -129,7 +129,7 @@ export default function ProjectsSection({ lang = 'en' }: { lang?: string }) {
   return (
     <section id="projects" ref={ref} className="relative overflow-hidden py-24 text-legible">
       <div className="pointer-events-none absolute -top-10 right-10 h-72 w-72 rounded-full bg-purple-700/15 blur-[120px]" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-[120px]" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-accent/10 blur-[120px]" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <div data-reveal className="mb-12 text-center">

@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { motion, type MotionProps } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { PERSONAL } from '../data/content'
 import { prefetchRoute } from '../routes'
@@ -63,12 +62,6 @@ const T: Record<string, HeroText> = {
 
 const TITLES: Record<string, string> = PERSONAL.titles
 
-const rise = (delay: number): MotionProps => ({
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.7, delay, ease: [0.2, 0.7, 0.2, 1] },
-})
-
 const warm = (to: string) => ({ onMouseEnter: () => prefetchRoute(to), onFocus: () => prefetchRoute(to) })
 
 /** Gateway — the homepage hero: vision statement first, authorship right beneath. */
@@ -80,16 +73,16 @@ export default function Gateway({ lang = 'en' }: { lang?: string }) {
     <section id="home" className="nah">
       <NeuralAttentionHero />
       <div className="nah-copy">
-        <motion.p {...rise(0)} className="nah-eyebrow">{t.eyebrow}</motion.p>
-        <motion.h1 {...rise(0.06)} className="signature-hero-title nah-title">{before}<em>{mark}</em>{after}</motion.h1>
-        <motion.p {...rise(0.14)} className="nah-byline"><strong>{PERSONAL.name}</strong><span>{TITLES[lang] || TITLES.en}</span></motion.p>
-        <motion.p {...rise(0.2)} className="nah-summary">{t.summary}</motion.p>
-        <motion.div {...rise(0.26)} className="nah-cta">
+        <p className="nah-eyebrow enter-eyebrow">{t.eyebrow}</p>
+        <h1 className="signature-hero-title nah-title enter-title">{before}<em className="gold-text">{mark}</em>{after}</h1>
+        <p className="nah-byline enter-sub"><strong>{PERSONAL.name}</strong><span>{TITLES[lang] || TITLES.en}</span></p>
+        <p className="nah-summary enter-late">{t.summary}</p>
+        <div className="nah-cta enter-late">
           <Link to="/projects" className="nah-btn is-primary" {...warm('/projects')}>
             {t.work} <ArrowRight size={16} aria-hidden />
           </Link>
           <Link to="/about" className="nah-btn is-line" {...warm('/about')}>{t.about}</Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

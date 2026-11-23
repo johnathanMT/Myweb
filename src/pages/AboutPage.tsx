@@ -1,3 +1,4 @@
+import PageStage from '../components/PageStage'
 import { useLang } from '../context/LangContext'
 import About from '../components/About'
 import Bibliography from '../components/Bibliography'
@@ -9,7 +10,7 @@ export default function AboutPage() {
   const { lang } = useLang()
   return (
     <>
-      <About lang={lang} />
+      <PageStage motif="about"><About lang={lang} /></PageStage>
       <Bibliography embedded />
       <Philosophy />
       <CyberPoetry />

@@ -31,7 +31,7 @@ export function applyTheme(theme: Theme): void {
   const root = document.documentElement
   root.setAttribute('data-theme', theme)
   const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) meta.setAttribute('content', theme === 'light' ? '#F6F8FC' : '#04091A')
+  if (meta) meta.setAttribute('content', theme === 'light' ? '#F9F7F1' : '#07070A')
 }
 
 export interface UseThemeResult {

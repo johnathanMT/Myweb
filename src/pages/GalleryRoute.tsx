@@ -1,3 +1,4 @@
+import PageStage from '../components/PageStage'
 import { useLang } from '../context/LangContext'
 import GalleryPage from '../components/GalleryPage'
 import VideoShowcase from '../components/VideoShowcase'
@@ -8,7 +9,7 @@ export default function GalleryRoute() {
   const { lang } = useLang()
   return (
     <>
-      <GalleryPage />
+      <PageStage motif="gallery"><GalleryPage /></PageStage>
       <VideoShowcase lang={lang} />
       <SeasonalGallery lang={lang} />
     </>

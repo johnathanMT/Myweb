@@ -318,7 +318,7 @@ export default function FarewellRSVP() {
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-rose-300 text-amber-950 shadow-[0_0_24px_rgba(253,224,140,0.6)]">
           <Sparkles size={22} />
         </div>
-        <h1 className="text-center font-serif text-2xl font-bold tracking-wide sm:text-3xl">{t.title}</h1>
+        <h1 className="enter-title text-center text-[#f5dc9a] font-serif text-2xl font-bold tracking-wide sm:text-3xl">{t.title}</h1>
         <p className="mx-auto mt-3 max-w-md text-center font-serif text-[14px] leading-relaxed text-white/85">{t.subtitle}</p>
 
         {/* Step 1 — attendance branch */}

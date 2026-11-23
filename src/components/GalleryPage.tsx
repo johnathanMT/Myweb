@@ -1,3 +1,4 @@
+import PageTitle from './PageTitle'
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { motion, useMotionValue, useMotionValueEvent, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import { useGallery, type GalleryItem } from '../hooks/useGallery'
@@ -131,11 +132,9 @@ export default function GalleryPage() {
   return (
     <section className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <header className="max-w-2xl">
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-accent/90">{t.badge}</p>
-        <h1 className="signature-page-title mt-4 text-white">
-          {t.title}
-        </h1>
-        <p className="mt-4 leading-relaxed text-gray-400">{t.sub}</p>
+        <p className="font-mono text-xs uppercase tracking-[0.35em] lux-eyebrow enter-eyebrow">{t.badge}</p>
+        <PageTitle className="mt-4">{t.title}</PageTitle>
+        <p className="enter-sub mt-4 leading-relaxed text-gray-400">{t.sub}</p>
       </header>
 
       {cards.length === 0 ? (

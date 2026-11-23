@@ -218,7 +218,7 @@ export default function ExploreWheel({ items, header }: { items: Destination[]; 
     <div className={`wheel ${inView ? 'is-live' : ''}`} ref={stageRef}>
       <div className="wheel-header">{header}</div>
       <div className="wheel-stage">
-        <span className="wheel-beam" data-tone={item.tone} aria-hidden />
+        <span className="wheel-beam" aria-hidden />
         <div
           ref={zoneRef}
           className="wheel-zone"

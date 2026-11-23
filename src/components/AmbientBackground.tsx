@@ -34,7 +34,7 @@ NODES.forEach(([x1, y1], i) => {
   })
 })
 const PULSES = [3, 9, 14, 20, 27, 33, 38]
-// "Exalted Mars" — a few crimson threads/nodes hidden in the blue network.
+// "Exalted Mars" — a few amber threads/nodes hidden in the gold network.
 const MARS_EDGE_EVERY = 11
 const MARS_PULSES = new Set([14, 33])
 
