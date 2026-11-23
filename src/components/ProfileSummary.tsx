@@ -3,13 +3,14 @@ import { ArrowRight, MapPin, UserRound } from 'lucide-react'
 import { PERSONAL } from '../data/content'
 import { prefetchRoute } from '../routes'
 
-interface ProfileText { kicker: string; title: string; role: string; based: string; cta: string }
+interface ProfileText { kicker: string; title: string; based: string; cta: string }
 const T: Record<string, ProfileText> = {
-  en: { kicker: 'Profile', title: 'Hello, I’m Myo Thant Naing', role: PERSONAL.subtitle, based: 'Based in Japan', cta: 'Read my full story' },
-  jp: { kicker: 'プロフィール', title: 'こんにちは、ミョーです', role: 'コンピュータサイエンス学生 · 介護士 · AIエンジニア志望', based: '日本在住', cta: '私のストーリーを読む' },
-  mm: { kicker: 'ကိုယ်ရေးအကျဉ်း', title: 'မင်္ဂလာပါ၊ ကျွန်တော် မျိုးသန့်နိုင် ပါ', role: 'ကွန်ပျူတာသိပ္ပံ ကျောင်းသား · ပြုစုစောင့်ရှောက်သူ · AI Engineer ဖြစ်ရန် ရည်မှန်းထားသူ', based: 'ဂျပန်နိုင်ငံ အခြေစိုက်', cta: 'ကျွန်တော့်ဇာတ်လမ်း အပြည့်အစုံ ဖတ်ရန်' },
+  en: { kicker: 'Profile', title: 'Hello, I’m Myo Thant Naing', based: 'Based in Japan', cta: 'Read my full story' },
+  jp: { kicker: 'プロフィール', title: 'こんにちは、ミョーです', based: '日本在住', cta: '私のストーリーを読む' },
+  mm: { kicker: 'ကိုယ်ရေးအကျဉ်း', title: 'မင်္ဂလာပါ၊ ကျွန်တော် မျိုးသန့်နိုင် ပါ', based: 'ဂျပန်နိုင်ငံ အခြေစိုက်', cta: 'ကျွန်တော့်ဇာတ်လမ်း အပြည့်အစုံ ဖတ်ရန်' },
 }
 
+const TITLES: Record<string, string> = PERSONAL.titles
 const SUMMARY: Record<string, string[]> = PERSONAL.summary
 
 interface ProfileSummaryProps { lang?: string }
@@ -57,7 +58,7 @@ export default function ProfileSummary({ lang = 'en' }: ProfileSummaryProps) {
           <div className="space-y-4 text-center md:text-left">
             <div>
               <h3 className="font-groovy text-2xl font-semibold tracking-wide text-fg">{PERSONAL.name}</h3>
-              <p className="mt-1 text-sm text-muted">{t.role}</p>
+              <p className="mt-1 text-sm text-muted">{TITLES[lang] || TITLES.en}</p>
               <p className="mt-2 inline-flex items-center gap-1.5 font-mono text-xs text-accent-light">
                 <MapPin size={12} aria-hidden /> {t.based}
               </p>

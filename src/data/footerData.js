@@ -1,93 +1,42 @@
 // ============================================================================
-//  footerData.js — SINGLE SOURCE OF TRUTH for the MegaFooter.
-//  Edit columns, links, socials, certs and the tech stack here — never touch
-//  the JSX. The component just maps over this data.
+//  footerData.js — links and copy for the site footer (MegaFooter.tsx).
+//  Labels fall back to `en` for any key a language leaves out.
 // ============================================================================
-import { Github, Linkedin, Twitter } from 'lucide-react'
 import { SITE } from '../config/site'
+import { HIRE_ME } from './recruiter'
 
-// Tiny inline SVG badge placeholder (swap for real PNG/SVG files in /public).
-const badge = (text) => {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="44">
-    <rect width="120" height="44" rx="8" fill="#10160f" stroke="#3a2f1c"/>
-    <text x="60" y="27" font-family="monospace" font-size="12" fill="#d4a04a"
-      text-anchor="middle" font-weight="700">${text}</text></svg>`
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
-}
+const cv = HIRE_ME.cvUrl
 
-export const footerData = {
-  brand: {
-    name: 'myothant.dev',
-    tagline: 'I Can Care , Cook and also Code ! — building software that solves real problems.',
-  },
-
-  socials: [
-    { label: 'GitHub',   href: 'https://github.com/johnathanMT',           Icon: Github },
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/johnathanmt/', Icon: Linkedin },
-    { label: 'X',        href: 'https://x.com/',                           Icon: Twitter },
-  ],
-
-  // 4 link columns. `icon` (emoji) is optional — shown next to highlighted links.
-  columns: [
-    {
-      title: 'Product',
-      links: [
-        { label: 'Projects',     href: '/projects' },
-        { label: 'Gallery',      href: '/gallery' },
-        { label: 'Immersive 3D', href: 'https://immersive.myothant.dev', icon: '🌌', external: true },
-        { label: 'Blog',         href: `${SITE.url}/blog.html`, external: true },
-      ],
-    },
-    {
-      title: 'Solutions',
-      links: [
-        { label: 'Web Apps',        href: '/projects' },
-        { label: 'AI & Automation', href: '/lab#agent' },
-        { label: 'IoT (M5Stack)',   href: '/projects' },
-        { label: 'UI / UX Design',  href: '/projects' },
-      ],
-    },
-    {
-      title: 'Company',
-      links: [
-        { label: 'About',     href: '/about' },
-        { label: 'Stack',     href: '/stack' },
-        { label: 'Exploring', href: '/exploring' },
-        { label: 'Contact',   href: SITE.mailto },
-      ],
-    },
-    {
-      title: 'Connect',
-      links: [
-        { label: 'LINE Bot',  href: SITE.lineUrl, icon: '💬', external: true },
-        { label: 'GitHub',    href: 'https://github.com/johnathanMT', external: true },
-        { label: 'LinkedIn',  href: 'https://www.linkedin.com/in/johnathanmt/', external: true },
-        { label: 'Email',     href: SITE.mailto },
-      ],
-    },
-  ],
-
-  certifications: [
-    { label: 'AICPA SOC 2',          src: badge('SOC 2') },
-    { label: 'Best Developer Award', src: badge('AWARD') },
-  ],
-}
-
-// ── "Powered By" tech stack ──────────────────────────────────────────────────
-// Logos are pulled as clean SVGs from Simple Icons' CDN (brand colours). Add a
-// `color` (hex, no #) to override — used for dark-on-dark logos like GitHub.
-// To self-host later: drop SVGs in /public and point `logo` at them instead.
-const SI = 'https://cdn.simpleicons.org'
-
-export const techStack = [
-  { name: 'React',        slug: 'react',        caption: 'UI Library' },
-  { name: 'Vite',         slug: 'vite',         caption: 'Build Tool' },
-  { name: 'Tailwind CSS', slug: 'tailwindcss',  caption: 'Styling' },
-  { name: 'Three.js',     slug: 'threedotjs',   caption: '3D / WebGL', color: 'd6c3a5' },
-  { name: 'C# / .NET 8',  slug: 'dotnet',       caption: 'Backend API' },
-  { name: 'MySQL',        slug: 'mysql',        caption: 'Database · Aiven' },
-  { name: 'Vercel',       slug: 'vercel',       caption: 'Frontend Host', color: 'd6c3a5' },
-  { name: 'Render',       slug: 'render',       caption: 'Backend Host', color: 'd6c3a5' },
+/** Keys index FOOTER_T. */
+export const NAV = [
+  { key: 'about', to: '/about' },
+  { key: 'projects', to: '/projects' },
+  { key: 'stack', to: '/stack' },
+  { key: 'lab', to: '/lab' },
+  { key: 'gallery', to: '/gallery' },
+  { key: 'exploring', to: '/exploring' },
+  { key: 'sanctuary', to: '/sanctuary' },
+  { key: 'immersive', href: 'https://immersive.myothant.dev' },
+  { key: 'blog', href: SITE.asset('blog.html') },
 ]
 
-export const techLogo = (t) => `${SI}/${t.slug}${t.color ? `/${t.color}` : ''}`
+export const ACCESS = [
+  { label: 'GitHub', href: 'https://github.com/johnathanMT' },
+  { label: 'LinkedIn', href: HIRE_ME.linkedin },
+  { label: SITE.email, href: SITE.mailto },
+  // becomes a direct download as soon as HIRE_ME.cvUrl is set in recruiter.ts
+  cv
+    ? { key: 'cv', href: /^https?:/.test(cv) ? cv : SITE.asset(cv) }
+    : { key: 'cvRequest', href: `${SITE.mailto}?subject=${encodeURIComponent('CV request')}` },
+  { key: 'recruiter', to: '/?mode=recruiter' },
+]
+
+export const FOOTER_T = {
+  en: { position: 'AI Research & Software Engineering · Tokyo, Japan', city: 'TOKYO', navTitle: 'Navigation', accessTitle: 'Direct access', about: 'About', projects: 'Projects', stack: 'Stack', lab: 'Techno Science Lab', gallery: 'Gallery', exploring: 'Exploring', sanctuary: 'Sanctuary', immersive: 'Immersive 3D', blog: 'Blog', cv: 'Download CV', cvRequest: 'Request CV', recruiter: 'Recruiter Fast-Track', colophon: 'Engineered in Tokyo' },
+  jp: { position: 'AI研究 & ソフトウェアエンジニアリング · 東京', city: '東京', navTitle: 'ナビゲーション', accessTitle: 'お問い合わせ', about: '概要', projects: 'プロジェクト', stack: 'スタック', lab: 'テクノサイエンス', gallery: 'ギャラリー', exploring: '探索', sanctuary: '記憶の木', blog: 'ブログ', cv: '履歴書をダウンロード', cvRequest: '履歴書を依頼する', recruiter: '採用担当者の方へ', colophon: '東京にて開発' },
+  mm: { position: 'AI သုတေသနနှင့် ဆော့ဖ်ဝဲ အင်ဂျင်နီယာပညာ · တိုကျို၊ ဂျပန်', city: 'တိုကျို', navTitle: 'ကဏ္ဍများ', accessTitle: 'ဆက်သွယ်ရန်', about: 'အကြောင်း', projects: 'ပရောဂျက်များ', stack: 'နည်းပညာများ', gallery: 'ပြခန်း', exploring: 'စူးစမ်းလေ့လာမှု', sanctuary: 'အမှတ်တရပင်', blog: 'ဘလော့ဂ်', cv: 'CV ဒေါင်းလုဒ်ရယူရန်', cvRequest: 'CV တောင်းခံရန်', recruiter: 'အလုပ်ခန့်အပ်သူများအတွက်', colophon: 'တိုကျိုတွင် တည်ဆောက်သည်' },
+  vn: { position: 'Nghiên cứu AI & Kỹ thuật phần mềm · Tokyo, Nhật Bản', navTitle: 'Điều hướng', accessTitle: 'Liên hệ', about: 'Giới thiệu', projects: 'Dự án', stack: 'Công nghệ', gallery: 'Thư viện', exploring: 'Khám phá', sanctuary: 'Cây Kỷ Niệm', cv: 'Tải CV', cvRequest: 'Yêu cầu CV', recruiter: 'Dành cho nhà tuyển dụng', colophon: 'Phát triển tại Tokyo' },
+  ne: { position: 'AI अनुसन्धान र सफ्टवेयर इन्जिनियरिङ · टोकियो, जापान', city: 'टोकियो', navTitle: 'पृष्ठहरू', accessTitle: 'सम्पर्क', about: 'परिचय', projects: 'परियोजना', stack: 'स्ट्याक', gallery: 'ग्यालरी', exploring: 'अन्वेषण', sanctuary: 'सम्झना रूख', blog: 'ब्लग', cv: 'CV डाउनलोड', cvRequest: 'CV अनुरोध', recruiter: 'रोजगारदाताका लागि', colophon: 'टोकियोमा निर्मित' },
+  id: { position: 'Riset AI & Rekayasa Perangkat Lunak · Tokyo, Jepang', navTitle: 'Navigasi', accessTitle: 'Kontak', about: 'Tentang', projects: 'Proyek', stack: 'Teknologi', gallery: 'Galeri', exploring: 'Jelajahi', sanctuary: 'Pohon Kenangan', cv: 'Unduh CV', cvRequest: 'Minta CV', recruiter: 'Jalur Cepat Perekrut', colophon: 'Dibuat di Tokyo' },
+  zh: { position: 'AI 研究与软件工程 · 日本东京', city: '东京', navTitle: '导航', accessTitle: '联系', about: '关于', projects: '项目', stack: '技术栈', lab: '科技实验室', gallery: '画廊', exploring: '探索', sanctuary: '记忆之树', blog: '博客', cv: '下载简历', cvRequest: '索取简历', recruiter: '招聘者快速通道', colophon: '于东京构建' },
+}

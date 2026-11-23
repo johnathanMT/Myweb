@@ -1,7 +1,7 @@
 /**
  * Recruiter mode — a fast track for people screening candidates.
  *
- *   ?mode=recruiter → skip the robot battle; Home renders the
+ *   ?mode=recruiter → skip the interactive hero; Home renders the
  *                     profile, case studies and Hire Me panel instead.
  *   ?mode=full      → back to the full interactive experience.
  *
@@ -10,7 +10,7 @@
  */
 const KEY = 'mtn_recruiter'
 
-/** Call once before React renders, so Home sees the flag on its first render. */
+/** Record the URL's mode. Called before React renders, and by Home on in-app `?mode=` links. */
 export function initRecruiterMode(): void {
   if (typeof window === 'undefined') return
   const mode = new URLSearchParams(window.location.search).get('mode')

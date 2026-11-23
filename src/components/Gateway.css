@@ -1,0 +1,150 @@
+/* GATEWAY — homepage hero: neural field backdrop + editorial copy. */
+.nah {
+  --nah-bg: 6 8 14;
+  --nah-ink: 244 247 251;
+  --nah-soft: 163 175 194;
+  --nah-mark: 165 180 252;
+  --nah-line: 255 255 255;
+  position: relative;
+  display: flex;
+  min-height: 100svh;
+  align-items: center;
+  overflow: hidden;
+}
+
+html[data-theme="light"] .nah {
+  --nah-bg: 248 247 243;
+  --nah-ink: 17 20 38;
+  --nah-soft: 78 84 104;
+  --nah-mark: 55 63 150;
+  --nah-line: 15 23 42;
+}
+
+/* the mask melts the stage into whatever page colour follows */
+.nah-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 80% at 85% 30%, rgb(72 84 180 / 0.16), transparent 70%),
+    radial-gradient(60% 70% at 60% 100%, rgb(30 110 130 / 0.12), transparent 70%),
+    rgb(var(--nah-bg));
+  -webkit-mask-image: linear-gradient(#000 84%, transparent);
+  mask-image: linear-gradient(#000 84%, transparent);
+}
+
+html[data-theme="light"] .nah-stage {
+  background:
+    radial-gradient(70% 80% at 85% 30%, rgb(99 110 190 / 0.1), transparent 70%),
+    radial-gradient(60% 70% at 60% 100%, rgb(30 120 130 / 0.07), transparent 70%),
+    rgb(var(--nah-bg));
+}
+
+.nah-canvas { position: absolute; inset: 0; height: 100%; width: 100%; }
+
+/* quiets the field behind the copy */
+.nah-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(68% 78% at 24% 50%, rgb(var(--nah-bg) / 0.9) 25%, rgb(var(--nah-bg) / 0.6) 60%, transparent 100%);
+}
+
+.nah-copy {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 72rem;
+  padding: 7rem 1.25rem calc(var(--dock-space) + 2rem);
+}
+
+.nah-eyebrow {
+  font-family: "Fira Code", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  color: rgb(var(--nah-soft));
+}
+
+.nah-title {
+  margin-top: 1.5rem;
+  max-width: 15ch;
+  font-size: clamp(2.5rem, 6.6vw, 5.25rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+  color: rgb(var(--nah-ink));
+}
+
+.nah-title em { font-style: normal; color: rgb(var(--nah-mark)); }
+
+/* scripts with taller glyphs or no word spaces need more air and less tracking */
+.nah-title:lang(ja), .nah-title:lang(zh) { max-width: 17em; font-size: clamp(2rem, 5vw, 3.9rem); line-height: 1.25; letter-spacing: -0.01em; word-break: auto-phrase; }
+.nah-title:lang(my) { max-width: 22em; font-size: clamp(1.75rem, 4.2vw, 3.3rem); line-height: 1.65; letter-spacing: 0; }
+.nah-title:lang(ne) { max-width: 20em; font-size: clamp(2rem, 4.8vw, 3.8rem); line-height: 1.35; letter-spacing: 0; }
+
+.nah-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1rem;
+  margin-top: 1.9rem;
+  color: rgb(var(--nah-soft));
+}
+
+.nah-byline::before {
+  content: '';
+  width: 2.5rem;
+  height: 1px;
+  background: rgb(var(--nah-mark) / 0.8);
+}
+
+.nah-byline strong { font-weight: 600; color: rgb(var(--nah-ink)); }
+
+.nah-summary {
+  margin-top: 1.5rem;
+  max-width: 38rem;
+  font-size: 1.06rem;
+  line-height: 1.7;
+  color: rgb(var(--nah-soft));
+}
+
+.nah-cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2.4rem; }
+
+.nah-btn {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.6rem;
+  border-radius: 0.65rem;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.nah-btn.is-primary { background: rgb(var(--nah-ink)); color: rgb(var(--nah-bg)); }
+.nah-btn.is-primary:hover { background: rgb(var(--nah-ink) / 0.88); }
+.nah-btn.is-line { border-color: rgb(var(--nah-line) / 0.22); background: rgb(var(--nah-bg) / 0.55); color: rgb(var(--nah-ink)); }
+.nah-btn.is-line:hover { border-color: rgb(var(--nah-line) / 0.5); }
+.nah-btn:focus-visible { outline: 2px solid rgb(var(--nah-mark)); outline-offset: 3px; }
+
+@media (max-width: 639px) {
+  .nah-cta { flex-direction: column; }
+  .nah-eyebrow { font-size: 0.66rem; letter-spacing: 0.14em; }
+  .nah-byline::before { flex-basis: 100%; max-width: 2.5rem; margin-right: 60%; }
+  .nah-veil { background: radial-gradient(120% 62% at 40% 56%, rgb(var(--nah-bg) / 0.88) 40%, transparent 100%); }
+}
+
+/* wide tracking breaks up Burmese and Devanagari clusters */
+.nah-eyebrow:lang(my), .nah-eyebrow:lang(ne) { font-size: 0.8rem; letter-spacing: 0.02em; }
+
+@media (min-width: 640px) {
+  .nah-copy { padding-inline: 1.5rem; }
+}
+
+/* the sci-fi HUD readouts step back while the hero is on screen */
+.hud { transition: opacity 0.4s ease; }
+.hero-live .hud { opacity: 0; }

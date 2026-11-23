@@ -38,7 +38,7 @@ const translations = {
 
         hero_hello: "Hello, I'm",
         hero_desc: "I Can Care and also Can Code 🇯🇵",
-        hero_sub: "Care-giver | Computer Science Student | An Aspiring AI Engineer & Passionate Software Developer",
+        hero_sub: "AI & Full-Stack Engineer · BSc Computer Science (in progress)",
         btn_view: "View My Work",
 
         // About Me / Profile
@@ -128,7 +128,7 @@ const translations = {
 
         hero_hello: "မင်္ဂလာပါ၊ ကျွန်တော်ကတော့",
         hero_desc: "ပြုစုစောင့်ရှောက်ခြင်းမှ ဆန်းသစ်တီထွင်ဆန်တီးခြင်းသို့",
-        hero_sub: "ကျန်းမာရေးစောင့်ရှောက်သူ | ကွန်ပျူတာသိပ္ပံ ကျောင်းသား | အနာဂတ် AI အင်ဂျင်နီယာနှင့် စိတ်အားထက်သန်သော ဆော့ဖ်ဝဲလ်ရေးသားသူ",
+        hero_sub: "AI နှင့် Full-Stack အင်ဂျင်နီယာ · ကွန်ပျူတာသိပ္ပံ ဘွဲ့ (BSc) တက်ရောက်ဆဲ",
         btn_view: "လက်ရာများကိုကြည့်ရန်",
 
         about_title: "ကျွန်တော့်အကြောင်း",
@@ -209,7 +209,7 @@ const translations = {
 
         Hero_hello: "こんにちは、私は",
         hero_desc: "ケア も コーディングもできるエンジニアです 🇯🇵",
-        hero_sub: "介護職 | コンピュータサイエンス専攻の学生 | AIエンジニア志望 ＆ 情熱的なソフトウェア開発者",
+        hero_sub: "AI・フルスタックエンジニア · コンピュータサイエンス学士課程 在学中",
         btn_view: "制作物を見る",
 
         // About Me / Profile
@@ -292,7 +292,7 @@ const translations = {
 
         Hero_hello: "Xin chào, tôi là",
         hero_desc: "Tôi có thể Chăm sóc (Care) và cũng có thể Lập trình (Code) 🇯🇵",
-        hero_sub: "Điều dưỡng viên | Sinh viên Khoa học Máy tính | Kỹ sư AI tương lai & Lập trình viên Phần mềm đam mê",
+        hero_sub: "Kỹ sư AI & Full-Stack · Cử nhân Khoa học Máy tính (đang học)",
         btn_view: "Xem Dự án của Tôi",
 
         // About Me / Profile
@@ -374,7 +374,7 @@ const translations = {
 
         Hero_hello: "नमस्ते, म",
         hero_desc: "म हेरचाह (Care) गर्न सक्छु र कोड (Code) पनि लेख्न सक्छु 🇯🇵",
-        hero_sub: "हेरचाहकर्ता | कम्प्युटर विज्ञानको विद्यार्थी | भविष्यको एआई इन्जिनियर र उत्साही सफ्टवेयर विकासकर्ता",
+        hero_sub: "AI तथा फुल-स्ट्याक इन्जिनियर · BSc कम्प्युटर विज्ञान (अध्ययनरत)",
         btn_view: "मेरा कामहरू हेर्नुहोस्",
 
         // About Me / Profile
@@ -457,7 +457,7 @@ const translations = {
 
         Hero_hello: "Halo, saya",
         hero_desc: "Saya Bisa Merawat (Care) dan Juga Bisa Mengoding (Code) 🇯🇵",
-        hero_sub: "Perawat | Mahasiswa Ilmu Komputer | Calon Insinyur AI & Pengembang Perangkat Lunak yang Bersemangat",
+        hero_sub: "AI & Full-Stack Engineer · BSc Ilmu Komputer (sedang ditempuh)",
         btn_view: "Lihat Karya Saya",
 
         // About Me / Profile

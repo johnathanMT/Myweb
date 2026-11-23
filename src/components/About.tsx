@@ -126,7 +126,7 @@ export default function About({ lang = 'en' }: AboutProps) {
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent">01 — Profile</p>
               <h3 className="mt-3 text-3xl font-bold leading-tight text-white sm:text-4xl">{PERSONAL.name}</h3>
               <p className="mt-1 font-mono text-sm text-accent-light">{PERSONAL.handle}</p>
-              <p className="mt-3 text-[15px] text-muted">{PERSONAL.subtitle}</p>
+              <p className="mt-3 text-[15px] text-muted">{(PERSONAL.titles as Record<string, string>)[lang] || PERSONAL.titles.en}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-medium" style={{ color: '#10b981' }}>
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" /> Open to opportunities

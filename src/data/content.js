@@ -29,28 +29,37 @@ export const PERSONAL = {
   name: 'Myo Thant Naing',
   handle: 'MTN.Digitosphere',
   tagline: 'From Caring to Coding in Japan 🇯🇵',
-  subtitle: 'Computer Science Student · Care-giver · Aspiring AI Engineer',
+  // The one job title used site-wide, keyed by LangContext code.
+  titles: {
+    en: 'AI & Full-Stack Engineer · BSc Computer Science (in progress)',
+    jp: 'AI・フルスタックエンジニア · コンピュータサイエンス学士課程 在学中',
+    mm: 'AI နှင့် Full-Stack အင်ဂျင်နီယာ · ကွန်ပျူတာသိပ္ပံ ဘွဲ့ (BSc) တက်ရောက်ဆဲ',
+    vn: 'Kỹ sư AI & Full-Stack · Cử nhân Khoa học Máy tính (đang học)',
+    ne: 'AI तथा फुल-स्ट्याक इन्जिनियर · BSc कम्प्युटर विज्ञान (अध्ययनरत)',
+    id: 'AI & Full-Stack Engineer · BSc Ilmu Komputer (sedang ditempuh)',
+    zh: 'AI 与全栈工程师 · 计算机科学学士（在读）',
+  },
   bio: 'Living in Japan. Transforming from Healthcare to Tech. I build software to solve real-world problems.',
   // Landing-page profile summary (HomePage → ProfileSummary), keyed by LangContext
   // code; languages missing here fall back to `en`. One string per paragraph.
   summary: {
     en: [
       'I’m genuinely excited by technology. I love taking an idea apart, learning how it works, and building something useful from it, whether that’s a full-stack web app or a small IoT gadget.',
-      'AI is where my curiosity runs deepest. I spend my time exploring agentic AI and how intelligent tools can make everyday life easier, and I’m working toward a career as an AI engineer.',
+      'AI is where my curiosity runs deepest. I spend my time exploring agentic AI and how intelligent tools can make everyday life easier, and as an AI engineer I turn that into tools people can use.',
     ],
     jp: [
       'テクノロジーが大好きです。アイデアを分解して仕組みを学び、フルスタックのWebアプリから小さなIoTガジェットまで、役に立つものを作ることにワクワクします。',
-      '一番の関心はAIです。エージェント型AIや、賢いツールで日常をもっと便利にする方法を探求しながら、AIエンジニアを目指しています。',
+      '一番の関心はAIです。エージェント型AIや、賢いツールで日常をもっと便利にする方法を探求しながら、AIエンジニアとして開発に取り組んでいます。',
     ],
     mm: [
       'နည်းပညာကို စိတ်အားထက်သန်စွာ စိတ်ဝင်စားပါသည်။ အိုင်ဒီယာတစ်ခုကို အသေးစိတ် ခွဲခြမ်းလေ့လာကာ ၎င်း၏ အလုပ်လုပ်ပုံကို နားလည်ပြီး Full-stack web app များမှသည် IoT ကိရိယာငယ်များအထိ လက်တွေ့အသုံးဝင်သည့် အရာများကို ဖန်တီးရခြင်းကို နှစ်သက်ပါသည်။',
-      'ကျွန်တော် အစိတ်ဝင်စားဆုံး နယ်ပယ်မှာ AI ဖြစ်ပါသည်။ Agentic AI နှင့် ဉာဏ်ရည်ထက်မြက်သော tool များက နေ့စဉ်ဘဝကို မည်သို့ ပိုမိုလွယ်ကူစေနိုင်သည်ကို လေ့လာရင်း AI Engineer တစ်ဦး ဖြစ်လာရန် ကြိုးပမ်းနေပါသည်။',
+      'ကျွန်တော် အစိတ်ဝင်စားဆုံး နယ်ပယ်မှာ AI ဖြစ်ပါသည်။ Agentic AI နှင့် ဉာဏ်ရည်ထက်မြက်သော tool များက နေ့စဉ်ဘဝကို မည်သို့ ပိုမိုလွယ်ကူစေနိုင်သည်ကို လေ့လာရင်း AI Engineer တစ်ဦးအဖြစ် ဖန်တီးတည်ဆောက်နေပါသည်။',
     ],
   },
   // Full bio on the About page (English visitors; other languages keep their short bio).
   aboutBio: [
-    'I’m Myo Thant Naing, a Computer Science student living in Japan. I started out in international relations and spent years as a caregiver (kaigo) before I moved into software. Caring for people taught me patience and empathy, and it taught me to build for the person on the other side of the screen.',
-    'These days I build full-stack apps with C#/.NET and React, try out agentic AI, and wire up IoT devices with M5Stack. I want to become an AI engineer who ships useful tools for real-world problems. I’m proof that it is better late than never.',
+    'I’m Myo Thant Naing, an AI & full-stack engineer in Japan, studying for a BSc in Computer Science. I started out in international relations and spent years as a caregiver (kaigo) before I moved into software. Caring for people taught me patience and empathy, and it taught me to build for the person on the other side of the screen.',
+    'These days I build full-stack apps with C#/.NET and React, try out agentic AI, and wire up IoT devices with M5Stack. As an AI engineer, I want to ship useful tools for real-world problems. I’m proof that it is better late than never.',
   ],
   slogan: 'Better Late Than Never',
   email: SITE.email,

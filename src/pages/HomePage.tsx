@@ -13,7 +13,7 @@ import WalkingAgent from '../components/WalkingAgent'
 import DiscoveryPortal from '../components/DiscoveryPortal'
 import CaseStudiesGrid from '../components/CaseStudiesGrid'
 import HireMePanel from '../components/HireMePanel'
-import { exitRecruiterMode, isRecruiterMode } from '../lib/recruiterMode'
+import { exitRecruiterMode, initRecruiterMode, isRecruiterMode } from '../lib/recruiterMode'
 
 const DESTINATIONS: Destination[] = [
   { to: '/about',     title: 'About',              blurb: 'From caregiving to code — the story, the philosophy, the poems.', Icon: UserRound, tone: 'cyan' },
@@ -30,7 +30,7 @@ const DESTINATIONS: Destination[] = [
 /** "/" — hero, profile summary, then a directory into every dedicated page (or the recruiter fast track). */
 export default function HomePage() {
   const { lang } = useLang()
-  const { hash } = useLocation()
+  const { pathname, hash, search, key } = useLocation()
   const navigate = useNavigate()
   const [recruiter, setRecruiter] = useState(isRecruiterMode)
 
@@ -40,7 +40,16 @@ export default function HomePage() {
     if (target) navigate(target, { replace: true })
   }, [hash, navigate])
 
-  // Recruiter fast track: no battle scene — just the facts.
+  // In-app ?mode=recruiter links (hero, footer) don't remount Home. Guarded on
+  // pathname: an exiting Home must not react to the next page's URL.
+  useEffect(() => {
+    if (pathname !== '/' || !new URLSearchParams(search).has('mode')) return
+    initRecruiterMode()
+    setRecruiter(isRecruiterMode())
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+  }, [pathname, search, key])
+
+  // Recruiter fast track: no interactive hero — just the facts.
   if (recruiter) {
     return (
       <div style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))' }}>
@@ -50,7 +59,7 @@ export default function HomePage() {
         <p className="pb-16 text-center">
           <button
             type="button"
-            onClick={() => { exitRecruiterMode(); setRecruiter(false); navigate('/', { replace: true }) }}
+            onClick={() => { exitRecruiterMode(); setRecruiter(false); navigate('/', { replace: true }); window.scrollTo({ top: 0, behavior: 'instant' }) }}
             className="inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-accent-light"
           >
             <Sparkles size={14} aria-hidden /> View the full interactive experience
@@ -62,7 +71,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Gateway />
+      <Gateway lang={lang} />
       <ProfileSummary lang={lang} />
 
       <section id="explore" className="relative py-20 sm:py-24" aria-labelledby="explore-title">

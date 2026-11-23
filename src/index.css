@@ -2068,55 +2068,6 @@ html[data-theme="light"] .section-subtitle {
   box-shadow: 0 0 18px -2px rgb(var(--cyan) / 0.5);
 }
 
-/* ── Hero name: icy moonlit ink + a hidden crimson under-glow ──
-   Letters stay crisp white→ice-blue. The halo breathes in blue; crimson only
-   appears as a faint shadow *beneath* the glyphs and as a thin scan line under
-   the name (::after — its own background, so the text clip doesn't touch it). */
-.hero-name {
-  position: relative;
-  background: linear-gradient(180deg, #FFFFFF 5%, #DCEBFF 55%, #A5E8F7 115%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: hero-breathe 4.8s ease-in-out infinite;
-}
-
-.hero-name::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -0.32em;
-  height: 1px;
-  width: min(62%, 22rem);
-  transform: translateX(-50%);
-  background:
-    linear-gradient(90deg, transparent, rgb(var(--mars-glow) / 0.95), transparent) 0 0 / 30% 100% no-repeat,
-    linear-gradient(90deg, transparent, rgb(var(--mars) / 0.45) 20%, rgb(var(--mars) / 0.45) 80%, transparent);
-  box-shadow: 0 0 10px rgb(var(--mars-glow) / 0.35);
-  animation: mars-scan 5.5s cubic-bezier(0.5, 0, 0.3, 1) infinite;
-  pointer-events: none;
-}
-
-@keyframes hero-breathe {
-  0%, 100% {
-    filter: drop-shadow(0 0 18px rgb(var(--accent) / 0.3)) drop-shadow(0 5px 10px rgb(var(--mars) / 0.18));
-  }
-  50% {
-    filter: drop-shadow(0 0 30px rgb(var(--cyan) / 0.42)) drop-shadow(0 6px 14px rgb(var(--mars) / 0.3));
-  }
-}
-
-/* a bright crimson spark travels along the thin line, then rests */
-@keyframes mars-scan {
-  0%        { background-position: -40% 0, 0 0; }
-  55%, 100% { background-position: 140% 0, 0 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-name { animation: none; filter: drop-shadow(0 0 24px rgb(var(--accent) / 0.35)) drop-shadow(0 5px 12px rgb(var(--mars) / 0.22)); }
-  .hero-name::after { animation: none; background-position: 50% 0, 0 0; }
-}
-
 /* ── Backdrop: midnight field + aurora + neural mesh ── */
 .ambient-base {
   position: absolute;
@@ -2543,107 +2494,24 @@ html[data-theme="light"] .ai-dock-tip {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   HERO BATTLE STAGE — pearl-white AI robots vs crimson creatures
-   (Gateway.tsx + hero/BattleScene). A permanent night stage in both themes;
-   `.dark-scope` re-applies the dark palette tokens to everything inside.
+   SITE FOOTER (MegaFooter.tsx)
    ══════════════════════════════════════════════════════════════════ */
-.hero-stage {
-  background:
-    radial-gradient(90% 60% at 50% 0%, #0E1D44 0%, transparent 70%),
-    linear-gradient(180deg, #060E26 0%, #04091A 55%, #02040C 100%);
+.site-footer {
+  background: rgb(var(--space) / 0.9);
 }
 
-.battle-scene,
-.battle-layer {
-  position: absolute;
-  inset: 0;
-  height: 100%;
-  width: 100%;
+.site-footer,
+.site-footer-legal {
+  border-color: rgb(255 255 255 / 0.1);
 }
 
-/* oversized so the parallax shift never reveals an edge */
-.battle-bg {
-  inset: -12px;
-  height: calc(100% + 24px);
-  width: calc(100% + 24px);
-  will-change: transform;
+html[data-theme="light"] .site-footer,
+html[data-theme="light"] .site-footer-legal {
+  border-color: rgb(15 23 42 / 0.1);
 }
 
-.battle-scene {
-  animation: battle-in 1.2s ease both;
-}
-
-@keyframes battle-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* darkens the centre so the copy always reads over the fight */
-.hero-scrim {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgb(2 5 15 / 0.55) 0%, transparent 18%),
-    radial-gradient(60% 52% at 50% 48%, rgb(3 7 20 / 0.62) 0%, rgb(3 7 20 / 0.28) 62%, transparent 88%);
-}
-
-/* melts the stage into whatever page colour follows */
-.hero-fade {
-  height: 14vh;
-  background: linear-gradient(180deg, transparent, #04091A);
-}
-
-/* light: a longer eased ramp so night → daylight doesn't band */
-html[data-theme="light"] .hero-fade {
-  height: 22vh;
-  background: linear-gradient(180deg,
-    rgb(246 248 252 / 0) 0%, rgb(246 248 252 / 0.08) 25%, rgb(246 248 252 / 0.3) 50%,
-    rgb(246 248 252 / 0.65) 75%, #F6F8FC 100%);
-}
-
-.hero-glass {
-  position: relative;
-  border-radius: 1.75rem;
-  border: 1px solid rgb(240 244 255 / 0.12);
-  background: linear-gradient(180deg, rgb(10 18 42 / 0.34), rgb(4 9 26 / 0.18));
-  backdrop-filter: blur(6px) saturate(140%);
-  -webkit-backdrop-filter: blur(6px) saturate(140%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.08),
-    0 30px 80px -30px rgb(0 0 0 / 0.85);
-}
-
-/* the panel's top edge carries both factions' light */
-.hero-glass::before {
-  content: '';
-  position: absolute;
-  inset: -1px 12% auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgb(247 245 239 / 0.9) 30%, rgb(160 180 255 / 0.4) 50%, rgb(255 30 60 / 0.85) 70%, transparent);
-  pointer-events: none;
-}
-
-/* No backdrop blur over the live canvas: it would re-blur every frame. The
-   scrim does the dimming; denser tints keep the glass look. */
-.hero-battle .hero-glass,
-.hero-battle .btn-glass,
-.hero-battle [class*="backdrop-blur"] {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.hero-battle .btn-glass {
-  background: rgb(var(--surface) / 0.6);
-}
-
-@media (max-width: 640px) {
-  .hero-glass {
-    background: linear-gradient(180deg, rgb(8 15 36 / 0.5), rgb(4 9 26 / 0.34));
-  }
-}
-
-/* html.hero-live (set by BattleScene while it's on screen): fixed chrome that
-   floats over the canvas trades blur for a solid tint until you scroll past. */
+/* html.hero-live (set by NeuralAttentionHero while it's on screen): fixed chrome
+   that floats over the canvas trades blur for a solid tint until you scroll past. */
 .hero-live .ai-dock-bar,
 .hero-live .icon-btn,
 .hero-live .nav-bar {
@@ -2667,30 +2535,11 @@ html[data-theme="light"].hero-live .icon-btn {
   background: rgb(255 255 255 / 0.95);
 }
 
-html[data-theme="light"].hero-live .nav-bar {
-  background: rgb(255 255 255 / 0.95);
+html.hero-live .nav-bar.is-scrolled {
+  background: rgb(var(--space) / 0.95);
 }
 
-/* pearl name with a faint iridescent sheen */
-.hero-battle .hero-name,
-html[data-theme="light"] .hero-battle .hero-name {
-  background: linear-gradient(180deg, #FFFFFF 15%, #F2EFE8 55%, #C9D5EE 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 22px rgb(240 244 255 / 0.35));
-}
-
-.hero-hint {
-  color: rgb(var(--muted) / 0.75);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .battle-scene { animation: none; }
-  .hero-hint { display: none; }
-}
-
-/* light mode: the hero stays a night stage, so keep dark-variant controls */
+/* light mode: sections that stay a dark stage keep dark-variant controls */
 html[data-theme="light"] .dark-scope .btn-primary {
   color: #fff;
   background: linear-gradient(135deg, #1E40AF, #2563EB 50%, #0E7490);
