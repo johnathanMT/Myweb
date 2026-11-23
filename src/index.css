@@ -2864,14 +2864,23 @@ html[data-theme="light"] .client-url {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   EXPLORE CARDS — one hue per card at equal OKLCH lightness/chroma, so the
-   set reads as a family. --tone = card accent, --lit = icon on dark glass.
+   EXPLORE — one hue per destination at equal OKLCH lightness/chroma, so the
+   set reads as a family. --tone = accent, --lit = icon on dark glass.
+   The wheel itself is styled in components/ExploreWheel.css.
    ══════════════════════════════════════════════════════════════════ */
-.explore-card {
+[data-tone] {
   --h: 210;
   --ch: 0.13;
   --lit: oklch(0.82 var(--ch) var(--h));
   --tone: oklch(0.76 var(--ch) var(--h));
+}
+
+/* light: same hues, darkened to hold contrast on white */
+html[data-theme="light"] [data-tone] {
+  --tone: oklch(0.56 var(--ch) var(--h));
+}
+
+.explore-card {
   position: relative;
   display: flex;
   height: 100%;
@@ -2890,15 +2899,15 @@ html[data-theme="light"] .client-url {
   transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.explore-card[data-tone="cyan"]    { --h: 208; }
-.explore-card[data-tone="violet"]  { --h: 302; }
-.explore-card[data-tone="emerald"] { --h: 155; }
-.explore-card[data-tone="amber"]   { --h: 75; }
-.explore-card[data-tone="rose"]    { --h: 5; }
-.explore-card[data-tone="sky"]     { --h: 240; }
-.explore-card[data-tone="indigo"]  { --h: 274; }
-.explore-card[data-tone="silver"]  { --h: 255; --ch: 0.025; }
-.explore-card[data-tone="teal"]    { --h: 182; }
+[data-tone="cyan"]    { --h: 208; }
+[data-tone="violet"]  { --h: 302; }
+[data-tone="emerald"] { --h: 155; }
+[data-tone="amber"]   { --h: 75; }
+[data-tone="rose"]    { --h: 5; }
+[data-tone="sky"]     { --h: 240; }
+[data-tone="indigo"]  { --h: 274; }
+[data-tone="silver"]  { --h: 255; --ch: 0.025; }
+[data-tone="teal"]    { --h: 182; }
 
 .explore-card:hover,
 .explore-card:focus-visible {
@@ -2914,16 +2923,6 @@ html[data-theme="light"] .client-url {
 .explore-card:focus-visible {
   outline: 2px solid var(--tone);
   outline-offset: 3px;
-}
-
-.explore-arrow {
-  color: rgb(var(--muted));
-  transition: transform 0.3s ease, color 0.3s ease;
-}
-
-.explore-card:hover .explore-arrow {
-  color: var(--tone);
-  transform: translate(2px, -2px);
 }
 
 /* Embossed icon: a raised dark-glass key — lit top bevel, shaded bottom edge,
@@ -2977,9 +2976,8 @@ html[data-theme="light"] .client-url {
     0 16px 26px -8px color-mix(in oklab, var(--lit) 75%, transparent);
 }
 
-/* light: same hues, darkened to hold contrast on white; softer glow */
+/* light: softer glow */
 html[data-theme="light"] .explore-card {
-  --tone: oklch(0.56 var(--ch) var(--h));
   background:
     radial-gradient(120% 90% at 0% 0%, color-mix(in oklab, var(--tone) 8%, transparent), transparent 60%),
     linear-gradient(180deg, rgb(255 255 255 / 0.92), rgb(255 255 255 / 0.78));
@@ -2995,10 +2993,9 @@ html[data-theme="light"] .explore-card:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .explore-card, .emboss-icon, .explore-arrow { transition: none; }
+  .explore-card, .emboss-icon { transition: none; }
   .explore-card:hover, .explore-card:focus-visible,
-  .explore-card:hover .emboss-icon, .explore-card:focus-visible .emboss-icon,
-  .explore-card:hover .explore-arrow { transform: none; }
+  .explore-card:hover .emboss-icon, .explore-card:focus-visible .emboss-icon { transform: none; }
 }
 
 /* ══════════════════════════════════════════════════════════════════

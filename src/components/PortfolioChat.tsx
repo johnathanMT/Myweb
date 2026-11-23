@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { MessageCircle, SendHorizontal, Sparkles, X } from 'lucide-react'
+import { onOpenPortfolioChat } from '../lib/chatBus'
 import { sendPortfolioMessage, type ChatMessage } from '../services/portfolioChat'
 
 /**
@@ -25,6 +26,8 @@ export default function PortfolioChat() {
   useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' }) }, [messages, pending])
   useEffect(() => { if (open) inputRef.current?.focus() }, [open])
   useEffect(() => () => abortRef.current?.abort(), [])
+  // opened from elsewhere on the page (the walking robot on Home)
+  useEffect(() => onOpenPortfolioChat(() => { setOpen(true); inputRef.current?.focus() }), [])
 
   // Esc closes the panel
   useEffect(() => {

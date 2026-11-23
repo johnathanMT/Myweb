@@ -1,0 +1,160 @@
+/* WALKING AGENT — robot pacing a glass track. */
+.agent-stage {
+  --bot-line: #6f8fc4;
+  --bot-a: #eaf2ff;
+  --bot-b: #8fa9d6;
+  --bot-far: #5a719e;
+  --violet: 167 139 250;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 17rem;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid rgb(var(--cyan) / 0.3);
+  background:
+    radial-gradient(60% 90% at 15% 0%, rgb(var(--cyan) / 0.13), transparent 70%),
+    radial-gradient(60% 90% at 85% 0%, rgb(var(--violet) / 0.15), transparent 70%),
+    linear-gradient(180deg, rgb(var(--card) / 0.6), rgb(var(--space) / 0.75));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 24px 60px -34px rgb(var(--accent) / 0.8);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-theme="light"] .agent-stage {
+  --bot-line: #4a69a5;
+  --bot-a: #ffffff;
+  --bot-b: #b3c6e8;
+  --bot-far: #8ba0c8;
+  --violet: 124 58 237;
+  background:
+    radial-gradient(60% 90% at 15% 0%, rgb(var(--cyan) / 0.12), transparent 70%),
+    radial-gradient(60% 90% at 85% 0%, rgb(var(--violet) / 0.1), transparent 70%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.92), rgb(255 255 255 / 0.72));
+}
+
+.agent-stage.is-alert { border-color: rgb(var(--cyan) / 0.75); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 0 50px -10px rgb(var(--cyan) / 0.55); }
+.agent-stage:focus-visible { outline: 2px solid rgb(var(--accent-light)); outline-offset: 4px; }
+
+/* the track it walks on */
+.agent-floor {
+  position: absolute;
+  inset: auto 0 0;
+  height: 3.2rem;
+  border-top: 2px solid rgb(var(--cyan) / 0.6);
+  background:
+    repeating-linear-gradient(90deg, rgb(var(--accent) / 0.28) 0 1px, transparent 1px 2.5rem),
+    linear-gradient(180deg, rgb(var(--cyan) / 0.16), transparent);
+  box-shadow: 0 -6px 24px -6px rgb(var(--cyan) / 0.5);
+}
+
+.agent-lane { position: absolute; inset: 0 1rem; }
+
+.agent-bot {
+  position: absolute;
+  left: 0;
+  bottom: 2.3rem;
+  width: 112px;
+  height: 150px;
+  will-change: transform;
+}
+
+.agent-bot svg { width: 100%; height: 100%; overflow: visible; }
+.agent-flip { width: 100%; height: 100%; }
+
+.agent-shadow {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -4px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.5), transparent);
+}
+html[data-theme="light"] .agent-shadow { background: radial-gradient(closest-side, rgb(20 40 90 / 0.35), transparent); }
+
+.agent-bubble {
+  position: absolute;
+  left: 0;
+  bottom: calc(2.3rem + 162px);
+  display: grid;
+  width: 208px;
+  min-height: 2.5rem;
+  place-items: center;
+  padding: 0.45rem 0.8rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(var(--cyan) / 0.5);
+  background: rgb(var(--surface) / 0.95);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  color: rgb(var(--fg));
+  box-shadow: 0 0 22px -8px rgb(var(--cyan) / 0.7);
+}
+
+.agent-tail {
+  position: absolute;
+  left: 0;
+  bottom: calc(2.3rem + 157px);
+  height: 11px;
+  width: 11px;
+  margin-left: -5.5px;
+  border: solid rgb(var(--cyan) / 0.5);
+  border-width: 0 1px 1px 0;
+  background: rgb(var(--surface));
+}
+
+/* robot parts (bot2-: the dock avatars already own .bot-) */
+.bot2-shell { fill: url(#bot2-metal); stroke: var(--bot-line); stroke-width: 1.4; }
+.bot2-near { fill: var(--bot-a); stroke: var(--bot-line); stroke-width: 1.3; }
+.bot2-far { fill: var(--bot-far); stroke: var(--bot-line); stroke-width: 1.3; }
+.bot2-visor { fill: #060d24; stroke: rgb(var(--cyan) / 0.8); stroke-width: 1.4; transition: filter 0.3s ease; }
+.bot2-eyes { fill: url(#bot2-glow); filter: drop-shadow(0 0 3px #22d3ee); transform: translateX(6px); transition: transform 0.3s ease; }
+.bot2-blink { transform-box: fill-box; transform-origin: center; animation: bot2-blink 4.2s infinite; }
+.bot2-core { fill: url(#bot2-glow); }
+.bot2-beacon { fill: #a78bfa; transform-box: fill-box; transform-origin: center; animation: bot2-beacon 1.8s ease-in-out infinite; }
+.bot2-smile { fill: none; stroke: #67e8f9; stroke-width: 1.8; stroke-linecap: round; opacity: 0; transition: opacity 0.25s ease; }
+.bot2-body { animation: bot2-breathe 3.4s ease-in-out infinite; }
+
+.is-paused .bot2-eyes { transform: none; }
+.is-paused .bot2-blink { animation-duration: 1.5s; }   /* friendly blink at each stop */
+.is-alert .bot2-smile { opacity: 1; }
+.is-alert .bot2-visor { filter: drop-shadow(0 0 7px rgb(34 211 238 / 0.9)); }
+.is-alert .bot2-eyes { filter: drop-shadow(0 0 6px #22d3ee) brightness(1.2); }
+
+/* joints: each rotates about its own pivot in viewBox units */
+.bot2-joint { transform-box: view-box; transform-origin: var(--px) var(--py); transition: transform 0.3s ease; }
+.is-walking .bot2-thigh { animation: bot2-thigh 0.88s ease-in-out infinite; }
+.is-walking .bot2-shin { animation: bot2-shin 0.88s ease-in-out infinite; }
+.is-walking .bot2-arm { animation: bot2-arm 0.88s ease-in-out infinite; }
+.is-walking .bot2-alt { animation-delay: -0.44s; }
+.is-walking .bot2-body { animation: bot2-bob 0.44s ease-in-out infinite; }
+.is-alert .bot2-wave { animation: bot2-wave 0.9s ease-in-out infinite; }
+
+/* a thigh swings back→forward in the second half, when its knee bends to clear the floor */
+@keyframes bot2-thigh { 0%, 100% { transform: rotate(-27deg); } 50% { transform: rotate(27deg); } }
+@keyframes bot2-shin { 0%, 50%, 100% { transform: rotate(4deg); } 75% { transform: rotate(46deg); } }
+@keyframes bot2-arm { 0%, 100% { transform: rotate(24deg); } 50% { transform: rotate(-24deg); } }
+@keyframes bot2-bob { 0%, 100% { transform: translateY(1.5px); } 50% { transform: translateY(-1.5px); } }
+@keyframes bot2-breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(1.6px); } }
+@keyframes bot2-blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
+@keyframes bot2-beacon { 0%, 100% { opacity: 0.55; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.2); filter: drop-shadow(0 0 5px #a78bfa); } }
+@keyframes bot2-wave { 0%, 100% { transform: rotate(125deg); } 50% { transform: rotate(155deg); } }
+
+/* off-screen: freeze everything */
+.agent-stage:not(.is-live) * { animation-play-state: paused; }
+
+@media (max-width: 639px) {
+  .agent-lane { inset: 0 0.6rem; }
+}
+
+/* reduced motion: only the slow breathing remains (the walk is stopped in JS) */
+@media (prefers-reduced-motion: reduce) {
+  .agent-stage .bot2-blink, .bot2-beacon, .is-alert .bot2-wave { animation: none; }
+  .bot2-body { animation-duration: 6s; }
+  .bot2-joint, .bot2-eyes { transition: none; }
+}
