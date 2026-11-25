@@ -144,6 +144,7 @@ const REPOS: Repo[] = [
       { name: 'Open-Meteo API', color: '#f59e0b' },
     ],
     github: 'https://github.com/johnathanMT/-live-sky-clock-m5stack_-Tazaungdaing_version',
+    caseStudy: 'live-sky-clock',
     demo: null,
   },
   {

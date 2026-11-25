@@ -37,7 +37,7 @@ function ClientCard({ project }: { project: ClientProject }) {
             decoding="async"
             className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.04]"
           />
-          <span className="client-live"><span className="client-live-dot" /> Live</span>
+          <span className="client-live"><span className="client-live-dot" /> {project.badge ?? 'Live'}</span>
         </div>
       </a>
 
@@ -92,9 +92,9 @@ export default function ClientProjects() {
       motif="projects"
       header={(
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <p className="lux-eyebrow enter-eyebrow font-mono text-xs uppercase tracking-[0.35em]">// Live in production</p>
-          <PageTitle id="client-work-title" className="mb-4 mt-3 max-w-[10em]">Featured Website Projects</PageTitle>
-          <p className="section-subtitle enter-sub !mb-0">Websites I designed and built — live and running today.</p>
+          <p className="lux-eyebrow enter-eyebrow font-mono text-xs uppercase tracking-[0.35em]">// Selected work</p>
+          <PageTitle id="client-work-title" className="mb-4 mt-3 max-w-[10em]">Featured Projects</PageTitle>
+          <p className="section-subtitle enter-sub !mb-0">Websites, AI and devices I designed and built.</p>
         </div>
       )}
     >

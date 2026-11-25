@@ -18,6 +18,8 @@ export interface ClientProject {
   caseStudy?: string
   /** Text for the outbound button; defaults to "Visit Live Site". */
   liveLabel?: string
+  /** Text for the thumbnail badge; defaults to "Live". */
+  badge?: string
 }
 
 export const CLIENT_PROJECTS: ClientProject[] = [
@@ -95,5 +97,20 @@ export const CLIENT_PROJECTS: ClientProject[] = [
     stack: ['Python', 'Flask', 'Google Gemini', 'LINE Messaging API'],
     caseStudy: 'ai-line-bot',
     liveLabel: 'Chat on LINE',
+  },
+  {
+    id: 'live-sky-clock',
+    name: 'Live Sky Clock — Tazaungdaing',
+    localName: 'တန်ဆောင်တိုင် မီးထွန်းပွဲတော်',
+    url: 'https://github.com/johnathanMT/-live-sky-clock-m5stack_-Tazaungdaing_version',
+    thumb: 'projects/live-sky-clock.webp',
+    kind: 'IoT · M5Stack · Embedded Python',
+    description:
+      'An animated desk clock themed on Myanmar’s Festival of Lights. Its sky follows the real sunrise, sunset, moon phase and weather, while fire balloons rise over Thatbyinnyu Temple and the Shwedagon Pagoda.',
+    highlights: ['Live Open-Meteo weather', 'Real moon phase + Myanmar calendar', 'About 12 fps target on a low-memory board'],
+    stack: ['MicroPython', 'UIFlow2', 'M5Stack Core', 'Open-Meteo API'],
+    caseStudy: 'live-sky-clock',
+    liveLabel: 'View on GitHub',
+    badge: 'Open source',
   },
 ]

@@ -31,6 +31,10 @@ export interface CaseStudy {
   liveUrl: string
   /** public/ path of the hero image. */
   thumb?: string
+  /** Pixel size of the hero image; defaults to 960×600. */
+  thumbSize?: [number, number]
+  /** Hero image alt text; defaults to "<name> — homepage". */
+  thumbAlt?: string
   stack: string[]
   /** Request flow, left → right. Drawn as a placeholder diagram until a real one exists. */
   architecture: string[]
@@ -476,6 +480,99 @@ export const CASE_STUDIES: CaseStudy[] = [
         results: [
           'LINE上で稼働中、このポートフォリオからリンクしています。',
           'Webhook、LLM API、マルチモーダル入力、プロンプト設計の実践経験を得ました — 今後のエージェント型AIプロジェクトの土台です。',
+        ],
+      },
+    },
+  },
+
+  // ── Live Sky Clock ──────────────────────────────────────────────────────────
+  {
+    slug: 'live-sky-clock',
+    name: 'Live Sky Clock — Tazaungdaing',
+    localName: 'တန်ဆောင်တိုင် မီးထွန်းပွဲတော်',
+    liveUrl: 'https://github.com/johnathanMT/-live-sky-clock-m5stack_-Tazaungdaing_version',
+    thumb: 'projects/live-sky-clock-demo.webp',
+    thumbSize: [980, 740],
+    thumbAlt: 'Live Sky Clock demo: nine screens showing dawn, day, rain, storm, snow, fog, dusk, clear night and rainy night',
+    stack: ['MicroPython', 'UIFlow2', 'M5Stack Core', 'Open-Meteo API', 'NTP'],
+    architecture: ['Wi-Fi · NTP time', 'Open-Meteo weather + sun times', 'Sky phase, moon + Myanmar calendar', '8-bit off-screen canvas', 'M5Stack 320×240 display'],
+    copy: {
+      en: {
+        kind: 'Personal project · IoT · Embedded Python',
+        summary: 'An animated M5Stack clock themed on Tazaungdaing, Myanmar’s Festival of Lights. The little 320×240 scene follows the real sky outside: sunrise, sunset, moon phase and live weather.',
+        liveLabel: 'View on GitHub',
+        problem: [
+          'Most desk clocks show numbers. I wanted one that brings a piece of Myanmar to a desk in Japan: Thatbyinnyu Temple and the Shwedagon Pagoda, toddy palms, a night market, oil lamps and rising fire balloons — and a sky that matches the one outside the window.',
+          'The hardware made that difficult. The M5Stack Core has a 320×240 screen and no PSRAM, so a smooth animation, a Wi-Fi connection, weather data and a calendar all have to share very little memory.',
+        ],
+        role: [
+          'Designed the scene and built the whole clock in MicroPython on UIFlow2: the drawing code, animation loop, weather integration, calendar logic and button controls.',
+          'Documented it for others with a setup guide and an illustrated page on the festival’s traditions, dates and sources.',
+        ],
+        decisions: [
+          { title: 'Animate a strip, not the whole screen', detail: 'Only a 320×54 landscape strip is animated. It is drawn on an off-screen canvas and pushed in one step, so nothing flickers. Clock digits, cards and status text redraw only when their values change.' },
+          { title: '8-bit colour to fit in memory', detail: 'A 16-bit canvas failed on this board, so the strip uses 8-bit colour at half the memory. Colours drawn straight to the screen are rounded to the same palette, so there is no visible seam. If no canvas fits, the clock falls back to a static scene.' },
+          { title: 'Real sunrise and sunset drive the theme', detail: 'Dawn and dusk are the 30 minutes either side of today’s actual sunrise and sunset. Each phase has clear and overcast palettes, and at night the temples are floodlit and the shrine doors glow.' },
+          { title: 'Weather you can see', detail: 'Open-Meteo is checked every 10 minutes, with no API key. Weather codes become rain, drizzle, snow, fog bands or lightning, and wind speed pushes the fire balloons sideways. If sunrise data is missing, the clock uses the API’s day/night flag, then default times.' },
+          { title: 'Moon and calendar worked out on the device', detail: 'The moon phase is calculated from the date. The Myanmar month and moon day come from a compact table covering December 2025 to December 2032, prepared on a PC with Yan Naing Aye’s mmcal algorithm.' },
+          { title: 'Safe to share, easy to demo', detail: 'Wi-Fi details and location live in a separate secrets.py that Git ignores. Button A returns to live mode and refreshes, B changes brightness and has an eco mode that stops the animation, and C steps through nine demo skies without waiting for the weather.' },
+        ],
+        results: [
+          'A finished, open-source clock in a single MicroPython program, with nine demo skies from dawn and snow to a moonlit night.',
+          'The animation targets about 12 frames per second on a board without PSRAM.',
+          'I learned to design within hard memory limits, recover from failed hardware and network calls, and turn live data into pictures.',
+        ],
+      },
+      mm: {
+        kind: 'ကိုယ်ပိုင် project · IoT · Embedded Python',
+        summary: 'မြန်မာ့မီးထွန်းပွဲတော် တန်ဆောင်တိုင်ကို အခြေခံထားသော M5Stack animation နာရီ ဖြစ်ပါသည်။ 320×240 မျက်နှာပြင်ငယ်ပေါ်ရှိ မြင်ကွင်းသည် နေထွက်ချိန်၊ နေဝင်ချိန်၊ လ၏အဆင့်နှင့် လက်ရှိရာသီဥတုအတိုင်း ပြောင်းလဲပါသည်။',
+        liveLabel: 'GitHub တွင် ကြည့်ရန်',
+        problem: [
+          'စားပွဲတင်နာရီ အများစုသည် ဂဏန်းများကိုသာ ပြသပါသည်။ သဗ္ဗညုဘုရား၊ ရွှေတိဂုံစေတီ၊ ထန်းပင်များ၊ ညဈေး၊ ဆီမီးများနှင့် မီးပုံးပျံများပါဝင်ပြီး ပြင်ပကောင်းကင်နှင့် တူညီသော မြန်မာ့မြင်ကွင်းတစ်ခုကို ဂျပန်ရှိ စားပွဲပေါ်သို့ ယူဆောင်လာလိုပါသည်။',
+          'Hardware ကန့်သတ်ချက်ကြောင့် မလွယ်ကူပါ။ M5Stack Core တွင် PSRAM မပါသဖြင့် animation၊ Wi-Fi၊ ရာသီဥတုဒေတာနှင့် ပြက္ခဒိန်တို့သည် memory အနည်းငယ်ကို မျှဝေသုံးစွဲရပါသည်။',
+        ],
+        role: [
+          'မြင်ကွင်းကို ဒီဇိုင်းဆွဲပြီး ပုံဆွဲ code၊ animation loop၊ ရာသီဥတုချိတ်ဆက်မှု၊ ပြက္ခဒိန်တွက်ချက်မှုနှင့် ခလုတ်များအထိ နာရီတစ်ခုလုံးကို UIFlow2 ပေါ်တွင် MicroPython ဖြင့် တည်ဆောက်ခဲ့ပါသည်။',
+          'တပ်ဆင်နည်းလမ်းညွှန်နှင့် ပွဲတော်၏ ဓလေ့၊ ရက်စွဲ၊ ကိုးကားချက်များပါသော စာမျက်နှာကိုလည်း ရေးသားခဲ့ပါသည်။',
+        ],
+        decisions: [
+          { title: 'မျက်နှာပြင်တစ်ခုလုံးအစား အပိုင်းတစ်ပိုင်းကိုသာ လှုပ်ရှားစေခြင်း', detail: '320×54 ရှုခင်းအပိုင်းကိုသာ off-screen canvas ပေါ်တွင် ဆွဲပြီး တစ်ကြိမ်တည်း ပြသသဖြင့် မျက်နှာပြင် မတုန်ခါပါ။ ဂဏန်းနှင့် စာသားများကို တန်ဖိုးပြောင်းမှသာ ပြန်ဆွဲပါသည်။' },
+          { title: 'Memory လုံလောက်စေရန် 8-bit အရောင်', detail: 'ဤ board တွင် 16-bit canvas မရသဖြင့် memory တစ်ဝက်သာ လိုသော 8-bit ကို သုံးထားပါသည်။ တိုက်ရိုက်ဆွဲသော အရောင်များကိုလည်း တူညီအောင် ညှိထားသဖြင့် အဆက်ကြောင်း မမြင်ရပါ။ Canvas မရပါက ငြိမ်သက်သော မြင်ကွင်းကို ပြသပါသည်။' },
+          { title: 'အမှန်တကယ် နေထွက်နေဝင်ချိန်အတိုင်း ပြောင်းလဲခြင်း', detail: 'နေထွက်ချိန်နှင့် နေဝင်ချိန်၏ ရှေ့နောက် မိနစ် ၃၀ ကို အရုဏ်နှင့် ဆည်းဆာအဖြစ် သတ်မှတ်ပါသည်။ ကြည်လင်ချိန်နှင့် တိမ်ထူချိန်အတွက် အရောင်များ သီးခြားရှိပြီး ညဘက်တွင် ဘုရားများကို မီးထိုးထားပါသည်။' },
+          { title: 'မျက်စိဖြင့် မြင်ရသော ရာသီဥတု', detail: 'API key မလိုသော Open-Meteo မှ ၁၀ မိနစ်တစ်ကြိမ် ဒေတာယူပါသည်။ မိုး၊ နှင်း၊ မြူနှင့် လျှပ်စီးတို့ကို ပုံဖော်ပြီး လေတိုက်နှုန်းက မီးပုံးပျံများကို ဘေးသို့ တွန်းပို့ပါသည်။ နေထွက်ချိန်ဒေတာ မရပါက နေ့/ည အချက်အလက်၊ ထို့နောက် ပုံသေအချိန်ကို သုံးပါသည်။' },
+          { title: 'လနှင့် ပြက္ခဒိန်ကို စက်ပေါ်တွင် တွက်ချက်ခြင်း', detail: 'လ၏အဆင့်ကို ရက်စွဲမှ တွက်ချက်ပါသည်။ မြန်မာလနှင့် ရက်ကို Yan Naing Aye ၏ mmcal algorithm ဖြင့် PC ပေါ်တွင် ပြင်ဆင်ထားသော ၂၀၂၅ ဒီဇင်ဘာမှ ၂၀၃၂ ဒီဇင်ဘာအထိ ဇယားမှ ရယူပါသည်။' },
+          { title: 'ဘေးကင်းစွာ မျှဝေပြီး လွယ်ကူစွာ ပြသနိုင်ခြင်း', detail: 'Wi-Fi အချက်အလက်နှင့် တည်နေရာကို Git မသိမ်းသော secrets.py တွင် ခွဲထားပါသည်။ ခလုတ် A က live mode၊ B က အလင်းနှင့် eco mode၊ C က demo ကောင်းကင် ကိုးမျိုးကို ပြောင်းပြပါသည်။' },
+        ],
+        results: [
+          'MicroPython program တစ်ခုတည်းဖြင့် ပြီးစီးပြီး demo ကောင်းကင် ကိုးမျိုးပါသော open-source နာရီ။',
+          'PSRAM မပါသော board ပေါ်တွင် တစ်စက္ကန့် ၁၂ frame ခန့်ကို ရည်မှန်းထားပါသည်။',
+          'Memory ကန့်သတ်ချက်အတွင်း ဒီဇိုင်းဆွဲခြင်း၊ hardware နှင့် network အမှားများကို ကိုင်တွယ်ခြင်း၊ live data ကို ရုပ်ပုံအဖြစ် ပြောင်းလဲခြင်းတို့ကို သင်ယူခဲ့ပါသည်။',
+        ],
+      },
+      jp: {
+        kind: '個人プロジェクト · IoT · 組み込みPython',
+        summary: 'ミャンマーの光の祭り「タザウンダイン」をテーマにしたM5Stackのアニメーション時計。320×240の小さな風景が、実際の日の出・日の入り、月の満ち欠け、天気に合わせて変化します。',
+        liveLabel: 'GitHubで見る',
+        problem: [
+          '多くの置き時計は数字を表示するだけです。タビニュ寺院とシュエダゴン・パゴダ、ヤシの木、夜市、灯明、空へ昇る熱気球。そんなミャンマーの風景を日本の机の上に置き、窓の外と同じ空を映したいと考えました。',
+          '課題はハードウェアです。M5Stack CoreにはPSRAMがなく、滑らかなアニメーション、Wi-Fi、天気データ、暦がごく限られたメモリを分け合う必要があります。',
+        ],
+        role: [
+          '風景のデザインから、描画コード、アニメーションループ、天気API連携、暦の計算、ボタン操作まで、時計全体をUIFlow2上のMicroPythonで開発。',
+          'セットアップ手順と、祭りの伝統・日程・出典をまとめたページも作成。',
+        ],
+        decisions: [
+          { title: '画面全体ではなく一部だけを動かす', detail: '動かすのは320×54の風景部分だけです。オフスクリーンのキャンバスに描いて一度に転送するため、ちらつきません。数字や文字は値が変わったときだけ再描画します。' },
+          { title: 'メモリに収めるための8ビットカラー', detail: 'この基板では16ビットのキャンバスを確保できなかったため、半分のメモリで済む8ビットを採用。画面に直接描く色も同じパレットに丸め、継ぎ目をなくしました。キャンバスを確保できない場合は静止画に切り替わります。' },
+          { title: '実際の日の出・日の入りでテーマを切り替え', detail: '当日の日の出・日の入りの前後30分を夜明けと夕暮れとし、晴れと曇りで別の配色を用意。夜は寺院がライトアップされ、扉が輝きます。' },
+          { title: '目で見える天気', detail: 'APIキー不要のOpen-Meteoから10分ごとに取得し、雨、霧雨、雪、霧、稲妻として描きます。風速に応じて熱気球も横に流れます。日の出データがない場合は昼夜フラグ、次に既定の時刻を使います。' },
+          { title: '月と暦は端末上で処理', detail: '月の満ち欠けは日付から計算します。ミャンマー暦の月と日は、Yan Naing Ayeさんのmmcalアルゴリズムを使いPCで作成した2025年12月〜2032年12月の表から求めます。' },
+          { title: '安全に公開でき、手軽にデモできる', detail: 'Wi-Fi情報と位置はGit管理外のsecrets.pyに分離。Aボタンはライブ表示と更新、Bは明るさとアニメーションを止めるエコモード、Cは9種類のデモの空を切り替えます。' },
+        ],
+        results: [
+          'MicroPythonの単一プログラムで完成させたオープンソースの時計。夜明けや雪から月夜まで9種類のデモを収録。',
+          'PSRAMのない基板で毎秒約12フレームを目標に設計。',
+          '厳しいメモリ制約での設計、ハードウェアや通信の失敗への対処、ライブデータの視覚化を学びました。',
         ],
       },
     },

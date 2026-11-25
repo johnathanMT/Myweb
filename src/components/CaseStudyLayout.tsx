@@ -83,8 +83,8 @@ export default function CaseStudyLayout({ study, lang = 'en' }: { study: CaseStu
         {study.thumb && (
           <img
             src={SITE.asset(study.thumb)}
-            alt={`${study.name} — homepage`}
-            width={960} height={600}
+            alt={study.thumbAlt ?? `${study.name} — homepage`}
+            width={study.thumbSize?.[0] ?? 960} height={study.thumbSize?.[1] ?? 600}
             className="w-full rounded-2xl border border-white/10 object-cover object-top shadow-xl"
             decoding="async"
           />
