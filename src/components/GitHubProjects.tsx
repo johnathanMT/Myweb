@@ -2,7 +2,7 @@ import PageStage from './PageStage'
 import PageTitle from './PageTitle'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Github, ExternalLink, Bot, Coffee, Globe, Cpu, Code2, Zap, Star, GitBranch, ArrowUpRight } from 'lucide-react'
+import { Github, ExternalLink, Bot, Coffee, Globe, CloudMoon, Cpu, Code2, Zap, Star, GitBranch, ArrowUpRight } from 'lucide-react'
 
 /**
  * GitHubProjects — a proper React page replacing the broken static
@@ -124,6 +124,26 @@ const REPOS: Repo[] = [
       { name: 'M5Stack', color: '#ef4444' },
     ],
     github: GITHUB_PROFILE,
+    demo: null,
+  },
+  {
+    id: 'live-sky-clock',
+    title: 'Live Sky Clock — Tazaungdaing',
+    desc: 'An animated M5Stack clock themed on Myanmar’s Festival of Lights, with a scene that follows the real sky outside.',
+    longDesc:
+      'MicroPython (UIFlow2) on a 320×240 M5Stack Core. Dawn, day, dusk and night follow real sunrise and sunset, with the true moon phase, live Open-Meteo weather and the Myanmar calendar. Thatbyinnyu, Shwedagon and rising fire balloons are drawn in code on an off-screen canvas for flicker-free animation.',
+    icon: CloudMoon,
+    category: 'IoT / Embedded',
+    status: 'live',
+    lang: 'Python',
+    langColor: '#3b82f6',
+    stack: [
+      { name: 'MicroPython', color: '#3b82f6' },
+      { name: 'M5Stack', color: '#ef4444' },
+      { name: 'UIFlow2', color: '#38bdf8' },
+      { name: 'Open-Meteo API', color: '#f59e0b' },
+    ],
+    github: 'https://github.com/johnathanMT/-live-sky-clock-m5stack_-Tazaungdaing_version',
     demo: null,
   },
   {
